@@ -30,6 +30,16 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
     
     # Begin
     
+    # -1: Check common input errors
+    if sources.shape[1] != ifgs_baseline.shape[1]:
+        raise Exception(f"The sources don't have the same number of pixels ({sources.shape[1]}) as the interferograms "
+                        f"({ifgs_baseline.shape[1]}), so can't be used to fit them.  This is usually due to changing "
+                        f"the cropped region but not re-running ICASAR.  Exiting...")
+    else:
+        pass
+    
+    
+    # 0: Ensure we can still run LiCSAlert in the case that we have no monitoring interferograms (yet)
     n_times_baseline = ifgs_baseline.shape[0]
     if ifgs_monitoring is None:
         ifgs_all = np.copy(ifgs_baseline)                                                                # if there are no monitoring ifgs, ifgs_all is just the set of baseline ifgs
@@ -231,8 +241,8 @@ def tcs_monitoring(tcs_c, sources_tcs, time_values, residual=False):
     
 #%%
 
-def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2, n_baseline_end, time_values, 
-                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15):
+def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2, n_baseline_end, time_values, day0_date=None,
+                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, n_days_major_tick = 48):
     """
     The main fucntion to draw the LiCSAlert figure.  
     
@@ -245,11 +255,14 @@ def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2
         mask | r2 array | to convert an ifg (or source) as a row vector into a rank 2 masked array
         
         n_baseline_end | int | number of ifgs at which we switch from baseline to monitoring
-        time_values | r1 array | time values to end date of each ifg.  e.g. [12,24,36] etc.  
+        time_values | r1 array | time values to end date of each ifg.  e.g. [12,24,36] etc.  Also could be called cumulative baselines
+        day0_date | string or None |  date of start of time series / first acquisition.  Used along with time values to make x tick labels as dates
         time_value_end | int or None | if an int, axes are extended to this time value, even if it's larrger than the last value of time_values
+                                        N.b. time is in days, so e.g. set it to 96, or 192
         out_folder | None or string | If not None, output pngs are saved to this location and the matplotib figures closed
         ifg_xpos_scaler | int | To be positioned correctly in the x direction, the ifgs that are plotted on the upper row must not be taller
                                 than the axis they lie within.  Increasing this value makes the ifgs smaller, and therefore fit.  
+        n_days_major_tick | int | minor tick labels are every 12 days but have no labels.  Major have labels (dates), and can be set.  default is 48.  
      
     Returns:
         figure
@@ -259,6 +272,8 @@ def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2
         2020/01/10 | MEG | update to add "upper_time_values"
         2020/02/16 | MEG | add ifg_xpos_scaler to make sure ifgs are plotted with the correct x value.  
         2020/03/08 | MEG | Change plotting of ifgs and sources to awlays be the downsampled ones.  
+        2020/04/20 | MEG | Update so that x tick labels are dates and not numbers since time series started.  
+        2020/06/23 | MEG | Write documentation for dates argument.  
     
     """
     import numpy as np
@@ -267,6 +282,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2
     from matplotlib import ticker
     import matplotlib as mpl
     from matplotlib.ticker import MultipleLocator
+    import datetime as dt 
     # MEG imports
     from small_plot_functions import col_to_ma, make_colormap 
     
@@ -333,10 +349,11 @@ def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2
 
    
         
-    # 0: Start, some definitions that shouldn't need changing
+    # 0: Start, some definitions that shouldn't need changing (ie hard coded variables)
     #line_best_fit_alpha = 0.7
+    xtick_label_angle = 315
     dot_marker_size = 12
-    majorLocator = MultipleLocator(96)                                                  # in days, good to be a multiple of 12 for Sentinel-1 data
+    majorLocator = MultipleLocator(n_days_major_tick)                                                  # in days, good to be a multiple of 12 for Sentinel-1 data
     minorLocator = MultipleLocator(12)                                                  # as above
     if time_value_end is None:
         t_end = time_values[-1]                                                         # last time value - i.e. the right hand x value of all the axes
@@ -413,6 +430,18 @@ def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2
     ax_residual.yaxis.tick_right()                                                                        # has to be called after sigma_bar_plotter
     ax_residual.set_xlabel('Time (days)')
     
+    # 5.1 Update the xticks to be dates and not day numbers    
+    if day0_date != None:
+        tick_labels_days = ax_residual.get_xticks().tolist()                                                # get the current tick labels
+        tick_label_dates = []                                                                               # initiate to store tick labels as dates
+        day0_date_dt = dt.datetime.strptime(day0_date, "%Y%m%d")
+        for tick_labels_day in tick_labels_days:                                                            # loop through all
+            dt_date = day0_date_dt + dt.timedelta(int(tick_labels_day))                                        # get the date of that tick label
+            tick_label_dates.append(dt.datetime.strftime(dt_date, "%Y %m %d"))                              # convert back to string and append
+        ax_residual.set_xticklabels(tick_label_dates, rotation = xtick_label_angle, ha = 'left')            # update tick labels, and rotate
+        plt.subplots_adjust(bottom=0.15)
+        ax_residual.set_xlabel('Date')
+       
     ## 6: add the two colorbars
     cax = fig1.add_axes([0.12, 0.08, 0.005, 0.1])                                      # source strength
     ics_cbar = fig1.colorbar(im, cax=cax, orientation='vertical')
@@ -441,12 +470,14 @@ def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2
 #%%
         
         
-def LiCSBAS_for_LiCSAlert(frame, downsampling = 1):
+def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_dir, LiCSBAS_bin, downsampling = 1):
     """ Call this to either create a LiCSBAS timeseries from LiCSAR products, or to update one when new products become available.  
     
     Inputs:
-        frame | string | The frame nameas defined by LiCSAR
-        downsampling | int | >=1, sets the downsampling (mulitlooking in both range and azimuth?)
+        LiCSAR_frame | string | The frame names as defined by LiCSAR
+        LiCSAR_dir | string | path to directory where LiCSAR products are stored, not including GEOC, and with trailing /
+        LiCSBAS_bin | string | path to LiCSABAS/bin folder, so this can be added to path
+        downsampling | int | >=1, sets the downsampling used in LiCSBAS (mulitlooking in both range and azimuth?)
         
     Returns:
         All products described in the LiCSBAS documentation.  
@@ -455,13 +486,14 @@ def LiCSBAS_for_LiCSAlert(frame, downsampling = 1):
             
     History:
         2020/02/15 | MEG | Written
+        2020/06/22 | MEG | Add option to set processing directory (LiCSAR_dir)
         
     """
 
     import os
     import sys
     
-    sys.path.append("/home/matthew/university_work/03_automatic_detection_algorithm/07_LiCSBAS/LiCSBAS/bin")                  # location of LiCSBAS functions
+    sys.path.append(LiCSBAS_bin)                                                    # location of LiCSBAS functions, add to path
     
     # Inputs args - probably a better way to change these (rather than hard-coding)    
     p11_unw_thre = 0.5
@@ -476,14 +508,15 @@ def LiCSBAS_for_LiCSAlert(frame, downsampling = 1):
     p13_n_unw_r_thre = 1	            # defualt: 1
     p13_keep_incfile = "n"	            # y/n. default: n
 
-    GEOCmldir = f"GEOCml{downsampling}"
-    TSdir = f"TS_GEOCmldir"
+    GEOCdir = f"{LiCSAR_dir}GEOC"                                       # GEOC dir, where LiCSAR ifgs are stored
+    GEOCmldir = f"{LiCSAR_dir}GEOCml{downsampling}"                     # multilooked directory, where LiCSBAS products are stored
+    TSdir = f"{LiCSAR_dir}TS_GEOCmldir"                                 # time series directory, where LiCSBAS products are stored
        
     # Convert format (LiCSBAS02)  NB: This will automatically skip files that have already been converted.  
-    os.system(f"LiCSBAS02_ml_prep.py -i GEOC -n{downsampling} -f{frame}")                                                   # This creates the files in GEOCmlXXX, including the png preview of unw
+    os.system(f"LiCSBAS02_ml_prep.py -i {GEOCdir} -n {downsampling} -f {LiCSAR_frame}")                                                   # This creates the files in GEOCmlXXX, including the png preview of unw
 
     # LiCSBAS03 - GACOS
-    # CSBAS04 - mask    
+    # LiCSBAS04 - mask    
     # LiCSBAS05 - clip
     #os.system(f"LiCSBAS05op_clip_unw.py -i {GEOCmldir} -o {'GEOCmldirclip'} -g {-91.5/-90.5/-0.6/-1.07}")                   # west east north south, can't get to work
 
@@ -494,7 +527,7 @@ def LiCSBAS_for_LiCSAlert(frame, downsampling = 1):
     os.system(f"LiCSBAS12_loop_closure.py -d {GEOCmldir} -t {TSdir} -l {p12_loop_thre}")
 
     # LiCSBAS13 - SB inversion
-    os.system(f"LiCSBAS13_sb_inv.py -d{GEOCmldir} -t{TSdir} --inv_alg {p13_inv_alg} --mem_size {p13_mem_size} --gamma {p13_gamma} --n_core {p13_n_core} --n_unw_r_thre {p13_n_unw_r_thre} --keep_incfile {p13_keep_incfile} " )
+    os.system(f"LiCSBAS13_sb_inv.py -d {GEOCmldir} -t {TSdir} --inv_alg {p13_inv_alg} --mem_size {p13_mem_size} --gamma {p13_gamma} --n_core {p13_n_core} --n_unw_r_thre {p13_n_unw_r_thre} --keep_incfile {p13_keep_incfile} " )
 
     # LiCSBAS 14 - velocity standard dev
     # LiCSBAS 15 - mask using noise indicies
@@ -508,9 +541,10 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
 
     Inputs:
         h5_file | string | path to h5 file.  e.g. cum_filt.h5
-        figures | boolean | if True, make two figures
+        figures | boolean | if True, make figures
         n_cols  | int | number of columns for figures.  May want to lower if plotting a long time series
-        crop_pixels | tuple | coords to crop images to.  Note than in matrix style, so 00 is top left.  e.g. (10, 500, 600, 900).  No checking that inputted values make sense
+        crop_pixels | tuple | coords to crop images to.  x then y, 00 is top left.  e.g. (10, 500, 600, 900).  
+                                x_start, x_stop, y_start, y_stop, No checking that inputted values make sense.  
         return_r3 | boolean | if True, the rank 3 data is also returns (n_ifgs x height x width).  Not used by ICASAR, so default is False
 
     Outputs:
@@ -529,6 +563,7 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
     import numpy as np
     import numpy.ma as ma
     import matplotlib.pyplot as plt
+    from LiCSAlert_aux_functions import add_square_plot
     
     
 
@@ -626,13 +661,24 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
     baseline_info = {}
 
     cumh5 = h5.File(h5_file,'r')                                                                                # open the file from LiCSBAS
-    baseline_info["imdates"] = cumh5['imdates'][()].astype(str).tolist()                                                         # get the acquisition dates
-    cumulative = cumh5['cum'][()]                                                                               # get cumulative displacements
+    baseline_info["imdates"] = cumh5['imdates'][()].astype(str).tolist()                                        # get the acquisition dates
+    cumulative_uncropped = cumh5['cum'][()]                                                                     # get cumulative displacements as a rank3 numpy array
     
-   
     if crop_pixels is not None:
-        print(f"Cropping the images in x from {crop_pixels[0]} to {crop_pixels[1]} and in y from {crop_pixels[2]} to {crop_pixels[3]} (NB matrix notation - 0,0 is top left.  ")
-        cumulative = cumulative[:, crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]                        # note rows first (y), then columns (x)
+        print(f"Cropping the images in x from {crop_pixels[0]} to {crop_pixels[1]} "
+              f"and in y from {crop_pixels[2]} to {crop_pixels[3]} (NB matrix notation - 0,0 is top left.  ")
+        cumulative = cumulative_uncropped[:, crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]                        # note rows first (y), then columns (x)
+        if figures:
+            ifg_n_plot = 1                                                                                      # which number ifg to plot.  Shouldn't need to change.  
+            title = f'Cropped region, ifg {ifg_n_plot}'
+            fig_crop, ax = plt.subplots()
+            fig_crop.canvas.set_window_title(title)
+            ax.set_title(title)
+            ax.imshow(cumulative_uncropped[ifg_n_plot, :,:],interpolation='none', aspect='auto')                # plot the uncropped ifg
+            add_square_plot(crop_pixels[0], crop_pixels[1], crop_pixels[2], crop_pixels[3], ax)                 # draw a box showing the cropped region    
+  
+    else:
+        cumulative = cumulative_uncropped
   
     mask_coh_water = np.isnan(cumulative)                                                                       # get where masked
     displacement_r3["cumulative"] = ma.array(cumulative, mask=mask_coh_water)                                   # rank 3 masked array of the cumulative displacement
@@ -662,7 +708,8 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
 #%%
     
 def detect_new_ifgs(path, initiate = False, ifgs_preexisting = None):
-    """ Determine the number of LiCSAR ifgs in a folder, and detect if this changes.  
+    """ Determine the number of LiCSAR ifgs in a folder, and detect if this changes.  Note that it has different returns, depending on if 
+    it is in the simple "initate" mode or not (if not, also returns a flag of if new interferograms have been detected).  
     Inputs:
         path | string | Path to LICSAR products (YYYYMMDD_YYYYMMDD folders) 
         initiate | boolean | if True, gets a list of ifgs and doens't check for new one 
@@ -740,11 +787,12 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
     
     displacement_r2["incremental"] = displacement_r2["incremental"] - np.mean(displacement_r2["incremental"], axis = 1)[:,np.newaxis]                            # mean centre the data (along rows) 
 
-    displacement_r2["incremental"], displacement_r2["mask"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
-                                                                                                         downsample_run)
+    if downsample_run != 1.0:                                                                                       # if we're not actually downsampling, skip for speed
+        displacement_r2["incremental"], displacement_r2["mask"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
+                                                                                  downsample_run, verbose = False)
 
     displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
-                                                                                                         downsample_plot)
+                                                                                                      downsample_plot, verbose = False)
     if verbose:
         print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
               f"but have been downsamped to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "

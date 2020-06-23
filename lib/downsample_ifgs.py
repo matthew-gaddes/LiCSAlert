@@ -25,7 +25,7 @@ def downsample_ifgs(ifgs, mask, scale = 0.1, verbose = True):
     import numpy as np
     from skimage.transform import rescale
     import numpy.ma as ma
-    from small_plot_functions import col_to_ma
+    from LiCSAlert_aux_functions import col_to_ma
     
     # 1: Check inputs
     if np.array_equal(mask, mask.astype(bool)):                                                                         # force the user to use a boolean mask

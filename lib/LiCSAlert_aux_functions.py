@@ -27,3 +27,27 @@ def col_to_ma(col, pixel_mask):
     source.unshare_mask()
     source[~source.mask] = col.ravel()   
     return source
+
+
+def add_square_plot(x_start, x_stop, y_start, y_stop, ax, colour = 'k'):
+    """Draw localization square around an area of interest, x_start etc are in pixels, so (0,0) is top left.  
+    Inputs:
+        x_start | int | start of box
+        x_stop | int | etc. 
+        y_start | int |
+        y_ stop | int |
+        ax | axes object | axes on which to draw
+        colour | string | colour of bounding box.  Useful to change when plotting labels, and predictions from a model.  
+    
+    Returns:
+        box on figure
+        
+    History:
+        2019/??/?? | MEG | Written
+        2020/04/20 | MEG | Document, copy to from small_plot_functions to LiCSAlert_aux_functions
+    """
+        
+    ax.plot((x_start, x_start), (y_start, y_stop), c= colour)           # left hand side
+    ax.plot((x_start, x_stop), (y_stop, y_stop), c= colour)             # bottom
+    ax.plot((x_stop, x_stop), (y_stop, y_start), c= colour)             # righ hand side
+    ax.plot((x_stop, x_start), (y_start, y_start), c= colour)             # top
