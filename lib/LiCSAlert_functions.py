@@ -47,7 +47,7 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
     else:
         ifgs_all = np.vstack((ifgs_baseline, ifgs_monitoring))                                           # ifgs are row vectors, so stack vertically
         n_times_monitoring = ifgs_monitoring.shape[0]
-    print(f"LiCSAlert for 'volcano' with {n_times_baseline} baseline interferograms and {n_times_monitoring} monitoring interferogram(s).  ")    
+    print(f"LiCSAlert with {n_times_baseline} baseline interferograms and {n_times_monitoring} monitoring interferogram(s).  ")    
         
     # 1: calculating time courses/distances etc for the baseline data
     tcs_c, _ = bss_components_inversion(sources, ifgs_baseline, cumulative=True)                         # compute cumulative time courses for baseline interferograms
@@ -241,28 +241,33 @@ def tcs_monitoring(tcs_c, sources_tcs, time_values, residual=False):
     
 #%%
 
-def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2, n_baseline_end, time_values, day0_date=None,
-                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, n_days_major_tick = 48):
+def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline_end, time_values, day0_date=None,
+                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, n_days_major_tick = 48, sources_downsampled = False):
     """
     The main fucntion to draw the LiCSAlert figure.  
     
     Inputs:
         sorces_tcs | list of dicts | Each source is an item in the list and has its own dictionary, containing information such as the lines of best, the graident learned
                                      in the baseline stage, the lines-of-best-fit to points distances etc.  
-        sources_downsampled | r2 array | sorces (recoverd by ICASAR) as row vectors.  N.b. must be the same size as the mask
-        displacement_r2 | dict | contains ifgs as row vectors in "incremental" and their mask ("mask"), and also downsampled versions for faster figures
-                                  Downsampled ones used in plotting!  
+         residual | list of dicts | Same structure as above, but as there is only one residual, list is of length 1.  Shuld contain: cumulative timecourse 
+                                    (cumualtive_tc), gradient, lines, sigma, distances, and t_recalculate.  
+        sources | r2 array or None | sorces (recoverd by ICASAR) as row vectors.  N.b. must be the same size as the downsampled mask in displacement_r2
+                                     If set to None, the full resolution source will be plotted        
+        displacement_r2 | dict | contains ifgs as row vectors in "incremental" and their mask ("mask"), and also downsampled versions for faster figures,
+                                  and their mask.  Downsampled ones used in plotting!  
         mask | r2 array | to convert an ifg (or source) as a row vector into a rank 2 masked array
-        
         n_baseline_end | int | number of ifgs at which we switch from baseline to monitoring
         time_values | r1 array | time values to end date of each ifg.  e.g. [12,24,36] etc.  Also could be called cumulative baselines
         day0_date | string or None |  date of start of time series / first acquisition.  Used along with time values to make x tick labels as dates
+
         time_value_end | int or None | if an int, axes are extended to this time value, even if it's larrger than the last value of time_values
                                         N.b. time is in days, so e.g. set it to 96, or 192
         out_folder | None or string | If not None, output pngs are saved to this location and the matplotib figures closed
         ifg_xpos_scaler | int | To be positioned correctly in the x direction, the ifgs that are plotted on the upper row must not be taller
                                 than the axis they lie within.  Increasing this value makes the ifgs smaller, and therefore fit.  
         n_days_major_tick | int | minor tick labels are every 12 days but have no labels.  Major have labels (dates), and can be set.  default is 48.  
+        sources_downsampled | Boolean | If true, sources are assumed to have been downsampled to the same resolution as the ifgs in displacement_r2
+                                        This can slightly speed up the plotting of figures.  
      
     Returns:
         figure
@@ -369,7 +374,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2
     line_args= calcualte_line_args(n_times, t_recalculate)                      # which lines of best fit to plot
     c = mpl.colors.ColorConverter().to_rgb                                      
     cmap_discrete = make_colormap(  [c('black'), c('orange'), 0.33, c('orange'), c('yellow'), 0.66, c('yellow'), c('red')])     # custom colorbar for number of sigmas from line
-    cmap_sources = colourbar_for_sources(sources_downsampled)
+    cmap_sources = colourbar_for_sources(sources)
     figtitle = f'LiCSAlert figure with {n_ifgs-n_baseline_end} monitoring interferograms'
 
     # 2 Initiate the figure    
@@ -388,7 +393,10 @@ def LiCSAlert_figure(sources_tcs, residual, sources_downsampled, displacement_r2
     for row_n, source_tc in enumerate(sources_tcs):
         # plot the source as an image
         ax_source = plt.Subplot(fig1, grid[row_n+1,0])
-        im = ax_source.imshow(col_to_ma(sources_downsampled[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources, vmin = np.min(sources_downsampled), vmax = np.max(sources_downsampled))   
+        if sources_downsampled:
+            im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   
+        else:
+            im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   
         ax_source.set_xticks([])
         ax_source.set_yticks([])
         ax_source.set_ylabel(f"IC {row_n+1}")

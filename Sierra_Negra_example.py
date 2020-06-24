@@ -111,7 +111,7 @@ else:
             Iq_sorted = pickle.load(f)    
             n_clusters = pickle.load(f)    
             
-        sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], LiCSAlert_settings["downsample_plot"])                     # downsample for plots
+        sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], LiCSAlert_settings["downsample_plot"])                     # downsample the sources as this can speed up plotting
 
         
     except:
@@ -132,7 +132,8 @@ for ifg_n in np.arange(n_baseline_end+1, displacement_r2["incremental"].shape[0]
 
     LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources_downsampled, displacement_r2_current, n_baseline_end, 
                       cumulative_baselines_current, time_value_end=cumulative_baselines[-1], out_folder = f"{LiCSAlert_settings['out_folder']}",
-                      day0_date = acq_dates[0])
+                      day0_date = acq_dates[0], sources_downsampled = True)                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
+
 
 
 #%% Or just run on the entire set of data
@@ -144,10 +145,13 @@ cumulative_baselines_current = cumulative_baselines[:n_end]                     
 
 
 sources_tcs_monitor, residual_monitor = LiCSAlert(sources, cumulative_baselines_current, displacement_r2_current["incremental"][:n_baseline_end], 
-                                                                                displacement_r2_current["incremental"][n_baseline_end:], t_recalculate=10)    
+                                                  displacement_r2_current["incremental"][n_baseline_end:], t_recalculate=10)    
 
-LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources_downsampled, displacement_r2_current, n_baseline_end, 
-                  cumulative_baselines_current, time_value_end=cumulative_baselines[-1], day0_date = acq_dates[0])    
+LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2_current, n_baseline_end, 
+                  cumulative_baselines_current, time_value_end=cumulative_baselines[-1], day0_date = acq_dates[0], sources_downsampled = False)                 # note that as we're only plotting once, 
+                                                                                                                                                                # this time we just use the full resolution sources, and set the sources_downsampled flag appropraitely (ie to False)
+
+
 
 
 #%%
