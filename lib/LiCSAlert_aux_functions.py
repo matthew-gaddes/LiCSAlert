@@ -6,6 +6,41 @@ Created on Sun Mar  8 18:10:21 2020
 @author: matthew
 """
 
+
+#%%
+
+#%%
+
+def create_folder(folder):
+    """ Try to create a folder to save function outputs.  If folder already exists,
+    funtion will try to delete it and its contents.  
+    
+    Inputs: 
+        folder | string |path to new folder.  e.g. './my_folder' 
+    Returns:
+        new folder
+    History:
+        2020/06/25 | MEG | Written
+    """
+    import shutil
+    import os
+    try:
+        print(f"Trying to remove the existing outputs folder ({folder})... ", end = '')
+        shutil.rmtree(folder)                                                                       # try to remove folder
+        print('Done!')
+    except:
+        print("Failed!")                                                                                # 
+    try:
+        print(f"Trying to create a new outputs folder ({folder})... ", end = '')                                    # try to make a new folder
+        os.mkdir(folder)                                                                       
+        print('Done!')
+    except:
+        print("Failed!") 
+        
+        
+        #%%
+
+
 def col_to_ma(col, pixel_mask):
     """ A function to take a column vector and a 2d pixel mask and reshape the column into a masked array.  
     Useful when converting between vectors used by BSS methods results that are to be plotted
