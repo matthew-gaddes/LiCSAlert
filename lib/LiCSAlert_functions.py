@@ -289,7 +289,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     from matplotlib.ticker import MultipleLocator
     import datetime as dt 
     # MEG imports
-    from small_plot_functions import col_to_ma, make_colormap 
+    #from small_plot_functions import col_to_ma, make_colormap 
     
     def calcualte_line_args(n_ifgs, t_recalculate):
         """Lines of best fit are calculated for eahc time step, but we don't want
@@ -330,7 +330,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         """ Creat a colourbar for the ICA sources that is centered on 0, and cropped so that each side is equal
         (i.e. if data lies in range [-1 10], will only go slightly blue, but up to max red, with grey at 0)
         """
-        from small_plot_functions import remappedColorMap
+        
         ics_min = np.min(icasar_sources)                                                       # 
         ics_max = np.max(icasar_sources)
         ic_colours = plt.get_cmap('coolwarm')
@@ -478,17 +478,17 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
 #%%
         
         
-def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_dir, LiCSBAS_bin, downsampling = 1,
-                          lon_lat = None):
+def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logfile_dir, lon_lat = None, downsampling = 1):
     """ Call this to either create a LiCSBAS timeseries from LiCSAR products, or to update one when new products become available.  
     Not all LiCSBAS features are supported! 
     
     Inputs:
-        LiCSAR_frame | string | The frame names as defined by LiCSAR
-        LiCSAR_dir | string | path to directory where LiCSAR products are stored, not including GEOC, and with trailing /
-        LiCSBAS_bin | string | path to LiCSABAS/bin folder, so this can be added to path
-        downsampling | int | >=1, sets the downsampling used in LiCSBAS (mulitlooking in both range and azimuth?)
+        LiCSAR_frame | string | name of frame being processed.  
+        LiCSAR_frames_dir | string | The path to the LiCSAR frame which contains that volcano.  Needs trailing /
+        LiCSBAS_out_dir | string | path to where LiCSBAS products will be stored.  Needs trailing /
+        logfile | string | path to directory where logfile will be appended to. Needs trailing /
         lon_lat | list | west east south north to be clipped to, or None.  
+        downsampling | int | >=1, sets the downsampling used in LiCSBAS (mulitlooking in both range and azimuth?)
         
     Returns:
         All products described in the LiCSBAS documentation.  
@@ -499,14 +499,15 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_dir, LiCSBAS_bin, downsampling = 
         2020/02/15 | MEG | Written
         2020/06/22 | MEG | Add option to set processing directory (LiCSAR_dir)
         2020/06/24 | MEG | Add option to call step_05 and clip to geographic region.  
+        2020/06/30 | MEG | Simplify inputs
+        2020/07/02 | MEG | Add logfile_dir, and change from os.system to subprocess.call so output can be appended to a logfile (and still be displayed to a terminal)
         
     """
 
-    import os
-    import sys
-    
-    sys.path.append(LiCSBAS_bin)                                                    # location of LiCSBAS functions, add to path
-    
+    # import os
+    # import sys
+    import subprocess
+        
     # Inputs args - probably a better way to change these (rather than hard-coding)    
     p11_unw_thre = 0.5
     p11_coh_thre = 0.1
@@ -520,13 +521,14 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_dir, LiCSBAS_bin, downsampling = 
     p13_n_unw_r_thre = 1	            # defualt: 1
     p13_keep_incfile = "n"	            # y/n. default: n
 
-    GEOCdir = f"{LiCSAR_dir}GEOC"                                       # GEOC dir, where LiCSAR ifgs are stored
-    GEOCmldir = f"{LiCSAR_dir}GEOCml{downsampling}"                     # multilooked directory, where LiCSBAS products are stored
-    TSdir = f"{LiCSAR_dir}TS_GEOCmldir"                                 # time series directory, where LiCSBAS products are stored
-    GEOCmldirclip = f"{LiCSAR_dir}GEOCmldirclip"                        # clipped products, produced by step_05
+    # make directory names in the style used by LiCSBAS.  
+    GEOCdir = f"{LiCSAR_frames_dir}{LiCSAR_frame}/GEOC"                                       # GEOC dir, where LiCSAR ifgs are stored
+    GEOCmldir = f"{LiCSBAS_out_dir}GEOCml{downsampling}"                     # multilooked directory, where LiCSBAS products are stored
+    TSdir = f"{LiCSBAS_out_dir}TS_GEOCmldir"                                 # time series directory, where LiCSBAS products are stored
+    GEOCmldirclip = f"{LiCSBAS_out_dir}GEOCmldirclip"                        # clipped products, produced by step_05
        
     # Convert format (LiCSBAS02)  NB: This will automatically skip files that have already been converted.  
-    os.system(f"LiCSBAS02_ml_prep.py -i {GEOCdir} -n {downsampling} -f {LiCSAR_frame}")                                                   # This creates the files in GEOCmlXXX, including the png preview of unw
+    subprocess.call(f"LiCSBAS02_ml_prep.py -i {GEOCdir} -o {GEOCmldir} -n {downsampling} -f {LiCSAR_frame}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)                 # This creates the files in GEOCmlXXX, including the png preview of unw, note that 1 is stdout, -a to append
 
     # LiCSBAS03 - GACOS
     # LiCSBAS04 - mask    
@@ -534,17 +536,17 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_dir, LiCSBAS_bin, downsampling = 
     # LiCSBAS05 - clip to region of interest (using lat and long, but can also use pixels)
     if lon_lat is not None:
         LiCSBAS_lon_lat_string = f"{lon_lat[0]}/{lon_lat[1]}/{lon_lat[2]}/{lon_lat[3]}"                                     # conver to a string which includes / (and so python does not see them as four numbers divided!)
-        os.system(f"LiCSBAS05op_clip_unw.py -i {GEOCmldir} -o {GEOCmldirclip} -g {LiCSBAS_lon_lat_string}")                 # do the clipping, -g of form west/east/south/north   N.b.!  As above, careful with / being treated as divide by Python!
+        subprocess.call(f"LiCSBAS05op_clip_unw.py -i {GEOCmldir} -o {GEOCmldirclip} -g {LiCSBAS_lon_lat_string}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)                 # # do the clipping, -g of form west/east/south/north   N.b.!  As above, careful with / being treated as divide by Python!
         GEOCmldir = GEOCmldirclip                                                                                           # update so now using the clipped products
     
     # LiCSBAS11 - check unwrapping, based on coherence
-    os.system(f"LiCSBAS11_check_unw.py -d {GEOCmldir} -t {TSdir} -c {p11_coh_thre} -u {p11_unw_thre}")
+    subprocess.call(f"LiCSBAS11_check_unw.py -d {GEOCmldir} -t {TSdir} -c {p11_coh_thre} -u {p11_unw_thre}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)   
 
     # LiCSBAS12 - check unwrapping, based on loop closure
-    os.system(f"LiCSBAS12_loop_closure.py -d {GEOCmldir} -t {TSdir} -l {p12_loop_thre}")
+    subprocess.call(f"LiCSBAS12_loop_closure.py -d {GEOCmldir} -t {TSdir} -l {p12_loop_thre}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)   
 
     # LiCSBAS13 - SB inversion
-    os.system(f"LiCSBAS13_sb_inv.py -d {GEOCmldir} -t {TSdir} --inv_alg {p13_inv_alg} --mem_size {p13_mem_size} --gamma {p13_gamma} --n_core {p13_n_core} --n_unw_r_thre {p13_n_unw_r_thre} --keep_incfile {p13_keep_incfile} " )
+    subprocess.call(f"LiCSBAS13_sb_inv.py -d {GEOCmldir} -t {TSdir} --inv_alg {p13_inv_alg} --mem_size {p13_mem_size} --gamma {p13_gamma} --n_core {p13_n_core} --n_unw_r_thre {p13_n_unw_r_thre} --keep_incfile {p13_keep_incfile} " + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)   
 
     # LiCSBAS 14 - velocity standard dev
     # LiCSBAS 15 - mask using noise indicies
@@ -724,58 +726,7 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
 
 
 
-#%%
-    
-def detect_new_ifgs(path, initiate = False, ifgs_preexisting = None):
-    """ Determine the number of LiCSAR ifgs in a folder, and detect if this changes.  Note that it has different returns, depending on if 
-    it is in the simple "initate" mode or not (if not, also returns a flag of if new interferograms have been detected).  
-    Inputs:
-        path | string | Path to LICSAR products (YYYYMMDD_YYYYMMDD folders) 
-        initiate | boolean | if True, gets a list of ifgs and doens't check for new one 
-                             if False, gets list of ifgs, compares with existing ifgs, and determines if any are new
-         ifgs_preexisting | list of strings | only needed if not in iniatiate mode.  
-         
-    Returns (in initiate mode):
-        ifgs_current | list of strings | current ifgs
-        n_ifgs_current | int | number of LiCSAR ifgs       
-    Returns (not in initiate mode):
-        new_ifgs_flag | boolean | True if new ifgs have been added
-        ifgs_current | list of strings | Ifgs now in the folder given by path.  
-        new_ifgs | list of strings | Names of the new ifgs
-
-    History:
-        2020/02/18 | MEG |  Written        
-            
-
-    """
-    import os 
-    
-    ifgs_current = sorted([f.name for f in os.scandir(path) if f.is_dir()])     # get names of folders produced by LiCSAR, and keep chronological.  
-    n_ifgs_current = len(ifgs_current)                                          # and the number of them
-    
-    if initiate == True:                                                        # in initiation mode, just get the ifgs that are there and don't need to test for more
-        return ifgs_current, n_ifgs_current
-    
-    elif initiate == False:                                                     # or in normal mode, point of this function is to detect if new ifgs have been added by LiCSAR automatic processing
-        n_ifgs_preexisting = len(ifgs_preexisting)                              # get the number of ifgs that existed before the function was called
-        
-        if n_ifgs_current > n_ifgs_preexisting:                                 # check if we now have more ifgs.  
-            new_ifgs_flag = True
-            ifgs_new = []                                                       # list to store names of new ifgs
-            for ifg in ifgs_current:                                            # loop through the current ifgs
-                if ifg not in ifgs_preexisting:                                 # and if they're not in the list of prexisting ifgs
-                    ifgs_new.append(ifg)                                        # add them to the list of new ifgs
-            ifgs_new = sorted(ifgs_new)                                         # easier to use if remains chronological
-            
-        else:
-            new_ifgs_flag = False                                               # or, if no new ifgs, set flag to false
-            ifgs_new = []                                                       # and ifgs_new empty as no new ones
-        
-        return new_ifgs_flag, ifgs_current, ifgs_new
-        
-    else:                                                                                   # incase inititate is not set correctly.  
-        raise Exception(f"'initiate' must be either 'True' or 'False'.  Exiting...")
-
+   
 
 #%%
     
@@ -814,8 +765,8 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
                                                                                                       downsample_plot, verbose = False)
     if verbose:
         print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
-              f"but have been downsamped to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
-              f"and have been downsamped to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
+              f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
+              f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
 
 
     return displacement_r2
@@ -979,135 +930,6 @@ def shorten_LiCSAlert_data(displacement_r2, n_end, n_start=0, verbose=False):
     return displacement_r2_short
 
 
-#%%
-
-
-def record_mask_changes(current_mask, current_date, mask_change = None,
-                        png_path = './mask_history/'):
-    """ Given a new mask and the date that the time series until, update the mask_change dictionary that keeps track of this.  
-    Inputs:
-        current_mask | rank 2 boolean | the current mask, as produced by LiCSBAS
-        current_date | string | the most recent data that the time series spans until, in form yyyymmdd
-        mask_change | dict or None | dictionary where each key is the date the time series ends up, and the variable the mask
-        png_path | string | path to folder of where to save the .png files.  Needs trailing /
-    Returns:
-        mask_change | dict or None | dictionary where each key is the date the time series ends up, and the variable the mask
-    History:
-        2020/06/25 | MEG | Written
-    """
-    import matplotlib.pyplot as plt
-    import numpy as np
-    import numpy.ma as ma
-        
-    if mask_change == None:                                                                 # when the function is first called, this won't exist (so is set to None)
-        initialising = True
-        mask_change = {}                                                                    # initiatalise 
-        mask_change['dates'] = [current_date]                                               # one list will have the dates for the mask, initiate with first date
-        mask_change['masks'] = [current_mask]                                                       # and one will have the masks, initate with first mask
-    else:
-        initialising = False                                                                # if mask is not None, we aren't initiliasing as it must have previously run in order to create mask_change
-        mask_change['dates'].append(current_date)
-        mask_change['masks'].append(current_mask)
-    
-    #import ipdb; ipdb.set_trace()
-    # Save the mask as a png, and the change in mask to the previous one
-    f1,axes = plt.subplots(1,2)
-    axes[0].imshow(mask_change['masks'][-1])
-    axes[0].set_title(mask_change['dates'][-1])
-    if initialising:                                                                                        # first run, so won't be a difference between this and past mask
-        axes[1].imshow(ma.array(np.ones(current_mask.shape), mask = np.ones(current_mask.shape)))           # an array of ones, but every element is masked as we know it hasn't changed yet.  
-        axes[1].set_title("First mask so no change")
-    else:
-        axes[1].imshow(ma.masked_where(mask_change['masks'][-2] == mask_change['masks'][-1] , np.ones(current_mask.shape)))           # create an array of ones that is maksed everywhere that the two masks are the same, and then plot this.  
-        #axes[1].imshow((mask_change['masks'][-2]).astype(int) - (mask_change['masks'][-1]).astype(int))         # difference in the masks
-        axes[1].set_title(f"{mask_change['dates'][-2]} - {mask_change['dates'][-1]} ")      # and differnce inthe dates
-        
-    f1.canvas.set_window_title(current_date)
-    f1.savefig(f"{png_path}{mask_change['dates'][-1]}.png", bbox_inches='tight')
-    plt.close(f1)
-
-    # Create the line graph of number of pixels
-    n_updates = len(mask_change['dates'])
-    x_vals = np.arange(n_updates)
-    n_pixs = np.zeros((n_updates, 2))                                     # 1st column will be number of non-masked and 2nd number of masked
-    for ifg_n in range(n_updates):
-        n_pixs[ifg_n,0] = len(np.argwhere(mask_change['masks'][ifg_n] == False))
-        n_pixs[ifg_n,1] = len(np.argwhere(mask_change['masks'][ifg_n] == True))
-    
-    #import ipdb; ipdb.set_trace()
-    f2,ax = plt.subplots(1)
-    ax.plot(x_vals, n_pixs[:,0], label = 'Non-masked pixels')
-    ax.plot(x_vals, n_pixs[:,1], label = 'Masked pixels')
-    ax.scatter(x_vals, n_pixs[:,0])
-    ax.scatter(x_vals, n_pixs[:,1])
-    ax.set_title(current_date)
-    f2.canvas.set_window_title(current_date)
-    leg = ax.legend()
-    ax.set_ylabel('# pixels')
-    ax.set_xlabel('Time series end (yyyymmdd)')
-    ax.set_xticks(x_vals)
-    ax.set_xticklabels(mask_change['dates'])
-    ax.set_ylim(bottom = 0)
-    #plt.grid()
-    f2.savefig(f'{png_path}pixel_history_{current_date}.png', bbox_inches='tight')
-    plt.close(f2)
-        
-    return mask_change
-
-
-#%%
-
-
-
-def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
-    """ Given two masks of pixels, create a mask of pixels that are valid for both.  
-    Inputs:
-        mask_sources | boolean rank 2| original mask
-        sources  | r2 array | sources as row vectors
-        mask_ifgs | boolean rank 2| new mask
-    Returns (in initiate mode):
-        mask_combnied | boolean rank 2| original mask
-    History:
-        2020/02/19 | MEG |  Written      
-        2020/06/26 | MEG | Major rewrite.  
-    """
-    import numpy as np
-    import numpy.ma as ma
-    from small_plot_functions import col_to_ma
-    
-    def apply_new_mask(ifgs, mask_old, mask_new):
-        """Apply a new mask to a collection of ifgs (or sources) that are stored as row vectors with an accompanying mask.  
-        Inputs:
-            ifgs | r2 array | ifgs as row vectors
-            mask_old | r2 array | mask to convert a row of ifg into a rank 2 masked array
-            mask_new | r2 array | the new mask to be applied.  Note that it must not unmask any pixels that are already masked.  
-        Returns:
-            ifgs_new_mask | r2 array | as per ifgs, but with a new mask.  
-        History:
-            2020/06/26 | MEG | Written
-        """
-        n_pixs_new = len(np.argwhere(mask_new == False))                                        
-        ifgs_new_mask = np.zeros((ifgs.shape[0], n_pixs_new))                        # initiate an array to store the modified sources as row vectors    
-        for ifg_n, ifg in enumerate(ifgs):                                 # Loop through each source
-            ifg_r2 = col_to_ma(ifg, mask_old)                             # turn it from a row vector into a rank 2 masked array        
-            ifg_r2_new_mask = ma.array(ifg_r2, mask = mask_new)              # apply the new mask   
-            ifgs_new_mask[ifg_n, :] = ma.compressed(ifg_r2_new_mask)       # convert to row vector and places in rank 2 array of modified sources
-        return ifgs_new_mask
-    
-    
-    mask_both = ~np.logical_and(~mask_sources, ~mask_ifgs)                                       # make a new mask for pixels that are in the sources AND in the current time series
-    n_pixs_sources = len(np.argwhere(mask_sources == False))                                  # masked pixels are 1s, so invert with 1- bit so that non-masked are 1s, then sum to get number of pixels
-    n_pixs_new = len(np.argwhere(mask_ifgs == False))                                          # ditto for new mask
-    n_pixs_both = len(np.argwhere(mask_both == False))                                        # ditto for the mutual mask
-    print(f"Updating masks and ICA sources.  Of the {n_pixs_sources} in the sources and {n_pixs_new} in the current LiCSBAS time series, "
-          f"{n_pixs_both} are in both and can be used in this iteration of LiCSAlert.  ")
-    
-    ifgs_new_mask = apply_new_mask(ifgs, mask_ifgs, mask_both)
-    sources_new_mask = apply_new_mask(sources, mask_sources, mask_both)
-    
-    return ifgs_new_mask, sources_new_mask, mask_both
-    
-
 
 #%% Small functions used by multiple function in this file
     
@@ -1129,3 +951,86 @@ def col_to_ma(col, pixel_mask):
     source.unshare_mask()
     source[~source.mask] = col.ravel()   
     return source
+
+
+def make_colormap(seq):
+    """
+    Taken from Stackechange - https://stackoverflow.com/questions/16834861/create-own-colormap-using-matplotlib-and-plot-color-scale
+    Return a LinearSegmentedColormap
+    seq: a sequence of floats and RGB-tuples. The floats should be increasing
+    and in the interval (0,1).
+
+    e.g. useage:  rvb = make_colormap(  [c('black'), c('orange'), 0.33, c('orange'), c('yellow'), 0.66, c('yellow'), c('red')])
+    """
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib.colors as mcolors
+
+
+    seq = [(None,) * 3, 0.0] + list(seq) + [1.0, (None,) * 3]
+    cdict = {'red': [], 'green': [], 'blue': []}
+    for i, item in enumerate(seq):
+        if isinstance(item, float):
+            r1, g1, b1 = seq[i - 1]
+            r2, g2, b2 = seq[i + 1]
+            cdict['red'].append([item, r1, r2])
+            cdict['green'].append([item, g1, g2])
+            cdict['blue'].append([item, b1, b2])
+    return mcolors.LinearSegmentedColormap('CustomMap', cdict)
+
+
+
+def remappedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
+    '''
+    Function to offset the median value of a colormap, and scale the
+    remaining color range (i.e. truncate the colormap so that it isn't
+    compressed on the shorter side) . Useful for data with a negative minimum and
+    positive maximum where you want the middle of the colormap's dynamic
+    range to be at zero.
+    Input
+    -----
+      cmap : The matplotlib colormap to be altered
+      start : Offset from lowest point in the colormap's range.
+          Defaults to 0.0 (no lower ofset). Should be between
+          0.0 and 0.5; if your dataset mean is negative you should leave
+          this at 0.0, otherwise to (vmax-abs(vmin))/(2*vmax)
+      midpoint : The new center of the colormap. Defaults to
+          0.5 (no shift). Should be between 0.0 and 1.0; usually the
+          optimal value is abs(vmin)/(vmax+abs(vmin))
+          Only got this to work with:
+              1 - vmin/(vmax + abs(vmin))
+      stop : Offset from highets point in the colormap's range.
+          Defaults to 1.0 (no upper ofset). Should be between
+          0.5 and 1.0; if your dataset mean is positive you should leave
+          this at 1.0, otherwise to (abs(vmin)-vmax)/(2*abs(vmin))
+
+      2017/??/?? | taken from stack exchange
+      2017/10/11 | update so that crops shorter side of colorbar (so if data are in range [-1 100],
+                   100 will be dark red, and -1 slightly blue (and not dark blue))
+      '''
+    import numpy as np
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+    if midpoint > 0.5:                                      # crop the top or bottom of the colourscale so it's not asymetric.
+        stop=(0.5 + (1-midpoint))
+    else:
+        start=(0.5 - midpoint)
+
+
+    cdict = { 'red': [], 'green': [], 'blue': [], 'alpha': []  }
+    # regular index to compute the colors
+    reg_index = np.hstack([np.linspace(start, 0.5, 128, endpoint=False),  np.linspace(0.5, stop, 129)])
+
+    # shifted index to match the data
+    shift_index = np.hstack([ np.linspace(0.0, midpoint, 128, endpoint=False), np.linspace(midpoint, 1.0, 129)])
+
+    for ri, si in zip(reg_index, shift_index):
+        r, g, b, a = cmap(ri)
+        cdict['red'].append((si, r, r))
+        cdict['green'].append((si, g, g))
+        cdict['blue'].append((si, b, b))
+        cdict['alpha'].append((si, a, a))
+    newcmap = matplotlib.colors.LinearSegmentedColormap(name, cdict)
+    plt.register_cmap(cmap=newcmap)
+    return newcmap
