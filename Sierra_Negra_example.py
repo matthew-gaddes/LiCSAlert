@@ -94,14 +94,10 @@ displacement_r2 = LiCSAlert_preprocessing(displacement_r2, LiCSAlert_settings["d
                                                            LiCSAlert_settings["downsample_plot"], LiCSAlert_settings["verbose"])                    # mean centre and downsize the data
 
 if LiCSAlert_settings["run_ICASAR"]:
-    sources, tcs, residual, Iq, n_clusters, S_all_info, means = ICASAR(phUnw = displacement_r2['incremental'][:n_baseline_end],
-                                                                       mask = displacement_r2['mask'], lons = lons, lats = lats,
-                                                                       **ICASAR_settings)
-
-    sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], LiCSAlert_settings["downsample_plot"])                     # downsample for plots
-    
-
-    
+    baseline_data = {'mixtures_r2' : displacement_r2['incremental'][:n_baseline_end],                                                                       # prepare a dictionary of data for ICASAR
+                     'mask'        : displacement_r2['mask']}
+    sources, tcs, residual, Iq, n_clusters, S_all_info, means = ICASAR(spatial_data = baseline_data, lons = lons, lats = lats, **ICASAR_settings)           # run ICASAR to recover the latent sources from the baseline stage
+    sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], LiCSAlert_settings["downsample_plot"])                                       # downsample for plots
 else:
     try:
         with open(f"ICASAR_results/ICASAR_results.pkl", 'rb') as f:
@@ -110,10 +106,8 @@ else:
             source_residuals = pickle.load(f)    
             Iq_sorted = pickle.load(f)    
             n_clusters = pickle.load(f)    
-            
         sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], LiCSAlert_settings["downsample_plot"])                     # downsample the sources as this can speed up plotting
 
-        
     except:
         raise Exception(f"Unable to open the results of ICASAR (which are usually stored in 'ICASAR_results') "
                         f"Try re-running and enabling ICASAR with 'run_ICASAR' set to 'True'.  ")

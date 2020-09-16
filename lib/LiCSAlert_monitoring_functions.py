@@ -9,63 +9,235 @@ Created on Mon Jun 29 14:09:28 2020
 #%%
 
 
-def record_mask_changes(mask_sources, mask_ifgs, mask_shared):
-    """ 
-    
-    
-    
-    Given a new mask and the date that the time series until, update the mask_change dictionary that keeps track of this.  
+
+def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, LiCSAR_frames_dir, LiCSAlert_volcs_dir):
+    """
+       
     Inputs:
-        current_mask | rank 2 boolean | the current mask, as produced by LiCSBAS
-        current_date | string | the most recent data that the time series spans until, in form yyyymmdd
-        mask_change | dict or None | dictionary where each key is the date the time series ends up, and the variable the mask
-        png_path | string | path to folder of where to save the .png files.  Needs trailing /
+        LiCSBAS_bin | string | Path to folder containing LiCSBAS functions.  
+        LiCSAlert_bin | string | Path to folder containing LiCSAlert functions.  
+        ICASAR_bin | string | Path to folder containing ICASAR functions.  
+        LiCSAR_frames_dir | string | path to the folder containing LiCSAR frames.  Needs trailing /
+        LiCSAlert_volcs_dir | string | path to the folder containing each volcano.  Needs trailing /
     Returns:
-        mask_change | dict or None | dictionary where each key is the date the time series ends up, and the variable the mask
+        Directory stucture.  
+        
+    History:
+        2020/06/29 | MEG | Written as a script
+        2020/07/03 | MEG | Convert to a funtcion
+                
+
+     """
+    # 0 Imports etc.:        
+
+    import sys
+    import os
+    import pickle
+    sys.path.append(f"{LiCSBAS_bin}")                                          
+    sys.path.append(f"{LiCSAlert_bin}")                                          
+    sys.path.append(f"{ICASAR_bin}")                                          
+    from LiCSAlert_functions import LiCSBAS_for_LiCSAlert, LiCSBAS_to_LiCSAlert, LiCSAlert_preprocessing, LiCSAlert, LiCSAlert_figure
+    from LiCSAlert_monitoring_functions import read_config_file, detect_new_ifgs, update_mask_sources_ifgs, record_mask_changes
+    from downsample_ifgs import downsample_ifgs
+    from ICASAR_functions import ICASAR
+        
+    # Python version of Tee used to output print functions to the terminal and a log file.  Taken from stack excange
+    class Tee(object):
+        def __init__(self, *files):
+            self.files = files
+        def write(self, obj):
+            for f in self.files:
+                f.write(obj)
+                f.flush() # If you want the output to be visible immediately
+        def flush(self) :
+            for f in self.files:
+                f.flush()
+    
+  
+    
+    volcano_dir = f"{LiCSAlert_volcs_dir}{volcano}/"
+    LiCSBAS_dir = f"{volcano_dir}LiCSBAS/"
+    LiCSAR_settings, LiCSBAS_settings, LiCSAlert_settings, ICASAR_settings = read_config_file(f"{volcano_dir}LiCSAlert_settings.txt")                  # read various settings from the volcanoes config file
+                                                                                                                                                        # LiCSAR_settings: frame
+                                                                                                                                                        # LiCSBAS_settings: lon_lat  
+                                                                                                                                                        # ICSAR_settings: n_comp, bootstrapping_param, hdbscan_param, tsne_param, ica_param
+    # Determine if new ifgs are present
+    new_ifg_flag, LiCSAR_last_acq = detect_new_ifgs(f"{LiCSAR_frames_dir}{LiCSAR_settings['frame']}/GEOC/", volcano_dir)
+    
+
+    if new_ifg_flag:                                                                                                                # if new interferograms have been detected, the LiCSAlert outputs can be updated
+        # -0: determine if this is the first run:
+        previous_LiCSAlert_dates = sorted([f.name for f in os.scandir(volcano_dir) if f.is_dir()])                   # get names of folders produced by LiCSAlert , and keep chronological.  
+        unused_folders = ['LiCSBAS', 'ICASAR_results']                                                      # these folders also exist, but aren't dates so we need to delete them.  
+        for unused_folder in unused_folders:
+            try:
+                previous_LiCSAlert_dates.remove(unused_folder)                                                       # loop through trying to delete
+            except:
+                pass                                                                                    
+        if len(previous_LiCSAlert_dates) == 0:                                                                       # if there are no dates, it must be the first time it's been run
+            initialise = True
+            print(f"This is the first time that LiCSAlert has been run for {volcano}.  ")
+        else:
+            initialise = False
+    
+        # 1: Create a folder (YYYYMMDD) for the outputs.  
+        try:
+            print(f'A new LiCSAR acquisition has been detected.  Creating a folder to contain the new LiCSAlert results ({LiCSAR_last_acq})... ', end = '')
+            os.mkdir(f"{volcano_dir}{LiCSAR_last_acq}")                                                                       
+            print('Done!')
+        except:
+            print('Failed!')
+            raise Exception('Unable to create folder {LiCSAR_last_acq} - perhaps it already exists?  Exiting...  ')
+          
+           
+        # 2: Create a log file.  
+        f = open(f"{volcano_dir}{LiCSAR_last_acq}/LiCSALert_log.txt", 'w')
+        original = sys.stdout
+        sys.stdout = Tee(sys.stdout, f)
+            
+        # 3: Create or update the LiCSBAS time series
+        try:
+            os.mkdir(LiCSBAS_dir)                                                                                                         # if it's the first run, a folder will be needed for LiCSBAS
+        except:
+            pass                                                                                                                          # assume if we can't make it, the folder already exists from a previous run.  
+        print(f"Running LiCSBAS.  See 'LiCSBAS_log.txt' for the status of this.  ")
+        LiCSBAS_for_LiCSAlert(LiCSAR_settings['frame'], LiCSAR_frames_dir, LiCSBAS_dir, 
+                              f"{volcano_dir}{LiCSAR_last_acq}/", LiCSBAS_settings['lon_lat'])                                             # run LiCSBAS to either create or extend the time series data.  Logfile is sent to the directory for the current date
+        displacement_r2, baseline_info = LiCSBAS_to_LiCSAlert(f"{LiCSBAS_dir}TS_GEOCmldir/cum.h5", figures=False)                          # open the h5 file produced by LiCSBAS
+        displacement_r2 = LiCSAlert_preprocessing(displacement_r2, LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])                                  # mean centre, and crate downsampled versions (either for general use to make                                                                                                                            # things faster), or just for plotting (to make LiCSAlert figures faster)                         
+        
+        
+        # 4: Possibly run ICASAR
+        if 'ICASAR_results' in [f.name for f in os.scandir(volcano_dir) if f.is_dir()]:                                                         # if an ICASAR folder already exists, simply open the saved file rather than rerunning.  
+            with open(f"{volcano_dir}ICASAR_results/ICASAR_results.pkl", 'rb') as f:
+                sources = pickle.load(f)   
+                mask_sources = pickle.load(f)
+                tcs  = pickle.load(f)    
+                source_residuals = pickle.load(f)    
+                Iq_sorted = pickle.load(f)    
+                n_clusters = pickle.load(f)    
+            f.close()                                                                                                                           
+        else:
+            print(f"A folder of ICASAR results has not been found so running this now... ", end = '')                                       # or if not, run it
+            sources, mask_sources, tcs, residual, Iq, n_clusters, S_all_info, r2_ifg_means  = ICASAR(displacement_r2['incremental'], displacement_r2['mask'], 
+                                                                                                     out_folder = f"{volcano_dir}ICASAR_results/", **ICASAR_settings,
+                                                                                                     ica_verbose = 'short', figures = 'png')
+            print('Done! ')
+        n_baseline_ifgs = tcs.shape[0]                                                                                                                                              # LiCSAlert needs to know how long the baseline stage from ICSASAR was.  
+        
+        # 5: Deal with changes to the mask of pixels 
+        displacement_r2_combined = {}                                                                                                                                               # a new dictionary to save the interferograms sampled to the combined mask in 
+        displacement_r2_combined['incremental'], sources_mask_combined, mask_combined = update_mask_sources_ifgs(mask_sources, sources, 
+                                                                                                                 displacement_r2['mask'], displacement_r2['incremental'])           # the new mask overwrites the mask in displacement_r2
+        displacement_r2_combined['mask'] = mask_combined                                                                                                                            # also put the combined mask in the dictionary
+        displacement_r2_combined["incremental_downsampled"], displacement_r2_combined["mask_downsampled"] = downsample_ifgs(displacement_r2_combined["incremental"], displacement_r2_combined["mask"],
+                                                                                                                            LiCSAlert_settings['downsample_plot'], verbose = False)
+        if initialise:
+            previous_output_dir = None                                                                                                                                  # there is no previous output directory
+        else:
+            previous_output_dir = f"{volcano_dir}{previous_LiCSAlert_dates[-1]}"
+        record_mask_changes(mask_sources, displacement_r2['mask'], mask_combined, LiCSAR_last_acq, f"{volcano_dir}{LiCSAR_last_acq}/", previous_output_dir)
+        
+        # 6: Run LiCSAlert
+        sources_tcs_baseline, residual_tcs_baseline = LiCSAlert(sources_mask_combined, baseline_info["baselines_cumulative"], displacement_r2_combined['incremental'][:n_baseline_ifgs,], 
+                                                                displacement_r2_combined['incremental'][n_baseline_ifgs:,], t_recalculate=10, verbose=False)
+               
+        LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, sources_mask_combined, displacement_r2_combined, n_baseline_ifgs, 
+                         baseline_info["baselines_cumulative"], out_folder = f"{volcano_dir}{LiCSAR_last_acq}")
+        
+        sys.stdout = original                                                                                                                       # return stdout to be normal.  
+        f.close()                                                                                                                                   # and close the log file.  
+    else:
+        print(f'No new LiCSAR acquisitions have been detected for {volcano}, and the LiCSAlert outputs are thought to be up to date.  ')
+        
+    
+    
+    
+
+
+
+
+#%%
+
+
+def record_mask_changes(mask_sources, mask_ifgs, mask_combined, current_date, current_output_dir, previous_output_dir = None):
+    """ Record changes to the masks used in LiCSAlert, as this is dependent on the mask provided by LiCSBAS.  Creates a variety of .png images showing the mask,
+    how many pixels remain for LiCSAlert to use, and a .pkl so this can be compared to the last time it was run.  
+    
+    Inputs:
+        mask_sources | r2 array | the mask used by ICASAR
+        mask_ifgs | r2 array | the mask produced by the last run of LiCSBAS
+        mask_combined | r2 array | the mask that removes any pixels that aren't in bothh the sources and the ifgs
+        current_date | string | the date that LiCSAlert is being run to.  
+        current_output_dir | string | the folder that LiCSALert is currently outputting to
+        previous_output_dir | string | If it's not hte first time LiCSAlert was run, this is the folder that LiCSALert previously output to
+    Returns:
+        2 x png figures
+        .pkl of the masks and dates.  
     History:
         2020/06/25 | MEG | Written
         2020/07/01 | MEG | Major rewrite to suit directory based structure.  
+        2020/07/03 | MEG | continue major rewrite, and write docs.  
     """
     import matplotlib.pyplot as plt
     import numpy as np
     import numpy.ma as ma
-        
-    if mask_change == None:                                                                 # when the function is first called, this won't exist (so is set to None)
-        initialising = True
-        mask_change = {}                                                                    # initiatalise 
-        mask_change['dates'] = [current_date]                                               # one list will have the dates for the mask, initiate with first date
-        mask_change['masks'] = [current_mask]                                                       # and one will have the masks, initate with first mask
-    else:
-        initialising = False                                                                # if mask is not None, we aren't initiliasing as it must have previously run in order to create mask_change
-        mask_change['dates'].append(current_date)
-        mask_change['masks'].append(current_mask)
+    import pickle
     
-    #import ipdb; ipdb.set_trace()
-    # Save the mask as a png, and the change in mask to the previous one
-    f1,axes = plt.subplots(1,2)
-    axes[0].imshow(mask_change['masks'][-1])
-    axes[0].set_title(mask_change['dates'][-1])
+    # 0: try to open a .pkl with the mask changes in, or initiate it
+    try:
+        with open(f"{previous_output_dir}/mask_history.pkl", 'rb') as f:
+            dates = pickle.load(f)   
+            masks_combined = pickle.load(f)
+            masks_ifgs = pickle.load(f)
+        f.close()
+        initialising = False
+    except:                                                                             # if we can't open file, assume it is because it doesn't exist as first run of function.  
+        initialising = True                                                             # this flag used to control plotting as it's different for the first one.  
+        dates = []
+        masks_combined = []
+        masks_ifgs = []
+    
+    # 1: append current masks
+    dates.append(current_date)
+    masks_combined.append(mask_combined)
+    masks_ifgs.append(mask_ifgs)
+    
+    # 2: Save the file
+    with open(f'{current_output_dir}mask_history.pkl', 'wb') as f:
+        pickle.dump(dates, f)
+        pickle.dump(masks_combined, f)
+        pickle.dump(masks_ifgs, f)
+    f.close()
+    
+    
+    # 3: Figure showing the masks
+    f1,axes = plt.subplots(1,4, figsize = (12,6))
+    axes[0].imshow(mask_sources)
+    axes[0].set_title('(ICASAR) sources mask')
+    axes[1].imshow(masks_ifgs[-1])
+    axes[1].set_title('Current LiCSBAS mask')
+    axes[2].imshow(masks_combined[-1])
+    axes[2].set_title('Current combined mask')
     if initialising:                                                                                        # first run, so won't be a difference between this and past mask
-        axes[1].imshow(ma.array(np.ones(current_mask.shape), mask = np.ones(current_mask.shape)))           # an array of ones, but every element is masked as we know it hasn't changed yet.  
-        axes[1].set_title("First mask so no change")
+        axes[3].imshow(np.full(mask_combined.shape, np.nan))                                                # just nans so it's blank
+        axes[3].set_title("First mask so no change")
     else:
-        axes[1].imshow(ma.masked_where(mask_change['masks'][-2] == mask_change['masks'][-1] , np.ones(current_mask.shape)))           # create an array of ones that is maksed everywhere that the two masks are the same, and then plot this.  
-        #axes[1].imshow((mask_change['masks'][-2]).astype(int) - (mask_change['masks'][-1]).astype(int))         # difference in the masks
-        axes[1].set_title(f"{mask_change['dates'][-2]} - {mask_change['dates'][-1]} ")      # and differnce inthe dates
+        axes[3].imshow(ma.masked_where(masks_combined[-2] == masks_combined[-1] , np.ones(mask_combined.shape)))           # create an array of ones that is maksed everywhere that the two masks are the same, and then plot this.  
+        axes[3].set_title(f"{dates[-2]} - {dates[-1]} ")                                                # and differnce inthe dates
         
     f1.canvas.set_window_title(current_date)
-    f1.savefig(f"{png_path}{mask_change['dates'][-1]}.png", bbox_inches='tight')
+    f1.savefig(f"{current_output_dir}mask_changes.png", bbox_inches='tight')
     plt.close(f1)
 
-    # Create the line graph of number of pixels
-    n_updates = len(mask_change['dates'])
+    # 4 Figure showing how the number of pixels has changes with time
+    n_updates = len(dates)
     x_vals = np.arange(n_updates)
     n_pixs = np.zeros((n_updates, 2))                                     # 1st column will be number of non-masked and 2nd number of masked
     for ifg_n in range(n_updates):
-        n_pixs[ifg_n,0] = len(np.argwhere(mask_change['masks'][ifg_n] == False))
-        n_pixs[ifg_n,1] = len(np.argwhere(mask_change['masks'][ifg_n] == True))
+        n_pixs[ifg_n,0] = len(np.argwhere(masks_combined[ifg_n] == False))
+        n_pixs[ifg_n,1] = len(np.argwhere(masks_combined[ifg_n] == True))
     
-    #import ipdb; ipdb.set_trace()
     f2,ax = plt.subplots(1)
     ax.plot(x_vals, n_pixs[:,0], label = 'Non-masked pixels')
     ax.plot(x_vals, n_pixs[:,1], label = 'Masked pixels')
@@ -77,86 +249,13 @@ def record_mask_changes(mask_sources, mask_ifgs, mask_shared):
     ax.set_ylabel('# pixels')
     ax.set_xlabel('Time series end (yyyymmdd)')
     ax.set_xticks(x_vals)
-    ax.set_xticklabels(mask_change['dates'])
-    ax.set_ylim(bottom = 0)
+    ax.set_xticklabels(dates)
+    #ax.set_ylim(bottom = 0)
     #plt.grid()
-    f2.savefig(f'{png_path}pixel_history_{current_date}.png', bbox_inches='tight')
+    f2.savefig(f"{current_output_dir}mask_changes_graph.png", bbox_inches='tight')
     plt.close(f2)
         
-    return mask_change
 
-
-# def record_mask_changes(current_mask, current_date, mask_change = None,
-#                         png_path = './mask_history/'):
-#     """ Given a new mask and the date that the time series until, update the mask_change dictionary that keeps track of this.  
-#     Inputs:
-#         current_mask | rank 2 boolean | the current mask, as produced by LiCSBAS
-#         current_date | string | the most recent data that the time series spans until, in form yyyymmdd
-#         mask_change | dict or None | dictionary where each key is the date the time series ends up, and the variable the mask
-#         png_path | string | path to folder of where to save the .png files.  Needs trailing /
-#     Returns:
-#         mask_change | dict or None | dictionary where each key is the date the time series ends up, and the variable the mask
-#     History:
-#         2020/06/25 | MEG | Written
-#     """
-#     import matplotlib.pyplot as plt
-#     import numpy as np
-#     import numpy.ma as ma
-        
-#     if mask_change == None:                                                                 # when the function is first called, this won't exist (so is set to None)
-#         initialising = True
-#         mask_change = {}                                                                    # initiatalise 
-#         mask_change['dates'] = [current_date]                                               # one list will have the dates for the mask, initiate with first date
-#         mask_change['masks'] = [current_mask]                                                       # and one will have the masks, initate with first mask
-#     else:
-#         initialising = False                                                                # if mask is not None, we aren't initiliasing as it must have previously run in order to create mask_change
-#         mask_change['dates'].append(current_date)
-#         mask_change['masks'].append(current_mask)
-    
-#     #import ipdb; ipdb.set_trace()
-#     # Save the mask as a png, and the change in mask to the previous one
-#     f1,axes = plt.subplots(1,2)
-#     axes[0].imshow(mask_change['masks'][-1])
-#     axes[0].set_title(mask_change['dates'][-1])
-#     if initialising:                                                                                        # first run, so won't be a difference between this and past mask
-#         axes[1].imshow(ma.array(np.ones(current_mask.shape), mask = np.ones(current_mask.shape)))           # an array of ones, but every element is masked as we know it hasn't changed yet.  
-#         axes[1].set_title("First mask so no change")
-#     else:
-#         axes[1].imshow(ma.masked_where(mask_change['masks'][-2] == mask_change['masks'][-1] , np.ones(current_mask.shape)))           # create an array of ones that is maksed everywhere that the two masks are the same, and then plot this.  
-#         #axes[1].imshow((mask_change['masks'][-2]).astype(int) - (mask_change['masks'][-1]).astype(int))         # difference in the masks
-#         axes[1].set_title(f"{mask_change['dates'][-2]} - {mask_change['dates'][-1]} ")      # and differnce inthe dates
-        
-#     f1.canvas.set_window_title(current_date)
-#     f1.savefig(f"{png_path}{mask_change['dates'][-1]}.png", bbox_inches='tight')
-#     plt.close(f1)
-
-#     # Create the line graph of number of pixels
-#     n_updates = len(mask_change['dates'])
-#     x_vals = np.arange(n_updates)
-#     n_pixs = np.zeros((n_updates, 2))                                     # 1st column will be number of non-masked and 2nd number of masked
-#     for ifg_n in range(n_updates):
-#         n_pixs[ifg_n,0] = len(np.argwhere(mask_change['masks'][ifg_n] == False))
-#         n_pixs[ifg_n,1] = len(np.argwhere(mask_change['masks'][ifg_n] == True))
-    
-#     #import ipdb; ipdb.set_trace()
-#     f2,ax = plt.subplots(1)
-#     ax.plot(x_vals, n_pixs[:,0], label = 'Non-masked pixels')
-#     ax.plot(x_vals, n_pixs[:,1], label = 'Masked pixels')
-#     ax.scatter(x_vals, n_pixs[:,0])
-#     ax.scatter(x_vals, n_pixs[:,1])
-#     ax.set_title(current_date)
-#     f2.canvas.set_window_title(current_date)
-#     leg = ax.legend()
-#     ax.set_ylabel('# pixels')
-#     ax.set_xlabel('Time series end (yyyymmdd)')
-#     ax.set_xticks(x_vals)
-#     ax.set_xticklabels(mask_change['dates'])
-#     ax.set_ylim(bottom = 0)
-#     #plt.grid()
-#     f2.savefig(f'{png_path}pixel_history_{current_date}.png', bbox_inches='tight')
-#     plt.close(f2)
-        
-#     return mask_change
 
 
 
@@ -248,7 +347,7 @@ def detect_new_ifgs(folder_ifgs, folder_LiCSAlert):
         
     
     if len(LiCSAlert_dates) == 0:
-        print("It appears that LiCSAlert hasn't been run for this volcano yet.  Setting the 'new_ifgs_flag' to True.  ")
+        #print("It appears that LiCSAlert hasn't been run for this volcano yet.  Setting the 'new_ifgs_flag' to True.  ")
         new_ifgs_flag = True
     else:
         LiCSAlert_last_run = LiCSAlert_dates[-1]                                            # folder are YYYYMMDD so last one is last time it was run until.  
