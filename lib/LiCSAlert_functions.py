@@ -4,6 +4,112 @@ A selection of functions used by LiCSAlert
 
 @author: Matthew Gaddes
 """
+
+#%%
+
+def LiCSAlert_batch_mode(displacement_r2, cumulative_baselines, acq_dates, 
+                         n_baseline_end, out_folder, ICASAR_settings, run_ICASAR = True, ICASAR_path = 'ICASAR/',
+                         intermediate_figures = False, downsample_run = 1.0, downsample_plot = 0.5):
+    """ A function to run the LiCSAlert algorithm on a preprocssed time series.  To run on a time series that is being 
+    updated, use LiCSAlert_monitoring_mode.  
+    
+    Inputs:
+        displacement_r2  | dict |  contains the incremental displacements in 'displacement_r2' as row vectors, and a mask ('mask') to conver these into masked arrays
+        cumulative_baselines | rank 1 array | cumulative sum of the temporal baselines.  E.g. if acquisitions every 12 days, the cumulative baselines would be 12, 24, 36 etc., 
+        acq_dates | list of strings | date of acquisitions in format YYYYMMDD, as a list.  Should be one longer than the number of ifgs as rows in displacement_r2
+        n_baseline_end | int | the interferogram number which is the last in the baseline stage.  
+        out_folder | path or string | name of folder in which to save ouputs.  
+        ICASAR_settings | dict | contains all the settings for the ICASAR algorithm.  See ICASAR for details.  
+        run_ICASAR | boolean | If false, the resutls from a previous run of ICASAR are used, if True it is run again (which can be time consuming)
+        ICASAR_path | path or string | location of ICASAR package.  
+        intermediate_figures | boolean | if True, figures for all time steps in the monitoring phase are created (which is slow).  If False, only the last figure is created.  
+        downsample_run | float | data can be downsampled to speed things up
+        downsample_plot | float | and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
+    Returns:
+        out_folder with various items.  
+    History:
+        2020/09/16 | MEG | Created from various scripts.           
+    """
+    import numpy as np
+    from pathlib import Path
+    import glob
+    import os
+    import sys
+    import pickle
+    
+    from LiCSAlert_functions import LiCSAlert, LiCSAlert_figure, save_pickle, shorten_LiCSAlert_data, LiCSAlert_preprocessing
+    from downsample_ifgs import downsample_ifgs
+    #from LiCSAlert_aux_functions import col_to_ma
+    
+    sys.path.append(str(ICASAR_path))                  # location of ICASAR functions
+    from ICASAR_functions import ICASAR
+    
+    # 0: Sort out the ouput folder
+    out_folder = Path(f"LiCSAlert_{out_folder}")
+    if run_ICASAR:                                                                                                            # if we're running ICASAR, assume no output folder and make a new one.  
+        try:
+            print(f"Trying to create a new outputs folder ({out_folder})... ", end = '')                                    # try to make a new folder
+            os.mkdir(out_folder)                                                                       
+            print('Done')
+        except:
+            raise Exception(f"Failed.  Perhaps the folder ({out_folder}) already exists?")
+    else:
+        print('Deleting all the LiCSAlert outputs, but leaving the ICASAR products.  ', end = '')
+        files = glob.glob(str(out_folder / 'LiCSAlert*'))
+        for f in files:
+            os.remove(f)
+        print("Done.  ")
+        
+            
+    # 1: Either run ICASAR to find latent spatial sources in baseline data, or load the results from a previous run.  
+    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, downsample_run, downsample_plot)                     # mean centre and downsize the data
+    
+    if run_ICASAR:
+        baseline_data = {'mixtures_r2' : displacement_r2['incremental'][:n_baseline_end],                                                                       # prepare a dictionary of data for ICASAR
+                         'mask'        : displacement_r2['mask']}
+        sources, tcs, residual, Iq, n_clusters, S_all_info, means = ICASAR(spatial_data = baseline_data, 
+                                                                           lons = displacement_r2['lons'], lats = displacement_r2['lats'],                          # run ICASAR to recover the latent sources from the baseline stage
+                                                                           out_folder = str(out_folder / "ICASAR_outputs")+'/', **ICASAR_settings)           
+        sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                                       # downsample for plots
+    else:
+        try:
+            with open(out_folder / "ICASAR_outputs/ICASAR_results.pkl", 'rb') as f:
+                sources = pickle.load(f)    
+                tcs  = pickle.load(f)    
+                source_residuals = pickle.load(f)    
+                Iq_sorted = pickle.load(f)    
+                n_clusters = pickle.load(f)    
+            del tcs, source_residuals, Iq_sorted, n_clusters                                                                                      # these ICASAR products are not needed by LiCSAlert
+            sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                     # downsample the sources as this can speed up plotting
+        except:
+            raise Exception(f"Unable to open the results of ICASAR (which are usually stored in 'ICASAR_results') "
+                            f"Try re-running and enabling ICASAR with 'run_ICASAR' set to 'True'.  ")
+    
+    
+    # 2: Do LiCSAlert, plotting figures for all time steps, or just for the final one.  
+    if intermediate_figures:
+        for ifg_n in np.arange(n_baseline_end+1, displacement_r2["incremental"].shape[0]+1):
+            
+            displacement_r2_current = shorten_LiCSAlert_data(displacement_r2, n_end=ifg_n)                        # get the ifgs available for this loop (ie one more is added each time the loop progresses)
+            cumulative_baselines_current = cumulative_baselines[:ifg_n]                                                             # also get current time values
+        
+        
+            sources_tcs_monitor, residual_monitor = LiCSAlert(sources, cumulative_baselines_current, displacement_r2_current["incremental"][:n_baseline_end],               # do LiCSAlert
+                                                                                            displacement_r2_current["incremental"][n_baseline_end:], t_recalculate=10)    
+        
+            LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources_downsampled, displacement_r2_current, n_baseline_end, 
+                              cumulative_baselines_current, time_value_end=cumulative_baselines[-1], out_folder = out_folder,
+                              day0_date = acq_dates[0], sources_downsampled = True)                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
+
+    else:
+        sources_tcs_monitor, residual_monitor = LiCSAlert(sources, cumulative_baselines, displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
+                                                          displacement_r2["incremental"][n_baseline_end:], t_recalculate=10)    
+        
+        LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
+                          cumulative_baselines, time_value_end=cumulative_baselines[-1], day0_date = acq_dates[0], 
+                          out_folder = out_folder, sources_downsampled = False)                 
+ 
+
 #%%
 
 def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_recalculate = 10, verbose=False):
@@ -385,18 +491,18 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     # 3: Plot the ifgs along the top
     plot_ifgs(displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"], fig1, grid[0,1:], time_values, minorLocator, majorLocator, t_end)
 
+
     # 4: Plot each source and its time course 
     try:
         baseline_monitor_change = np.mean([time_values[n_baseline_end-1], time_values[n_baseline_end]])                                     # Vertical line will be drawn at this time value to show that we switch from baseline to monitoring
     except:
         baseline_monitor_change = np.mean([time_values[n_baseline_end-1], time_values[n_baseline_end-1] + 12])                              # But the above won't work if there are no monitoring ifgs, so just guess next ifg will be after 12 days and draw line as if that were true (ie 6 days after last point)
     for row_n, source_tc in enumerate(sources_tcs):
-        # plot the source as an image
-        ax_source = plt.Subplot(fig1, grid[row_n+1,0])
+        ax_source = plt.Subplot(fig1, grid[row_n+1,0])                                                                                      # create an axes for the IC (spatial source)
         if sources_downsampled:
-            im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   
+            im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   # plot the downsampled source
         else:
-            im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   
+            im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
         ax_source.set_xticks([])
         ax_source.set_yticks([])
         ax_source.set_ylabel(f"IC {row_n+1}")
@@ -408,7 +514,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         for line_arg in line_args:
             ax_tc.plot(time_values, source_tc["lines"][:,line_arg], c = 'k')
     
-        # # tidy up some stuff on the axes
+        # tidy up some stuff on the axes
         ax_tc.axhline(y=0, color='k', alpha=0.3)  
         ax_tc.axvline(x = baseline_monitor_change, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
         ax_tc.set_xlim(left = 0, right = t_end)
@@ -419,7 +525,6 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         sigma_bar_plotter(ax_tc, time_values, source_tc["distances"], cmap_discrete)                # draw the bar graph showing sigma values
         ax_tc.yaxis.tick_right()                                                                    # has to be called after sigma_bar_plotter
                                                                 
-
     # 5: Plot the residual
     ax_residual = plt.Subplot(fig1, grid[-1,1:])                                                                    # plot on the last row
     ax_residual.scatter(time_values, residual[0]["cumulative_tc"], marker='o', s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, c = residual[0]["distances"])         # 
@@ -733,7 +838,8 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
 def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot=0.5, verbose=True):
     """A function to downsample the data at two scales (one for general working [ie to speed things up], and one 
     for faster plotting.  )  Also, data are mean centered, which is required for ICASAR and LiCSAlert.  
-    Note that the downsamples are applied consecutively, so are compound.  
+    Note that the downsamples are applied consecutively, so are compound (e.g. if both are 0.5, 
+    the plotted data will be at 0.25 the resolution of the original data).  
     
     Inputs:
         displacement_r2 | dict | input data stored in a dict as row vectors with a mask
