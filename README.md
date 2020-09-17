@@ -35,7 +35,7 @@ There are three groups of inputs:
     - <code>downsample_plot</code>   |  Downsampling the data for plotting can speed up making figures.  Note that this is applied after the downsample_run command, so is compound (i.e. 0.5 for downsample_run and 0.5 for downsample_plot produces a final downsampling of 0.25 for the plotted signals).  
 
 3) <code> ICASAR_settings</code>
-  These are explained in the [ICASAR wiki](https://github.com/matthew-gaddes/ICASAR/wiki/03-Inputs-and-Tunable-parameters).  
+  - These are explained in the [ICASAR wiki](https://github.com/matthew-gaddes/ICASAR/wiki/03-Inputs-and-Tunable-parameters).  
 
 
 # Monitoring mode usage
