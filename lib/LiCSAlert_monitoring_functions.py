@@ -119,9 +119,13 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
             f.close()                                                                                                                           
         else:
             print(f"A folder of ICASAR results has not been found so running this now... ", end = '')                                       # or if not, run it
-            sources, mask_sources, tcs, residual, Iq, n_clusters, S_all_info, r2_ifg_means  = ICASAR(displacement_r2['incremental'], displacement_r2['mask'], 
-                                                                                                     out_folder = f"{volcano_dir}ICASAR_results/", **ICASAR_settings,
-                                                                                                     ica_verbose = 'short', figures = 'png')
+            spatial_ICASAR_data = {'mixtures_r2' : displacement_r2['incremental'],
+                                   'mask'        : displacement_r2['mask']}
+            
+            sources, tcs, residual, Iq, n_clusters, S_all_info, r2_ifg_means  = ICASAR(spatial_data = spatial_ICASAR_data, 
+                                                                                       out_folder = f"{volcano_dir}ICASAR_results/", **ICASAR_settings,
+                                                                                       ica_verbose = 'short', figures = 'png')
+            mask_sources = displacement_r2['mask']                                                                                                          # rename a copy of the mask
             print('Done! ')
         n_baseline_ifgs = tcs.shape[0]                                                                                                                                              # LiCSAlert needs to know how long the baseline stage from ICSASAR was.  
         
