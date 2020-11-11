@@ -83,7 +83,7 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
         # 1: Create a folder (YYYYMMDD) for the outputs.  
         try:
             print(f'A new LiCSAR acquisition has been detected.  Creating a folder to contain the new LiCSAlert results ({LiCSAR_last_acq})... ', end = '')
-            if not os.path.exists:
+            if not os.path.exists(f"{volcano_dir}{LiCSAR_last_acq}"):
                 os.mkdir(f"{volcano_dir}{LiCSAR_last_acq}")                                                                       
             print('Done!')
         except:
