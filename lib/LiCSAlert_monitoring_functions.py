@@ -336,6 +336,10 @@ def detect_new_ifgs(folder_ifgs, folder_LiCSAlert):
     
     # 0: Get the last acquisition that LiCSAR has been run until.  
     LiCSAR_ifgs = sorted([f.name for f in os.scandir(folder_ifgs) if f.is_dir()])     # get names of folders produced by LiCSAR (ie the ifgs), and keep chronological.  
+    # check for empty directory:
+    if not LiCSAR_ifgs:
+        print(f"No files found in {folder_ifgs} ... ")
+        return False, False
     LiCSAR_last_acq = LiCSAR_ifgs[-1][-8:]                                                  # this is the last date that LiCSAR has processed up to 
     
     # 1: Get the last date that LiCAlert has been run until
