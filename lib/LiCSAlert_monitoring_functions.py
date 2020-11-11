@@ -10,7 +10,7 @@ Created on Mon Jun 29 14:09:28 2020
 
 
 
-def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, LiCSAR_frames_dir, LiCSAlert_volcs_dir):
+def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, LiCSAR_frames_dir, LiCSAlert_volcs_dir, n_para=1):
     """
        
     Inputs:
@@ -102,7 +102,7 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
             pass                                                                                                                          # assume if we can't make it, the folder already exists from a previous run.  
         print(f"Running LiCSBAS.  See 'LiCSBAS_log.txt' for the status of this.  ")
         LiCSBAS_for_LiCSAlert(LiCSAR_settings['frame'], LiCSAR_frames_dir, LiCSBAS_dir, 
-                              f"{volcano_dir}{LiCSAR_last_acq}/", LiCSBAS_settings['lon_lat'])                                             # run LiCSBAS to either create or extend the time series data.  Logfile is sent to the directory for the current date
+                              f"{volcano_dir}{LiCSAR_last_acq}/", LiCSBAS_settings['lon_lat'], n_para=n_para)                                             # run LiCSBAS to either create or extend the time series data.  Logfile is sent to the directory for the current date
         displacement_r2, baseline_info = LiCSBAS_to_LiCSAlert(f"{LiCSBAS_dir}TS_GEOCmldir/cum.h5", figures=False)                          # open the h5 file produced by LiCSBAS
         displacement_r2 = LiCSAlert_preprocessing(displacement_r2, LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])                                  # mean centre, and crate downsampled versions (either for general use to make                                                                                                                            # things faster), or just for plotting (to make LiCSAlert figures faster)                         
         
