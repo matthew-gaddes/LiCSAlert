@@ -83,7 +83,8 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
         # 1: Create a folder (YYYYMMDD) for the outputs.  
         try:
             print(f'A new LiCSAR acquisition has been detected.  Creating a folder to contain the new LiCSAlert results ({LiCSAR_last_acq})... ', end = '')
-            os.mkdir(f"{volcano_dir}{LiCSAR_last_acq}")                                                                       
+            if not os.path.exists:
+                os.mkdir(f"{volcano_dir}{LiCSAR_last_acq}")                                                                       
             print('Done!')
         except:
             print('Failed!')
@@ -353,6 +354,28 @@ def detect_new_ifgs(folder_ifgs, folder_LiCSAlert):
     except:
         pass                                                                                    # however, on the first ever run it doesn't exist.  
         
+    # For each folder that exists, check that output images exist, to try and
+    # verify things ran successfully. The output files are expected to exist:
+    output_files = [
+        'LiCSAlert_figure_with_0_monitoring_interferograms.png',
+        'mask_changes_graph.png',
+        'mask_changes.png',
+        'mask_history.pkl'
+    ]
+    # Loop through dates:
+    for LiCSAlert_date in LiCSAlert_dates:
+        # Loop through files:
+        for output_file in output_files:
+            # Skip if this date has already been removed:
+            if LiCSAlert_date not in LiCSAlert_dates:
+                continue
+            # Path to output file:
+            output_path = os.sep.join([folder_LiCSAlert, LiCSAlert_date,
+                                       output_file])
+            # If the file does not exist ... :
+            if not os.path.exists(output_path):
+                # Remove this date from list dates:
+                LiCSAlert_dates.remove(LiCSAlert_date) 
     
     if len(LiCSAlert_dates) == 0:
         #print("It appears that LiCSAlert hasn't been run for this volcano yet.  Setting the 'new_ifgs_flag' to True.  ")
