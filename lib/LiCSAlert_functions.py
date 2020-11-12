@@ -583,7 +583,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
 #%%
         
         
-def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logfile_dir, lon_lat = None, downsampling = 1):
+def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logfile_dir, lon_lat = None, downsampling = 1, n_para=1):
     """ Call this to either create a LiCSBAS timeseries from LiCSAR products, or to update one when new products become available.  
     Not all LiCSBAS features are supported! 
     
@@ -622,8 +622,7 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
     p13_inv_alg = "LS"              	# LS (default) or WLS
     p13_mem_size = 4000	                # default: 4000 (MB)
     p13_gamma = 0.0001              	# default: 0.0001
-    p13_n_core = 1	                    # default: 1
-    p13_n_unw_r_thre = 1	            # defualt: 1
+    p13_n_unw_r_thre = 1	            # default: 1
     p13_keep_incfile = "n"	            # y/n. default: n
 
     # make directory names in the style used by LiCSBAS.  
@@ -633,7 +632,7 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
     GEOCmldirclip = f"{LiCSBAS_out_dir}GEOCmldirclip"                        # clipped products, produced by step_05
        
     # Convert format (LiCSBAS02)  NB: This will automatically skip files that have already been converted.  
-    subprocess.call(f"LiCSBAS02_ml_prep.py -i {GEOCdir} -o {GEOCmldir} -n {downsampling} -f {LiCSAR_frame}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)                 # This creates the files in GEOCmlXXX, including the png preview of unw, note that 1 is stdout, -a to append
+    subprocess.call(f"LiCSBAS02_ml_prep.py -i {GEOCdir} -o {GEOCmldir} -n {downsampling} --n_para {n_para}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)                 # This creates the files in GEOCmlXXX, including the png preview of unw, note that 1 is stdout, -a to append
 
     # LiCSBAS03 - GACOS
     # LiCSBAS04 - mask    
@@ -641,17 +640,17 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
     # LiCSBAS05 - clip to region of interest (using lat and long, but can also use pixels)
     if lon_lat is not None:
         LiCSBAS_lon_lat_string = f"{lon_lat[0]}/{lon_lat[1]}/{lon_lat[2]}/{lon_lat[3]}"                                     # conver to a string which includes / (and so python does not see them as four numbers divided!)
-        subprocess.call(f"LiCSBAS05op_clip_unw.py -i {GEOCmldir} -o {GEOCmldirclip} -g {LiCSBAS_lon_lat_string}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)                 # # do the clipping, -g of form west/east/south/north   N.b.!  As above, careful with / being treated as divide by Python!
+        subprocess.call(f"LiCSBAS05op_clip_unw.py -i {GEOCmldir} -o {GEOCmldirclip} -g {LiCSBAS_lon_lat_string} --n_para {n_para}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)                 # # do the clipping, -g of form west/east/south/north   N.b.!  As above, careful with / being treated as divide by Python!
         GEOCmldir = GEOCmldirclip                                                                                           # update so now using the clipped products
     
     # LiCSBAS11 - check unwrapping, based on coherence
     subprocess.call(f"LiCSBAS11_check_unw.py -d {GEOCmldir} -t {TSdir} -c {p11_coh_thre} -u {p11_unw_thre}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)   
 
     # LiCSBAS12 - check unwrapping, based on loop closure
-    subprocess.call(f"LiCSBAS12_loop_closure.py -d {GEOCmldir} -t {TSdir} -l {p12_loop_thre}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)   
+    subprocess.call(f"LiCSBAS12_loop_closure.py -d {GEOCmldir} -t {TSdir} -l {p12_loop_thre} --n_para {n_para}" + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)   
 
     # LiCSBAS13 - SB inversion
-    subprocess.call(f"LiCSBAS13_sb_inv.py -d {GEOCmldir} -t {TSdir} --inv_alg {p13_inv_alg} --mem_size {p13_mem_size} --gamma {p13_gamma} --n_core {p13_n_core} --n_unw_r_thre {p13_n_unw_r_thre} --keep_incfile {p13_keep_incfile} " + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)   
+    subprocess.call(f"LiCSBAS13_sb_inv.py -d {GEOCmldir} -t {TSdir} --inv_alg {p13_inv_alg} --mem_size {p13_mem_size} --gamma {p13_gamma} --n_para {n_para} --n_unw_r_thre {p13_n_unw_r_thre} --keep_incfile {p13_keep_incfile} " + f" >&1 | tee -a {logfile_dir}LiCSBAS_log.txt", shell=True)   
 
     # LiCSBAS 14 - velocity standard dev
     # LiCSBAS 15 - mask using noise indicies
