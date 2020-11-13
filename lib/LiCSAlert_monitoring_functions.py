@@ -19,23 +19,25 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
         ICASAR_bin | string | Path to folder containing ICASAR functions.  
         LiCSAR_frames_dir | string | path to the folder containing LiCSAR frames.  Needs trailing /
         LiCSAlert_volcs_dir | string | path to the folder containing each volcano.  Needs trailing /
+        n_para | int | Sets number of parallel processes used by LiCSBAS.  
     Returns:
         Directory stucture.  
         
     History:
         2020/06/29 | MEG | Written as a script
         2020/07/03 | MEG | Convert to a funtcion
+        2020/11/11 | RR | Add n_para argument
                 
-
      """
     # 0 Imports etc.:        
 
     import sys
     import os
     import pickle
-    sys.path.append(f"{LiCSBAS_bin}")                                          
-    sys.path.append(f"{LiCSAlert_bin}")                                          
-    sys.path.append(f"{ICASAR_bin}")                                          
+    
+    if ICASAR_bin not in sys.path:                                                  # check if already on path
+        sys.path.append(ICASAR_bin)                                                 # and if not, add
+    
     from LiCSAlert_functions import LiCSBAS_for_LiCSAlert, LiCSBAS_to_LiCSAlert, LiCSAlert_preprocessing, LiCSAlert, LiCSAlert_figure
     from LiCSAlert_monitoring_functions import read_config_file, detect_new_ifgs, update_mask_sources_ifgs, record_mask_changes
     from downsample_ifgs import downsample_ifgs
@@ -98,14 +100,14 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
             
         # 3: Create or update the LiCSBAS time series
         try:
-            os.mkdir(LiCSBAS_dir)                                                                                                         # if it's the first run, a folder will be needed for LiCSBAS
+            os.mkdir(LiCSBAS_dir)                                                                                                                  # if it's the first run, a folder will be needed for LiCSBAS
         except:
-            pass                                                                                                                          # assume if we can't make it, the folder already exists from a previous run.  
+            pass                                                                                                                                   # assume if we can't make it, the folder already exists from a previous run.  
         print(f"Running LiCSBAS.  See 'LiCSBAS_log.txt' for the status of this.  ")
-        LiCSBAS_for_LiCSAlert(LiCSAR_settings['frame'], LiCSAR_frames_dir, LiCSBAS_dir, 
-                              f"{volcano_dir}{LiCSAR_last_acq}/", LiCSBAS_settings['lon_lat'], n_para=n_para)                                             # run LiCSBAS to either create or extend the time series data.  Logfile is sent to the directory for the current date
-        displacement_r2, baseline_info = LiCSBAS_to_LiCSAlert(f"{LiCSBAS_dir}TS_GEOCmldir/cum.h5", figures=False)                          # open the h5 file produced by LiCSBAS
-        displacement_r2 = LiCSAlert_preprocessing(displacement_r2, LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])                                  # mean centre, and crate downsampled versions (either for general use to make                                                                                                                            # things faster), or just for plotting (to make LiCSAlert figures faster)                         
+        LiCSBAS_for_LiCSAlert(LiCSAR_settings['frame'], LiCSAR_frames_dir, LiCSBAS_dir, f"{volcano_dir}{LiCSAR_last_acq}/",                        # run LiCSBAS to either create or extend the time series data.  
+                              LiCSBAS_bin, LiCSBAS_settings['lon_lat'], n_para=n_para)                                                             # Logfile is sent to the directory for the current date
+        displacement_r2, baseline_info = LiCSBAS_to_LiCSAlert(f"{LiCSBAS_dir}TS_GEOCmldir/cum.h5", figures=False)                                  # open the h5 file produced by LiCSBAS
+        displacement_r2 = LiCSAlert_preprocessing(displacement_r2, LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])    # mean centre, and crate downsampled versions (either for general use to make                                                                                                                            # things faster), or just for plotting (to make LiCSAlert figures faster)                         
         
         
         # 4: Possibly run ICASAR

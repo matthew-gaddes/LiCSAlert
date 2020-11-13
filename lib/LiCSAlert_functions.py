@@ -583,7 +583,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
 #%%
         
         
-def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logfile_dir, lon_lat = None, downsampling = 1, n_para=1):
+def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logfile_dir, LiCSBAS_bin, lon_lat = None, downsampling = 1, n_para=1):
     """ Call this to either create a LiCSBAS timeseries from LiCSAR products, or to update one when new products become available.  
     Not all LiCSBAS features are supported! 
     
@@ -591,6 +591,7 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
         LiCSAR_frame | string | name of frame being processed.  
         LiCSAR_frames_dir | string | The path to the LiCSAR frame which contains that volcano.  Needs trailing /
         LiCSBAS_out_dir | string | path to where LiCSBAS products will be stored.  Needs trailing /
+        LiCSBAS_bin | string | The LiCSBAS functions must have been added to your shell's path.  This is used to check this has been done correctly.  
         logfile | string | path to directory where logfile will be appended to. Needs trailing /
         lon_lat | list | west east south north to be clipped to, or None.  
         downsampling | int | >=1, sets the downsampling used in LiCSBAS (mulitlooking in both range and azimuth?)
@@ -606,12 +607,21 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
         2020/06/24 | MEG | Add option to call step_05 and clip to geographic region.  
         2020/06/30 | MEG | Simplify inputs
         2020/07/02 | MEG | Add logfile_dir, and change from os.system to subprocess.call so output can be appended to a logfile (and still be displayed to a terminal)
+        2020/11/11 | RR | Add n_para argument for new version of LiCSBAS
+        2020/11/13 | MEG | Add LiCSBAS_bin argument to check that path is set correctly.  
         
     """
 
     # import os
     # import sys
     import subprocess
+    import sys
+    
+    if LiCSBAS_bin not in sys.path:                                                  # check if already on path
+        raise Exception(f"Error - the LiCSBAS scripts don't appear to be on your path.  As these functions are called from the command line, "
+                        f"the path can't be updated from within Python.  This can usually be rectified by adding a line such as this to your ~/.bashrc file: "
+                        f"source <your_LiCSBAS_path>/LiCSBAS/bashrc_LiCSBAS.sh \n The LiCSBAS documentation may also be useful: "
+                        f"https://github.com/yumorishita/LiCSBAS/wiki/1_Installation Exiting.  ")
         
     # Inputs args - probably a better way to change these (rather than hard-coding)    
     p11_unw_thre = 0.5
@@ -626,7 +636,7 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
     p13_keep_incfile = "n"	            # y/n. default: n
 
     # make directory names in the style used by LiCSBAS.  
-    GEOCdir = f"{LiCSAR_frames_dir}{LiCSAR_frame}/GEOC"                                       # GEOC dir, where LiCSAR ifgs are stored
+    GEOCdir = f"{LiCSAR_frames_dir}{LiCSAR_frame}/GEOC"                      # GEOC dir, where LiCSAR ifgs are stored
     GEOCmldir = f"{LiCSBAS_out_dir}GEOCml{downsampling}"                     # multilooked directory, where LiCSBAS products are stored
     TSdir = f"{LiCSBAS_out_dir}TS_GEOCmldir"                                 # time series directory, where LiCSBAS products are stored
     GEOCmldirclip = f"{LiCSBAS_out_dir}GEOCmldirclip"                        # clipped products, produced by step_05
