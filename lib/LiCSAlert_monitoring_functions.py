@@ -337,61 +337,81 @@ def detect_new_ifgs(folder_ifgs, folder_LiCSAlert):
     import os 
     import datetime
     
+    
+    
+    def check_LiCSAlert_products(dates):
+        """ Given a list of dates in which LiCSAlert has been run, check that the required outputs are present in each folder.  
+        Inputs:
+            dates | list of strings | dates that LiCSAlert was run until.  In form YYYYMMDD
+        Returns:
+            dates_incomplete | list of strings | dates that a LiCSAlert folder exisits, but it doesn't have all the ouptuts.  
+        History:
+            2020/11/13 | MEG | Written
+        """
+        from pathlib import Path
+        import os
+        import fnmatch                                                                      # used to compare lists and strings using wildcards
+        
+        constant_outputs = ['mask_changes_graph.png',                                      # The output files that are expected to exist and never change name
+                            'mask_changes.png',
+                            'mask_history.pkl']
+        variable_outputs = ['LiCSAlert_figure_with_*_monitoring_interferograms.png']        # The output files that are expected to exist and change name.  
+
+        dates_incomplete = []
+        for date in dates:
+            date_folder = Path(folder_LiCSAlert + date)                                     # join to make a path to the current date folder
+            date_files = sorted([f.name for f in os.scandir(date_folder)])                  # get names of the files in this folder (no paths)
+            
+            # 1: look for the products that don't change name (ie all but the first)
+            all_products_complete = True                                                                            # initiate as True
+            for constant_output in constant_outputs:                                                                # loop through the outputs that can't change name
+                all_products_complete = (all_products_complete) and (constant_output in date_files)                 # update boolean 
+            # 2: look for the product that does change name (the main figure)
+            for variable_output in variable_outputs:                                                                # loop through the outputs that can change name
+                output = fnmatch.filter(date_files, "LiCSAlert_figure_with_*_monitoring_interferograms.png")        # check for file with wildcard for changing name
+                all_products_complete = (all_products_complete) and (len(output) > 0)                               # empty list if file doesn't exit, use to update boolean
+                
+            if all_products_complete is False:
+                dates_incomplete.append(date)                                                                       # create a list of dates for which otputs are missing
+        return dates_incomplete
+        
+    
+   
     # 0: Get the last acquisition that LiCSAR has been run until.  
     LiCSAR_ifgs = sorted([f.name for f in os.scandir(folder_ifgs) if f.is_dir()])     # get names of folders produced by LiCSAR (ie the ifgs), and keep chronological.  
     # check for empty directory:
-    if not LiCSAR_ifgs:
+    if not LiCSAR_ifgs:                                                                 # RR addition?  To check that the list isn't empty
         print(f"No files found in {folder_ifgs} ... ")
         return False, False
-    LiCSAR_last_acq = LiCSAR_ifgs[-1][-8:]                                                  # this is the last date that LiCSAR has processed up to 
+    LiCSAR_last_acq = LiCSAR_ifgs[-1][-8:]                                                  # this is the last date that LiCSAR has processed up to, in the form YYYYMMDD
     
     # 1: Get the last date that LiCAlert has been run until
     LiCSAlert_dates = sorted([f.name for f in os.scandir(folder_LiCSAlert) if f.is_dir()])     # get names of folders produced by LiCSAR (ie the ifgs), and keep chronological.  
-    try:
-        LiCSAlert_dates.remove('LiCSBAS')                                                       # note that the LiCSBAS folder also gets caught by this, and needs removing as it's not a date.  
-    except:
-        pass                                                                                    # however, on the first ever run it doesn't exist.  
-    try:
-        LiCSAlert_dates.remove('ICASAR_results')                                                       # note that the ICSAR folder also gets caught by this, and needs removing as it's not a date.  
-    except:
-        pass                                                                                    # however, on the first ever run it doesn't exist.  
-        
-    # For each folder that exists, check that output images exist, to try and
-    # verify things ran successfully. The output files are expected to exist:
-    output_files = [
-        'LiCSAlert_figure_with_0_monitoring_interferograms.png',
-        'mask_changes_graph.png',
-        'mask_changes.png',
-        'mask_history.pkl'
-    ]
-    # Loop through dates:
-    for LiCSAlert_date in LiCSAlert_dates:
-        # Loop through files:
-        for output_file in output_files:
-            # Skip if this date has already been removed:
-            if LiCSAlert_date not in LiCSAlert_dates:
-                continue
-            # Path to output file:
-            output_path = os.sep.join([folder_LiCSAlert, LiCSAlert_date,
-                                       output_file])
-            # If the file does not exist ... :
-            if not os.path.exists(output_path):
-                # Remove this date from list dates:
-                LiCSAlert_dates.remove(LiCSAlert_date) 
-    
-    if len(LiCSAlert_dates) == 0:
+    for unneeded_folder in ['LiCSBAS', 'ICASAR_results']:                                               # these folders get caught in the dates list, but aren't dates so need to be deleted.  
+        try:
+            LiCSAlert_dates.remove(unneeded_folder)                                                       # note that the LiCSBAS folder also gets caught by this, and needs removing as it's not a date.  
+        except:
+            pass                                                                                    # however, on the first ever run it doesn't exist.  
+    LiCSAlert_last_run = LiCSAlert_dates[-1]                                            # folder are YYYYMMDD so last one is last time it was run until.  
+
+    # 2: Compare 0 (the last LiCSAR acquisition) and 1 (the last date LiCSAlert has been run until)
+    if len(LiCSAlert_dates) == 0:                                                                       # if there are no LiCSAlert dates, it hasn't been run for this volcano.  
         #print("It appears that LiCSAlert hasn't been run for this volcano yet.  Setting the 'new_ifgs_flag' to True.  ")
         new_ifgs_flag = True
     else:
-        LiCSAlert_last_run = LiCSAlert_dates[-1]                                            # folder are YYYYMMDD so last one is last time it was run until.  
         fmt = '%Y%m%d'                                                                      # tell datetime the format of the date (here year, month, day with no sepeartions)
         LiCSAR_last_acq_dt = datetime.datetime.strptime(LiCSAR_last_acq, fmt)               # convert from string to datetime
         LiCSAlert_last_run_dt = datetime.datetime.strptime(LiCSAlert_last_run, fmt)         # ditto
-        if LiCSAR_last_acq_dt > LiCSAlert_last_run_dt:
+        if LiCSAR_last_acq_dt > LiCSAlert_last_run_dt:                                      # if the last licsar ifg is after the last LiCSAlert run.  
             new_ifgs_flag = True
         else:
             new_ifgs_flag = False
-            
+
+    # 3: Check that LiCSAlert has run succesfully before in each folder
+    dates_incomplete = check_LiCSAlert_products(LiCSAlert_dates)
+    if len(dates_incomplete) > 0:
+        print(f"LiCSBAS products have not be found for {dates_incomplete}")
+        
     return new_ifgs_flag, LiCSAR_last_acq
     
 
