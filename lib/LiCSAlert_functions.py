@@ -116,9 +116,9 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
     """ Main LiCSAlert algorithm for a daisy-chain timeseries of interferograms.  
     
     Inputs:
-        sources | r2 array | sources (from ICASAR) as row vectors, as per ICA
+        sources | r2 array | sources (from ICASAR) as row vectors, as per ICA, that can be turned back to interferograms with a rank 2 boolean mask of which pixels are masked and the col_to_ma function.  
         ifgs_baseline | r2 array | ifgs used in training stage as row vectors
-        time_values | r1 array | time values for each point in the time series, commonly (12,24,36) for Sentinel-1 data
+        time_values | r1 array | time values for each point in the time series, commonly (12,24,36) for Sentinel-1 data.  Could also be described as the cumulative temporal baselines.  
         t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
         verbose | boolean | if True, various information is printed to screen.  
         

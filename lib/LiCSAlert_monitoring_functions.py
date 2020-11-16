@@ -27,6 +27,7 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
         2020/06/29 | MEG | Written as a script
         2020/07/03 | MEG | Convert to a funtcion
         2020/11/11 | RR | Add n_para argument
+        2020/11/16 | MEG | Pass day0_data info to LiCSAlert figure so that x axis is not in terms of days and is instead in terms of dates.  
                 
      """
     # 0 Imports etc.:        
@@ -143,18 +144,17 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
             previous_output_dir = None                                                                                                                                  # there is no previous output directory
         else:
             previous_output_dir = f"{volcano_dir}{previous_LiCSAlert_dates[-1]}"
-        record_mask_changes(mask_sources, displacement_r2['mask'], mask_combined, LiCSAR_last_acq, f"{volcano_dir}{LiCSAR_last_acq}/", previous_output_dir)
+        record_mask_changes(mask_sources, displacement_r2['mask'], mask_combined, LiCSAR_last_acq, f"{volcano_dir}{LiCSAR_last_acq}/", previous_output_dir)             # record any changes in the mask (ie pixels that are now masked due to being incoherent).  
         
         # 6: Run LiCSAlert
-        sources_tcs_baseline, residual_tcs_baseline = LiCSAlert(sources_mask_combined, baseline_info["baselines_cumulative"], displacement_r2_combined['incremental'][:n_baseline_ifgs,], 
-                                                                displacement_r2_combined['incremental'][n_baseline_ifgs:,], t_recalculate=10, verbose=False)
-             
+        #def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_recalculate = 10, verbose=False):
         
-        # need to add day0_date flag to this.  
+        sources_tcs_baseline, residual_tcs_baseline = LiCSAlert(sources_mask_combined, baseline_info["baselines_cumulative"],                                                               # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
+                                                                displacement_r2_combined['incremental'][:n_baseline_ifgs,], displacement_r2_combined['incremental'][n_baseline_ifgs:,],     # baseline ifgs and monitoring ifgs
+                                                                t_recalculate=10, verbose=False)                                                                                            # recalculate lines of best fit every 10 acquisitions
+        
         LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, sources_mask_combined, displacement_r2_combined, n_baseline_ifgs,                                 # creat the LiCSAlert figure
                          baseline_info["baselines_cumulative"], out_folder = f"{volcano_dir}{LiCSAR_last_acq}", day0_date = baseline_info['imdates'][0])                #
-        
-        
         
         sys.stdout = original                                                                                                                       # return stdout to be normal.  
         f.close()                                                                                                                                   # and close the log file.  
@@ -382,21 +382,25 @@ def detect_new_ifgs(folder_ifgs, folder_LiCSAlert):
     
    
     # 0: Get the last acquisition that LiCSAR has been run until.  
-    LiCSAR_ifgs = sorted([f.name for f in os.scandir(folder_ifgs) if f.is_dir()])     # get names of folders produced by LiCSAR (ie the ifgs), and keep chronological.  
+    LiCSAR_ifgs = sorted([f.name for f in os.scandir(folder_ifgs) if f.is_dir()])                # get names of folders produced by LiCSAR (ie the ifgs), and keep chronological.  
     # check for empty directory:
-    if not LiCSAR_ifgs:                                                                 # RR addition?  To check that the list isn't empty
+    if not LiCSAR_ifgs:                                                                          # RR addition?  To check that the list isn't empty
         print(f"No files found in {folder_ifgs} ... ")
-        return False, False
-    LiCSAR_last_acq = LiCSAR_ifgs[-1][-8:]                                                  # this is the last date that LiCSAR has processed up to, in the form YYYYMMDD
+        return False, False                                                                     # return back to parent function (new_ifg_flag, LiCSAR_last_acq)
+    LiCSAR_last_acq = LiCSAR_ifgs[-1][-8:]                                                      # this is the last date that LiCSAR has processed up to, in the form YYYYMMDD
     
     # 1: Get the last date that LiCAlert has been run until
-    LiCSAlert_dates = sorted([f.name for f in os.scandir(folder_LiCSAlert) if f.is_dir()])     # get names of folders produced by LiCSAR (ie the ifgs), and keep chronological.  
-    for unneeded_folder in ['LiCSBAS', 'ICASAR_results']:                                               # these folders get caught in the dates list, but aren't dates so need to be deleted.  
+    LiCSAlert_dates = sorted([f.name for f in os.scandir(folder_LiCSAlert) if f.is_dir()])      # get names of folders produced by LiCSAR (ie the ifgs), and keep chronological.  
+    for unneeded_folder in ['LiCSBAS', 'ICASAR_results']:                                       # these folders get caught in the dates list, but aren't dates so need to be deleted.  
         try:
-            LiCSAlert_dates.remove(unneeded_folder)                                                       # note that the LiCSBAS folder also gets caught by this, and needs removing as it's not a date.  
+            LiCSAlert_dates.remove(unneeded_folder)                                             # note that the LiCSBAS folder also gets caught by this, and needs removing as it's not a date.  
         except:
-            pass                                                                                    # however, on the first ever run it doesn't exist.  
-    LiCSAlert_last_run = LiCSAlert_dates[-1]                                            # folder are YYYYMMDD so last one is last time it was run until.  
+            pass                                                                                # however, on the first ever run these don't exist.  
+    if len(LiCSAlert_dates) == 0:                                                                # if the list is of length 0, LiCSAlert has not been run yet.  
+        new_ifgs_flag = True                                                                    # if LiCSAlert hasn't been run yet but the LiCSAR_ifgs is not empty, there must be new interferograms.  
+        return new_ifgs_flag, LiCSAR_last_acq                                                   # return to parent function.  
+    else:
+        LiCSAlert_last_run = LiCSAlert_dates[-1]                                            #    folder are YYYYMMDD so last one is last time it was run until.  
 
     # 2: Compare 0 (the last LiCSAR acquisition) and 1 (the last date LiCSAlert has been run until)
     if len(LiCSAlert_dates) == 0:                                                                       # if there are no LiCSAlert dates, it hasn't been run for this volcano.  
