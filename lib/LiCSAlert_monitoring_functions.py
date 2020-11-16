@@ -395,12 +395,28 @@ def detect_new_ifgs(folder_ifgs, folder_LiCSAlert):
         try:
             LiCSAlert_dates.remove(unneeded_folder)                                             # note that the LiCSBAS folder also gets caught by this, and needs removing as it's not a date.  
         except:
+<<<<<<< HEAD
             pass                                                                                # however, on the first ever run these don't exist.  
     if len(LiCSAlert_dates) == 0:                                                                # if the list is of length 0, LiCSAlert has not been run yet.  
         new_ifgs_flag = True                                                                    # if LiCSAlert hasn't been run yet but the LiCSAR_ifgs is not empty, there must be new interferograms.  
         return new_ifgs_flag, LiCSAR_last_acq                                                   # return to parent function.  
     else:
         LiCSAlert_last_run = LiCSAlert_dates[-1]                                            #    folder are YYYYMMDD so last one is last time it was run until.  
+=======
+            pass                                                                                    # however, on the first ever run it doesn't exist.  
+    # If there are any LiCSAlert_dates:
+    if LiCSAlert_dates:
+        # Check that LiCSAlert has run succesfully before in each folder
+        dates_incomplete = check_LiCSAlert_products(LiCSAlert_dates)
+        if len(dates_incomplete) > 0:
+            print(f"LiCSBAS products have not be found for {dates_incomplete}")
+        # Remove incomplete dates from LiCSAlert_dates:
+        LiCSAlert_dates = [i for i in LiCSAlert_dates
+                           if i not in dates_incomplete]    
+        # If there are any dates left:
+        if LiCSAlert_dates:
+            LiCSAlert_last_run = LiCSAlert_dates[-1]                                            # folder are YYYYMMDD so last one is last time it was run until.  
+>>>>>>> 4407f2b220743dc7938414469c00737593631120
 
     # 2: Compare 0 (the last LiCSAR acquisition) and 1 (the last date LiCSAlert has been run until)
     if len(LiCSAlert_dates) == 0:                                                                       # if there are no LiCSAlert dates, it hasn't been run for this volcano.  
@@ -414,12 +430,7 @@ def detect_new_ifgs(folder_ifgs, folder_LiCSAlert):
             new_ifgs_flag = True
         else:
             new_ifgs_flag = False
-
-    # 3: Check that LiCSAlert has run succesfully before in each folder
-    dates_incomplete = check_LiCSAlert_products(LiCSAlert_dates)
-    if len(dates_incomplete) > 0:
-        print(f"LiCSBAS products have not be found for {dates_incomplete}")
-        
+       
     return new_ifgs_flag, LiCSAR_last_acq
     
 
