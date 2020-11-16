@@ -612,12 +612,14 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
         
     """
 
-    # import os
     # import sys
+    import os
     import subprocess
     import sys
-    
-    if LiCSBAS_bin not in sys.path:                                                  # check if already on path
+
+    # Get the user's PATH:
+    user_path = os.environ['PATH'].split(':') 
+    if LiCSBAS_bin.rstrip('/') not in user_path:                                                  # check if already on path
         raise Exception(f"Error - the LiCSBAS scripts don't appear to be on your path.  As these functions are called from the command line, "
                         f"the path can't be updated from within Python.  This can usually be rectified by adding a line such as this to your ~/.bashrc file: "
                         f"source <your_LiCSBAS_path>/LiCSBAS/bashrc_LiCSBAS.sh \n The LiCSBAS documentation may also be useful: "
