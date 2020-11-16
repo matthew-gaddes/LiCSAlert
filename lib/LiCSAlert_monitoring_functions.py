@@ -148,9 +148,13 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
         # 6: Run LiCSAlert
         sources_tcs_baseline, residual_tcs_baseline = LiCSAlert(sources_mask_combined, baseline_info["baselines_cumulative"], displacement_r2_combined['incremental'][:n_baseline_ifgs,], 
                                                                 displacement_r2_combined['incremental'][n_baseline_ifgs:,], t_recalculate=10, verbose=False)
-               
-        LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, sources_mask_combined, displacement_r2_combined, n_baseline_ifgs, 
-                         baseline_info["baselines_cumulative"], out_folder = f"{volcano_dir}{LiCSAR_last_acq}")
+             
+        
+        # need to add day0_date flag to this.  
+        LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, sources_mask_combined, displacement_r2_combined, n_baseline_ifgs,                                 # creat the LiCSAlert figure
+                         baseline_info["baselines_cumulative"], out_folder = f"{volcano_dir}{LiCSAR_last_acq}", day0_date = baseline_info['imdates'][0])                #
+        
+        
         
         sys.stdout = original                                                                                                                       # return stdout to be normal.  
         f.close()                                                                                                                                   # and close the log file.  
