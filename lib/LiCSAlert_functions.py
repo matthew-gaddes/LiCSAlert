@@ -691,10 +691,12 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
         baseline_info | dict| imdates : acquisition dates as strings
                               daisy_chain : names of the daisy chain of ifgs, YYYYMMDD_YYYYMMDD
                              baselines : temporal baselines of incremental ifgs
+        geocode_info | dict | lons and lats for each pixel in the ifgs.  
 
     2019/12/03 | MEG | Written
     2020/01/13 | MEG | Update depreciated use of dataset.value to dataset[()] when working with h5py files from LiCSBAS
     2020/02/16 | MEG | Add argument to crop images based on pixel, and return baselines etc
+    2020/11/24 | MEG | Add option to get lons and lats of pixels.  
     """
 
     import h5py as h5
@@ -791,6 +793,18 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
             slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')   
             baselines.append(-1 *(master - slave).days)    
         return baselines
+    
+    def create_lon_lat_meshgrids(corner_lon, corner_lat, post_lon, post_lat, ifg):
+        """ Return a mesh grid of the longitudes and latitues for each pixels.  Not tested!
+        I think Corner is the top left, but not sure this is always the case
+        """
+        ny, nx = ifg.shape
+        x = corner_lon +  (post_lon * np.arange(nx))
+        y = corner_lat +  (post_lat * np.arange(ny))
+        xx, yy = np.meshgrid(x,y)
+        geocode_info = {'lons_mg' : xx,
+                        'lats_mg' : yy}
+        return geocode_info
 
 
     displacement_r3 = {}                                                                                        # here each image will 1 x width x height stacked along first axis
@@ -834,11 +848,14 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
     baseline_info["daisy_chain"] = daisy_chain_from_acquisitions(baseline_info["imdates"])
     baseline_info["baselines"] = baseline_from_names(baseline_info["daisy_chain"])
     baseline_info["baselines_cumulative"] = np.cumsum(baseline_info["baselines"])                                         # cumulative baslines, e.g. 12 24 36 48 etc
+    
+    # get the lons and lats of each pixel in the ifgs
+    geocode_info = create_lon_lat_meshgrids(cumh5['corner_lon'][()], cumh5['corner_lat'][()], cumh5['post_lon'][()], cumh5['post_lat'][()], displacement_r3['incremental'][0,:,:])
 
     if return_r3:
-        return displacement_r3, displacement_r2, baseline_info
+        return displacement_r3, displacement_r2, baseline_info, geocode_info
     else:
-        return displacement_r2, baseline_info
+        return displacement_r2, baseline_info, geocode_info
 
 
 
