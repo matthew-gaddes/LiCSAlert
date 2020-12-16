@@ -13,7 +13,8 @@ Created on Mon Jun 29 14:09:28 2020
 
 
 def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, LiCSAR_frames_dir, LiCSAlert_volcs_dir, n_para=1):
-    """
+    """The main function for running LiCSAlert is monitoring mode.  It was designed to work with LiCSAR interferograms, but could be used with 
+    any product that creates interfegorams that LiCSBAS can use (which is used for the time series calculation.  )
        
     Inputs:
         LiCSBAS_bin | string | Path to folder containing LiCSBAS functions.  
@@ -118,7 +119,7 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
     
         # 5: Deal with changes to the mask of pixels 
         displacement_r2_combined = {}                                                                                                                                               # a new dictionary to save the interferograms sampled to the combined mask in 
-        displacement_r2_combined['incremental'], sources_mask_combined, mask_combined = update_mask_sources_ifgs(mask_sources, sources, 
+        displacement_r2_combined['incremental'], sources_mask_combined, mask_combined = update_mask_sources_ifgs(mask_sources, sources,                                             # comapres the mask for the ICs and the mask for the current ifgs and finds a set of pixels that are present in both
                                                                                                                  displacement_r2['mask'], displacement_r2['incremental'])           # the new mask overwrites the mask in displacement_r2
         displacement_r2_combined['mask'] = mask_combined                                                                                                                            # also put the combined mask in the dictionary
         displacement_r2_combined["incremental_downsampled"], displacement_r2_combined["mask_downsampled"] = downsample_ifgs(displacement_r2_combined["incremental"], displacement_r2_combined["mask"],
@@ -175,135 +176,7 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
         sys.stdout = original                                                                                                                       # return stdout to be normal.  
         f_run_log.close()                                                                                                                                   # and close the log file.  
 
-#%%
 
-
-      
-    # ###################################################                                                                                                                                                
-    # # Determine if new ifgs are present
-    # new_ifg_flag, LiCSAR_last_acq, s1_acquisitions = detect_new_ifgs(f"{LiCSAR_frames_dir}{LiCSAR_settings['frame']}/GEOC/", volcano_dir)       # determine the date that LiCSAR is up to date to.  
-    # if 1 == 1:
-    #     pass
-
-    # else:
-    #     if new_ifg_flag:                                                                                                                # if new interferograms have been detected, the LiCSAlert outputs can be updated
-    #         # -0: determine if this is the first run:
-    #         previous_LiCSAlert_dates = sorted([f.name for f in os.scandir(volcano_dir) if f.is_dir()])                   # get names of folders produced by LiCSAlert , and keep chronological.  
-    #         unused_folders = ['LiCSBAS', 'ICASAR_results']                                                      # these folders also exist, but aren't dates so we need to delete them.  
-    #         for unused_folder in unused_folders:
-    #             try:
-    #                 previous_LiCSAlert_dates.remove(unused_folder)                                                       # loop through trying to delete
-    #             except:
-    #                 pass                                                                                    
-    #         if len(previous_LiCSAlert_dates) == 0:                                                                       # if there are no dates, it must be the first time it's been run
-    #             initialise = True
-    #             print(f"This is the first time that LiCSAlert has been run for {volcano}.  ")
-    #         else:
-    #             initialise = False
-        
-    #         # 1: Create a folder (YYYYMMDD) for the outputs.  
-    #         try:
-    #             print(f'A new LiCSAR acquisition has been detected.  Creating a folder to contain the new LiCSAlert results ({LiCSAR_last_acq})... ', end = '')
-    #             if not os.path.exists(f"{volcano_dir}{LiCSAR_last_acq}"):
-    #                 os.mkdir(f"{volcano_dir}{LiCSAR_last_acq}")                                                                       
-    #             print('Done!')
-    #         except:
-    #             print('Failed!')
-    #             raise Exception('Unable to create folder {LiCSAR_last_acq} - perhaps it already exists?  Exiting...  ')
-              
-               
-    #         # 2: Create a log file.  
-
-            
-            
-    #         # 4: Possibly run ICASAR
-    #         if 'ICASAR_results' in [f.name for f in os.scandir(volcano_dir) if f.is_dir()]:                                                         # if an ICASAR folder already exists, simply open the saved file rather than rerunning.  
-    #             with open(f"{volcano_dir}ICASAR_results/ICASAR_results.pkl", 'rb') as f:
-    #                 sources = pickle.load(f)   
-    #                 mask_sources = pickle.load(f)
-    #                 tcs  = pickle.load(f)    
-    #                 source_residuals = pickle.load(f)    
-    #                 Iq_sorted = pickle.load(f)    
-    #                 n_clusters = pickle.load(f)    
-    #             f.close()                                                                                                                           
-    #         else:
-    #             print(f"A folder of ICASAR results has not been found so running this now... ", end = '')                                       # or if not, run it
-    #             spatial_ICASAR_data = {'mixtures_r2' : displacement_r2['incremental'],
-    #                                    'mask'        : displacement_r2['mask']}
-                
-    #             sources, tcs, residual, Iq, n_clusters, S_all_info, r2_ifg_means  = ICASAR(spatial_data = spatial_ICASAR_data, 
-    #                                                                                        out_folder = f"{volcano_dir}ICASAR_results/", **ICASAR_settings,
-    #                                                                                        ica_verbose = 'short', figures = 'png')
-    #             mask_sources = displacement_r2['mask']                                                                                                          # rename a copy of the mask
-    #             print('Done! ')
-    #         n_baseline_ifgs = tcs.shape[0]                                                                                                                                              # LiCSAlert needs to know how long the baseline stage from ICSASAR was.  
-            
-    #         # 5: Deal with changes to the mask of pixels 
-    #         displacement_r2_combined = {}                                                                                                                                               # a new dictionary to save the interferograms sampled to the combined mask in 
-    #         displacement_r2_combined['incremental'], sources_mask_combined, mask_combined = update_mask_sources_ifgs(mask_sources, sources, 
-    #                                                                                                                  displacement_r2['mask'], displacement_r2['incremental'])           # the new mask overwrites the mask in displacement_r2
-    #         displacement_r2_combined['mask'] = mask_combined                                                                                                                            # also put the combined mask in the dictionary
-    #         displacement_r2_combined["incremental_downsampled"], displacement_r2_combined["mask_downsampled"] = downsample_ifgs(displacement_r2_combined["incremental"], displacement_r2_combined["mask"],
-    #                                                                                                                             LiCSAlert_settings['downsample_plot'], verbose = False)
-    #         if initialise:
-    #             previous_output_dir = None                                                                                                                                  # there is no previous output directory
-    #         else:
-    #             previous_output_dir = f"{volcano_dir}{previous_LiCSAlert_dates[-1]}"
-    #         record_mask_changes(mask_sources, displacement_r2['mask'], mask_combined, LiCSAR_last_acq, f"{volcano_dir}{LiCSAR_last_acq}/", previous_output_dir)             # record any changes in the mask (ie pixels that are now masked due to being incoherent).  
-            
-    #         # 6: Run LiCSAlert
-    #         #def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_recalculate = 10, verbose=False):
-            
-    #         sources_tcs_baseline, residual_tcs_baseline = LiCSAlert(sources_mask_combined, baseline_info["baselines_cumulative"],                                                               # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
-    #                                                                 displacement_r2_combined['incremental'][:n_baseline_ifgs,], displacement_r2_combined['incremental'][n_baseline_ifgs:,],     # baseline ifgs and monitoring ifgs
-    #                                                                 t_recalculate=10, verbose=False)                                                                                            # recalculate lines of best fit every 10 acquisitions
-            
-    #         LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, sources_mask_combined, displacement_r2_combined, n_baseline_ifgs,                                 # creat the LiCSAlert figure
-    #                          baseline_info["baselines_cumulative"], out_folder = f"{volcano_dir}{LiCSAR_last_acq}", day0_date = baseline_info['imdates'][0])                #
-            
-    #         sys.stdout = original                                                                                                                       # return stdout to be normal.  
-    #         f.close()                                                                                                                                   # and close the log file.  
-    #     else:
-    #         print(f'No new LiCSAR acquisitions have been detected for {volcano}, and the LiCSAlert outputs are thought to be up to date.  ')
-        
-    
-    
-            # def check_LiCSAlert_products(dates):
-            # """ Given a list of dates in which LiCSAlert has been run, check that the required outputs are present in each folder.  
-            # Inputs:
-            #     dates | list of strings | dates that LiCSAlert was run until.  In form YYYYMMDD
-            # Returns:
-            #     dates_incomplete | list of strings | dates that a LiCSAlert folder exisits, but it doesn't have all the ouptuts.  
-            # History:
-            #     2020/11/13 | MEG | Written
-            # """
-            # from pathlib import Path
-            # import os
-            # import fnmatch                                                                      # used to compare lists and strings using wildcards
-            
-            
-            # constant_outputs = ['mask_changes_graph.png',                                      # The output files that are expected to exist and never change name
-            #                     'mask_changes.png',
-            #                     'mask_history.pkl']
-            # variable_outputs = ['LiCSAlert_figure_with_*_monitoring_interferograms.png']        # The output files that are expected to exist and change name.  
-    
-            # dates_incomplete = []
-            # for date in dates:
-            #     date_folder = Path(folder_LiCSAlert + date)                                     # join to make a path to the current date folder
-            #     date_files = sorted([f.name for f in os.scandir(date_folder)])                  # get names of the files in this folder (no paths)
-                
-            #     # 1: look for the products that don't change name (ie all but the first)
-            #     all_products_complete = True                                                                            # initiate as True
-            #     for constant_output in constant_outputs:                                                                # loop through the outputs that can't change name
-            #         all_products_complete = (all_products_complete) and (constant_output in date_files)                 # update boolean 
-            #     # 2: look for the product that does change name (the main figure)
-            #     for variable_output in variable_outputs:                                                                # loop through the outputs that can change name
-            #         output = fnmatch.filter(date_files, "LiCSAlert_figure_with_*_monitoring_interferograms.png")        # check for file with wildcard for changing name
-            #         all_products_complete = (all_products_complete) and (len(output) > 0)                               # empty list if file doesn't exit, use to update boolean
-                    
-            #     if all_products_complete is False:
-            #         dates_incomplete.append(date)                                                                       # create a list of dates for which otputs are missing
-            # return dates_incomplete
 #%%
 def LiCSAlert_dates_status(LiCSAlert_required_dates, LiCSAlert_dates, folder_LiCSAlert):
     """ Given a list of dates in which LiCSAlert has been run, check that the required outputs are present in each folder.  

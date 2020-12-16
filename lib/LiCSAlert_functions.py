@@ -112,38 +112,62 @@ def LiCSAlert_batch_mode(displacement_r2, cumulative_baselines, acq_dates,
 
 #%%
 
-def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_recalculate = 10, verbose=False):
+def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_recalculate = 10, verbose=False, out_file=None):
     """ Main LiCSAlert algorithm for a daisy-chain timeseries of interferograms.  
     
     Inputs:
         sources | r2 array | sources (from ICASAR) as row vectors, as per ICA, that can be turned back to interferograms with a rank 2 boolean mask of which pixels are masked and the col_to_ma function.  
-        ifgs_baseline | r2 array | ifgs used in training stage as row vectors
         time_values | r1 array | time values for each point in the time series, commonly (12,24,36) for Sentinel-1 data.  Could also be described as the cumulative temporal baselines.  
+        ifgs_baseline | r2 array | ifgs used in baseline stage as row vectors
+        ifgs_monitoring | r2 array or None | ifgs used in monitoring stage as row vectors
         t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
         verbose | boolean | if True, various information is printed to screen.  
+        out_file | None or string | If not None, name of file that is used to save the LiCSALert outputs.  
         
     Outputs
-        sources_tcs_monitor | list of dicts | list, with item for each time course.  Each dictionary contains the cumualtive time course, the 
-                                                cumulative time courses gradient, the rolling lines of best fit, the standard deviation of the 
-                                                line-to-point distances for the baseline data, and the line-to-point distances.  
+        sources_tcs_monitor | list of dicts | list, with item for each time course.  Each dictionary contains:
+                                                cumualtive_tc | cumulative time course : the cumulative sum of how that IC is used to fit each interferogram.  Column vector.  
+                                                gradient      | gradient of the cumulative time course in the baseline stage.  float.  
+                                                lines         | n_times x n_times.  The lines of best fit used to calculate the line-of-best-fit to point distance at each time.  
+                                                                Each column is a line of best fit, but many values are zeros as the lines of best fit are redrawn periodically.  
+                                                sigma         | sigma (standard deviation) of the line-to-point distances in the baseline stage
+                                                distances     | number of standard deviations each point is from it's line of best fit.  
+                                                t_recalcaulte | integer, how often the lines of best fit are redrawn.  
+                                                                
         residual_tcs_monitor | list of dicts | As per above, but only for the cumulative residual (i.e. list is length 1)
+    
     History:
         2019/12/XX | MEG |  Written from existing script.  
         2020/02/16 | MEG |  Update to work with no monitoring interferograms
+        2020/12/14 | MEG | Improve docs and add option to save outputs.  
     """
-    from LiCSAlert_functions import bss_components_inversion, residual_for_pixels, tcs_baseline, tcs_monitoring  
     import numpy as np
-    
-    # Begin
-    
-    # -1: Check common input errors
-    if sources.shape[1] != ifgs_baseline.shape[1]:
+    import pickle
+    from LiCSAlert_functions import bss_components_inversion, residual_for_pixels, tcs_baseline, tcs_monitoring  
+        
+    # -1: Check common input errors (number of pixels first, number of time second)
+    if sources.shape[1] != ifgs_baseline.shape[1]:                                                                                              # 2nd dimension ([1] bit) is the number of pixels, which we compare.  
         raise Exception(f"The sources don't have the same number of pixels ({sources.shape[1]}) as the interferograms "
                         f"({ifgs_baseline.shape[1]}), so can't be used to fit them.  This is usually due to changing "
                         f"the cropped region but not re-running ICASAR.  Exiting...")
     else:
         pass
     
+    if ifgs_monitoring is None:                                                                                                                     # in the case that there are no monitoring ifgs
+        if time_values.shape[0] != ifgs_baseline.shape[0]:                                                                                          # check the number of times agree
+            raise Exception(f"There appears to be a mismatch between the number of times ({time_values.shape[0]}, set by time_values), "            # error if they don't agree
+                            f"and the number of interferograms ({ifgs_baseline.shape[0]}, in ifgs_baseline).  Exiting...")
+        else:
+            print(f"There are {time_values.shape[0]} times (set by time_values), which agress with the  "                                           # or update user that all ok if they don
+                  f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline.  " )
+    else:
+        if time_values.shape[0] != (ifgs_baseline.shape[0] + ifgs_monitoring.shape[0]):                                                             # check in the case that there are monitoring ifgs
+            raise Exception(f"There appears to be a mismatch between the number of times ({time_values.shape[0]}, set by time_values), "            # error if they don't agree
+                            f"and the number of interferograms ({ifgs_baseline.shape[0]}, in ifgs_baseline; and {ifgs_monitoring.shape[0]}, in ifgs_monitoring)).  Exiting..." )
+        else:
+            print(f"There are {time_values.shape[0]} times (set by time_values), which agress with the  "                                            # or update user that all ok if they do
+                  f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline and {ifgs_monitoring.shape[0]} in ifgs_monitoring.  " )
+        
     
     # 0: Ensure we can still run LiCSAlert in the case that we have no monitoring interferograms (yet)
     n_times_baseline = ifgs_baseline.shape[0]
@@ -156,26 +180,36 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
     print(f"LiCSAlert with {n_times_baseline} baseline interferograms and {n_times_monitoring} monitoring interferogram(s).  ")    
         
     # 1: calculating time courses/distances etc for the baseline data
-    tcs_c, _ = bss_components_inversion(sources, ifgs_baseline, cumulative=True)                         # compute cumulative time courses for baseline interferograms
-    sources_tcs = tcs_baseline(tcs_c, time_values[:n_times_baseline], t_recalculate)                     # lines, gradients, etc for time courses 
+    tcs_c, _ = bss_components_inversion(sources, ifgs_baseline, cumulative=True)                         # compute cumulative time courses for baseline interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources.  )
+    sources_tcs = tcs_baseline(tcs_c, time_values[:n_times_baseline], t_recalculate)                     # lines, gradients, etc for time courses.  Note done by tcs_baseline, which contrasts with tcs_monitoring (which is used lower down)
     _, residual_cb = residual_for_pixels(sources, sources_tcs, ifgs_baseline)                            # get the cumulative residual for the baseline interferograms
     residual_tcs = tcs_baseline(residual_cb, time_values[:n_times_baseline], t_recalculate)              # lines, gradients. etc for residual 
     del tcs_c, residual_cb
     
     #2: Calculate time courses/distances etc for the monitoring data
     if ifgs_monitoring is not None:
-        tcs_c, _ = bss_components_inversion(sources, ifgs_monitoring, cumulative=True)                      # compute cumulative time courses for monitoring interferograms
-        sources_tcs_monitor = tcs_monitoring(tcs_c, sources_tcs, time_values)                               # update lines, gradients, etc for time courses 
+        tcs_c, _ = bss_components_inversion(sources, ifgs_monitoring, cumulative=True)                      # compute cumulative time courses for monitoring interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources.  )
+        sources_tcs_monitor = tcs_monitoring(tcs_c, sources_tcs, time_values)                               # update lines, gradients, etc for time courses  Note done by tcs_monitoring, which contrasts with tcs_baseline (which is used before)
     
         #3: and update the residual stuff                                                                            # which is handled slightly differently as must be recalcualted for baseline and monitoring data
         _, residual_c_bm = residual_for_pixels(sources, sources_tcs_monitor, ifgs_all)                               # get the cumulative residual for baseline and monitoring (hence _cb)    
         residual_tcs_monitor = tcs_monitoring(residual_c_bm, residual_tcs, time_values, residual=True)               # lines, gradients. etc for residual 
     
 
-
     if ifgs_monitoring is None:
+        if out_file is not None:
+            with open(out_file, 'wb') as f:
+                pickle.dump(sources_tcs, f)
+                pickle.dump(residual_tcs, f)
+            f.close()
         return sources_tcs, residual_tcs
+   
     else:
+        if out_file is not None:
+            with open(out_file, 'wb') as f:
+                pickle.dump(sources_tcs_monitor, f)
+                pickle.dump(residual_tcs_monitor, f)
+            f.close()
         return sources_tcs_monitor, residual_tcs_monitor
     
 
@@ -348,7 +382,7 @@ def tcs_monitoring(tcs_c, sources_tcs, time_values, residual=False):
 #%%
 
 def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline_end, time_values, day0_date=None,
-                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, n_days_major_tick = 48, sources_downsampled = False):
+                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, n_days_major_tick = 48):
     """
     The main fucntion to draw the LiCSAlert figure.  
     
@@ -372,8 +406,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ifg_xpos_scaler | int | To be positioned correctly in the x direction, the ifgs that are plotted on the upper row must not be taller
                                 than the axis they lie within.  Increasing this value makes the ifgs smaller, and therefore fit.  
         n_days_major_tick | int | minor tick labels are every 12 days but have no labels.  Major have labels (dates), and can be set.  default is 48.  
-        sources_downsampled | Boolean | If true, sources are assumed to have been downsampled to the same resolution as the ifgs in displacement_r2
-                                        This can slightly speed up the plotting of figures.  
+
      
     Returns:
         figure
@@ -385,6 +418,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         2020/03/08 | MEG | Change plotting of ifgs and sources to awlays be the downsampled ones.  
         2020/04/20 | MEG | Update so that x tick labels are dates and not numbers since time series started.  
         2020/06/23 | MEG | Write documentation for dates argument.  
+        2020/12/15 | MEG | Determine whether sources are downsampled automatically, and also raise exception if the number of pixels doesn't agree.  
     
     """
     import numpy as np
@@ -459,7 +493,18 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ax_tc2.set_ylim(top = 10)                                                       # set so in range 0 to 10
 
    
+    # -1: Check that the sizes of the sources and the interferograms agree.  Raise error if not.  
+    if sources.shape[1] == displacement_r2['incremental'].shape[1]:
+        sources_downsampled = False
+    elif sources.shape[1] == displacement_r2['incremental_downsampled'].shape[1]:
+        sources_downsampled = True
+    else:
+        raise Exception(f"There appears to be a mismatch in the number of pixels contained within the sources ({sources.shape[1]} pixels) "
+                        f"and the interferograms ({displacement_r2['incremental'].shape[1]} pixels) or the downsampled interferograms "
+                        f"({displacement_r2['incremental_downsampled'].shape[1]} pixels).  The sources must have the same number of pixels "
+                        f"as one of these so that their mask can be used to turn the sources from row vectors into images.  ")
         
+    
     # 0: Start, some definitions that shouldn't need changing (ie hard coded variables)
     #line_best_fit_alpha = 0.7
     xtick_label_angle = 315
@@ -511,8 +556,8 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         # plot the time courses for that IC, and the rolling lines of best fit
         ax_tc = plt.Subplot(fig1, grid[row_n+1,1:])
         ax_tc.scatter(time_values, source_tc["cumulative_tc"], c = source_tc["distances"], marker='o', s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, )                        # 
-        for line_arg in line_args:
-            ax_tc.plot(time_values, source_tc["lines"][:,line_arg], c = 'k')
+        for line_arg in line_args:                                                                                          # line args sets which lines of best fit to plot (there is a line of best fit for each point, but it's too busy if we plot them all)
+            ax_tc.plot(time_values, source_tc["lines"][:,line_arg], c = 'k')                                                # ie each column is a line of best fit
     
         # tidy up some stuff on the axes
         ax_tc.axhline(y=0, color='k', alpha=0.3)  
@@ -528,8 +573,8 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     # 5: Plot the residual
     ax_residual = plt.Subplot(fig1, grid[-1,1:])                                                                    # plot on the last row
     ax_residual.scatter(time_values, residual[0]["cumulative_tc"], marker='o', s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, c = residual[0]["distances"])         # 
-    for line_arg in line_args:                                                                                      # plot the rolling line of best fit
-        ax_residual.plot(time_values, residual[0]["lines"][:,line_arg], c = 'k')    
+    for line_arg in line_args:                                                                                      # plot the rolling line of best fit, but not all of them (only those in line_args)
+        ax_residual.plot(time_values, residual[0]["lines"][:,line_arg], c = 'k')                                    # each column is a line of best fit
     ax_residual.axhline(y=0, color='k', alpha=0.3)
     ax_residual.axvline(x = baseline_monitor_change, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
     ax_residual.set_xlim(left = 0, right = t_end)                    # and finaly tidy up axis and labels etc.  
@@ -863,7 +908,8 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
 
 #%%
     
-def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot=0.5, verbose=True):
+def LiCSAlert_preprocessing(displacement_r2, ICASAR_geocode = None,
+                            downsample_run=1.0, downsample_plot=0.5, verbose=True):
     """A function to downsample the data at two scales (one for general working [ie to speed things up], and one 
     for faster plotting.  )  Also, data are mean centered, which is required for ICASAR and LiCSAlert.  
     Note that the downsamples are applied consecutively, so are compound (e.g. if both are 0.5, 
@@ -871,8 +917,12 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
     
     Inputs:
         displacement_r2 | dict | input data stored in a dict as row vectors with a mask
+        ICASAR_geocde | dict or None | If a dict contains lons and lats of each pixel as vectors (ie not rank2 meshgrids), 
+                                        will be downsampled in the same was the ifgs.  
+        
         downsample_run | float | in range [0 1], and used to downsample the "incremental" data
         downsample_plot | float | in range [0 1] and used to downsample the data again for the "incremental_downsample" data
+        verbose | boolean | if True, informatin returned to terminal
         
     Outputs:
         displacement_r2 | dict | input data stored in a dict as row vectors with a mask
@@ -881,6 +931,7 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
                                  that is downsamled further for fast plotting                                 
     History:
         2020/01/13 | MEG | Written
+        2020/12/15 | MEG | Update to also downsample the lons and lats in the ICASAR geocoding information.  
     """
     import numpy as np
     from downsample_ifgs import downsample_ifgs
@@ -891,19 +942,28 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
     
     displacement_r2["incremental"] = displacement_r2["incremental"] - np.mean(displacement_r2["incremental"], axis = 1)[:,np.newaxis]                            # mean centre the data (along rows) 
 
+    # 1: Downsample the ifgs for use in all following functions.  
     if downsample_run != 1.0:                                                                                       # if we're not actually downsampling, skip for speed
         displacement_r2["incremental"], displacement_r2["mask"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
                                                                                   downsample_run, verbose = False)
 
+    # 2: Downsample for plotting
     displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
                                                                                                       downsample_plot, verbose = False)
+
     if verbose:
         print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
               f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
               f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
-
-
-    return displacement_r2
+    
+    # 3: Downsample the geocode info (if provided) in the same was as step 1:
+    if ICASAR_geocode is not None:
+        ifg1 = col_to_ma(displacement_r2['incremental'][0,:], pixel_mask = displacement_r2['mask'])                     # get the size of a new ifg
+        ICASAR_geocode['lons'] = np.linspace(ICASAR_geocode['lons'][0], ICASAR_geocode['lons'][-1], ifg1.shape[1])      # remake the correct number of lons (to suit the number of pixels in the new ifgs.)
+        ICASAR_geocode['lats'] = np.linspace(ICASAR_geocode['lats'][0], ICASAR_geocode['lats'][-1], ifg1.shape[0])      # as above, for lats
+        return displacement_r2, ICASAR_geocode
+    else:
+        return displacement_r2
 
 
 
