@@ -879,6 +879,7 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
     mask_coh_water = np.isnan(cumulative)                                                                       # get where masked
     displacement_r3["cumulative"] = ma.array(cumulative, mask=mask_coh_water)                                   # rank 3 masked array of the cumulative displacement
     displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], axis = 0)                           # displacement between each acquisition - ie incremental
+    displacement_r3["incremental"].mask = ma.getmaskarray(displacement_r3["incremental"])                       # make sure mask maintains same shape as data
     n_im, length, width = displacement_r3["cumulative"].shape                                   
 
     if figures:                                                 

@@ -91,7 +91,10 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
                                   LiCSBAS_bin, LiCSBAS_settings['lon_lat'], n_para=n_para)                                                             # Logfile is sent to the directory for the current date
             displacement_r2, temporal_baselines, geocode_info = LiCSBAS_to_LiCSAlert(f"{LiCSBAS_dir}TS_GEOCmldir/cum.h5", figures=False)                                  # open the h5 file produced by LiCSBAS
             displacement_r2 = LiCSAlert_preprocessing(displacement_r2, LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])    # mean centre, and crate downsampled versions (either for general use to make                                                                                                                            # things faster), or just for plotting (to make LiCSAlert figures faster)                         
-            
+        # Check that the baseline_end date is not before the first image date:
+        if int(LiCSAlert_settings['baseline_end']) < int(temporal_baselines['imdates'][0]):
+            raise Exception(f"baseline_end date ({LiCSAlert_settings['baseline_end']}) is before first image data ({temporal_baselines['imdates'][0]}) ... Exiting")
+
     
         # 3: If required, run ICASAR
         if LiCSAlert_status['run_ICASAR']:
@@ -136,7 +139,13 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
         print(f"LiCSAlert will be run for the following dates: {processing_dates}")
         for processing_date in processing_dates:
             print(f"Running LiCSAlert for {processing_date}")
-            ifg_n = temporal_baselines['imdates'].index(processing_date)
+            # Check for this date in LiCSBAS data:
+            try:
+                ifg_n = temporal_baselines['imdates'].index(processing_date)
+            except ValueError:
+                # If no data for this date, it was probably discarded by LiCSBAS, so move on:
+                print(f"No LiCSBAS data for {processing_date}, was probably discarded")
+                continue
             
             # 6a: Create a folder (YYYYMMDD) for the outputs.  
             if not os.path.exists(f"{volcano_dir}{processing_date}"):                                   # True if folder exists, so enter if statement if doesn't exist (due to not)
