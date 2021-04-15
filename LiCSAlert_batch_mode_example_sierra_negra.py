@@ -73,10 +73,10 @@ ICASAR_settings = {"n_comp" : 6,                                    # number of 
                     "bootstrapping_param" : (200, 0),               # number of runs with bootstrapping, number of runs without bootstrapping
                     "hdbscan_param" : (35, 10),                     # (min_cluster_size, min_samples)
                     "tsne_param" : (30, 12),                        # (perplexity, early_exaggeration)
-                    "ica_param"  : (1e-2, 150),                      # (tolerance, max iterations)
-                    "ge_kmz"     :  True,                            # make a google earth .kmz of the ICs
-                    "figures"    : "png"}                       # if png, saved in a folder as .png.  If window, open as interactive matplotlib figures, if window+png then both.  
-
+                    "ica_param"  : (1e-2, 150),                     # (tolerance, max iterations)
+                    "ge_kmz"     :  True,                           # make a google earth .kmz of the ICs
+                    "figures"    : "png"}                           # if png, saved in a folder as .png.  If window, open as interactive matplotlib figures, if window+png then both.  
+  
 
 LiCSAlert_batch_mode(displacement_r2_copy, cumulative_baselines, acq_dates,
                      ICASAR_settings = ICASAR_settings, **LiCSAlert_settings,ICASAR_path = ICASAR_path)

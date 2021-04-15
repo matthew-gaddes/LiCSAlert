@@ -14,7 +14,8 @@ def LiCSAlert_batch_mode(displacement_r2, cumulative_baselines, acq_dates,
     updated, use LiCSAlert_monitoring_mode.  
     
     Inputs:
-        displacement_r2  | dict |  contains the incremental displacements in 'displacement_r2' as row vectors, and a mask ('mask') to conver these into masked arrays
+        displacement_r2  | dict |  contains the incremental displacements in 'displacement_r2' as row vectors, and a mask ('mask') to convert these into masked arrays
+                                   May also contain the lons and lats of each pixel in the interferograms (ie as rank 2 tensors)
         cumulative_baselines | rank 1 array | cumulative sum of the temporal baselines.  E.g. if acquisitions every 12 days, the cumulative baselines would be 12, 24, 36 etc., 
         acq_dates | list of strings | date of acquisitions in format YYYYMMDD, as a list.  Should be one longer than the number of ifgs as rows in displacement_r2
         n_baseline_end | int | the interferogram number which is the last in the baseline stage.  
@@ -28,7 +29,13 @@ def LiCSAlert_batch_mode(displacement_r2, cumulative_baselines, acq_dates,
     Returns:
         out_folder with various items.  
     History:
-        2020/09/16 | MEG | Created from various scripts.           
+        2020/09/16 | MEG | Created from various scripts.        
+        
+    Stack overview:
+        LiCSAlert_preprocessing
+        ICASAR
+        LiCSAlert
+        LiCSAlert_figure
     """
     import numpy as np
     from pathlib import Path
@@ -97,9 +104,9 @@ def LiCSAlert_batch_mode(displacement_r2, cumulative_baselines, acq_dates,
             sources_tcs_monitor, residual_monitor = LiCSAlert(sources, cumulative_baselines_current, displacement_r2_current["incremental"][:n_baseline_end],               # do LiCSAlert
                                                                                             displacement_r2_current["incremental"][n_baseline_end:], t_recalculate=10)    
         
-            LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources_downsampled, displacement_r2_current, n_baseline_end, 
+            LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2_current, n_baseline_end, 
                               cumulative_baselines_current, time_value_end=cumulative_baselines[-1], out_folder = out_folder,
-                              day0_date = acq_dates[0], sources_downsampled = True)                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
+                              day0_date = acq_dates[0])                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
 
     else:
         sources_tcs_monitor, residual_monitor = LiCSAlert(sources, cumulative_baselines, displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
@@ -107,7 +114,7 @@ def LiCSAlert_batch_mode(displacement_r2, cumulative_baselines, acq_dates,
         
         LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
                           cumulative_baselines, time_value_end=cumulative_baselines[-1], day0_date = acq_dates[0], 
-                          out_folder = out_folder, sources_downsampled = False)                 
+                          out_folder = out_folder)                 
  
 
 #%%
@@ -126,13 +133,13 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
         
     Outputs
         sources_tcs_monitor | list of dicts | list, with item for each time course.  Each dictionary contains:
-                                                cumualtive_tc | cumulative time course : the cumulative sum of how that IC is used to fit each interferogram.  Column vector.  
-                                                gradient      | gradient of the cumulative time course in the baseline stage.  float.  
-                                                lines         | n_times x n_times.  The lines of best fit used to calculate the line-of-best-fit to point distance at each time.  
-                                                                Each column is a line of best fit, but many values are zeros as the lines of best fit are redrawn periodically.  
-                                                sigma         | sigma (standard deviation) of the line-to-point distances in the baseline stage
-                                                distances     | number of standard deviations each point is from it's line of best fit.  
-                                                t_recalcaulte | integer, how often the lines of best fit are redrawn.  
+        cumualtive_tc | cumulative time course : the cumulative sum of how that IC is used to fit each interferogram.  Column vector.  
+        gradient      | gradient of the cumulative time course in the baseline stage.  float.  
+        lines         | n_times x n_times.  The lines of best fit used to calculate the line-of-best-fit to point distance at each time.  
+                        Each column is a line of best fit, but many values are zeros as the lines of best fit are redrawn periodically.  
+        sigma         | sigma (standard deviation) of the line-to-point distances in the baseline stage
+        distances     | number of standard deviations each point is from it's line of best fit.  
+        t_recalcaulte | integer, how often the lines of best fit are redrawn.  
                                                                 
         residual_tcs_monitor | list of dicts | As per above, but only for the cumulative residual (i.e. list is length 1)
     
@@ -732,16 +739,18 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
 
     Outputs:
         displacment_r3 | dict | Keys: cumulative, incremental.  Stored as masked arrays.  Mask should be consistent through time/interferograms
+                                Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
         displacment_r2 | dict | Keys: cumulative, incremental, mask.  Stored as row vectors in arrays.  
+                                Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
         baseline_info | dict| imdates : acquisition dates as strings
                               daisy_chain : names of the daisy chain of ifgs, YYYYMMDD_YYYYMMDD
-                             baselines : temporal baselines of incremental ifgs
-        geocode_info | dict | lons and lats for each pixel in the ifgs.  
+                              baselines : temporal baselines of incremental ifgs
 
     2019/12/03 | MEG | Written
     2020/01/13 | MEG | Update depreciated use of dataset.value to dataset[()] when working with h5py files from LiCSBAS
     2020/02/16 | MEG | Add argument to crop images based on pixel, and return baselines etc
     2020/11/24 | MEG | Add option to get lons and lats of pixels.  
+    2021/04/15 | MEG | Update lons and lats to be packaged into displacement_r2 and displacement_r3
     """
 
     import h5py as h5
@@ -896,11 +905,15 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
     
     # get the lons and lats of each pixel in the ifgs
     geocode_info = create_lon_lat_meshgrids(cumh5['corner_lon'][()], cumh5['corner_lat'][()], cumh5['post_lon'][()], cumh5['post_lat'][()], displacement_r3['incremental'][0,:,:])
+    displacement_r2['lons'] = geocode_info['lons_mg']                                                                       # add to the displacement dict
+    displacement_r2['lats'] = geocode_info['lats_mg']
+    displacement_r3['lons'] = geocode_info['lons_mg']                                                                       # add to the displacement dict (rank 3 one)
+    displacement_r3['lats'] = geocode_info['lats_mg']
 
     if return_r3:
-        return displacement_r3, displacement_r2, baseline_info, geocode_info
+        return displacement_r3, displacement_r2, baseline_info
     else:
-        return displacement_r2, baseline_info, geocode_info
+        return displacement_r2, baseline_info
 
 
 
@@ -908,18 +921,15 @@ def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None,
 
 #%%
     
-def LiCSAlert_preprocessing(displacement_r2, ICASAR_geocode = None,
-                            downsample_run=1.0, downsample_plot=0.5, verbose=True):
+def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot=0.5, verbose=True):
     """A function to downsample the data at two scales (one for general working [ie to speed things up], and one 
     for faster plotting.  )  Also, data are mean centered, which is required for ICASAR and LiCSAlert.  
     Note that the downsamples are applied consecutively, so are compound (e.g. if both are 0.5, 
     the plotted data will be at 0.25 the resolution of the original data).  
     
     Inputs:
-        displacement_r2 | dict | input data stored in a dict as row vectors with a mask
-        ICASAR_geocde | dict or None | If a dict contains lons and lats of each pixel as vectors (ie not rank2 meshgrids), 
-                                        will be downsampled in the same was the ifgs.  
-        
+        displacement_r2 | dict | input data stored in a dict as row vectors with a mask    
+                                 Also lons and lats as rank 2 arrays.  
         downsample_run | float | in range [0 1], and used to downsample the "incremental" data
         downsample_plot | float | in range [0 1] and used to downsample the data again for the "incremental_downsample" data
         verbose | boolean | if True, informatin returned to terminal
@@ -932,14 +942,16 @@ def LiCSAlert_preprocessing(displacement_r2, ICASAR_geocode = None,
     History:
         2020/01/13 | MEG | Written
         2020/12/15 | MEG | Update to also downsample the lons and lats in the ICASAR geocoding information.  
+        2021_04_14 | MEG | Update so handle rank2 arrays of lons and lats properly.  
     """
     import numpy as np
     from downsample_ifgs import downsample_ifgs
 
     
-    n_pixs_start = displacement_r2["incremental"].shape[1]                                          # as ifgs are row vectors
-    shape_start = displacement_r2["mask"].shape
+    n_pixs_start = displacement_r2["incremental"].shape[1]                                          # as ifgs are row vectors, this is the number of pixels we start with
+    shape_start = displacement_r2["mask"].shape                                                     # and the shape of the ifgs (ny, nx)
     
+    # 0: Mean centre the interferograms (ie. break any connection to a reference pixel/region that the interferogram was set to)
     displacement_r2["incremental"] = displacement_r2["incremental"] - np.mean(displacement_r2["incremental"], axis = 1)[:,np.newaxis]                            # mean centre the data (along rows) 
 
     # 1: Downsample the ifgs for use in all following functions.  
@@ -951,19 +963,20 @@ def LiCSAlert_preprocessing(displacement_r2, ICASAR_geocode = None,
     displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
                                                                                                       downsample_plot, verbose = False)
 
-    if verbose:
-        print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
-              f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
-              f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
-    
     # 3: Downsample the geocode info (if provided) in the same was as step 1:
-    if ICASAR_geocode is not None:
-        ifg1 = col_to_ma(displacement_r2['incremental'][0,:], pixel_mask = displacement_r2['mask'])                     # get the size of a new ifg
-        ICASAR_geocode['lons'] = np.linspace(ICASAR_geocode['lons'][0], ICASAR_geocode['lons'][-1], ifg1.shape[1])      # remake the correct number of lons (to suit the number of pixels in the new ifgs.)
-        ICASAR_geocode['lats'] = np.linspace(ICASAR_geocode['lats'][0], ICASAR_geocode['lats'][-1], ifg1.shape[0])      # as above, for lats
-        return displacement_r2, ICASAR_geocode
-    else:
-        return displacement_r2
+    if ('lons' in displacement_r2) and ('lats' in displacement_r2):                                         # check if we have lon lat data as not alway strictly necessary.  
+        ifg1 = col_to_ma(displacement_r2['incremental'][0,:], pixel_mask = displacement_r2['mask'])                     # get the size of a new ifg (ie convert the row vector to be a rank 2 masked array.  )
+        lons = np.linspace(displacement_r2['lons'][0,0], displacement_r2['lons'][-1,0], ifg1.shape[1])      # remake the correct number of lons (to suit the number of pixels in the new ifgs, first as 1d
+        displacement_r2['lons'] = np.repeat(lons[np.newaxis, :], ifg1.shape[0], axis = 0)                                          # then as 2D
+        lats = np.linspace(displacement_r2['lats'][-1,0], displacement_r2['lats'][0,0], ifg1.shape[0])      # remake the correct number of lons (to suit the number of pixels in the new ifgs, first as 1d
+        displacement_r2['lats'] = np.repeat(lats[:, np.newaxis], ifg1.shape[1], axis = 1)                                          # then as 2D
+        
+
+    print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
+          f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
+          f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
+    
+    return displacement_r2
 
 
 
