@@ -7,22 +7,28 @@ A selection of functions used by LiCSAlert
 
 #%%
 
-def LiCSAlert_batch_mode(displacement_r2, cumulative_baselines, acq_dates, 
-                         n_baseline_end, out_folder, ICASAR_settings, run_ICASAR = True, ICASAR_path = 'ICASAR/',
+def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder, 
+                         ICASAR_settings, run_ICASAR = True, ICASAR_path = None, vudl_net_21_path = None,
                          intermediate_figures = False, downsample_run = 1.0, downsample_plot = 0.5):
     """ A function to run the LiCSAlert algorithm on a preprocssed time series.  To run on a time series that is being 
     updated, use LiCSAlert_monitoring_mode.  
     
     Inputs:
-        displacement_r2  | dict |  contains the incremental displacements in 'displacement_r2' as row vectors, and a mask ('mask') to convert these into masked arrays
-                                   May also contain the lons and lats of each pixel in the interferograms (ie as rank 2 tensors)
-        cumulative_baselines | rank 1 array | cumulative sum of the temporal baselines.  E.g. if acquisitions every 12 days, the cumulative baselines would be 12, 24, 36 etc., 
-        acq_dates | list of strings | date of acquisitions in format YYYYMMDD, as a list.  Should be one longer than the number of ifgs as rows in displacement_r2
+        displacement_r2  | dict | Required: 
+                                     incremental | rank 2 array | row vectors of the ifgs, incremental (ie not cumulative)
+                                     mask  | rank 2 array | mask to conver the row vectors to rank 2 masked arrays.  
+                                     ifg_dates | list of strings | YYYYMMDD_YYYYMMDD of interferograms.  
+                                  Optional:
+                                     lons | rank 2 array | lons of each pixel in the image.  Changed to rank 2 in version 2.0, from rank 1 in version 1.0  .  If supplied, ICs will be geocoded as kmz.  
+                                     lats | rank 2 array | lats of each pixel in the image. Changed to rank 2 in version 2.0, from rank 1 in version 1.0
+                                     dem | rank 2 array | height in metres of each pixel in the image.  If supplied, IC vs dem plots will be produced.  
+                                                           
         n_baseline_end | int | the interferogram number which is the last in the baseline stage.  
         out_folder | path or string | name of folder in which to save ouputs.  
         ICASAR_settings | dict | contains all the settings for the ICASAR algorithm.  See ICASAR for details.  
         run_ICASAR | boolean | If false, the resutls from a previous run of ICASAR are used, if True it is run again (which can be time consuming)
-        ICASAR_path | path or string | location of ICASAR package.  
+        ICASAR_path | path or string | location of ICASAR package.  Note, important to remember the /lib/ part at teh end.  
+        vudl_net_21_path | path or string | location of Keras model for classification and localisation of deformation in a single ifg.  
         intermediate_figures | boolean | if True, figures for all time steps in the monitoring phase are created (which is slow).  If False, only the last figure is created.  
         downsample_run | float | data can be downsampled to speed things up
         downsample_plot | float | and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
@@ -43,44 +49,75 @@ def LiCSAlert_batch_mode(displacement_r2, cumulative_baselines, acq_dates,
     import os
     import sys
     import pickle
+    import shutil
     
     from LiCSAlert_functions import LiCSAlert, LiCSAlert_figure, save_pickle, shorten_LiCSAlert_data, LiCSAlert_preprocessing
     from downsample_ifgs import downsample_ifgs
-    #from LiCSAlert_aux_functions import col_to_ma
+    from LiCSAlert_aux_functions import LiCSAR_ifgs_to_s1_acquisitions, baselines_from_ifgnames
     
-    sys.path.append(str(ICASAR_path))                  # location of ICASAR functions
-    from ICASAR_functions import ICASAR
-    
-    # 0: Sort out the ouput folder
-    out_folder = Path(f"LiCSAlert_{out_folder}")
-    if run_ICASAR:                                                                                                            # if we're running ICASAR, assume no output folder and make a new one.  
+    # 0: Check some inputs and raise Exceptions if they're not suitable.  
+    if ICASAR_path is None:
+        raise Exception(f"LiCSAlert requires the path to the local copy of the ICASAR package, which can be downloaded from https://github.com/matthew-gaddes/ICASAR  Exiting...."  )
+    else:
         try:
-            print(f"Trying to create a new outputs folder ({out_folder})... ", end = '')                                    # try to make a new folder
-            os.mkdir(out_folder)                                                                       
-            print('Done')
+            if str(ICASAR_path)[-3:] != 'lib':
+                print("Warning: the last part of the ICASAR path is not 'lib', which is unusual as the required functions are stored in ICASAR's 'lib' subdirectory.  Trying to continue.  ")
         except:
-            raise Exception(f"Failed.  Perhaps the folder ({out_folder}) already exists?")
-    else:
-        print('Deleting all the LiCSAlert outputs, but leaving the ICASAR products.  ', end = '')
-        files = glob.glob(str(out_folder / 'LiCSAlert*'))
-        for f in files:
-            os.remove(f)
-        print("Done.  ")
-        
-            
-    # 1: Either run ICASAR to find latent spatial sources in baseline data, or load the results from a previous run.  
-    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, downsample_run, downsample_plot)                     # mean centre and downsize the data
+            pass
+        sys.path.append(str(ICASAR_path))                  # location of ICASAR functions
+        from ICASAR_functions import ICASAR
     
-    if run_ICASAR:
-        baseline_data = {'mixtures_r2' : displacement_r2['incremental'][:n_baseline_end],                                                                       # prepare a dictionary of data for ICASAR
-                         'mask'        : displacement_r2['mask']}
-        sources, tcs, residual, Iq, n_clusters, S_all_info, means = ICASAR(spatial_data = baseline_data, 
-                                                                           lons = displacement_r2['lons'], lats = displacement_r2['lats'],                          # run ICASAR to recover the latent sources from the baseline stage
-                                                                           out_folder = str(out_folder / "ICASAR_outputs")+'/', **ICASAR_settings)           
-        sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                                       # downsample for plots
+    if 'out_folder' in ICASAR_settings:
+        print(f"An 'out_folder' can't be set when running ICASAR within LiCSAlert.  Deleting this item from the 'ICASAR_settings' dictionary and continuing.  ")
+        del ICASAR_settings['out_folder']
+        
+    for required_to_be_r2 in ['lons', 'lats']:                                                                          # check that these aren't rank 1 (should be rank 2 - ie a value for every pixel)
+        if required_to_be_r2 in displacement_r2:                                                                        # though we also need to check they are 
+            if len(displacement_r2[required_to_be_r2].shape) != 2:
+                raise Exception(f"{required_to_be_r2} is not rank 2 (i.e. a value for every pixel) so exiting.   ")
+        
+   
+    # 1: Sort out the ouput folder, which depends on if ICASAR will be run.  
+    out_folder = Path(out_folder)
+    if os.path.exists(out_folder):
+        print(f"The out_folder ({out_folder}) already exists. ")
+        if run_ICASAR:
+            print(f"As run_ICASAR is selected, deleting all the LiCSAlert outputs but leaving the ICASAR products.  ")
+            shutil.rmtree(out_folder)
+            os.mkdir(out_folder)
+        else:
+            print(f"As run_ICASAR is False, deleting all the LiCSAlert outputs, but leaving the ICASAR products.  ")
+            files = glob.glob(str(out_folder / 'LiCSAlert*'))                                                           # get all the files in the folder that have LiCSALert in the name (ie not the ICASAR directory)
+            for f in files:
+                try:
+                    os.remove(f)                                    # try to delete assuming it's a file
+                except:
+                    shutil.rmtree(f)                                # if that fails, assume it's a directory and try to delete a different way.  
+
+    else:
+        os.mkdir(out_folder)                                                                       
+
+    # 2: Prepare a dictionary to store information about the temporal information.  
+    tbaseline_info = {'acq_dates'            : LiCSAR_ifgs_to_s1_acquisitions(displacement_r2['ifg_dates']),                    # get the unique acquisition (epoch) dates
+                      'baselines_cumulative' : np.cumsum(baselines_from_ifgnames(displacement_r2['ifg_dates']))}                # and the cumulative temporal baselines (in days)
+           
+    # 3: Either run ICASAR to find latent spatial sources in baseline data, or load the results from a previous run.  
+    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, downsample_run, downsample_plot)                         # mean centre and downsize the data
+    
+    if run_ICASAR:                                                                                                      # set to True if we need to run ICASAR
+        baseline_data = {'mixtures_r2' : displacement_r2['incremental'][:n_baseline_end],                               # prepare a dictionary of data for ICASAR
+                         'mask'        : displacement_r2['mask'],
+                         'ifg_dates'   : displacement_r2['ifg_dates'][:n_baseline_end]}                                 # ifg dates are stored in displacement_r2,    
+
+        for optional_data in ['dem', 'lons', 'lats']:                                                                  # these are not guaranteed to be supplied to LiCSAlert, to check if they have been, loop through each one.  
+            if optional_data in displacement_r2:                                                                       # if it's in the main displacement_r2 dict
+                baseline_data[optional_data] = displacement_r2[optional_data]                                          # add it to the baseline data.  
+        
+        sources, tcs, residual, Iq, n_clusters, S_all_info, means = ICASAR(spatial_data = baseline_data, out_folder = out_folder/"ICASAR_outputs", **ICASAR_settings)       # run ICASAR to recover the latent sources from the baseline stage
+        sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                                                                         # downsample for recovered sources for plots
     else:
         try:
-            with open(out_folder / "ICASAR_outputs/ICASAR_results.pkl", 'rb') as f:
+            with open(str(out_folder / "ICASAR_outputs/ICASAR_results.pkl"), 'rb') as f:
                 sources = pickle.load(f)    
                 tcs  = pickle.load(f)    
                 source_residuals = pickle.load(f)    
@@ -90,31 +127,42 @@ def LiCSAlert_batch_mode(displacement_r2, cumulative_baselines, acq_dates,
             sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                     # downsample the sources as this can speed up plotting
         except:
             raise Exception(f"Unable to open the results of ICASAR (which are usually stored in 'ICASAR_results') "
-                            f"Try re-running and enabling ICASAR with 'run_ICASAR' set to 'True'.  ")
+                            f"Try re-running and enabling ICASAR with 'run_ICASAR' set to 'True' in the 'LiCSAlert_settings' dictionary.  ")
     
-    
-    # 2: Do LiCSAlert, plotting figures for all time steps, or just for the final one.  
-    if intermediate_figures:
+
+    # 4: Possible use the VUDL-net-21 model to detect and locate deformation in the ICs.      
+    if vudl_net_21_path != None:
+        print(f"Using VUDL-Net-21 to determine which ICs are deformation and which are atmosphere.  ")
+        from LiCSAlert_neural_network_functions import sources_though_cnn                                                 # don't import if we don't need to as this needs Keras and may not be installed
+        sources_labels = {'defo_sources' : ['Dyke', 'Sill/Point', 'Atmosphere' ]}                                                                          # one hot encodings to labels for Vudl-net}
+        sources_labels['Y_class'], sources_labels['Y_loc'] = sources_though_cnn(sources, displacement_r2['mask'], vudl_net_21_path)
+    else:
+        sources_labels = None
+        
+
+    # 5a: Either do LiCSAlert and the LiCSAlert figure for all time steps, 
+    if intermediate_figures:                                                                                                # controls if we enter the intermediate ifgs loop.  
         for ifg_n in np.arange(n_baseline_end+1, displacement_r2["incremental"].shape[0]+1):
             
-            displacement_r2_current = shorten_LiCSAlert_data(displacement_r2, n_end=ifg_n)                        # get the ifgs available for this loop (ie one more is added each time the loop progresses)
-            cumulative_baselines_current = cumulative_baselines[:ifg_n]                                                             # also get current time values
+            displacement_r2_current = shorten_LiCSAlert_data(displacement_r2, n_end=ifg_n)                                  # get the ifgs available for this loop (ie one more is added each time the loop progresses)
+            baselines_cumulative_current = tbaseline_info['baselines_cumulative'][:ifg_n]                                   # also get current time values
         
         
-            sources_tcs_monitor, residual_monitor = LiCSAlert(sources, cumulative_baselines_current, displacement_r2_current["incremental"][:n_baseline_end],               # do LiCSAlert
+            sources_tcs_monitor, residual_monitor = LiCSAlert(sources, baselines_cumulative_current, displacement_r2_current["incremental"][:n_baseline_end],               # do LiCSAlert
                                                                                             displacement_r2_current["incremental"][n_baseline_end:], t_recalculate=10)    
         
             LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2_current, n_baseline_end, 
-                              cumulative_baselines_current, time_value_end=cumulative_baselines[-1], out_folder = out_folder,
-                              day0_date = acq_dates[0])                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
+                              baselines_cumulative_current, time_value_end=tbaseline_info['baselines_cumulative'][-1], out_folder = out_folder,
+                              day0_date = tbaseline_info['acq_dates'][0], sources_labels = sources_labels)                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
 
+    # 5b: Or just do LiCSAlet and the LiCSAlert figure for the final time step (much quicker, but only one LiCSAlert figure is created)
     else:
-        sources_tcs_monitor, residual_monitor = LiCSAlert(sources, cumulative_baselines, displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
+        sources_tcs_monitor, residual_monitor = LiCSAlert(sources, tbaseline_info['baselines_cumulative'], displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
                                                           displacement_r2["incremental"][n_baseline_end:], t_recalculate=10)    
         
         LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
-                          cumulative_baselines, time_value_end=cumulative_baselines[-1], day0_date = acq_dates[0], 
-                          out_folder = out_folder)                 
+                          tbaseline_info['baselines_cumulative'], time_value_end=tbaseline_info['baselines_cumulative'][-1], day0_date = tbaseline_info['acq_dates'][0], 
+                          out_folder = out_folder, sources_labels = sources_labels)                 
  
 
 #%%
@@ -389,7 +437,7 @@ def tcs_monitoring(tcs_c, sources_tcs, time_values, residual=False):
 #%%
 
 def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline_end, time_values, day0_date=None,
-                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, n_days_major_tick = 48):
+                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, n_days_major_tick = 48, sources_labels = None):
     """
     The main fucntion to draw the LiCSAlert figure.  
     
@@ -413,8 +461,11 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ifg_xpos_scaler | int | To be positioned correctly in the x direction, the ifgs that are plotted on the upper row must not be taller
                                 than the axis they lie within.  Increasing this value makes the ifgs smaller, and therefore fit.  
         n_days_major_tick | int | minor tick labels are every 12 days but have no labels.  Major have labels (dates), and can be set.  default is 48.  
-
-     
+        sources_labels | dict |  keys and variables:
+                                    'defo_sources' : ['dyke', 'sill', 'no_def' ]
+                                    'Y_class' : n_sources x 3, labels as one hot encoding.  
+                                    'Y_loc' : n_sources x 4, location of deformation.  [0,0,0,0] if none present.  
+        
     Returns:
         figure
         
@@ -429,11 +480,13 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     
     """
     import numpy as np
+    import matplotlib
     import matplotlib.pyplot as plt
     import matplotlib.gridspec as gridspec
     from matplotlib import ticker
     import matplotlib as mpl
     from matplotlib.ticker import MultipleLocator
+    plt.switch_backend('Agg')                                                           #  works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
     import datetime as dt 
     # MEG imports
     #from small_plot_functions import col_to_ma, make_colormap 
@@ -500,6 +553,8 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ax_tc2.set_ylim(top = 10)                                                       # set so in range 0 to 10
 
    
+    # -2: 
+
     # -1: Check that the sizes of the sources and the interferograms agree.  Raise error if not.  
     if sources.shape[1] == displacement_r2['incremental'].shape[1]:
         sources_downsampled = False
@@ -550,6 +605,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     except:
         baseline_monitor_change = np.mean([time_values[n_baseline_end-1], time_values[n_baseline_end-1] + 12])                              # But the above won't work if there are no monitoring ifgs, so just guess next ifg will be after 12 days and draw line as if that were true (ie 6 days after last point)
     for row_n, source_tc in enumerate(sources_tcs):
+        # 4a: Plot the source
         ax_source = plt.Subplot(fig1, grid[row_n+1,0])                                                                                      # create an axes for the IC (spatial source)
         if sources_downsampled:
             im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   # plot the downsampled source
@@ -557,16 +613,37 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
             im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
         ax_source.set_xticks([])
         ax_source.set_yticks([])
-        ax_source.set_ylabel(f"IC {row_n+1}")
+        ax_source.set_ylabel(f"IC {row_n}")
+        
+        # 4b: Possible annotate it with VUDL-net-21 output
+        ######################## start WIP
+        if sources_labels != None:
+            if row_n == 0:
+                ax_source.set_title('VUDL-Net-21\nprediction', fontsize = 8, color = 'tab:orange')
+            from LiCSAlert_neural_network_functions import centre_to_box, add_square_plot
+            #start_stop_locs_pred = centre_to_box(locs_predicted[plot_args[n_plot]])                                         # covert from centre width notation to start stop notation, # [x_start, x_stop, Y_start, Y_stop]
+            start_stop_locs = centre_to_box(sources_labels['Y_loc'][row_n])                                         # covert from centre width notation to start stop notation, # [x_start, x_stop, Y_start, Y_stop]
+            add_square_plot(start_stop_locs[0], start_stop_locs[1], 
+                            start_stop_locs[2], start_stop_locs[3], ax_source, colour='tab:orange')                           # box around deformation
+        
+            ax_orange = ax_source.twinx()
+            ax_orange.set_ylabel(f"{sources_labels['defo_sources'][np.argmax(sources_labels['Y_class'][row_n,])]}", fontsize = 8, color = 'tab:orange')
+            #ax_orange.yaxis.label.set_color("tab:orange")
+            ax_orange.set_yticks([])
+            
         fig1.add_subplot(ax_source)
         
-        # plot the time courses for that IC, and the rolling lines of best fit
+        
+        ######################## end WIP
+        
+        
+        # 4c: plot the time courses for that IC, and the rolling lines of best fit
         ax_tc = plt.Subplot(fig1, grid[row_n+1,1:])
         ax_tc.scatter(time_values, source_tc["cumulative_tc"], c = source_tc["distances"], marker='o', s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, )                        # 
         for line_arg in line_args:                                                                                          # line args sets which lines of best fit to plot (there is a line of best fit for each point, but it's too busy if we plot them all)
             ax_tc.plot(time_values, source_tc["lines"][:,line_arg], c = 'k')                                                # ie each column is a line of best fit
     
-        # tidy up some stuff on the axes
+        # 4d: tidy up some stuff on the axes
         ax_tc.axhline(y=0, color='k', alpha=0.3)  
         ax_tc.axvline(x = baseline_monitor_change, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
         ax_tc.set_xlim(left = 0, right = t_end)
@@ -722,201 +799,6 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
     
 
 
-#%%
-def LiCSBAS_to_LiCSAlert(h5_file, figures = False, n_cols=5, crop_pixels = None, return_r3 = False):
-    """ A function to prepare the outputs of LiCSBAS for use with LiCSALERT.
-    LiCSBAS uses nans for masked areas - here these are converted to masked arrays.   Can also create three figures: 1) The Full LiCSBAS ifg, and the area
-    that it has been cropped to 2) The cumulative displacement 3) The incremental displacement.  
-
-    Inputs:
-        h5_file | string | path to h5 file.  e.g. cum_filt.h5
-        figures | boolean | if True, make figures
-        n_cols  | int | number of columns for figures.  May want to lower if plotting a long time series
-        crop_pixels | tuple | coords to crop images to.  x then y, 00 is top left.  e.g. (10, 500, 600, 900).  
-                                x_start, x_stop, y_start, y_stop, No checking that inputted values make sense.  
-                                Note, generally better to have cropped (cliped in LiCSBAS language) to the correct area in LiCSBAS_for_LiCSAlert
-        return_r3 | boolean | if True, the rank 3 data is also returns (n_ifgs x height x width).  Not used by ICASAR, so default is False
-
-    Outputs:
-        displacment_r3 | dict | Keys: cumulative, incremental.  Stored as masked arrays.  Mask should be consistent through time/interferograms
-                                Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
-        displacment_r2 | dict | Keys: cumulative, incremental, mask.  Stored as row vectors in arrays.  
-                                Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
-        baseline_info | dict| imdates : acquisition dates as strings
-                              daisy_chain : names of the daisy chain of ifgs, YYYYMMDD_YYYYMMDD
-                              baselines : temporal baselines of incremental ifgs
-
-    2019/12/03 | MEG | Written
-    2020/01/13 | MEG | Update depreciated use of dataset.value to dataset[()] when working with h5py files from LiCSBAS
-    2020/02/16 | MEG | Add argument to crop images based on pixel, and return baselines etc
-    2020/11/24 | MEG | Add option to get lons and lats of pixels.  
-    2021/04/15 | MEG | Update lons and lats to be packaged into displacement_r2 and displacement_r3
-    """
-
-    import h5py as h5
-    import numpy as np
-    import numpy.ma as ma
-    import matplotlib.pyplot as plt
-    from LiCSAlert_aux_functions import add_square_plot
-    
-    
-
-    def rank3_ma_to_rank2(ifgs_r3, consistent_mask = False):
-        """A function to take a time series of interferograms stored as a rank 3 array,
-        and convert it into the ICA(SAR) friendly format of a rank 2 array with ifgs as
-        row vectors, and an associated mask.
-
-        For use with ICA, the mask must be consistent.
-
-        Inputs:
-            ifgs_r3 | r3 masked array | ifgs in rank 3 format
-            consistent_mask | boolean | If True, areas of incoherence are consistent through the whole stack
-                                        If false, a consistent mask will be made.  N.b. this step can remove the number of pixels dramatically.
-        """
-
-        n_ifgs = ifgs_r3.shape[0]
-        # 1: Deal with masking
-        mask_coh_water = ifgs_r3.mask                                                               #get the mask as a rank 3, still boolean
-        if consistent_mask:
-            mask_coh_water_consistent = mask_coh_water[0,]                                             # if all ifgs are masked in the same way, just grab the first one
-        else:
-            mask_coh_water_sum = np.sum(mask_coh_water, axis = 0)                                       # sum to make an image that shows in how many ifgs each pixel is incoherent
-            mask_coh_water_consistent = np.where(mask_coh_water_sum == 0, np.zeros(mask_coh_water_sum.shape),
-                                                                          np.ones(mask_coh_water_sum.shape)).astype(bool)    # make a mask of pixels that are never incoherent
-        ifgs_r3_consistent = ma.array(ifgs_r3, mask = ma.repeat(mask_coh_water_consistent[np.newaxis,], n_ifgs, axis = 0))                       # mask with the new consistent mask
-
-        # 2: Convert from rank 3 to rank 2
-        n_pixs = ma.compressed(ifgs_r3_consistent[0,]).shape[0]                                                        # number of non-masked pixels
-        ifgs_r2 = np.zeros((n_ifgs, n_pixs))
-        for ifg_n, ifg in enumerate(ifgs_r3_consistent):
-            ifgs_r2[ifg_n,:] = ma.compressed(ifg)
-
-        return ifgs_r2, mask_coh_water_consistent
-
-
-    def ts_quick_plot(ifgs_r3, title):
-        """
-        A quick function to plot a rank 3 array of ifgs.
-        Inputs:
-            title | string | title
-        """
-        n_ifgs = ifgs_r3.shape[0]
-        n_rows = int(np.ceil(n_ifgs / n_cols))
-        fig1, axes = plt.subplots(n_rows,n_cols)
-        fig1.suptitle(title)
-        for n_ifg in range(n_ifgs):
-            ax=np.ravel(axes)[n_ifg]                                                                            # get axes on it own
-            matrixPlt = ax.imshow(ifgs_r3[n_ifg,],interpolation='none', aspect='equal')                         # plot the ifg
-            ax.set_xticks([])
-            ax.set_yticks([])
-            fig1.colorbar(matrixPlt,ax=ax)                                                                       
-            ax.set_title(f'Ifg: {n_ifg}')
-        for axe in np.ravel(axes)[(n_ifgs):]:                                                                   # delete any unused axes
-            axe.set_visible(False)
-
-    def daisy_chain_from_acquisitions(acquisitions):
-        """Given a list of acquisiton dates, form the names of the interferograms that would create a simple daisy chain of ifgs.  
-        Inputs:
-            acquisitions | list | list of acquistiion dates in form YYYYMMDD
-        Returns:
-            daisy_chain | list | names of daisy chain ifgs, in form YYYYMMDD_YYYYMMDD
-        History:
-            2020/02/16 | MEG | Written
-        """
-        daisy_chain = []
-        n_acqs = len(acquisitions)
-        for i in range(n_acqs-1):
-            daisy_chain.append(f"{acquisitions[i]}_{acquisitions[i+1]}")
-        return daisy_chain
-    
-        
-    def baseline_from_names(names_list):
-        """Given a list of ifg names in the form YYYYMMDD_YYYYMMDD, find the temporal baselines in days_elapsed
-        Inputs:
-            names_list | list | in form YYYYMMDD_YYYYMMDD
-        Returns:
-            baselines | list of ints | baselines in days
-        History:
-            2020/02/16 | MEG | Documented 
-        """
-        from datetime import datetime
-        
-        baselines = []
-        for file in names_list:
-            master = datetime.strptime(file.split('_')[-2], '%Y%m%d')   
-            slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')   
-            baselines.append(-1 *(master - slave).days)    
-        return baselines
-    
-    def create_lon_lat_meshgrids(corner_lon, corner_lat, post_lon, post_lat, ifg):
-        """ Return a mesh grid of the longitudes and latitues for each pixels.  Not tested!
-        I think Corner is the top left, but not sure this is always the case
-        """
-        ny, nx = ifg.shape
-        x = corner_lon +  (post_lon * np.arange(nx))
-        y = corner_lat +  (post_lat * np.arange(ny))
-        xx, yy = np.meshgrid(x,y)
-        geocode_info = {'lons_mg' : xx,
-                        'lats_mg' : yy}
-        return geocode_info
-
-
-    displacement_r3 = {}                                                                                        # here each image will 1 x width x height stacked along first axis
-    displacement_r2 = {}                                                                                        # here each image will be a row vector 1 x pixels stacked along first axis
-    baseline_info = {}
-
-    cumh5 = h5.File(h5_file,'r')                                                                                # open the file from LiCSBAS
-    baseline_info["imdates"] = cumh5['imdates'][()].astype(str).tolist()                                        # get the acquisition dates
-    cumulative_uncropped = cumh5['cum'][()]                                                                     # get cumulative displacements as a rank3 numpy array
-    
-    if crop_pixels is not None:
-        print(f"Cropping the images in x from {crop_pixels[0]} to {crop_pixels[1]} "
-              f"and in y from {crop_pixels[2]} to {crop_pixels[3]} (NB matrix notation - 0,0 is top left.  ")
-        cumulative = cumulative_uncropped[:, crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]                        # note rows first (y), then columns (x)
-        if figures:
-            ifg_n_plot = 1                                                                                      # which number ifg to plot.  Shouldn't need to change.  
-            title = f'Cropped region, ifg {ifg_n_plot}'
-            fig_crop, ax = plt.subplots()
-            fig_crop.canvas.set_window_title(title)
-            ax.set_title(title)
-            ax.imshow(cumulative_uncropped[ifg_n_plot, :,:],interpolation='none', aspect='auto')                # plot the uncropped ifg
-            add_square_plot(crop_pixels[0], crop_pixels[1], crop_pixels[2], crop_pixels[3], ax)                 # draw a box showing the cropped region    
-  
-    else:
-        cumulative = cumulative_uncropped
-  
-    mask_coh_water = np.isnan(cumulative)                                                                       # get where masked
-    displacement_r3["cumulative"] = ma.array(cumulative, mask=mask_coh_water)                                   # rank 3 masked array of the cumulative displacement
-    displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], axis = 0)                           # displacement between each acquisition - ie incremental
-    n_im, length, width = displacement_r3["cumulative"].shape                                   
-
-    if figures:                                                 
-        ts_quick_plot(displacement_r3["cumulative"], title = 'Cumulative displacements')
-        ts_quick_plot(displacement_r3["incremental"], title = 'Incremental displacements')
-
-    # convert the data to rank 2 format (for both incremental and cumulative)
-    displacement_r2['cumulative'], displacement_r2['mask'] = rank3_ma_to_rank2(displacement_r3['cumulative'])      # convert from rank 3 to rank 2 and a mask
-    displacement_r2['incremental'], _ = rank3_ma_to_rank2(displacement_r3['incremental'])                          # also convert incremental, no need to also get mask as should be same as above
-
-    # work with the acquisiton dates to produces names of daisy chain ifgs, and baselines
-    baseline_info["daisy_chain"] = daisy_chain_from_acquisitions(baseline_info["imdates"])
-    baseline_info["baselines"] = baseline_from_names(baseline_info["daisy_chain"])
-    baseline_info["baselines_cumulative"] = np.cumsum(baseline_info["baselines"])                                         # cumulative baslines, e.g. 12 24 36 48 etc
-    
-    # get the lons and lats of each pixel in the ifgs
-    geocode_info = create_lon_lat_meshgrids(cumh5['corner_lon'][()], cumh5['corner_lat'][()], cumh5['post_lon'][()], cumh5['post_lat'][()], displacement_r3['incremental'][0,:,:])
-    displacement_r2['lons'] = geocode_info['lons_mg']                                                                       # add to the displacement dict
-    displacement_r2['lats'] = geocode_info['lats_mg']
-    displacement_r3['lons'] = geocode_info['lons_mg']                                                                       # add to the displacement dict (rank 3 one)
-    displacement_r3['lats'] = geocode_info['lats_mg']
-
-    if return_r3:
-        return displacement_r3, displacement_r2, baseline_info
-    else:
-        return displacement_r2, baseline_info
-
-
-
    
 
 #%%
@@ -943,6 +825,7 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
         2020/01/13 | MEG | Written
         2020/12/15 | MEG | Update to also downsample the lons and lats in the ICASAR geocoding information.  
         2021_04_14 | MEG | Update so handle rank2 arrays of lons and lats properly.  
+        2021_05_05 | MEG | Add check that lats are always the right way up, and fix bug in lons.  
     """
     import numpy as np
     from downsample_ifgs import downsample_ifgs
@@ -963,14 +846,16 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
     displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
                                                                                                       downsample_plot, verbose = False)
 
+
     # 3: Downsample the geocode info (if provided) in the same was as step 1:
-    if ('lons' in displacement_r2) and ('lats' in displacement_r2):                                         # check if we have lon lat data as not alway strictly necessary.  
-        ifg1 = col_to_ma(displacement_r2['incremental'][0,:], pixel_mask = displacement_r2['mask'])                     # get the size of a new ifg (ie convert the row vector to be a rank 2 masked array.  )
-        lons = np.linspace(displacement_r2['lons'][0,0], displacement_r2['lons'][-1,0], ifg1.shape[1])      # remake the correct number of lons (to suit the number of pixels in the new ifgs, first as 1d
-        displacement_r2['lons'] = np.repeat(lons[np.newaxis, :], ifg1.shape[0], axis = 0)                                          # then as 2D
-        lats = np.linspace(displacement_r2['lats'][-1,0], displacement_r2['lats'][0,0], ifg1.shape[0])      # remake the correct number of lons (to suit the number of pixels in the new ifgs, first as 1d
-        displacement_r2['lats'] = np.repeat(lats[:, np.newaxis], ifg1.shape[1], axis = 1)                                          # then as 2D
-        
+    if ('lons' in displacement_r2) and ('lats' in displacement_r2):                                             # check if we have lon lat data as not alway strictly necessary.  
+        ifg1 = col_to_ma(displacement_r2['incremental'][0,:], pixel_mask = displacement_r2['mask'])             # get the size of a new ifg (ie convert the row vector to be a rank 2 masked array.  )
+        lons = np.linspace(displacement_r2['lons'][0,0], displacement_r2['lons'][-1,-1], ifg1.shape[1])          # remake the correct number of lons (to suit the number of pixels in the new ifgs, first as 1d
+        displacement_r2['lons'] = np.repeat(lons[np.newaxis, :], ifg1.shape[0], axis = 0)                       # then as 2D
+        lats = np.linspace(displacement_r2['lats'][0,0], displacement_r2['lats'][-1,0], ifg1.shape[0])          # remake the correct number of lats (to suit the number of pixels in the new ifgs, first as 1d
+        displacement_r2['lats'] = np.repeat(lats[:, np.newaxis], ifg1.shape[1], axis = 1)                       # then as 2D
+        if displacement_r2['lats'][0,0] < displacement_r2['lats'][-1,0]:                                        # if the lat in the top row is less than the lat in the bottom row
+            displacement_r2['lats'] = np.flipud(displacement_r2['lats'])                                        # something is reveresed, so flip up down so that the highest lats are in the top row.  
 
     print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
           f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "

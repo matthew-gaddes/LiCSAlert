@@ -22,3 +22,5 @@ dependencies:
   - h5py
   - requests
   - statsmodels
+
+  - keras=2.4.3                         # if we wish to use DL modules of LiCSAlert  

@@ -70,6 +70,28 @@ def LiCSAR_ifgs_to_s1_acquisitions(LiCSAR_ifgs):
 
 #%%
 
+def baselines_from_ifgnames(names_list):
+    """Given a list of ifg names in the form YYYYMMDD_YYYYMMDD, find the temporal baselines in days_elapsed (e.g. 12, 6, 12, 24, 6 etc.  )
+    Inputs:
+        names_list | list | in form YYYYMMDD_YYYYMMDD
+    Returns:
+        baselines | list of ints | baselines in days
+    History:
+        2020/02/16 | MEG | Documented
+    """
+
+    from datetime import datetime, timedelta
+
+    baselines = []
+    for file in names_list:
+
+        master = datetime.strptime(file.split('_')[-2], '%Y%m%d')
+        slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')
+        baselines.append(-1 *(master - slave).days)
+    return baselines
+
+#%%
+
 def compare_two_dates(date1, date2, fmt ='%Y%m%d'):
         """ Given two dates as strings (by default in YYYYMMDD format), determine if date 2 is after date 1.  
         Inputs:

@@ -85,7 +85,7 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
         # 3: If required, run ICASA to find the sources, or just load the sources from a previous run
         if LiCSAlert_status['run_ICASAR']:
             print(f"Running ICASAR... ", end = '')                                       # or if not, run it
-            LiCSAlert_settings['baseline_end_ifg_n'] = get_baseline_end_ifg_n(temporal_baselines['imdates'], LiCSAlert_settings['baseline_end'])               # if this is e.g. 14, the 14th ifg would not be in the baseline stage
+            LiCSAlert_settings['baseline_end_ifg_n'] = get_baseline_end_ifg_n(temporal_baselines['acq_dates'], LiCSAlert_settings['baseline_end'])               # if this is e.g. 14, the 14th ifg would not be in the baseline stage
             spatial_ICASAR_data = {'mixtures_r2' : displacement_r2['incremental'][:(LiCSAlert_settings['baseline_end_ifg_n']+1),],                             # only take up to the last 
                                    'mask'        : displacement_r2['mask']}
             
@@ -104,10 +104,10 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
                 Iq_sorted = pickle.load(f_icasar)    
                 n_clusters = pickle.load(f_icasar)    
             f_icasar.close()                                                                                                                           
-            LiCSAlert_settings['baseline_end_ifg_n'] = get_baseline_end_ifg_n(temporal_baselines['imdates'], LiCSAlert_settings['baseline_end'])            # if this is e.g. 14, the 14th ifg would not be in the baseline stage
+            LiCSAlert_settings['baseline_end_ifg_n'] = get_baseline_end_ifg_n(temporal_baselines['acq_dates'], LiCSAlert_settings['baseline_end'])            # if this is e.g. 14, the 14th ifg would not be in the baseline stage
     
         # 5: Deal with changes to the mask of pixels 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         displacement_r2_combined = {}                                                                                                                                               # a new dictionary to save the interferograms sampled to the combined mask in (ie the same pixels as the sources)
         displacement_r2_combined['incremental'], sources_mask_combined, mask_combined = update_mask_sources_ifgs(mask_sources, sources,                                             # comapres the mask for the ICs and the mask for the current ifgs and finds a set of pixels that are present in both
                                                                                                                  displacement_r2['mask'], displacement_r2['incremental'])           # the new mask overwrites the mask in displacement_r2
@@ -126,7 +126,7 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
         print(f"LiCSAlert will be run for the following dates: {processing_dates}")
         for processing_date in processing_dates:
             print(f"Running LiCSAlert for {processing_date}")
-            ifg_n = temporal_baselines['imdates'].index(processing_date)
+            ifg_n = temporal_baselines['acq_dates'].index(processing_date)
             
             # 6a: Create a folder (YYYYMMDD) for the outputs.  
             if not os.path.exists(f"{volcano_dir}{processing_date}"):                                   # True if folder exists, so enter if statement if doesn't exist (due to not)
@@ -141,10 +141,10 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
                     os.mkdir(f"{volcano_dir}{processing_date}")                                             # and remake the folder
                 
             # 6b: Update the mask to create a figure of changes.  Not robustly written
-            previous_date = temporal_baselines['imdates'][ifg_n-1]                                                                  # find the date one before the one being processed.  
+            previous_date = temporal_baselines['acq_dates'][ifg_n-1]                                                                  # find the date one before the one being processed.  
             previous_date_after_baseline = compare_two_dates(LiCSAlert_settings['baseline_end'], previous_date)                     # check that this date is not during the baseline.  
             if previous_date_after_baseline:                                                                                        # if it's not,
-                previous_output_dir = f"{volcano_dir}{temporal_baselines['imdates'][ifg_n-1]}"                                      # get the previous output directory
+                previous_output_dir = f"{volcano_dir}{temporal_baselines['acq_dates'][ifg_n-1]}"                                      # get the previous output directory
             else:
                 previous_output_dir = None                                                                                          # if it is, there's no previous output directory
             record_mask_changes(mask_sources, displacement_r2['mask'], mask_combined, processing_date, f"{volcano_dir}{processing_date}/", previous_output_dir)             # record any changes in the mask (ie pixels that are now masked due to being incoherent).  
@@ -160,7 +160,7 @@ def LiCSAlert_monitoring_mode(volcano, LiCSBAS_bin, LiCSAlert_bin, ICASAR_bin, L
                                                                 t_recalculate=10, verbose=False)                                                                      # recalculate lines of best fit every 10 acquisitions
         
             LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, sources_mask_combined, displacement_r2_combined_current, LiCSAlert_settings['baseline_end_ifg_n'],  # creat the LiCSAlert figure
-                             cumulative_baselines_current, out_folder = f"{volcano_dir}{processing_date}", day0_date = temporal_baselines['imdates'][0])    #
+                             cumulative_baselines_current, out_folder = f"{volcano_dir}{processing_date}", day0_date = temporal_baselines['acq_dates'][0])    #
             
             
         sys.stdout = original                                                                                                                       # return stdout to be normal.  
@@ -451,11 +451,13 @@ def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
     History:
         2020/02/19 | MEG |  Written      
         2020/06/26 | MEG | Major rewrite.  
+        2021_04_20 | MEG | Add check that sources and ifgs are both rank 2 (use row vectors if only one source, but it must be rank2 and not rank 1)
     """
     import numpy as np
     import numpy.ma as ma
-    from LiCSAlert_aux_functions import col_to_ma
-    
+    from auxiliary_functions import col_to_ma
+
+        
     
     def apply_new_mask(ifgs, mask_old, mask_new):
         """Apply a new mask to a collection of ifgs (or sources) that are stored as row vectors with an accompanying mask.  
@@ -477,6 +479,10 @@ def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
         return ifgs_new_mask
     
     
+    # check some inputs.  Not exhuastive!
+    if (len(sources.shape) != 2) or (len(ifgs.shape) != 2):
+        raise Exception(f"Both 'sources' and 'ifgs' must be rank 2 arrays (even if they are only a single source).  Exiting. ")
+    
     mask_both = ~np.logical_and(~mask_sources, ~mask_ifgs)                                       # make a new mask for pixels that are in the sources AND in the current time series
     n_pixs_sources = len(np.argwhere(mask_sources == False))                                  # masked pixels are 1s, so invert with 1- bit so that non-masked are 1s, then sum to get number of pixels
     n_pixs_new = len(np.argwhere(mask_ifgs == False))                                          # ditto for new mask
@@ -489,6 +495,7 @@ def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
     
     return ifgs_new_mask, sources_new_mask, mask_both
     
+
 
 
 #%%
