@@ -2,3 +2,5 @@ not_in_repo/
 lib/__pycache__/*
 LiCSAlert_01_Sierra_Negra_no_intermediate/ICASAR_outputs/FastICA_results.pkl
 LiCSAlert_02_Sierra_Negra_intermediate/ICASAR_outputs/FastICA_results.pkl
+LiCSAlert_03_Campi_Flegrei/ICASAR_outputs/FastICA_results.pkl
+

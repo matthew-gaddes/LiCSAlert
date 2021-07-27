@@ -8,7 +8,7 @@ A selection of functions used by LiCSAlert
 #%%
 
 def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder, 
-                         ICASAR_settings, run_ICASAR = True, ICASAR_path = None, vudl_net_21_path = None,
+                         ICASAR_settings, run_ICASAR = True, ICASAR_path = None, ic_classifying_model = None,
                          intermediate_figures = False, downsample_run = 1.0, downsample_plot = 0.5):
     """ A function to run the LiCSAlert algorithm on a preprocssed time series.  To run on a time series that is being 
     updated, use LiCSAlert_monitoring_mode.  
@@ -28,7 +28,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         ICASAR_settings | dict | contains all the settings for the ICASAR algorithm.  See ICASAR for details.  
         run_ICASAR | boolean | If false, the resutls from a previous run of ICASAR are used, if True it is run again (which can be time consuming)
         ICASAR_path | path or string | location of ICASAR package.  Note, important to remember the /lib/ part at teh end.  
-        vudl_net_21_path | path or string | location of Keras model for classification and localisation of deformation in a single ifg.  
+        ic_classifying_model | path or string | location of Keras model for classification and localisation of deformation in a single ifg.  
         intermediate_figures | boolean | if True, figures for all time steps in the monitoring phase are created (which is slow).  If False, only the last figure is created.  
         downsample_run | float | data can be downsampled to speed things up
         downsample_plot | float | and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
@@ -75,27 +75,36 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         if required_to_be_r2 in displacement_r2:                                                                        # though we also need to check they are 
             if len(displacement_r2[required_to_be_r2].shape) != 2:
                 raise Exception(f"{required_to_be_r2} is not rank 2 (i.e. a value for every pixel) so exiting.   ")
-        
-   
+                
+    for required_array in ['incremental', 'mask', 'ifg_dates']:                                                             # some keys are always required in displacement_r2.  Check they exist.  
+        if required_array not in displacement_r2.keys():                                                                    # loop through checkin.  
+            raise Exception(f"{required_array} is not in displacement_r2, but is one of the required three ('incremental', 'mask', and 'ifg_dates').  Exiting.  ")
+                
+
     # 1: Sort out the ouput folder, which depends on if ICASAR will be run.  
     out_folder = Path(out_folder)
-    if os.path.exists(out_folder):
-        print(f"The out_folder ({out_folder}) already exists. ")
-        if run_ICASAR:
-            print(f"As run_ICASAR is selected, deleting all the LiCSAlert outputs but leaving the ICASAR products.  ")
-            shutil.rmtree(out_folder)
-            os.mkdir(out_folder)
-        else:
-            print(f"As run_ICASAR is False, deleting all the LiCSAlert outputs, but leaving the ICASAR products.  ")
-            files = glob.glob(str(out_folder / 'LiCSAlert*'))                                                           # get all the files in the folder that have LiCSALert in the name (ie not the ICASAR directory)
-            for f in files:
+    if os.path.exists(out_folder):                                                                                                     # the directory containing both LiCSAlert products and the 'ICASAR_outputs' directory exists
+        print(f"The out_folder ({out_folder}) already exists, deleting the LiCSAlert outputs within it.   ")
+        files = glob.glob(str(out_folder / 'LiCSAlert*'))                                                                              # get all the files in the folder that have LiCSALert in the name (ie not the ICASAR directory)
+        for f in files:
+            try:
+                os.remove(f)                                                                                                           # try to delete assuming it's a file
+            except:
+                shutil.rmtree(f)                                                                                                       # if that fails, assume it's a directory and try to delete a different way.  
+        if run_ICASAR:                                                                                                                 # if ICASAR is being run, the directory may or may not need to be deleted.  
+            if ICASAR_settings['load_fastICA_results'] == True:                                                                        # if we will load the results of an existing run, the directory must remain 
+                print(f"As run_ICASAR is selected but'load_fastICA_results' is also True, leaving the ICASAR_outputs folder.  ")
+            else:
+                print(f"As run_ICASAR is selected but'load_fastICA_results' is False, deleting the ICASAR_outputs folder.  ")           # if we won't load the results of an existing run, the directory can be deleted.  
                 try:
-                    os.remove(f)                                    # try to delete assuming it's a file
+                    shutil.rmtree(out_folder / 'ICASAR_outputs')                                                                            # delete the directory
                 except:
-                    shutil.rmtree(f)                                # if that fails, assume it's a directory and try to delete a different way.  
-
+                    print(f"Failed to remove the ICASAR folder ({str(out_folder / 'ICASAR_outputs')}) which is probably "
+                          f"as it doesn't exist, so trying to continue anyway.  ")
+        else:                                                                                                                           # if we're not running ICASAR, leave the directory alone.  
+            print(f"As run_ICASAR is False, leaving the ICASAR_outputs folder")
     else:
-        os.mkdir(out_folder)                                                                       
+        os.mkdir(out_folder)                                                                                                            # if nothing exits (i.e. first run), just make the folder                                  
 
     # 2: Prepare a dictionary to store information about the temporal information.  
     tbaseline_info = {'acq_dates'            : LiCSAR_ifgs_to_s1_acquisitions(displacement_r2['ifg_dates']),                    # get the unique acquisition (epoch) dates
@@ -131,11 +140,12 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
     
 
     # 4: Possible use the VUDL-net-21 model to detect and locate deformation in the ICs.      
-    if vudl_net_21_path != None:
-        print(f"Using VUDL-Net-21 to determine which ICs are deformation and which are atmosphere.  ")
-        from LiCSAlert_neural_network_functions import sources_though_cnn                                                 # don't import if we don't need to as this needs Keras and may not be installed
-        sources_labels = {'defo_sources' : ['Dyke', 'Sill/Point', 'Atmosphere' ]}                                                                          # one hot encodings to labels for Vudl-net}
-        sources_labels['Y_class'], sources_labels['Y_loc'] = sources_though_cnn(sources, displacement_r2['mask'], vudl_net_21_path)
+    if ic_classifying_model != None:
+        print(f"Using the supplied neural network to determine which ICs are deformation and which are atmosphere.  ",
+              f"This will require keras to be imported.  ")
+        from LiCSAlert_neural_network_functions import sources_though_cnn                                                                        # don't import if we don't need to as this needs Keras and may not be installed
+        sources_labels = {'defo_sources' : ['Dyke', 'Sill/Point', 'Atmosphere' ]}                                                                # one hot encodings to labels for Vudl-net}
+        sources_labels['Y_class'], sources_labels['Y_loc'] = sources_though_cnn(sources, tcs, displacement_r2['mask'], ic_classifying_model)
     else:
         sources_labels = None
         
@@ -213,7 +223,7 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
             raise Exception(f"There appears to be a mismatch between the number of times ({time_values.shape[0]}, set by time_values), "            # error if they don't agree
                             f"and the number of interferograms ({ifgs_baseline.shape[0]}, in ifgs_baseline).  Exiting...")
         else:
-            print(f"There are {time_values.shape[0]} times (set by time_values), which agress with the  "                                           # or update user that all ok if they don
+            print(f"There are {time_values.shape[0]} times (set by time_values), which agrees with the  "                                           # or update user that all ok if they don
                   f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline.  " )
     else:
         if time_values.shape[0] != (ifgs_baseline.shape[0] + ifgs_monitoring.shape[0]):                                                             # check in the case that there are monitoring ifgs
@@ -690,7 +700,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     tick_locator = ticker.MaxNLocator(nbins=4)
     ics_cbar.locator = tick_locator
     ics_cbar.update_ticks()
-    ics_cbar.set_label('IC strength (rad)')
+    ics_cbar.set_label('IC (rad)')
     ics_cbar.ax.yaxis.set_label_position('left')
     
     cax2 = fig1.add_axes([0.17, 0.08, 0.005, 0.1])                                            # number of sigmas from the mean
@@ -856,13 +866,18 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
         displacement_r2['lats'] = np.repeat(lats[:, np.newaxis], ifg1.shape[1], axis = 1)                       # then as 2D
         if displacement_r2['lats'][0,0] < displacement_r2['lats'][-1,0]:                                        # if the lat in the top row is less than the lat in the bottom row
             displacement_r2['lats'] = np.flipud(displacement_r2['lats'])                                        # something is reveresed, so flip up down so that the highest lats are in the top row.  
-
-    print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
-          f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
-          f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
     
-    return displacement_r2
+    print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
+      f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
+      f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
+    
+    # 4: and also downsample the DEM if it's included:
+    if 'dem' in displacement_r2:                                                                                        # from LiCSBAS, the dem will a numpy array that uses nans for where it's water.  
+        from skimage.transform import rescale
+        displacement_r2['dem'] = rescale(displacement_r2['dem'], downsample_run, multichannel = False, anti_aliasing = False)                               # do the rescaling
+        print(f"The DEM was also succesfully downsmapled.  ")
 
+    return displacement_r2
 
 
 #%%

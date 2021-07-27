@@ -8,7 +8,7 @@ Created on Wed Jun  9 16:43:03 2021
 
 
 
-def sources_though_cnn(sources_r2, mask, vudl_net_21_path):
+def sources_though_cnn(sources_r2, tcs, mask, vudl_net_21_path):
     """Given a matrix of interferograms (or ICs) as row vectors and their mask, convert them to the correcto form for use with VUDL-net-21, 
     and then detect and locate deformation using the model.  
     Inputs:
@@ -29,7 +29,11 @@ def sources_though_cnn(sources_r2, mask, vudl_net_21_path):
     import keras
        
     # 1: resize and rescale the data to be suitable for use with VUDL-net-21
-    ifgs_r3 = r2_to_r3(sources_r2, mask)                                                                                    # row vectors to rank 3 masked array
+    n_pixels = sources_r2.shape[1]
+    tcs_cs = np.cumsum(tcs, axis = 0)
+    tcs_cs_final = np.repeat(tcs_cs[-1,:][:,np.newaxis], repeats = n_pixels, axis = 1)                                      # make a matrix of the final value of the cumulative time courses repeated to be the same size as sources_r2
+    sources_r2_rescaled = sources_r2 * tcs_cs_final                                                                         # scale the sources by the final value of their cumulative time course
+    ifgs_r3 = r2_to_r3(sources_r2_rescaled, mask)                                                                                    # row vectors to rank 3 masked array
     x_scale = ifgs_r3.shape[2] / 224                                                                                        # determine how much we are going to resize the images by in x
     y_scale = ifgs_r3.shape[1] / 224                                                                                        # and in y
     ifgs_r4 = ma.repeat(ifgs_r3[:,:,:,np.newaxis], 3, axis = 3)                                                             # rank 4 masked array with 3 channels (data just repeated across them).  
@@ -108,7 +112,7 @@ def r2_to_r3(ifgs_r2, mask):
     """
     import numpy as np
     import numpy.ma as ma
-    from small_plot_functions import col_to_ma
+    from auxiliary_functions import col_to_ma
     
     n_ifgs = ifgs_r2.shape[0]
     ny, nx = col_to_ma(ifgs_r2[0,], mask).shape                                   # determine the size of an ifg when it is converter from being a row vector
