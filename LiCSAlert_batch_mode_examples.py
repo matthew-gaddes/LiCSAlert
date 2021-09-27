@@ -45,16 +45,16 @@ displacement_r2_copy = copy.deepcopy(displacement_r2)                           
 
 
 #%% Example 1, creating one LiCSAlert figure for the complete time series
-ICASAR_path = Path("/home/matthew/university_work/15_my_software_releases/ICASAR-2.3.0/lib/")                               # location of ICASAR functions
-# ICASAR_path = Path("/home/matthew/university_work/01_blind_signal_separation_python/13_ICASAR/ICASAR_GitHub/lib")           # development version
+#ICASAR_path = Path("/home/matthew/university_work/15_my_software_releases/ICASAR-2.3.0/lib/")                               # location of ICASAR functions
+ICASAR_path = Path("/home/matthew/university_work/01_blind_signal_separation_python/13_ICASAR/ICASAR_GitHub/lib")           # development version
 
 # LiCSAlert_settings = {"n_baseline_end" : 35,                                         # n_ifgs that are used in the baseline stage (i.e. by ICASAR)
 #                       "out_folder" : "LiCSAlert_01_Sierra_Negra_no_intermediate",    # no spaces, snake or camel case
 #                       "run_ICASAR" : True,                                           # If False, attempt to load results from previous run.  If True, run (which can be slow)
 #                       "intermediate_figures" : False,                                # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
 #                       "downsample_run" : 0.5,                                        # data can be downsampled to speed things up
-#                       "downsample_plot" : 0.5,                                       # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
-#                       "ic_classifying_model" : Path("/home/matthew/university_work/02_neural_networks_python/01_phd_script_approach/04_vgg16/03_best_2head_synth_real_v2/01_vgg16_2head_block5_trained.h5")}        # path to the keras model that can be used to classify ICs and deformation or atmosphere
+#                       "downsample_plot" : 0.5}                                       # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
+                      
                       
 # ICASAR_settings = {"n_comp" : 6,                                                     # number of components to recover with ICA (ie the number of PCA sources to keep)
 #                     "bootstrapping_param" : (200, 0),                                # number of runs with bootstrapping, number of runs without bootstrapping
@@ -77,7 +77,7 @@ ICASAR_path = Path("/home/matthew/university_work/15_my_software_releases/ICASAR
 # LiCSAlert_batch_mode(displacement_r2_copy, ICASAR_settings = ICASAR_settings, **LiCSAlert_settings,ICASAR_path = ICASAR_path)
 
 
-#%% Example 3, Running LiCSAlert with a smaller signal (The LiCSBAS example at Campi Flegrei)
+#%% Example 3, Running LiCSAlert with a smaller signal (Campi Flegrei, processed with LiCSBAS)
 
 LiCSBAS_out_folder_campi_flegrei = Path('./022D_04826_121209')
 

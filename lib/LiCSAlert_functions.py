@@ -9,7 +9,7 @@ A selection of functions used by LiCSAlert
 
 def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder, 
                          ICASAR_settings, run_ICASAR = True, ICASAR_path = None, ic_classifying_model = None,
-                         intermediate_figures = False, downsample_run = 1.0, downsample_plot = 0.5):
+                         intermediate_figures = False, downsample_run = 1.0, downsample_plot = 0.5, t_recalculate = 10):
     """ A function to run the LiCSAlert algorithm on a preprocssed time series.  To run on a time series that is being 
     updated, use LiCSAlert_monitoring_mode.  
     
@@ -32,10 +32,12 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         intermediate_figures | boolean | if True, figures for all time steps in the monitoring phase are created (which is slow).  If False, only the last figure is created.  
         downsample_run | float | data can be downsampled to speed things up
         downsample_plot | float | and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
+        t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
     Returns:
         out_folder with various items.  
     History:
         2020/09/16 | MEG | Created from various scripts.        
+        2021_08_09 | MEG | add option to set r_recalculate, rather than hard coding it.  
         
     Stack overview:
         LiCSAlert_preprocessing
@@ -59,13 +61,9 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
     if ICASAR_path is None:
         raise Exception(f"LiCSAlert requires the path to the local copy of the ICASAR package, which can be downloaded from https://github.com/matthew-gaddes/ICASAR  Exiting...."  )
     else:
-        try:
-            if str(ICASAR_path)[-3:] != 'lib':
-                print("Warning: the last part of the ICASAR path is not 'lib', which is unusual as the required functions are stored in ICASAR's 'lib' subdirectory.  Trying to continue.  ")
-        except:
-            pass
         sys.path.append(str(ICASAR_path))                  # location of ICASAR functions
-        from ICASAR_functions import ICASAR
+        import icasar
+        from icasar.icasar_funcs import ICASAR
     
     if 'out_folder' in ICASAR_settings:
         print(f"An 'out_folder' can't be set when running ICASAR within LiCSAlert.  Deleting this item from the 'ICASAR_settings' dictionary and continuing.  ")
@@ -109,7 +107,8 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
     # 2: Prepare a dictionary to store information about the temporal information.  
     tbaseline_info = {'acq_dates'            : LiCSAR_ifgs_to_s1_acquisitions(displacement_r2['ifg_dates']),                    # get the unique acquisition (epoch) dates
                       'baselines_cumulative' : np.cumsum(baselines_from_ifgnames(displacement_r2['ifg_dates']))}                # and the cumulative temporal baselines (in days)
-           
+    
+   
     # 3: Either run ICASAR to find latent spatial sources in baseline data, or load the results from a previous run.  
     displacement_r2 = LiCSAlert_preprocessing(displacement_r2, downsample_run, downsample_plot)                         # mean centre and downsize the data
     
@@ -159,7 +158,8 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         
         
             sources_tcs_monitor, residual_monitor = LiCSAlert(sources, baselines_cumulative_current, displacement_r2_current["incremental"][:n_baseline_end],               # do LiCSAlert
-                                                                                            displacement_r2_current["incremental"][n_baseline_end:], t_recalculate=10)    
+                                                              displacement_r2_current["incremental"][n_baseline_end:], t_recalculate=t_recalculate, 
+                                                              out_file = out_folder / 'LiCSAlert_results.pkl')    
         
             LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2_current, n_baseline_end, 
                               baselines_cumulative_current, time_value_end=tbaseline_info['baselines_cumulative'][-1], out_folder = out_folder,
@@ -168,7 +168,8 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
     # 5b: Or just do LiCSAlet and the LiCSAlert figure for the final time step (much quicker, but only one LiCSAlert figure is created)
     else:
         sources_tcs_monitor, residual_monitor = LiCSAlert(sources, tbaseline_info['baselines_cumulative'], displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
-                                                          displacement_r2["incremental"][n_baseline_end:], t_recalculate=10)    
+                                                          displacement_r2["incremental"][n_baseline_end:], t_recalculate=t_recalculate, 
+                                                          out_file = out_folder / 'LiCSAlert_results.pkl')    
         
         LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
                           tbaseline_info['baselines_cumulative'], time_value_end=tbaseline_info['baselines_cumulative'][-1], day0_date = tbaseline_info['acq_dates'][0], 
@@ -434,11 +435,12 @@ def tcs_monitoring(tcs_c, sources_tcs, time_values, residual=False):
         else:
             source_tc["cumulative_tc"] = tcs_c[:, source_n][:, np.newaxis]                                    # don't need to extend as have full time course
         
-        # 2: Lines of best fit, and line to point distances
+        # 2: Lines of best fit, and line to point distances for the monitoring data
         source_tc["lines"] = np.pad(source_tc["lines"], [(0,n_times_monitor),(0,n_times_monitor)], "constant", constant_values=(np.nan))        # resize, keeping original values in top left corner
         source_tc["distances"] = np.pad(source_tc["distances"], [(0, n_times_monitor), (0,0)], "constant", constant_values=(0))                 # lengthen to incorporate the monitoring data
         for n_ifg in np.arange(n_times_baseline, n_times_total):                                                                                # loop through each monitoring ifg
-            line_y_intercept = np.mean(source_tc["cumulative_tc"][n_ifg-t_recalculate: n_ifg]) - (source_tc["gradient"]*np.mean(time_values[n_ifg-t_recalculate: n_ifg]))                   # find the y-intercept of a the line 
+            line_y_intercept = (np.mean(source_tc["cumulative_tc"][n_ifg-t_recalculate: n_ifg]) 
+                             - (source_tc["gradient"]*np.mean(time_values[n_ifg-t_recalculate: n_ifg])))                   # find the y-intercept of a the line 
             line_yvals = (time_values[n_ifg-t_recalculate: n_ifg+1] * source_tc["gradient"]) + line_y_intercept                                                                      # predict the y values given the gradient and y-intercept of the line, note that also predicting y value for next point
             source_tc["lines"][n_ifg-t_recalculate: n_ifg+1, n_ifg] = line_yvals
             source_tc["distances"][n_ifg,] = (np.abs(source_tc["cumulative_tc"][n_ifg,] - line_yvals[-1]))/source_tc["sigma"]      
@@ -496,10 +498,11 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     from matplotlib import ticker
     import matplotlib as mpl
     from matplotlib.ticker import MultipleLocator
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes            
     plt.switch_backend('Agg')                                                           #  works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
+    #plt.switch_backend('Qt5Agg')                                                           #  for debugging
     import datetime as dt 
-    # MEG imports
-    #from small_plot_functions import col_to_ma, make_colormap 
+
     
     def calcualte_line_args(n_ifgs, t_recalculate):
         """Lines of best fit are calculated for eahc time step, but we don't want
@@ -515,7 +518,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         return line_args
     
 
-    def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, time_values, minorLocator, majorLocator, xlim):
+    def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, time_values, minorLocator, majorLocator, xlim, ylabel = ''):
         """ Plot all the ifgs (baseline and monitoring) within the grispec_area.  
         """
 
@@ -535,6 +538,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
             iax.set_yticks([])
             # print(time_values[ifg_n])                                                                       # for debugging
             # plt.pause(1)                                                                                    # "
+        ax_ifgs.set_ylabel(ylabel, fontsize = 7, labelpad = -2)
 
     def colourbar_for_sources(icasar_sources):
         """ Creat a colourbar for the ICA sources that is centered on 0, and cropped so that each side is equal
@@ -562,8 +566,71 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ax_tc2.set_yticklabels([])                                                      # turn off y labels
         ax_tc2.set_ylim(top = 10)                                                       # set so in range 0 to 10
 
-   
-    # -2: 
+    def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+        import matplotlib.colors as colors
+        new_cmap = colors.LinearSegmentedColormap.from_list(
+        'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+        cmap(np.linspace(minval, maxval, n)))
+        return new_cmap 
+    
+    def xticks_every_3months(ax_to_update, day0_date, time_values, include_tick_labels):
+        """Given an axes, update the xtcisk so the major ones are the 1st of jan/april/july/october, and the minor ones are the first of the 
+        other months.  
+        Inputs:
+            ax_to_update | matplotlib axes | the axes to update.  
+            day0_date | string | in form yyyymmdd
+            time_values | rank 1 array | cumulative temporal baselines, e.g. np.array([6,18, 30, 36, 48])
+        Returns:
+            updates axes
+        History:
+            2021_09_27 | MEG | Written
+        """
+        
+        from dateutil.relativedelta import relativedelta                                                    # add 3 months and check not after end
+        from matplotlib.ticker import AutoMinorLocator      
+        
+        tick_labels_days = ax_to_update.get_xticks().tolist()                                                # get the current tick labels
+        day0_date_dt = dt.datetime.strptime(day0_date, "%Y%m%d")                                            
+        dayend_date_dt = day0_date_dt +  dt.timedelta(int(time_values[-1]))                                 # the last time value is the number of days we have, so add this to day0 to get the end.  
+    
+        # 1: find first tick date (the first of the jan/ april/jul /oct)                        
+        date_tick0 = day0_date_dt                                                                           
+        while not ( (date_tick0.day) == 1 and (date_tick0.month == 1  or date_tick0.month == 4 or date_tick0.month == 7 or date_tick0.month == 10 )):
+            date_tick0 +=  dt.timedelta(1)
+            
+        # 2: get all the other first of the quarters
+        ticks = {'datetimes' : [date_tick0],
+                 'yyyymmdd'   : [],
+                 'n_day'     : []}
+       
+        while ticks['datetimes'][-1] < (dayend_date_dt - relativedelta(months=+3)):                         # subtract 3 months to make sure we don't go one 3 month jump too far. 
+            ticks['datetimes'].append(ticks['datetimes'][-1] + relativedelta(months=+3))
+        
+        # 3: work out what day number each first of the quarter is.  
+        for tick_dt in ticks['datetimes']:                                                                   # find the day nubmers from this.             
+            ticks['yyyymmdd'].append(dt.datetime.strftime(tick_dt, "%Y/%m/%d"))
+            ticks['n_day'].append((tick_dt - day0_date_dt).days)
+            
+        # 4: Update the figure.  
+        ax_to_update.set_xticks(ticks['n_day'])                                                                   # apply major tick labels to the figure
+        minor_locator = AutoMinorLocator(3)                                                                       # there are three months in each quarter, so a minor tick every month
+        ax_to_update.xaxis.set_minor_locator(minor_locator)                                                       # add to figure.  
+        if include_tick_labels:
+            ax_to_update.set_xticklabels(ticks['yyyymmdd'], rotation = xtick_label_angle, ha = 'left')            # update tick labels, and rotate
+            plt.subplots_adjust(bottom=0.15)
+            ax_to_update.set_xlabel('Date')
+        else:
+            ax_to_update.set_xticklabels([])                                                                    # remove any tick lables if they aren't to be used.  
+        
+        # add vertical lines every year.  
+        for major_tick_n, datetime_majortick in enumerate(ticks['datetimes']):
+            if datetime_majortick.month == 1:
+                ax_to_update.axvline(x = ticks['n_day'][major_tick_n], color='k', alpha=0.1, linestyle='--')                          
+                   
+
+
+
+
 
     # -1: Check that the sizes of the sources and the interferograms agree.  Raise error if not.  
     if sources.shape[1] == displacement_r2['incremental'].shape[1]:
@@ -603,10 +670,13 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     # 2 Initiate the figure    
     fig1 = plt.figure(figsize=(14,8))
     fig1.canvas.set_window_title(figtitle)
-    grid = gridspec.GridSpec((n_ics + 2), 11, wspace=0.3, hspace=0.1)                        # divide into 2 sections, 1/5 for ifgs and 4/5 for components
+    grid = gridspec.GridSpec((n_ics + 3), 11, wspace=0.3, hspace=0.1)                        # divide into 2 sections, 1/5 for ifgs and 4/5 for components
 
     # 3: Plot the ifgs along the top
-    plot_ifgs(displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"], fig1, grid[0,1:], time_values, minorLocator, majorLocator, t_end)
+    plot_ifgs(np.cumsum(displacement_r2["incremental_downsampled"], axis = 0), displacement_r2["mask_downsampled"], fig1, grid[0,1:], 
+              time_values, minorLocator, majorLocator, t_end, ylabel = 'Cumulative')                                                                # cumulative ifgs
+    plot_ifgs(displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"], fig1, grid[1,1:], 
+              time_values, minorLocator, majorLocator, t_end, ylabel = ' Incremental')                                                               # incremental ifgs
 
 
     # 4: Plot each source and its time course 
@@ -616,7 +686,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         baseline_monitor_change = np.mean([time_values[n_baseline_end-1], time_values[n_baseline_end-1] + 12])                              # But the above won't work if there are no monitoring ifgs, so just guess next ifg will be after 12 days and draw line as if that were true (ie 6 days after last point)
     for row_n, source_tc in enumerate(sources_tcs):
         # 4a: Plot the source
-        ax_source = plt.Subplot(fig1, grid[row_n+1,0])                                                                                      # create an axes for the IC (spatial source)
+        ax_source = plt.Subplot(fig1, grid[row_n+2,0])                                                                                      # create an axes for the IC (spatial source)
         if sources_downsampled:
             im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   # plot the downsampled source
         else:
@@ -642,13 +712,11 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
             ax_orange.set_yticks([])
             
         fig1.add_subplot(ax_source)
-        
-        
         ######################## end WIP
         
         
         # 4c: plot the time courses for that IC, and the rolling lines of best fit
-        ax_tc = plt.Subplot(fig1, grid[row_n+1,1:])
+        ax_tc = plt.Subplot(fig1, grid[row_n+2,1:])
         ax_tc.scatter(time_values, source_tc["cumulative_tc"], c = source_tc["distances"], marker='o', s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, )                        # 
         for line_arg in line_args:                                                                                          # line args sets which lines of best fit to plot (there is a line of best fit for each point, but it's too busy if we plot them all)
             ax_tc.plot(time_values, source_tc["lines"][:,line_arg], c = 'k')                                                # ie each column is a line of best fit
@@ -657,12 +725,11 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ax_tc.axhline(y=0, color='k', alpha=0.3)  
         ax_tc.axvline(x = baseline_monitor_change, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
         ax_tc.set_xlim(left = 0, right = t_end)
-        ax_tc.set_xticklabels([])
-        ax_tc.xaxis.set_major_locator(majorLocator)                                                 # Major and minor tick lables 
-        ax_tc.xaxis.set_minor_locator(minorLocator)
+        xticks_every_3months(ax_tc, day0_date, time_values, include_tick_labels = False)
         fig1.add_subplot(ax_tc)
         sigma_bar_plotter(ax_tc, time_values, source_tc["distances"], cmap_discrete)                # draw the bar graph showing sigma values
         ax_tc.yaxis.tick_right()                                                                    # has to be called after sigma_bar_plotter
+        
                                                                 
     # 5: Plot the residual
     ax_residual = plt.Subplot(fig1, grid[-1,1:])                                                                    # plot on the last row
@@ -675,25 +742,11 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     ax_residual.yaxis.tick_right()
     ax_residual.yaxis.set_label_position("right")
     ax_residual.set_ylabel('RMS\nresidual')
-    ax_residual.xaxis.set_major_locator(majorLocator)                             # Major and minor tick lables 
-    ax_residual.xaxis.set_minor_locator(minorLocator)
     fig1.add_subplot(ax_residual)
     sigma_bar_plotter(ax_residual, time_values, residual[0]["distances"], cmap_discrete)                    # draw the bar graph showing sigma values
     ax_residual.yaxis.tick_right()                                                                        # has to be called after sigma_bar_plotter
-    ax_residual.set_xlabel('Time (days)')
+    xticks_every_3months(ax_residual, day0_date, time_values, include_tick_labels = True)                   # create the ticks and labels on the 1st of the quater.  
     
-    # 5.1 Update the xticks to be dates and not day numbers    
-    if day0_date != None:
-        tick_labels_days = ax_residual.get_xticks().tolist()                                                # get the current tick labels
-        tick_label_dates = []                                                                               # initiate to store tick labels as dates
-        day0_date_dt = dt.datetime.strptime(day0_date, "%Y%m%d")
-        for tick_labels_day in tick_labels_days:                                                            # loop through all
-            dt_date = day0_date_dt + dt.timedelta(int(tick_labels_day))                                        # get the date of that tick label
-            tick_label_dates.append(dt.datetime.strftime(dt_date, "%Y %m %d"))                              # convert back to string and append
-        ax_residual.set_xticklabels(tick_label_dates, rotation = xtick_label_angle, ha = 'left')            # update tick labels, and rotate
-        plt.subplots_adjust(bottom=0.15)
-        ax_residual.set_xlabel('Date')
-       
     ## 6: add the two colorbars
     cax = fig1.add_axes([0.12, 0.08, 0.005, 0.1])                                      # source strength
     ics_cbar = fig1.colorbar(im, cax=cax, orientation='vertical')
@@ -712,7 +765,43 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     std_cbar.set_label(r'$\sigma$ from trend line')
     std_cbar.ax.yaxis.set_label_position('left')
     
-    # 7: Possible save output
+    # 7: Possibly add the DEM
+    if 'dem' in displacement_r2.keys():                                                                                         # DEM is not alway included.  
+        ax_dem = plt.Subplot(fig1, grid[1,0])                                                                                   # create an axes for the IC (spatial source)
+        terrain_cmap = plt.get_cmap('terrain')                                                                                  # appropriate colours for a dem
+        terrain_cmap = truncate_colormap(terrain_cmap, 0.2, 1)                                                                  # but crop (truncate) the blue parts as we are only interested in land
+        dem_plot = ax_dem.imshow(displacement_r2["dem"], cmap = terrain_cmap)                                                   # plot the DEM
+        ax_dem.xaxis.tick_top()                                                                                                 #
+        ax_dem.tick_params(axis='both', which='major', labelsize=7)                                                             # adjust fontsize
+        ax_dem.tick_params(axis='both', which='minor', labelsize=7)
+        ax_dem.set_xticks([0, displacement_r2['dem'].shape[1]])                                                                 # tick only the min and max in each direction
+        ax_dem.set_yticks([0, displacement_r2['dem'].shape[0]])
+        ax_dem.set_ylabel('Latitude ($^\circ$)', fontsize = 6)
+        ax_dem.set_xlabel('Longitude ($^\circ$)', fontsize = 6)
+        ax_dem.xaxis.set_label_position('top')
+        if ('lons' in displacement_r2.keys()) and ('lats' in displacement_r2.keys()):                                           # if we have lons and lats, we can update the tick lables to be lons and lats.  
+            ax_dem.set_xticklabels([round(displacement_r2['lons'][-1,0], 2), round(displacement_r2['lons'][-1,-1], 2)])
+            ax_dem.set_yticklabels([round(displacement_r2['lats'][0,0], 2), round(displacement_r2['lats'][-1,0], 2)])
+        axins = inset_axes(ax_dem, width="7%", height="50%",   loc='lower left',  bbox_to_anchor=(1.05, 0., 1, 1),              # isnet axes just to left of the main axix for a colorbar
+                            bbox_transform=ax_dem.transAxes,borderpad=0)
+        fig1.colorbar(dem_plot, cax = axins, ticks = [0, np.nanmax(displacement_r2['dem'])])                                    # colorbar, tick only 0 and the max (and check max is not a nan)
+        axins.tick_params(axis='both', which='major', labelsize=6, rotation = 90)                                               #
+        fig1.add_subplot(ax_dem)
+        
+        # work out the size of the ICs/ DEM and add to the DEM bit of the figure.  
+        from geopy import distance
+        image_size = {}
+        image_size['x'] = int(distance.distance((displacement_r2['lats'][-1,0], displacement_r2['lons'][-1,0]),                       # bottom left corner  
+                                                (displacement_r2['lats'][-1,-1], displacement_r2['lons'][-1,-1])).meters / 1000)      #  to bottom right, and convert to integere kms
+        image_size['y'] = int(distance.distance((displacement_r2['lats'][-1,0], displacement_r2['lons'][-1,0]),                       # bottom left 
+                                            (displacement_r2['lats'][0,0], displacement_r2['lons'][0,0])).meters / 1000)              # to to top left, and conver to integer kms
+        
+        ax_dem.text(int(displacement_r2['dem'].shape[1] / 2), displacement_r2['dem'].shape[0], f"{image_size['x']}km",                # x size first 
+                    horizontalalignment='center', verticalalignment = 'bottom', fontsize = 6)
+        ax_dem.text(0.05 * int(displacement_r2['dem'].shape[1]), int(displacement_r2['dem'].shape[0] / 2), f"{image_size['y']}km",      # in x dimension, nudged in by 5% of the image width to look better.  
+                    horizontalalignment='left', fontsize = 6, rotation = 90)
+            
+    # 8: Possible save output
     if out_folder is not None:
         filename = "_".join(figtitle.split(" "))                                            # figtitle has spaces, but filename must use underscores instead.  
         fig1.savefig(f'{out_folder}/{filename}.png', bbox_inches='tight')
