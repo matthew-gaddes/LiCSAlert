@@ -489,6 +489,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         2020/04/20 | MEG | Update so that x tick labels are dates and not numbers since time series started.  
         2020/06/23 | MEG | Write documentation for dates argument.  
         2020/12/15 | MEG | Determine whether sources are downsampled automatically, and also raise exception if the number of pixels doesn't agree.  
+        2021_09_28 | MEG | Update various plotting featuers (add cumulative ifgs, add DEM with lons and lats.  )
     
     """
     import numpy as np
@@ -521,7 +522,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, time_values, minorLocator, majorLocator, xlim, ylabel = ''):
         """ Plot all the ifgs (baseline and monitoring) within the grispec_area.  
         """
-
+        from mpl_toolkits.axes_grid1.inset_locator import inset_axes            
         # 1: Create a single wide axes for the inset axes to be plotted on
         ax_ifgs = plt.Subplot(figure, gridspec_area)                                       # a thin but wide axes for all the thumbnail ifgs along the top to go in
         fig1.add_subplot(ax_ifgs)                                                          # add to figure
@@ -533,12 +534,20 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ax_ifgs.xaxis.set_minor_locator(minorLocator)
         for ifg_n, source in enumerate(ifgs):                                                                                # ifgs are rows, loop through
             iax = ax_ifgs.inset_axes([time_values[ifg_n], 0., (xlim/ifg_xpos_scaler), 1.], transform=ax_ifgs.transData)      # [xpos, ypos, xwidth, ywidth], note the x_pos_scaler that reduces the size of the inset axes to make sure it remains in tehe right place
-            iax.imshow(col_to_ma(source, pixel_mask), cmap = plt.get_cmap('coolwarm'))                                       # plot on the axes
+            ifg_plot = iax.imshow(col_to_ma(source, pixel_mask), cmap = plt.get_cmap('coolwarm'))                                       # plot on the axes
             iax.set_xticks([])                                                                                               # images so get rid of x and y ticks (nb this is just for the inset axes)
             iax.set_yticks([])
             # print(time_values[ifg_n])                                                                       # for debugging
             # plt.pause(1)                                                                                    # "
-        ax_ifgs.set_ylabel(ylabel, fontsize = 7, labelpad = -2)
+            if ifg_n == (ifgs.shape[0] -1):
+                cbar_ax = inset_axes(iax, width="7%", height="50%",   loc='lower left',  bbox_to_anchor=(1.05, 0.25, 1, 1),              # isnet axes just to left of the main axix for a colorbar
+                                     bbox_transform=iax.transAxes,borderpad=0)
+                cbar = fig1.colorbar(ifg_plot, cax = cbar_ax, ticks = [np.nanmin(source), np.nanmax(source)])                                    # colorbar, tick only 0 and the max (and check max is not a nan)
+                cbar_ax.tick_params(labelsize=6)                                               #
+                cbar_ax.set_title('LOS disp. (m)', fontsize = 6, loc = 'left')
+            
+        ax_ifgs.set_ylabel(ylabel, fontsize = 7, labelpad = -1)
+        
 
     def colourbar_for_sources(icasar_sources):
         """ Creat a colourbar for the ICA sources that is centered on 0, and cropped so that each side is equal
@@ -753,7 +762,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     tick_locator = ticker.MaxNLocator(nbins=4)
     ics_cbar.locator = tick_locator
     ics_cbar.update_ticks()
-    ics_cbar.set_label('IC (rad)')
+    ics_cbar.set_label('IC (m)')
     ics_cbar.ax.yaxis.set_label_position('left')
     
     cax2 = fig1.add_axes([0.17, 0.08, 0.005, 0.1])                                            # number of sigmas from the mean
@@ -776,16 +785,20 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ax_dem.tick_params(axis='both', which='minor', labelsize=7)
         ax_dem.set_xticks([0, displacement_r2['dem'].shape[1]])                                                                 # tick only the min and max in each direction
         ax_dem.set_yticks([0, displacement_r2['dem'].shape[0]])
-        ax_dem.set_ylabel('Latitude ($^\circ$)', fontsize = 6)
-        ax_dem.set_xlabel('Longitude ($^\circ$)', fontsize = 6)
+
         ax_dem.xaxis.set_label_position('top')
         if ('lons' in displacement_r2.keys()) and ('lats' in displacement_r2.keys()):                                           # if we have lons and lats, we can update the tick lables to be lons and lats.  
             ax_dem.set_xticklabels([round(displacement_r2['lons'][-1,0], 2), round(displacement_r2['lons'][-1,-1], 2)])
             ax_dem.set_yticklabels([round(displacement_r2['lats'][0,0], 2), round(displacement_r2['lats'][-1,0], 2)])
-        axins = inset_axes(ax_dem, width="7%", height="50%",   loc='lower left',  bbox_to_anchor=(1.05, 0., 1, 1),              # isnet axes just to left of the main axix for a colorbar
-                            bbox_transform=ax_dem.transAxes,borderpad=0)
-        fig1.colorbar(dem_plot, cax = axins, ticks = [0, np.nanmax(displacement_r2['dem'])])                                    # colorbar, tick only 0 and the max (and check max is not a nan)
-        axins.tick_params(axis='both', which='major', labelsize=6, rotation = 90)                                               #
+        ax_dem.set_ylabel('Latitude ($^\circ$)', fontsize = 6)
+        ax_dem.set_xlabel("Longitude ($^\circ$)", fontsize = 6)
+            
+        #colorbar for the DEM, just gets in the way.              
+        # axins = inset_axes(ax_dem, width="7%", height="50%",   loc='lower left',  bbox_to_anchor=(1.05, 0., 1, 1),              # isnet axes just to left of the main axix for a colorbar
+        #                     bbox_transform=ax_dem.transAxes,borderpad=0)
+        # #fig1.colorbar(dem_plot, cax = axins, ticks = [0, np.nanmax(displacement_r2['dem'])])                                    # colorbar, tick only 0 and the max (and check max is not a nan)
+        # fig1.colorbar(dem_plot, cax = axins, ticks = [])                                    # colorbar, tick only 0 and the max (and check max is not a nan)
+        # #axins.tick_params(axis='both', which='major', labelsize=6, rotation = 90)                                               #
         fig1.add_subplot(ax_dem)
         
         # work out the size of the ICs/ DEM and add to the DEM bit of the figure.  
@@ -796,11 +809,9 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         image_size['y'] = int(distance.distance((displacement_r2['lats'][-1,0], displacement_r2['lons'][-1,0]),                       # bottom left 
                                             (displacement_r2['lats'][0,0], displacement_r2['lons'][0,0])).meters / 1000)              # to to top left, and conver to integer kms
         
-        ax_dem.text(int(displacement_r2['dem'].shape[1] / 2), displacement_r2['dem'].shape[0], f"{image_size['x']}km",                # x size first 
-                    horizontalalignment='center', verticalalignment = 'bottom', fontsize = 6)
-        ax_dem.text(0.05 * int(displacement_r2['dem'].shape[1]), int(displacement_r2['dem'].shape[0] / 2), f"{image_size['y']}km",      # in x dimension, nudged in by 5% of the image width to look better.  
-                    horizontalalignment='left', fontsize = 6, rotation = 90)
-            
+        ax_dem.text(-0.5 * displacement_r2['dem'].shape[1], -1 * displacement_r2['dem'].shape[0], f"WxH (km): {image_size['x']} x {image_size['y']}\n"              # add these in these labels in the space above the DEM.  
+                        f"DEM min/max (m): {int(np.nanmin(displacement_r2['dem'])), int(np.nanmax(displacement_r2['dem']))}", fontsize = 6 )
+    
     # 8: Possible save output
     if out_folder is not None:
         filename = "_".join(figtitle.split(" "))                                            # figtitle has spaces, but filename must use underscores instead.  
