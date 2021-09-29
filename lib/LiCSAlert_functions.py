@@ -449,7 +449,7 @@ def tcs_monitoring(tcs_c, sources_tcs, time_values, residual=False):
 #%%
 
 def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline_end, time_values, day0_date=None,
-                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, n_days_major_tick = 48, sources_labels = None):
+                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, sources_labels = None):
     """
     The main fucntion to draw the LiCSAlert figure.  
     
@@ -472,8 +472,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         out_folder | None or string | If not None, output pngs are saved to this location and the matplotib figures closed
         ifg_xpos_scaler | int | To be positioned correctly in the x direction, the ifgs that are plotted on the upper row must not be taller
                                 than the axis they lie within.  Increasing this value makes the ifgs smaller, and therefore fit.  
-        n_days_major_tick | int | minor tick labels are every 12 days but have no labels.  Major have labels (dates), and can be set.  default is 48.  
-        sources_labels | dict |  keys and variables:
+        WIP sources_labels | dict |  keys and variables:
                                     'defo_sources' : ['dyke', 'sill', 'no_def' ]
                                     'Y_class' : n_sources x 3, labels as one hot encoding.  
                                     'Y_loc' : n_sources x 4, location of deformation.  [0,0,0,0] if none present.  
@@ -490,6 +489,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         2020/06/23 | MEG | Write documentation for dates argument.  
         2020/12/15 | MEG | Determine whether sources are downsampled automatically, and also raise exception if the number of pixels doesn't agree.  
         2021_09_28 | MEG | Update various plotting featuers (add cumulative ifgs, add DEM with lons and lats.  )
+        2021_09_29 | MEG | Add ifg date
     
     """
     import numpy as np
@@ -519,19 +519,19 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         return line_args
     
 
-    def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, time_values, minorLocator, majorLocator, xlim, ylabel = ''):
+    def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, time_values, xlim, ylabel = '', day0_date = None, cumulative = False):
         """ Plot all the ifgs (baseline and monitoring) within the grispec_area.  
         """
         from mpl_toolkits.axes_grid1.inset_locator import inset_axes            
         # 1: Create a single wide axes for the inset axes to be plotted on
-        ax_ifgs = plt.Subplot(figure, gridspec_area)                                       # a thin but wide axes for all the thumbnail ifgs along the top to go in
-        fig1.add_subplot(ax_ifgs)                                                          # add to figure
-        ax_ifgs.set_yticks([])                                                             # no y ticks
+        ax_ifgs = plt.Subplot(figure, gridspec_area)                                                # a thin but wide axes for all the thumbnail ifgs along the top to go in
+        fig1.add_subplot(ax_ifgs)                                                                   # add to figure
+        ax_ifgs.set_yticks([])                                                                      # no y ticks
         ax_ifgs.set_ylim(bottom = 0, top = 1)
-        ax_ifgs.set_xlim(left = 0, right = xlim)                                           # set x axis upper limit to be the number of acquisitions in the time series
-        ax_ifgs.set_xticklabels([])
-        ax_ifgs.xaxis.set_major_locator(majorLocator)                                      # Major and minor tick lables 
-        ax_ifgs.xaxis.set_minor_locator(minorLocator)
+        ax_ifgs.set_xlim(left = 0, right = xlim)                                                    # set x axis upper limit to be the number of acquisitions in the time series
+        if day0_date is not None:       
+            xticks_every_3months(ax_ifgs, day0_date, time_values, include_tick_labels = False)      # update the ticks (but not labels) to be the same as the time course and residual axis
+
         for ifg_n, source in enumerate(ifgs):                                                                                # ifgs are rows, loop through
             iax = ax_ifgs.inset_axes([time_values[ifg_n], 0., (xlim/ifg_xpos_scaler), 1.], transform=ax_ifgs.transData)      # [xpos, ypos, xwidth, ywidth], note the x_pos_scaler that reduces the size of the inset axes to make sure it remains in tehe right place
             ifg_plot = iax.imshow(col_to_ma(source, pixel_mask), cmap = plt.get_cmap('coolwarm'))                                       # plot on the axes
@@ -540,12 +540,21 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
             # print(time_values[ifg_n])                                                                       # for debugging
             # plt.pause(1)                                                                                    # "
             if ifg_n == (ifgs.shape[0] -1):
-                cbar_ax = inset_axes(iax, width="7%", height="50%",   loc='lower left',  bbox_to_anchor=(1.05, 0.25, 1, 1),              # isnet axes just to left of the main axix for a colorbar
+                cbar_ax = inset_axes(iax, width="7%", height="40%",   loc='lower left',  bbox_to_anchor=(1.05, 0.1, 1, 1),              # Colorbar: isnet axes just to left of the main axis
                                      bbox_transform=iax.transAxes,borderpad=0)
-                cbar = fig1.colorbar(ifg_plot, cax = cbar_ax, ticks = [np.nanmin(source), np.nanmax(source)])                                    # colorbar, tick only 0 and the max (and check max is not a nan)
-                cbar_ax.tick_params(labelsize=6)                                               #
-                cbar_ax.set_title('LOS disp. (m)', fontsize = 6, loc = 'left')
-            
+                cbar = fig1.colorbar(ifg_plot, cax = cbar_ax, ticks = [np.nanmin(source), np.nanmax(source)])                            # colorbar, tick only 0 and the max (and check max is not a nan)
+                cbar_ax.tick_params(labelsize=6)                                                                                         #                                    
+                if day0_date is None:
+                    cbar_ax.set_title('LOS disp. (m)', fontsize = 6, loc = 'left')
+                else:
+                    day0_date_dt = dt.datetime.strptime(day0_date, "%Y%m%d")                                                             # label the ifg with date interval, start by converting day0 date
+                    if cumulative:                                                                                                       # cumulative ifg spans from start to end
+                        ifg_start_date = day0_date_dt
+                    else:
+                        ifg_start_date = day0_date_dt + dt.timedelta(int(time_values[-2]))                                               # but incremental is from previous date
+                    ifg_end_date = day0_date_dt + dt.timedelta(int(time_values[-1]))                                                     # to final date
+                    cbar_ax.set_title(f"{dt.datetime.strftime(ifg_start_date, '%Y%m%d')}\n"
+                                      f"{dt.datetime.strftime(ifg_end_date, '%Y%m%d')}\nLOS disp. (m)", fontsize = 6, loc = 'left')
         ax_ifgs.set_ylabel(ylabel, fontsize = 7, labelpad = -1)
         
 
@@ -597,6 +606,8 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         
         from dateutil.relativedelta import relativedelta                                                    # add 3 months and check not after end
         from matplotlib.ticker import AutoMinorLocator      
+        
+        xtick_label_angle = 315
         
         tick_labels_days = ax_to_update.get_xticks().tolist()                                                # get the current tick labels
         day0_date_dt = dt.datetime.strptime(day0_date, "%Y%m%d")                                            
@@ -655,10 +666,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     
     # 0: Start, some definitions that shouldn't need changing (ie hard coded variables)
     #line_best_fit_alpha = 0.7
-    xtick_label_angle = 315
     dot_marker_size = 12
-    majorLocator = MultipleLocator(n_days_major_tick)                                                  # in days, good to be a multiple of 12 for Sentinel-1 data
-    minorLocator = MultipleLocator(12)                                                  # as above
     if time_value_end is None:
         t_end = time_values[-1]                                                         # last time value - i.e. the right hand x value of all the axes
     else:
@@ -674,7 +682,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     c = mpl.colors.ColorConverter().to_rgb                                      
     cmap_discrete = make_colormap(  [c('black'), c('orange'), 0.33, c('orange'), c('yellow'), 0.66, c('yellow'), c('red')])     # custom colorbar for number of sigmas from line
     cmap_sources = colourbar_for_sources(sources)
-    figtitle = f'LiCSAlert figure with {n_ifgs-n_baseline_end} monitoring interferograms'
+    figtitle = f'LiCSAlert figure with {(n_ifgs-n_baseline_end):03d} monitoring interferograms'
 
     # 2 Initiate the figure    
     fig1 = plt.figure(figsize=(14,8))
@@ -683,10 +691,9 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
 
     # 3: Plot the ifgs along the top
     plot_ifgs(np.cumsum(displacement_r2["incremental_downsampled"], axis = 0), displacement_r2["mask_downsampled"], fig1, grid[0,1:], 
-              time_values, minorLocator, majorLocator, t_end, ylabel = 'Cumulative')                                                                # cumulative ifgs
+              time_values, t_end, ylabel = 'Cumulative', day0_date = day0_date, cumulative = True)                                                                # cumulative ifgs
     plot_ifgs(displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"], fig1, grid[1,1:], 
-              time_values, minorLocator, majorLocator, t_end, ylabel = ' Incremental')                                                               # incremental ifgs
-
+              time_values, t_end, ylabel = ' Incremental', day0_date = day0_date, cumulative = False)                                                               # incremental ifgs
 
     # 4: Plot each source and its time course 
     try:
@@ -734,7 +741,8 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ax_tc.axhline(y=0, color='k', alpha=0.3)  
         ax_tc.axvline(x = baseline_monitor_change, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
         ax_tc.set_xlim(left = 0, right = t_end)
-        xticks_every_3months(ax_tc, day0_date, time_values, include_tick_labels = False)
+        if day0_date is not None:
+            xticks_every_3months(ax_tc, day0_date, time_values, include_tick_labels = False)
         fig1.add_subplot(ax_tc)
         sigma_bar_plotter(ax_tc, time_values, source_tc["distances"], cmap_discrete)                # draw the bar graph showing sigma values
         ax_tc.yaxis.tick_right()                                                                    # has to be called after sigma_bar_plotter
@@ -754,7 +762,8 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     fig1.add_subplot(ax_residual)
     sigma_bar_plotter(ax_residual, time_values, residual[0]["distances"], cmap_discrete)                    # draw the bar graph showing sigma values
     ax_residual.yaxis.tick_right()                                                                        # has to be called after sigma_bar_plotter
-    xticks_every_3months(ax_residual, day0_date, time_values, include_tick_labels = True)                   # create the ticks and labels on the 1st of the quater.  
+    if day0_date is not None:
+        xticks_every_3months(ax_residual, day0_date, time_values, include_tick_labels = True)                   # create the ticks and labels on the 1st of the quater.  
     
     ## 6: add the two colorbars
     cax = fig1.add_axes([0.12, 0.08, 0.005, 0.1])                                      # source strength
@@ -809,7 +818,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         image_size['y'] = int(distance.distance((displacement_r2['lats'][-1,0], displacement_r2['lons'][-1,0]),                       # bottom left 
                                             (displacement_r2['lats'][0,0], displacement_r2['lons'][0,0])).meters / 1000)              # to to top left, and conver to integer kms
         
-        ax_dem.text(-0.5 * displacement_r2['dem'].shape[1], -1 * displacement_r2['dem'].shape[0], f"WxH (km): {image_size['x']} x {image_size['y']}\n"              # add these in these labels in the space above the DEM.  
+        ax_dem.text(-0.5 * displacement_r2['dem'].shape[1], -0.75 * displacement_r2['dem'].shape[0], f"WxH (km): {image_size['x']} x {image_size['y']}\n"              # add these in these labels in the space above the DEM.  
                         f"DEM min/max (m): {int(np.nanmin(displacement_r2['dem'])), int(np.nanmax(displacement_r2['dem']))}", fontsize = 6 )
     
     # 8: Possible save output
