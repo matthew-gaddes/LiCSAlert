@@ -5,7 +5,7 @@ channels:
 
 dependencies:
   - python=3.7.1                            # general
-  - matplotlib=3.0.2  		 	    # swtich from 3.0.1 needed due to bug with inset axes and tight layout
+  - matplotlib=3.0.2                      # swtich from 3.0.1 needed due to bug with inset axes and tight layout
   - numpy
   - spyder                                # interactive plotting of ICASAR is designed to work with Spyder
 
