@@ -140,7 +140,7 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
 
 #%%
 
-def create_licsalert_update_list(licsbas_dir, licsalert_dir, filt = True):
+def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, filt = True):
     """ Given a dir of licsbas products and a dir of licsalert time series, determine which licsalert time series need to be updated.  
     This is done by comparing the modified dates of the licsbas .json files, and the date
     of the licsbas file last used by licsalert which is stored as a .txt file in the directory 
@@ -148,6 +148,7 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, filt = True):
     Inputs:
         licsbas_dir | path | location of directory containing the region directories.  
         licsalert_dir | path | location of directory containing the licsalert region directories.  
+        template_file_dir
     Returns:
         volc_names_current | list of dicts | name and region of each volcano that is up to date (ie) curent.  
         volc_names_to_update | list of dicts | names and region of each volcano that need to be updated (ie. LiCSAlert run).  
@@ -190,6 +191,36 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, filt = True):
             return volc_paths
         else:
             return volc_paths_filt
+        
+    def initiate_licsalert_volcano(licsalert_dir, region, volc, template_file_dir):
+        """If a volcano has not been processed with LiCSAlert yet (ie no output directory exists), make the directory and 
+        copy in the template files.  
+        Inputs:
+            licsalert_dir | Path | to licsalert folder
+            region | string | volcano region
+            volc | string | volcano form, in the licsbas form (ie with track info etc.  )
+            template_file_dir | Path | to where the template files are stored.  
+        Returns:
+            directories and files.  
+        History:
+            2021_10_22 | MEG | Written
+        """
+        import os
+        import glob
+        from shutil import copyfile
+        from pathlib import Path
+               
+        os.makedirs(licsalert_dir / region / volc)                                                              # make the volcanoes directory
+        template_files = glob.glob(str(template_file_dir / "*"))                                                # get the paths to each template file
+        for template_file in template_files:                                                                    # loop through them
+            filename = list(Path(template_file).parts)[-1]                                                      # get jut the name
+            copyfile(template_file, licsalert_dir / region / volc / filename)                                   # copy them to the new dir
+            
+        with open(licsalert_dir / "all_volcs_products" / "licsalert_all_volcs_log.txt", "a") as all_volcs_log:
+            message = f"A licsbas .json was found for {volc} but no licsalert directory.  The directory has now been created, and the template files copied in.  "
+            print(message)
+            all_volcs_log.write(message)
+
 
     # 1: get all the licsbas volcanoes, and loop through seeing how they compare to the files used by licsalert for that volcano
     licsbas_volc_paths = get_all_licsbas_jsons(licsbas_dir, filt = True)                           # get a list of the full paths to all .json files (either filtered or not, depending on flag).  All regions, all volcanoes, as pathlib Paths
@@ -200,19 +231,15 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, filt = True):
         region = licsbas_volc_path.parts[-2]
         volc_name = licsbas_volc_path.parts[-1].split('.')[0]                                               # last part of the path is the file name, and drop the .json bit.  
 
+        if os.path.isdir(licsalert_dir / region / volc_name) == False:                                      # if the directory for that volcano doesn't exist
+            initiate_licsalert_volcano(licsalert_dir, region, volc_name, template_file_dir)                 # make it and copy in the template files, then update the all_volcs log 
+
         licsbas_json_time = datetime.fromtimestamp(os.path.getmtime(licsbas_volc_path))                     # and determine when the .json file was modified
         licsbas_json_time = licsbas_json_time.replace(microsecond = 0)                                      # incuding micro seconds just makes it more complicated
 
-        try:
-            f = open(licsalert_dir / region / volc_name / 'licsbas_dates.txt', "r")                             # open the file
-            lines = f.readlines()                                                                               # lines of the file to a list                                                                               
-            licsbas_time_used_by_licsalert = datetime.strptime(lines[-1][:-1],  '%Y-%m-%d %H:%M:%S')                   # last line is the date of the .json file last usedd, -1 at the end as \n (linebreak) counts as one character.   
-        except:
-            print(f"Unable to find the date of the LiCSBAS file last used by LiCSAlert for {volc_name} (stored in the licsbas_dates.txt file for each volcano).  "
-                  f"Setting this date to 2000-01-01 00:00:00 and trying to continue as it's assumed this is the first run of LiCSAlert.  ")
-            licsbas_time_used_by_licsalert = datetime.strptime('2000-01-01 00:00:00',  '%Y-%m-%d %H:%M:%S')
-            with open(licsalert_dir / region / volc_name / 'licsbas_dates.txt', "w") as licsbas_dates_file:                      # open the file
-                licsbas_dates_file.write(f"{datetime.strftime(licsbas_time_used_by_licsalert, '%Y-%m-%d %H:%M:%S')}\n")                   # ad write this first dummy date to it,
+        f = open(licsalert_dir / region / volc_name / 'licsbas_dates.txt', "r")                             # open the file
+        lines = f.readlines()                                                                               # lines of the file to a list                                                                               
+        licsbas_time_used_by_licsalert = datetime.strptime(lines[-1][:-1],  '%Y-%m-%d %H:%M:%S')                   # last line is the date of the .json file last usedd, -1 at the end as \n (linebreak) counts as one character.   
         
         if licsbas_json_time > licsbas_time_used_by_licsalert:                                          # if time from licsbas .json file is after the time of the licsbas .json licsalert recorded as having last used
             volc_names_to_update.append({'name'   : volc_name,                                          # then volcano will need updating
