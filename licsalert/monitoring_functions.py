@@ -162,35 +162,32 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
     from datetime import datetime
     
 
-    def get_all_licsbas_jsons(licsbas_dir, filt = True):
+    def get_required_licsbas_jsons(licsbas_dir):
         """ Given a directory of LiCSBAS .json files (i.e. as produced on Jasmin), return paths
         to all of either the filtered or normal files.  Note that each volcano is expected to be
         in a region (e.g. afrida / pacific island etc.)
         Inputs:
             licsbas_dir | path | location of directory containing the region directories.  
-            filt | boolean | if True, filtered files are returned.  If false, normal
         Returns:
             volc_paths | list of strings | either to filtered or normal files
         History:
             2021_10_01 | MEG | Written
+            2021_10_25 | MEG | Update to return both filt and non filtered, but no web products.  
         """
         from pathlib import Path
         
         regions = listdir(licsbas_dir)
         volc_path_strs = []                                                                                 # list of paths, but as strings
-        volc_paths = []                                                                                     # list of pathlib Paths
-        volc_paths_filt = []                                                                                # list of pathlib Paths
-        for region in regions:
-            volc_path_strs.extend(glob.glob(str(licsbas_dir / region / '*.json')))                            # contains both _filt.json and .json, returns a list which we use to extend the other list
+        volc_paths = []                                                                                     # list of pathlib Paths to be returned
+
+        for region in regions:                                                                              # loop through all regions to get all the .json files.  
+            volc_path_strs.extend(glob.glob(str(licsbas_dir / region / '*.json')))                            # contains both _filt.json and .json for web and normal resolution, returns a list which we use to extend the other list
+            
         for volc_path_str in volc_path_strs:                                                            # loop through each file
-            if volc_path_str.split('.')[-2][-4:] == 'filt':                                         # 
-                volc_paths_filt.append(Path(volc_path_str))
-            else:
+            if '_web' not in volc_path_str:
                 volc_paths.append(Path(volc_path_str))
-        if filt:
-            return volc_paths
-        else:
-            return volc_paths_filt
+        return volc_paths
+
         
     def initiate_licsalert_volcano(licsalert_dir, region, volc, template_file_dir):
         """If a volcano has not been processed with LiCSAlert yet (ie no output directory exists), make the directory and 
@@ -223,7 +220,8 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
 
 
     # 1: get all the licsbas volcanoes, and loop through seeing how they compare to the files used by licsalert for that volcano
-    licsbas_volc_paths = get_all_licsbas_jsons(licsbas_dir, filt = True)                           # get a list of the full paths to all .json files (either filtered or not, depending on flag).  All regions, all volcanoes, as pathlib Paths
+    licsbas_volc_paths = get_required_licsbas_jsons(licsbas_dir)                                           # get a list of the full paths to all required .json files (filtered and non filtered, but no web)
+
     volc_names_current = []
     volc_names_to_update = []
     
@@ -438,7 +436,12 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     mask_coh_water = 1 - nested_lists_to_numpy(licsbas_data['mask'])                        # flip as vertical always flipped when working with .json files. Also, LiCSAlert uses 1 for area to be masked, this returns opposite (so 1 - to invert)
     
     # 3: get the data, mask, and convert to rank 2 in both cumululative and incremental
-    cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_raw'])                                    # 
+    if 'data_raw' in licsbas_data.keys():                                                                   # data can be called one of two things.      
+        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_raw'])                                    # 
+    elif 'data_filt' in licsbas_data.keys():
+        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_filt'])                                    # 
+    else:
+        raise Exception(f"The deformation information is expected to be stored in the .json file as either 'data_raw' or 'data_filt', but neither of these were present so can't continue.  ")
     cumulative_r3 *= 0.001                                                                             # licsbas standard is mm, convert to m
     n_im, length, width = cumulative_r3.shape                                                          # time series size, n_im = n_acquisisions
     mask_coh_water_r3 = np.repeat(mask_coh_water[np.newaxis,], n_im, axis = 0)                         # new version that has expanded to be the same size as the cumulative ifgs
