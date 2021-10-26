@@ -12,10 +12,10 @@ from pathlib import Path
 import copy
 import numpy as np
 
-sys.path.append("./lib")
-from LiCSAlert_functions import LiCSAlert_batch_mode
+import licsalert
+from licsalert.licsalert import LiCSAlert_batch_mode
 
-ICASAR_path = Path("/home/matthew/university_work/15_my_software_releases/ICASAR-2.6.0/")                               # location of ICASAR functions
+ICASAR_path = Path("/home/matthew/university_work/15_my_software_releases/ICASAR-2.7.1/")                               # location of ICASAR functions
 #ICASAR_path = Path("/home/matthew/university_work/01_blind_signal_separation_python/13_ICASAR/ICASAR_GitHub")           # development version
 
 
@@ -59,7 +59,7 @@ ICASAR_settings = {"n_comp" : 6,                                                
                     "ica_param" : (1e-2, 150),                                       # (tolerance, max iterations)
                     "figures" : "png",                                               # if png, saved in a folder as .png.  If window, open as interactive matplotlib figures, if window+png then both.  
                     "create_all_ifgs_flag" : False,                                  # Creates all possible pairs of ifgs between all acquisitions.  Results can be more complex with this set to True, but also better at recovering small magnitude signals
-                    "load_fastICA_results" : True}                                   # If True, ICASAR will try to load the results of FastICA from previous runs.  This is useful if you wish to fine tune the hdbscan or tsne settings quickly.     
+                    "load_fastICA_results" : False}                                   # If True, ICASAR will try to load the results of FastICA from previous runs.  This is useful if you wish to fine tune the hdbscan or tsne settings quickly.     
                     
 
 
@@ -95,7 +95,7 @@ ICASAR_settings = {"n_comp" : 5,                                         # numbe
                    "ica_param" : (1e-2, 150),                           # (tolerance, max iterations)
                    "hdbscan_param" : (100,10),                           # (min_cluster_size, min_samples) Discussed in more detail in Mcinnes et al. (2017). min_cluster_size sets the smallest collection of points that can be considered a cluster. min_samples sets how conservative the clustering is. With larger values, more points will be considered noise. 
                    "create_all_ifgs_flag" : True,                       # small signals are hard for ICA to extact from time series, so make it easier by creating all possible long temporal baseline ifgs from the incremental data.  
-                   "load_fastICA_results" : True,                      # If all the FastICA runs already exisit, setting this to True speeds up ICASAR as they don't need to be recomputed.  
+                   "load_fastICA_results" : False,                      # If all the FastICA runs already exisit, setting this to True speeds up ICASAR as they don't need to be recomputed.  
                    "figures" : "png+window"}                            # if png, saved in a folder as .png.  If window, open as interactive matplotlib figures,
 
 
