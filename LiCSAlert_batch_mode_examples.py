@@ -15,7 +15,7 @@ import numpy as np
 import licsalert
 from licsalert.licsalert import LiCSAlert_batch_mode
 
-ICASAR_path = Path("/home/matthew/university_work/15_my_software_releases/ICASAR-2.7.1/")                               # location of ICASAR functions
+ICASAR_path = Path("/home/matthew/university_work/15_my_software_releases/ICASAR-2.7.2/")                               # location of ICASAR functions
 #ICASAR_path = Path("/home/matthew/university_work/01_blind_signal_separation_python/13_ICASAR/ICASAR_GitHub")           # development version
 
 
@@ -69,9 +69,9 @@ LiCSAlert_batch_mode(displacement_r2, ICASAR_settings = ICASAR_settings, **LiCSA
 
 #%% Example 2, creating the LiCSAlert figure at all time steps
 
-LiCSAlert_settings["intermediate_figures"] = True                # change one key/variable in the dict so that all the intermediate ifgs are made by LiCSAlert (which can be slow, but is good for animations)
-LiCSAlert_settings["out_folder"] = "LiCSAlert_02_Sierra_Negra_intermediate"
-LiCSAlert_batch_mode(displacement_r2_copy, ICASAR_settings = ICASAR_settings, **LiCSAlert_settings,ICASAR_path = ICASAR_path)
+# LiCSAlert_settings["intermediate_figures"] = True                # change one key/variable in the dict so that all the intermediate ifgs are made by LiCSAlert (which can be slow, but is good for animations)
+# LiCSAlert_settings["out_folder"] = "LiCSAlert_02_Sierra_Negra_intermediate"
+# LiCSAlert_batch_mode(displacement_r2_copy, ICASAR_settings = ICASAR_settings, **LiCSAlert_settings,ICASAR_path = ICASAR_path)
 
 
 #%% Example 3, Running LiCSAlert with a smaller signal (Campi Flegrei, processed with LiCSBAS)
