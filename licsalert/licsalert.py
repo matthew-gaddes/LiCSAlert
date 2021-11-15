@@ -932,7 +932,7 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
 
 #%%
     
-def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot=0.5, verbose=True):
+def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot=0.5, verbose=True, mean_centre = True):
     """A function to downsample the data at two scales (one for general working [ie to speed things up], and one 
     for faster plotting.  )  Also, data are mean centered, which is required for ICASAR and LiCSAlert.  
     Note that the downsamples are applied consecutively, so are compound (e.g. if both are 0.5, 
@@ -944,6 +944,7 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
         downsample_run | float | in range [0 1], and used to downsample the "incremental" data
         downsample_plot | float | in range [0 1] and used to downsample the data again for the "incremental_downsample" data
         verbose | boolean | if True, informatin returned to terminal
+        mean_centre | boolean | add option to control if mean centered.  
         
     Outputs:
         displacement_r2 | dict | input data stored in a dict as row vectors with a mask
@@ -956,6 +957,7 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
         2021_04_14 | MEG | Update so handle rank2 arrays of lons and lats properly.  
         2021_05_05 | MEG | Add check that lats are always the right way up, and fix bug in lons.  
         2021_10_13 | MEG | Add function to also downsample ENU grids.  
+        2021_11_15 | MEG | Add option to control mean centering, and warning that it is happening.  
     """
     import numpy as np
     from licsalert.downsample_ifgs import downsample_ifgs
@@ -967,7 +969,10 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
     shape_start = displacement_r2["mask"].shape                                                     # and the shape of the ifgs (ny, nx)
     
     # 0: Mean centre the interferograms (ie. break any connection to a reference pixel/region that the interferogram was set to)
-    displacement_r2["incremental"] = displacement_r2["incremental"] - np.mean(displacement_r2["incremental"], axis = 1)[:,np.newaxis]                            # mean centre the data (along rows) 
+    if mean_centre:
+        if verbose:
+            print(f"LiCSAlert_preprocessing: mean centering the interferograms before downsampling")
+        displacement_r2["incremental"] = displacement_r2["incremental"] - np.mean(displacement_r2["incremental"], axis = 1)[:,np.newaxis]                            # mean centre the data (along rows) 
 
     # 1: Downsample the ifgs for use in all following functions.  
     if downsample_run != 1.0:                                                                                       # if we're not actually downsampling, skip for speed

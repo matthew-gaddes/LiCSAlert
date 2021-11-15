@@ -216,7 +216,8 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
         with open(licsalert_dir / "all_volcs_products" / "licsalert_all_volcs_log.txt", "a") as all_volcs_log:
             message = f"A licsbas .json was found for {volc} but no licsalert directory.  The directory has now been created, and the template files copied in.  "
             print(message)
-            all_volcs_log.write(message)
+            all_volcs_log.write(message + '\n')
+
 
 
     # 1: get all the licsbas volcanoes, and loop through seeing how they compare to the files used by licsalert for that volcano
@@ -422,6 +423,13 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     licsbas_json_creation_time = licsbas_json_creation_time.replace(microsecond = 0)
     
     print(f"Opening the LiCSBAS .json file with timestamp {licsbas_json_timestamp} and system creation time {licsbas_json_creation_time}.  ")
+    
+    # 0: Get the reference area.  
+    ref_list = licsbas_data['refarea'] 
+    ref_xy = {'x_start' : int(ref_list[0]),                                            # convert the correct part of the string to an integer
+              'x_stop'   : int(ref_list[1]),
+              'y_start'  : int(ref_list[2]),
+              'y_stop'   : int(ref_list[3])}
         
     # 1: get the lons and lats of each pixel in the image
     lons_mg, lats_mg = np.meshgrid(licsbas_data['x'], licsbas_data['y'])    
@@ -446,6 +454,11 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     n_im, length, width = cumulative_r3.shape                                                          # time series size, n_im = n_acquisisions
     mask_coh_water_r3 = np.repeat(mask_coh_water[np.newaxis,], n_im, axis = 0)                         # new version that has expanded to be the same size as the cumulative ifgs
     
+    # 3a: Reference the time series
+    ifg_offsets = np.nanmean(cumulative_r3[:, ref_xy['y_start']: ref_xy['y_stop'], ref_xy['x_start']: ref_xy['x_stop']], axis = (1,2))                                          # get the offset between the reference pixel/area and 0 for each time
+    cumulative_r3 = cumulative_r3 - np.repeat(np.repeat(ifg_offsets[:,np.newaxis, np.newaxis], cumulative_r3.shape[1],  axis = 1), cumulative_r3.shape[2], axis = 2)         # do the correction (first make ifg_offsets teh same size as cumulative).      
+    
+    # 3b: Deal with masking etc.
     cumulative_r3_ma = ma.array(cumulative_r3, mask=mask_coh_water_r3)                                  # mask the cumulative ifgs (first one should be all 0s), note that this could still have nans in it
     for nan_pixel in np.argwhere(np.isnan(cumulative_r3_ma)):                                           # find any pixels that are nan in this, and iterate over
         mask_coh_water_r3[:, nan_pixel[1], nan_pixel[2]] = 1                                            # and modify the mask so that they are masked for all times
@@ -464,14 +477,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     tbaseline_info["baselines"] = baseline_from_names(tbaseline_info["ifg_dates"])                                                          # and their temporal baselines
     tbaseline_info["baselines_cumulative"] = np.cumsum(tbaseline_info["baselines"])                                                         # cumulative baslines, e.g. 12 24 36 48 etc
     
-    # 5: Get the reference area.  
-    ref_list = licsbas_data['refarea'] 
-    ref_xy = {'x_start' : int(ref_list[0]),                                            # convert the correct part of the string to an integer
-              'x_stop'   : int(ref_list[1]),
-              'y_start'  : int(ref_list[2]),
-              'y_stop'   : int(ref_list[3])}
-    
-    # 6: Try to get the DEM
+    # 5: Try to get the DEM
     try:
         dem = nested_lists_to_numpy(licsbas_data['elev'])                                                 # 
         displacement_r2['dem'] = dem                                                                      # and added to the displacement dict in the same was as the lons and lats
