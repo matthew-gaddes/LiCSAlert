@@ -884,7 +884,7 @@ def record_mask_changes(icasar_mask, licsbas_mask, mask_combined, licsbas_date, 
     axes[2].set_title('Current combined mask')
     f1.suptitle(title)
     
-    f1.canvas.set_window_title(title)
+    f1.canvas.manager.set_window_title(title)
     f1.savefig(current_output_dir / "mask_status.png", bbox_inches='tight')
     plt.close(f1)
 
