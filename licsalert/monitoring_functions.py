@@ -140,7 +140,7 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
 
 #%%
 
-def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, filt = True):
+def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, licsbas_json_type = 'unfiltered'):
     """ Given a dir of licsbas products and a dir of licsalert time series, determine which licsalert time series need to be updated.  
     This is done by comparing the modified dates of the licsbas .json files, and the date
     of the licsbas file last used by licsalert which is stored as a .txt file in the directory 
@@ -148,7 +148,9 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
     Inputs:
         licsbas_dir | path | location of directory containing the region directories.  
         licsalert_dir | path | location of directory containing the licsalert region directories.  
-        template_file_dir
+        template_file_dir | path | location of template files that are copied in to each volcano's licsalert directory if it doesn't already exist.  
+        licsbas_json_type | string | 'filtered', 'unfiltered', or 'both'
+        
     Returns:
         volc_names_current | list of dicts | name and region of each volcano that is up to date (ie) curent.  
         volc_names_to_update | list of dicts | names and region of each volcano that need to be updated (ie. LiCSAlert run).  
@@ -162,12 +164,13 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
     from datetime import datetime
     
 
-    def get_required_licsbas_jsons(licsbas_dir):
+    def get_required_licsbas_jsons(licsbas_dir, licsbas_json_type = 'unfiltered'):
         """ Given a directory of LiCSBAS .json files (i.e. as produced on Jasmin), return paths
         to all of either the filtered or normal files.  Note that each volcano is expected to be
         in a region (e.g. afrida / pacific island etc.)
         Inputs:
             licsbas_dir | path | location of directory containing the region directories.  
+            licsbas_json_type | string | 'filtered', 'unfiltered', or 'both'
         Returns:
             volc_paths | list of strings | either to filtered or normal files
         History:
@@ -184,8 +187,16 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
             volc_path_strs.extend(glob.glob(str(licsbas_dir / region / '*.json')))                            # contains both _filt.json and .json for web and normal resolution, returns a list which we use to extend the other list
             
         for volc_path_str in volc_path_strs:                                                            # loop through each file
-            if '_web' not in volc_path_str:
-                volc_paths.append(Path(volc_path_str))
+            if '_web' not in volc_path_str:                                                                     # make sure it's not a low resolution _web file
+            
+                if (licsbas_json_type == 'filtered') or (licsbas_json_type == 'both'):
+                    if '_filt.' in volc_path_str:
+                        volc_paths.append(Path(volc_path_str))
+                        
+                if (licsbas_json_type == 'unfiltered') or (licsbas_json_type == 'both'):        
+                    if '_filt.' not in volc_path_str:
+                        volc_paths.append(Path(volc_path_str))
+
         return volc_paths
 
         
@@ -220,9 +231,9 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
 
 
 
-    # 1: get all the licsbas volcanoes, and loop through seeing how they compare to the files used by licsalert for that volcano
-    licsbas_volc_paths = get_required_licsbas_jsons(licsbas_dir)                                           # get a list of the full paths to all required .json files (filtered and non filtered, but no web)
-
+    # 1: get all the licsbas volcanoes (either filt or not), and loop through seeing how they compare to the files used by licsalert for that volcano    
+    licsbas_volc_paths = get_required_licsbas_jsons(licsbas_dir, licsbas_json_type)                                           # get a list of the full paths to all required .json files (filtered and non filtered, but no web)
+    
     volc_names_current = []
     volc_names_to_update = []
     
@@ -751,11 +762,11 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, b
     if run_ICASAR:
         print(f"\nRunning ICASAR.")                                      
         
-        spatial_ICASAR_data = {'mixtures_r2' : displacement_r2['incremental'][:(baseline_end_ifg_n+1),],                             # only take up to the last 
+        spatial_ICASAR_data = {'ifgs_dc' : displacement_r2['incremental'][:(baseline_end_ifg_n+1),],                             # only take up to the last 
                                'mask'        : displacement_r2['mask'],
                                'lons'        : displacement_r2['lons'],
                                'lats'        : displacement_r2['lats'],
-                               'ifg_dates'   : tbaseline_info['ifg_dates'][:(baseline_end_ifg_n+1)]}                             # ifg dates (yyyymmdd_yyyymmdd), but only up to the end of the baseline stage
+                               'ifg_dates_dc'   : tbaseline_info['ifg_dates'][:(baseline_end_ifg_n+1)]}                             # ifg dates (yyyymmdd_yyyymmdd), but only up to the end of the baseline stage
         if 'dem' in displacement_r2.keys():
             spatial_ICASAR_data['dem'] = displacement_r2['dem']
         

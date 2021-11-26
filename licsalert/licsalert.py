@@ -600,7 +600,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         return new_cmap 
     
     def xticks_every_3months(ax_to_update, day0_date, time_values, include_tick_labels):
-        """Given an axes, update the xtcisk so the major ones are the 1st of jan/april/july/october, and the minor ones are the first of the 
+        """Given an axes, update the xticks so the major ones are the 1st of jan/april/july/october, and the minor ones are the first of the 
         other months.  
         Inputs:
             ax_to_update | matplotlib axes | the axes to update.  
@@ -694,7 +694,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
 
     # 2 Initiate the figure    
     fig1 = plt.figure(figsize=(14,8))
-    fig1.canvas.set_window_title(figtitle)
+    fig1.canvas.manager.set_window_title(figtitle)
     grid = gridspec.GridSpec((n_ics + 3), 11, wspace=0.3, hspace=0.1)                        # divide into 2 sections, 1/5 for ifgs and 4/5 for components
 
     # 3: Plot the ifgs along the top
