@@ -64,7 +64,7 @@ ICASAR_settings = {"n_comp" : 6,                                                
                     
 
 
-LiCSAlert_batch_mode(displacement_r2, ICASAR_settings = ICASAR_settings, **LiCSAlert_settings, ICASAR_path = ICASAR_path)
+#LiCSAlert_batch_mode(displacement_r2, ICASAR_settings = ICASAR_settings, **LiCSAlert_settings, ICASAR_path = ICASAR_path)
 
 
 
@@ -74,6 +74,7 @@ LiCSAlert_settings["intermediate_figures"] = True                # change one ke
 LiCSAlert_settings["out_folder"] = "LiCSAlert_02_Sierra_Negra_intermediate"
 LiCSAlert_batch_mode(displacement_r2_copy, ICASAR_settings = ICASAR_settings, **LiCSAlert_settings,ICASAR_path = ICASAR_path)
 
+import sys; sys.exit()
 
 
 

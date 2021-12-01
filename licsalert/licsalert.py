@@ -568,6 +568,9 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     import datetime as dt 
     
     from licsalert.aux import col_to_ma
+    
+    import warnings
+    warnings.filterwarnings("error")
 
     
     def calcualte_line_args(n_ifgs, t_recalculate):
@@ -1310,5 +1313,5 @@ def remappedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
         cdict['blue'].append((si, b, b))
         cdict['alpha'].append((si, a, a))
     newcmap = matplotlib.colors.LinearSegmentedColormap(name, cdict)
-    plt.register_cmap(cmap=newcmap)
+    #plt.register_cmap(cmap=newcmap)
     return newcmap
