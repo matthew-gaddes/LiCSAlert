@@ -322,10 +322,6 @@ def residual_for_pixels(sources, sources_tcs, ifgs, mask, n_pix_window = 20, res
     2021_11_30 | MEG | Add new residual method (ratio of maximum in window for mean of all windows)
     """
 
-    # import warnings
-    # warnings.filterwarnings("error")
-
-
     import numpy as np
     import numpy.ma as ma
     from licsalert.aux import r2_to_r3
@@ -436,7 +432,7 @@ def tcs_baseline(tcs_c, time_values, t_recalculate):
         tc_dict["gradient"] = gradient[0]                                                       # add to dictionary
         
         # 3: Lines of best fit
-        line_yvals = np.polyval((tc_dict["gradient"], y_intercept), time_values)                # line of best fit, using the calcaulted y value
+        line_yvals = np.polyval((tc_dict["gradient"], y_intercept[0]), time_values)                # line of best fit, using the calcaulted y value
         lines_yvals = np.nan * np.ones((n_times, n_times))                                      # initiate as nans
         for time_step in range(n_times):                                                        # loop through each time step, to calculate it
             start_time = time_step - (t_recalculate-1)
@@ -568,11 +564,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     import datetime as dt 
     
     from licsalert.aux import col_to_ma
-    
-    import warnings
-    warnings.filterwarnings("error")
-
-    
+        
     def calcualte_line_args(n_ifgs, t_recalculate):
         """Lines of best fit are calculated for eahc time step, but we don't want
         to plot them all (as they lie on top of each other, mostly).  
