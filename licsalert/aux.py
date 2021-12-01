@@ -8,6 +8,36 @@ Created on Sun Mar  8 18:10:21 2020
 
 #%%
 
+
+
+def r2_to_r3(ifgs_r2, mask):
+    """ Given a rank2 of ifgs as row vectors, convert it to a rank3.   Copied from insar_tools.general to avoid making insar_tools a dependency.  
+    Inputs:
+        ifgs_r2 | rank 2 array | ifgs as row vectors 
+        mask | rank 2 array | to convert a row vector ifg into a rank 2 masked array        
+    returns:
+        phUnw | rank 3 array | n_ifgs x height x width
+    History:
+        2020/06/10 | MEG  | Written
+    """
+    import numpy as np
+    import numpy.ma as ma
+    from small_plot_functions import col_to_ma
+    
+    n_ifgs = ifgs_r2.shape[0]
+    ny, nx = col_to_ma(ifgs_r2[0,], mask).shape                                   # determine the size of an ifg when it is converter from being a row vector
+    
+    ifgs_r3 = np.zeros((n_ifgs, ny, nx))                                                # initate to store new ifgs
+    for ifg_n, ifg_row in enumerate(ifgs_r2):                                           # loop through all ifgs
+        ifgs_r3[ifg_n,] = col_to_ma(ifg_row, mask)                                  
+    
+    mask_r3 = np.repeat(mask[np.newaxis,], n_ifgs, axis = 0)                            # expand the mask from r2 to r3
+    ifgs_r3_ma = ma.array(ifgs_r3, mask = mask_r3)                                      # and make a masked array    
+    return ifgs_r3_ma
+
+
+#%%
+
 def get_baseline_end_ifg_n(LiCSBAS_imdates, baseline_end):
     """ Given a list of the dates that there are steps in the LICSBAS time series for (i.e. when there was a Sentinel-1 acquisition),
     find which number is the last before the baseline stage ends.  Note the baseline stage can end on any date (i.e. not one when there's an acquisition)

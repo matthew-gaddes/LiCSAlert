@@ -4,12 +4,13 @@ A selection of functions used by LiCSAlert
 
 @author: Matthew Gaddes
 """
+import pdb
 
 #%%
 
 def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder, 
                          ICASAR_settings, run_ICASAR = True, ICASAR_path = None, ic_classifying_model = None,
-                         intermediate_figures = False, downsample_run = 1.0, downsample_plot = 0.5, t_recalculate = 10):
+                         intermediate_figures = False, downsample_run = 1.0, downsample_plot = 0.5, t_recalculate = 10, residual_type = 'cumulative'):
     """ A function to run the LiCSAlert algorithm on a preprocssed time series.  To run on a time series that is being 
     updated, use LiCSAlert_monitoring_mode.  
     
@@ -33,6 +34,8 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         downsample_run | float | data can be downsampled to speed things up
         downsample_plot | float | and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
         t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
+        residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summer in time for each pixel, then averaged in space across each ifg.  )
+                                                        If window, the residual is the ratio of the max in a window (e.g. 20x20 pixels) over the mean for all windows for that time.  Value at each point is the cumulative.  
     Returns:
         out_folder with various items.  
     History:
@@ -113,9 +116,9 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
     displacement_r2 = LiCSAlert_preprocessing(displacement_r2, downsample_run, downsample_plot)                         # mean centre and downsize the data
     
     if run_ICASAR:                                                                                                      # set to True if we need to run ICASAR
-        baseline_data = {'mixtures_r2' : displacement_r2['incremental'][:n_baseline_end],                               # prepare a dictionary of data for ICASAR
+        baseline_data = {'ifgs_dc' : displacement_r2['incremental'][:n_baseline_end],                               # prepare a dictionary of data for ICASAR
                          'mask'        : displacement_r2['mask'],
-                         'ifg_dates'   : displacement_r2['ifg_dates'][:n_baseline_end]}                                 # ifg dates are stored in displacement_r2,    
+                         'ifg_dates_dc'   : displacement_r2['ifg_dates'][:n_baseline_end]}                                 # ifg dates are stored in displacement_r2,    
 
         for optional_data in ['dem', 'lons', 'lats']:                                                                  # these are not guaranteed to be supplied to LiCSAlert, to check if they have been, loop through each one.  
             if optional_data in displacement_r2:                                                                       # if it's in the main displacement_r2 dict
@@ -168,8 +171,8 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
     # 5b: Or just do LiCSAlet and the LiCSAlert figure for the final time step (much quicker, but only one LiCSAlert figure is created)
     else:
         sources_tcs_monitor, residual_monitor = LiCSAlert(sources, tbaseline_info['baselines_cumulative'], displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
-                                                          displacement_r2["incremental"][n_baseline_end:], t_recalculate=t_recalculate, 
-                                                          out_file = out_folder / 'LiCSAlert_results.pkl')    
+                                                          displacement_r2['mask'], displacement_r2["incremental"][n_baseline_end:], t_recalculate=t_recalculate, 
+                                                          out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
         
         LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
                           tbaseline_info['baselines_cumulative'], time_value_end=tbaseline_info['baselines_cumulative'][-1], day0_date = tbaseline_info['acq_dates'][0], 
@@ -178,17 +181,22 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
 
 #%%
 
-def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_recalculate = 10, verbose=False, out_file=None):
+def LiCSAlert(sources, time_values, ifgs_baseline, mask, ifgs_monitoring = None, t_recalculate = 10, verbose=False, out_file=None,
+              n_pix_window = 20, residual_type = 'cumulative'):
     """ Main LiCSAlert algorithm for a daisy-chain timeseries of interferograms.  
     
     Inputs:
         sources | r2 array | sources (from ICASAR) as row vectors, as per ICA, that can be turned back to interferograms with a rank 2 boolean mask of which pixels are masked and the col_to_ma function.  
         time_values | r1 array | time values for each point in the time series, commonly (12,24,36) for Sentinel-1 data.  Could also be described as the cumulative temporal baselines.  
         ifgs_baseline | r2 array | ifgs used in baseline stage as row vectors
+        mask | r2 array boolean | mask to convert a row vector (e.g. a row in sources or ifgs) back to a rank2 array.  
         ifgs_monitoring | r2 array or None | ifgs used in monitoring stage as row vectors
         t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
         verbose | boolean | if True, various information is printed to screen.  
         out_file | None or string | If not None, name of file that is used to save the LiCSALert outputs.  
+        n_pix_window | int | side length of square windows used for the window residual calculation.  
+        residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summer in time for each pixel, then averaged in space across each ifg.  )
+                                                        If window, the residual is the ratio of the max in a window (e.g. 20x20 pixels) over the mean for all windows for that time.  Value at each point is the cumulative.  
         
     Outputs
         sources_tcs_monitor | list of dicts | list, with item for each time course.  Each dictionary contains:
@@ -206,6 +214,7 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
         2019/12/XX | MEG |  Written from existing script.  
         2020/02/16 | MEG |  Update to work with no monitoring interferograms
         2020/12/14 | MEG | Improve docs and add option to save outputs.  
+        2021_11_30 | MEG | Add new residual method (max residual of spatial window / mean of residual of all spatial windows for each ifg)
     """
     import numpy as np
     import pickle
@@ -247,10 +256,10 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
         
     # 1: calculating time courses/distances etc for the baseline data
     tcs_c, _ = bss_components_inversion(sources, ifgs_baseline, cumulative=True)                         # compute cumulative time courses for baseline interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources.  )
-    sources_tcs = tcs_baseline(tcs_c, time_values[:n_times_baseline], t_recalculate)                     # lines, gradients, etc for time courses.  Note done by tcs_baseline, which contrasts with tcs_monitoring (which is used lower down)
-    _, residual_cb = residual_for_pixels(sources, sources_tcs, ifgs_baseline)                            # get the cumulative residual for the baseline interferograms
-    residual_tcs = tcs_baseline(residual_cb, time_values[:n_times_baseline], t_recalculate)              # lines, gradients. etc for residual 
-    del tcs_c, residual_cb
+    sources_tcs = tcs_baseline(tcs_c, time_values[:n_times_baseline], t_recalculate)                     # lines, gradients, etc for time courses.  Note done by tcs_baseline, which contrasts with tcs_monitoring (which is used lower down)    
+    residual = residual_for_pixels(sources, sources_tcs, ifgs_baseline, mask, n_pix_window, residual_type)                      # get the cumulative residual for the baseline interferograms, sources are stored as row vectors, and each has an entry in sources_tcs which is a dict (ie a list of dicts).  Ifgs_baseline are ifgs as row vectors, mean centered in space (ie mean of each row is 0)       
+    residual_tcs = tcs_baseline(residual, time_values[:n_times_baseline], t_recalculate)              # lines, gradients. etc for residual 
+    del tcs_c, residual
     
     #2: Calculate time courses/distances etc for the monitoring data
     if ifgs_monitoring is not None:
@@ -258,8 +267,8 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
         sources_tcs_monitor = tcs_monitoring(tcs_c, sources_tcs, time_values)                               # update lines, gradients, etc for time courses  Note done by tcs_monitoring, which contrasts with tcs_baseline (which is used before)
     
         #3: and update the residual stuff                                                                            # which is handled slightly differently as must be recalcualted for baseline and monitoring data
-        _, residual_c_bm = residual_for_pixels(sources, sources_tcs_monitor, ifgs_all)                               # get the cumulative residual for baseline and monitoring (hence _cb)    
-        residual_tcs_monitor = tcs_monitoring(residual_c_bm, residual_tcs, time_values, residual=True)               # lines, gradients. etc for residual 
+        residual_bm = residual_for_pixels(sources, sources_tcs_monitor, ifgs_all, mask, n_pix_window, residual_type)                               # get the cumulative residual for baseline and monitoring (hence _cb)    
+        residual_tcs_monitor = tcs_monitoring(residual_bm, residual_tcs, time_values, residual=True)               # lines, gradients. etc for residual 
     
 
     if ifgs_monitoring is None:
@@ -282,7 +291,7 @@ def LiCSAlert(sources, time_values, ifgs_baseline, ifgs_monitoring = None, t_rec
 
 #%%
 
-def residual_for_pixels(sources, sources_tcs, ifgs, n_skip=None):
+def residual_for_pixels(sources, sources_tcs, ifgs, mask, n_pix_window = 20, residual_type = 'cumulative', n_skip=None):
     """
     Given spatial sources and their time courses, reconstruct the entire time series and calcualte:
         - RMS of the residual between each reconstructed and real ifg
@@ -294,7 +303,11 @@ def residual_for_pixels(sources, sources_tcs, ifgs, n_skip=None):
         sources | r2 array | sources as row vectors
         sources_tcs | list of dicts | As per LiCSAlert, a list with an item for each sources, and each item is a dictionary of various itmes
         ifgs | r2 array | interferograms as row vectors
+        mask | r2 array of boolean | to convert a row vector back to a rank 2 masked array.  
         n_skip | None or int | if an int, the first n_skip values of the timecourses will be skipped.  
+        n_pix_window | int | side length of square windows used for the window residual calculation.  
+        residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summer in time for each pixel, then averaged in space across each ifg.  )
+                                                        If window, the residual is the ratio of the max in a window (e.g. 20x20 pixels) over the mean for all windows for that time.  Value at each point is the cumulative.  
 
     Outputs:
         residual_ts | r2 array | Column vector of the RMS residual between that ifg, and its reconstruction
@@ -306,9 +319,16 @@ def residual_for_pixels(sources, sources_tcs, ifgs, n_skip=None):
     2019/12/06 | MEG | Comment and documentation
     2020/01/02 | MEG | Update to use new LiCSAlert list of dictionaries
     2020/02/06 | MEG | Fix bug as had forgotten to convert cumulative time courses to be incremental
+    2021_11_30 | MEG | Add new residual method (ratio of maximum in window for mean of all windows)
     """
 
+    # import warnings
+    # warnings.filterwarnings("error")
+
+
     import numpy as np
+    import numpy.ma as ma
+    from licsalert.aux import r2_to_r3
 
     def list_dict_to_r2(sources_tcs):
         """ Extract the cumulative time courses from the sources_tcs list of dicts, and convert them to incremental
@@ -326,19 +346,61 @@ def residual_for_pixels(sources, sources_tcs, ifgs, n_skip=None):
                     
 
     (n_sources, n_pixs) = sources.shape                                         # number of sources and number of pixels
-    tcs = list_dict_to_r2(sources_tcs)                                          # get the incremental time courses as a rank 2 array
+    tcs = list_dict_to_r2(sources_tcs)                                          # get the incremental time courses as a rank 2 array (ie. as column vectors, so something like 55x5, if there are 55 times and 5 sources)
     if n_skip is not None:                                                      # crop/remove the first ifgs
         tcs = tcs[n_skip:,]                                                        # usually the baseline ifgs when used with monitoring data
     
-    data_model_residual = ifgs - (tcs @ sources)                                # residual for each pixel at each time
-    data_model_residual_cs = np.cumsum(data_model_residual, axis = 0)           # summing the residual for each pixel cumulatively through time   
+    data_model_residual = ifgs - (tcs @ sources)                                                # residual for each pixel at each time (ie the data - the reconstrutcion)
+    data_model_residual_cs = np.cumsum(data_model_residual, axis = 0)                           # summing the residual for each pixel cumulatively through time, same size as above.     
     residual_ts = np.zeros((data_model_residual.shape[0], 1))                                   # initiate, n_ifgs x 1 array
     residual_cs = np.zeros((data_model_residual.shape[0], 1))                                   # initiate, n_ifgs x 1 array
     for row_n in range(data_model_residual.shape[0]):                                           # loop through each ifg
         residual_ts[row_n, 0] = np.sqrt(np.sum(data_model_residual[row_n,:]**2)/n_pixs)         # RMS of residual for each ifg
         residual_cs[row_n, 0] = np.sqrt(np.sum(data_model_residual_cs[row_n,:]**2)/n_pixs)      # RMS of residual for cumulative ifgs.  i.e. if atmosphere reverses, should cancel in 2nd cumulative ifg.  
+        
+    # method 2: calculate the residual in spatial windows.  
+    residuals_cs_r3 = r2_to_r3(data_model_residual_cs, mask)                                        # convert from row vectors to rank 2 images.  n_times x ny x nx
+    (n_residuals, ny, nx) = residuals_cs_r3.shape
+    n_windows_x = int(np.floor(nx / n_pix_window))                                                  # the number of whole windows we can it in the x direction.  
+    rem_x = nx % (n_pix_window * n_windows_x)                                                       # the number of pixels remaining if we do that.  
+    border_x = int(rem_x / 2)                                                                       # what half the border will be
+    n_windows_y = int(np.floor(ny / n_pix_window))                                                  # as above but for y
+    rem_y = ny % (n_pix_window * n_windows_y)
+    border_y = int(rem_y / 2)
     
-    return residual_ts, residual_cs
+    residual_cs_window = np.zeros((data_model_residual.shape[0], 1))                                   # initiate, n_ifgs x 1 array, to store the ratio of the max residual to the mean residual for each ifg. 
+    residual_cs_windows_r3 = np.zeros((n_residuals, n_windows_y, n_windows_x))                                   # initiate, n_ifgs x 1 array
+    for n_resid, residual_cs_r3 in enumerate(residuals_cs_r3):
+        for row_n in range(n_windows_y):
+            for col_n in range(n_windows_x):
+                window_region = residuals_cs_r3[n_resid, (border_y + row_n*n_pix_window):(border_y + (row_n+1)*n_pix_window), 
+                                                         (border_x + col_n*n_pix_window):(border_x + (col_n+1)*n_pix_window) ]                 # extract the window region
+                n_coherent_pixs = (n_pix_window**2) - np.sum(window_region.mask)                                                               # get the number of coherent pixels in the windo (maksed pixels are 1)
+                if False not in window_region.mask:                                                                                             # if there are no unmasked pixels (unmasked = False)
+                    residual_cs_windows_r3[n_resid, row_n, col_n] = np.nan                                                                      # then the residual for that window is just nan
+                else:
+                    residual_cs_windows_r3[n_resid, row_n, col_n] = np.sqrt(ma.sum(window_region**2)/n_coherent_pixs)                           # ge the RMS error for the window, and assign to the array that stores them.  
+        
+        residual_cs_window[n_resid] = np.nanmax(residual_cs_windows_r3[n_resid,]) / np.nanmean(residual_cs_windows_r3[n_resid,])                # calculate the ratio between the largest and mean residual 
+
+    # debugging/ examining plot
+    # import numpy.ma as ma
+    # import matplotlib.pyplot as plt
+    # n_plot = 15
+    # f, axes = plt.subplots(2,n_plot, figsize = (30,7))
+    # residuals = residuals_cs_r3[:n_plot,]
+    # window_residuals = residual_cs_windows_r3[:n_plot,]
+    # for i in range(n_plot):
+    #     #axes[0,i].imshow(residuals[i,], vmin = ma.min(residuals), vmax = ma.max(residuals))                                        # share colorbar
+    #     axes[0,i].imshow(residuals[i,])                                                                                             # dont 
+    #     axes[1,i].imshow(window_residuals[i,], vmin = np.nanmin(window_residuals), vmax = np.nanmax(window_residuals))              # share colorbar
+    if residual_type == 'cumulative':
+        return residual_cs
+    elif residual_type == 'window':
+        return residual_cs_window
+    else:
+        raise Exception(f"'residual_type' must be either 'cumulative' or 'window'.  Exiting as it's {residual_type}")
+
 
 #%%
 
@@ -693,7 +755,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     figtitle = f'LiCSAlert figure with {(n_ifgs-n_baseline_end):03d} monitoring interferograms'
 
     # 2 Initiate the figure    
-    fig1 = plt.figure(figsize=(14,8))
+    fig1 = plt.figure(figsize=(18,10))
     fig1.canvas.manager.set_window_title(figtitle)
     grid = gridspec.GridSpec((n_ics + 3), 11, wspace=0.3, hspace=0.1)                        # divide into 2 sections, 1/5 for ifgs and 4/5 for components
 

@@ -5,7 +5,7 @@ Created on Mon Jun 29 14:09:28 2020
 
 @author: matthew
 """
-
+import pdb
 
 #%%
 
@@ -559,7 +559,7 @@ def LiCSAlert_dates_status(LiCSAlert_required_dates, LiCSAlert_dates, folder_LiC
 #%%
 
 def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end):
-    """ When 'LiCSAlert_monitoring_mode' is run in a folder, this function determines which steps
+    """ When 'LiCSAlert_monitoring_mode' is run in a directory, this function determines which steps
     need to be done, ranging from nothing (everything is up to date), through to runnings LiCSBAS, ICASAR, and LiCSAlert.  
     
     Inputs:
