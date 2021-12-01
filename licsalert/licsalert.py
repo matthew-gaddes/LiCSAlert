@@ -161,7 +161,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         
         
             sources_tcs_monitor, residual_monitor = LiCSAlert(sources, baselines_cumulative_current, displacement_r2_current["incremental"][:n_baseline_end],               # do LiCSAlert
-                                                              displacement_r2_current["incremental"][n_baseline_end:], t_recalculate=t_recalculate, 
+                                                              displacement_r2['mask'], displacement_r2_current["incremental"][n_baseline_end:], t_recalculate, 
                                                               out_file = out_folder / 'LiCSAlert_results.pkl')    
         
             LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2_current, n_baseline_end, 
@@ -171,7 +171,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
     # 5b: Or just do LiCSAlet and the LiCSAlert figure for the final time step (much quicker, but only one LiCSAlert figure is created)
     else:
         sources_tcs_monitor, residual_monitor = LiCSAlert(sources, tbaseline_info['baselines_cumulative'], displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
-                                                          displacement_r2['mask'], displacement_r2["incremental"][n_baseline_end:], t_recalculate=t_recalculate, 
+                                                          displacement_r2['mask'], displacement_r2["incremental"][n_baseline_end:], t_recalculate, 
                                                           out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
         
         LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
