@@ -162,7 +162,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         
             sources_tcs_monitor, residual_monitor = LiCSAlert(sources, baselines_cumulative_current, displacement_r2_current["incremental"][:n_baseline_end],               # do LiCSAlert
                                                               displacement_r2['mask'], displacement_r2_current["incremental"][n_baseline_end:], t_recalculate, 
-                                                              out_file = out_folder / 'LiCSAlert_results.pkl')    
+                                                              out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
         
             LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2_current, n_baseline_end, 
                               baselines_cumulative_current, time_value_end=tbaseline_info['baselines_cumulative'][-1], out_folder = out_folder,
@@ -240,7 +240,7 @@ def LiCSAlert(sources, time_values, ifgs_baseline, mask, ifgs_monitoring = None,
             raise Exception(f"There appears to be a mismatch between the number of times ({time_values.shape[0]}, set by time_values), "            # error if they don't agree
                             f"and the number of interferograms ({ifgs_baseline.shape[0]}, in ifgs_baseline; and {ifgs_monitoring.shape[0]}, in ifgs_monitoring)).  Exiting..." )
         else:
-            print(f"There are {time_values.shape[0]} times (set by time_values), which agress with the  "                                            # or update user that all ok if they do
+            print(f"There are {time_values.shape[0]} times (set by time_values), which agrees with the  "                                            # or update user that all ok if they do
                   f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline and {ifgs_monitoring.shape[0]} in ifgs_monitoring.  " )
         
     
