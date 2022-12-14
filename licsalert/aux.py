@@ -22,8 +22,7 @@ def r2_to_r3(ifgs_r2, mask):
     """
     import numpy as np
     import numpy.ma as ma
-    from small_plot_functions import col_to_ma
-    
+        
     n_ifgs = ifgs_r2.shape[0]
     ny, nx = col_to_ma(ifgs_r2[0,], mask).shape                                   # determine the size of an ifg when it is converter from being a row vector
     

@@ -119,7 +119,6 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         baseline_data = {'ifgs_dc' : displacement_r2['incremental'][:n_baseline_end],                               # prepare a dictionary of data for ICASAR
                          'mask'        : displacement_r2['mask'],
                          'ifg_dates_dc'   : displacement_r2['ifg_dates'][:n_baseline_end]}                                 # ifg dates are stored in displacement_r2,    
-
         for optional_data in ['dem', 'lons', 'lats']:                                                                  # these are not guaranteed to be supplied to LiCSAlert, to check if they have been, loop through each one.  
             if optional_data in displacement_r2:                                                                       # if it's in the main displacement_r2 dict
                 baseline_data[optional_data] = displacement_r2[optional_data]                                          # add it to the baseline data.  
@@ -140,7 +139,6 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
             raise Exception(f"Unable to open the results of ICASAR (which are usually stored in 'ICASAR_results') "
                             f"Try re-running and enabling ICASAR with 'run_ICASAR' set to 'True' in the 'LiCSAlert_settings' dictionary.  ")
     
-
     # 4: Possible use the VUDL-net-21 model to detect and locate deformation in the ICs.      
     if ic_classifying_model != None:
         print(f"Using the supplied neural network to determine which ICs are deformation and which are atmosphere.  ",
@@ -173,6 +171,17 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         sources_tcs_monitor, residual_monitor = LiCSAlert(sources, tbaseline_info['baselines_cumulative'], displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
                                                           displacement_r2['mask'], displacement_r2["incremental"][n_baseline_end:], t_recalculate, 
                                                           out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
+        
+        pdb.set_trace()
+        #this would allow you to export the data required to make the LiCSALert figure.  E.g. if you want to make a modified version of it for a publication.  
+        with open(out_folder / f"for_publication_figure.pkl", 'wb') as f:
+            pickle.dump(sources_tcs_monitor,f)
+            pickle.dump(residual_monitor,f)
+            pickle.dump(sources,f)
+            pickle.dump(displacement_r2,f)
+            pickle.dump(n_baseline_end,f)
+            pickle.dump(tbaseline_info,f)
+            pickle.dump(sources_labels,f)
         
         LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
                           tbaseline_info['baselines_cumulative'], time_value_end=tbaseline_info['baselines_cumulative'][-1], day0_date = tbaseline_info['acq_dates'][0], 
@@ -254,11 +263,12 @@ def LiCSAlert(sources, time_values, ifgs_baseline, mask, ifgs_monitoring = None,
         n_times_monitoring = ifgs_monitoring.shape[0]
     #print(f"LiCSAlert with {n_times_baseline} baseline interferograms and {n_times_monitoring} monitoring interferogram(s).  ")    
         
+
     # 1: calculating time courses/distances etc for the baseline data
-    tcs_c, _ = bss_components_inversion(sources, ifgs_baseline, cumulative=True)                         # compute cumulative time courses for baseline interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources.  )
-    sources_tcs = tcs_baseline(tcs_c, time_values[:n_times_baseline], t_recalculate)                     # lines, gradients, etc for time courses.  Note done by tcs_baseline, which contrasts with tcs_monitoring (which is used lower down)    
-    residual = residual_for_pixels(sources, sources_tcs, ifgs_baseline, mask, n_pix_window, residual_type)                      # get the cumulative residual for the baseline interferograms, sources are stored as row vectors, and each has an entry in sources_tcs which is a dict (ie a list of dicts).  Ifgs_baseline are ifgs as row vectors, mean centered in space (ie mean of each row is 0)       
-    residual_tcs = tcs_baseline(residual, time_values[:n_times_baseline], t_recalculate)              # lines, gradients. etc for residual 
+    tcs_c, _ = bss_components_inversion(sources, ifgs_baseline, cumulative=True)                                 # compute cumulative time courses for baseline interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources.  )
+    sources_tcs = tcs_baseline(tcs_c, time_values[:n_times_baseline], t_recalculate)                             # lines, gradients, etc for time courses.  Note done by tcs_baseline, which contrasts with tcs_monitoring (which is used lower down)    
+    residual = residual_for_pixels(sources, sources_tcs, ifgs_baseline, mask, n_pix_window, residual_type)       # get the cumulative residual for the baseline interferograms, sources are stored as row vectors, and each has an entry in sources_tcs which is a dict (ie a list of dicts).  Ifgs_baseline are ifgs as row vectors, mean centered in space (ie mean of each row is 0)       
+    residual_tcs = tcs_baseline(residual, time_values[:n_times_baseline], t_recalculate)                         # lines, gradients. etc for residual 
     del tcs_c, residual
     
     #2: Calculate time courses/distances etc for the monitoring data
@@ -378,6 +388,7 @@ def residual_for_pixels(sources, sources_tcs, ifgs, mask, n_pix_window = 20, res
                     residual_cs_windows_r3[n_resid, row_n, col_n] = np.sqrt(ma.sum(window_region**2)/n_coherent_pixs)                           # ge the RMS error for the window, and assign to the array that stores them.  
         
         residual_cs_window[n_resid] = np.nanmax(residual_cs_windows_r3[n_resid,]) / np.nanmean(residual_cs_windows_r3[n_resid,])                # calculate the ratio between the largest and mean residual 
+        #residual_cs_window[n_resid] = np.nanmax(residual_cs_windows_r3[n_resid,]) / np.nanmin(residual_cs_windows_r3[n_resid,])                # calculate the ratio between the largest and minimum residual
 
     # debugging/ examining plot
     # import numpy.ma as ma
@@ -796,9 +807,10 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ######################## end WIP
         
         
-        # 4c: plot the time courses for that IC, and the rolling lines of best fit
+        # 4c: plot the time courses for that IC, and the rolling lines of best fit      
         ax_tc = plt.Subplot(fig1, grid[row_n+2,1:])
-        ax_tc.scatter(time_values, source_tc["cumulative_tc"], c = source_tc["distances"], marker='o', s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, )                        # 
+        ax_tc.scatter(time_values, source_tc["cumulative_tc"], c = source_tc["distances"], marker='o', 
+                      s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, )                                      # note that time_values don't start at 0 as the cumualtive tcs also don't start at 0 
         for line_arg in line_args:                                                                                          # line args sets which lines of best fit to plot (there is a line of best fit for each point, but it's too busy if we plot them all)
             ax_tc.plot(time_values, source_tc["lines"][:,line_arg], c = 'k')                                                # ie each column is a line of best fit
     
