@@ -172,7 +172,6 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
                                                           displacement_r2['mask'], displacement_r2["incremental"][n_baseline_end:], t_recalculate, 
                                                           out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
         
-        pdb.set_trace()
         #this would allow you to export the data required to make the LiCSALert figure.  E.g. if you want to make a modified version of it for a publication.  
         with open(out_folder / f"for_publication_figure.pkl", 'wb') as f:
             pickle.dump(sources_tcs_monitor,f)
