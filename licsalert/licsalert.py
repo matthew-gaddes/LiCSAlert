@@ -5,12 +5,14 @@ A selection of functions used by LiCSAlert
 @author: Matthew Gaddes
 """
 import pdb
+import matplotlib.pyplot as plt
 
 #%%
 
 def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder, 
                          ICASAR_settings, run_ICASAR = True, ICASAR_path = None, ic_classifying_model = None,
-                         intermediate_figures = False, downsample_run = 1.0, downsample_plot = 0.5, t_recalculate = 10, residual_type = 'cumulative'):
+                         figure_intermediate = False, figure_type = 'png', figure_cmap = plt.get_cmap('coolwarm'), 
+                         downsample_run = 1.0, downsample_plot = 0.5, t_recalculate = 10, residual_type = 'cumulative'):
     """ A function to run the LiCSAlert algorithm on a preprocssed time series.  To run on a time series that is being 
     updated, use LiCSAlert_monitoring_mode.  
     
@@ -30,7 +32,12 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         run_ICASAR | boolean | If false, the resutls from a previous run of ICASAR are used, if True it is run again (which can be time consuming)
         ICASAR_path | path or string | location of ICASAR package.  Note, important to remember the /lib/ part at teh end.  
         ic_classifying_model | path or string | location of Keras model for classification and localisation of deformation in a single ifg.  
-        intermediate_figures | boolean | if True, figures for all time steps in the monitoring phase are created (which is slow).  If False, only the last figure is created.  
+        
+        LiCSAlert figure settings:
+        figure_intermediate | boolean | if True, figures for all time steps in the monitoring phase are created (which is slow).  If False, only the last figure is created.  
+        figure_type          | string | 'png' for png saved in output directory, or 'window' for interactive window
+        figure_cmap           | matplotlib colourmap | colourmap to be used in figures.    Note that ICASAR currently always uses coolwarm.  
+        
         downsample_run | float | data can be downsampled to speed things up
         downsample_plot | float | and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
         t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
@@ -41,6 +48,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
     History:
         2020/09/16 | MEG | Created from various scripts.        
         2021_08_09 | MEG | add option to set r_recalculate, rather than hard coding it.  
+        2023_01_30 | MEG | Improve figure ploting (imshow switched to matshow), and option to select colourbar.  
         
     Stack overview:
         LiCSAlert_preprocessing
@@ -84,6 +92,13 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
 
     # 1: Sort out the ouput folder, which depends on if ICASAR will be run.  
     out_folder = Path(out_folder)
+    if figure_type == 'png':
+        licsalert_figure_out_dir = out_folder
+    elif figure_type == 'window':
+        licsalert_figure_out_dir = None 
+    else:
+        raise Exception(f"figure_type can be either 'png' (to save a png), or 'window' (for an interactive figure in a window).  It is {figure_type}, so exiting.  ")
+    
     if os.path.exists(out_folder):                                                                                                     # the directory containing both LiCSAlert products and the 'ICASAR_outputs' directory exists
         print(f"The out_folder ({out_folder}) already exists, deleting the LiCSAlert outputs within it.   ")
         files = glob.glob(str(out_folder / 'LiCSAlert*'))                                                                              # get all the files in the folder that have LiCSALert in the name (ie not the ICASAR directory)
@@ -151,7 +166,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         
 
     # 5a: Either do LiCSAlert and the LiCSAlert figure for all time steps, 
-    if intermediate_figures:                                                                                                # controls if we enter the intermediate ifgs loop.  
+    if figure_intermediate:                                                                                                # controls if we enter the intermediate ifgs loop.  
         for ifg_n in np.arange(n_baseline_end+1, displacement_r2["incremental"].shape[0]+1):
             
             displacement_r2_current = shorten_LiCSAlert_data(displacement_r2, n_end=ifg_n)                                  # get the ifgs available for this loop (ie one more is added each time the loop progresses)
@@ -163,8 +178,8 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
                                                               out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
         
             LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2_current, n_baseline_end, 
-                              baselines_cumulative_current, time_value_end=tbaseline_info['baselines_cumulative'][-1], out_folder = out_folder,
-                              day0_date = tbaseline_info['acq_dates'][0], sources_labels = sources_labels)                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
+                              baselines_cumulative_current, time_value_end=tbaseline_info['baselines_cumulative'][-1], out_folder = licsalert_figure_out_dir,
+                              day0_date = tbaseline_info['acq_dates'][0], sources_labels = sources_labels, cmap = figure_cmap)                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
 
     # 5b: Or just do LiCSAlet and the LiCSAlert figure for the final time step (much quicker, but only one LiCSAlert figure is created)
     else:
@@ -184,7 +199,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         
         LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
                           tbaseline_info['baselines_cumulative'], time_value_end=tbaseline_info['baselines_cumulative'][-1], day0_date = tbaseline_info['acq_dates'][0], 
-                          out_folder = out_folder, sources_labels = sources_labels)                 
+                          out_folder = licsalert_figure_out_dir, sources_labels = sources_labels, cmap = figure_cmap)                 
  
 
 #%%
@@ -518,7 +533,8 @@ def tcs_monitoring(tcs_c, sources_tcs, time_values, residual=False):
 #%%
 
 def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline_end, time_values, day0_date=None,
-                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, sources_labels = None):
+                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, sources_labels = None,
+                     cmap = plt.get_cmap('coolwarm')):
     """
     The main fucntion to draw the LiCSAlert figure.  
     
@@ -569,8 +585,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     import matplotlib as mpl
     from matplotlib.ticker import MultipleLocator
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes            
-    plt.switch_backend('Agg')                                                           #  works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
-    #plt.switch_backend('Qt5Agg')                                                           #  for debugging
+    
     import datetime as dt 
     
     from licsalert.aux import col_to_ma
@@ -604,7 +619,8 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
 
         for ifg_n, source in enumerate(ifgs):                                                                                # ifgs are rows, loop through
             iax = ax_ifgs.inset_axes([time_values[ifg_n], 0., (xlim/ifg_xpos_scaler), 1.], transform=ax_ifgs.transData)      # [xpos, ypos, xwidth, ywidth], note the x_pos_scaler that reduces the size of the inset axes to make sure it remains in tehe right place
-            ifg_plot = iax.imshow(col_to_ma(source, pixel_mask), cmap = plt.get_cmap('coolwarm'))                                       # plot on the axes
+            #ifg_plot = iax.imshow(col_to_ma(source, pixel_mask), cmap = plt.get_cmap('coolwarm'))                                       # plot on the axes
+            ifg_plot = iax.matshow(col_to_ma(source, pixel_mask), cmap = cmap)                                       # plot on the axes
             iax.set_xticks([])                                                                                               # images so get rid of x and y ticks (nb this is just for the inset axes)
             iax.set_yticks([])
             # print(time_values[ifg_n])                                                                       # for debugging
@@ -640,7 +656,8 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         
         ics_min = np.min(icasar_sources)                                                       # 
         ics_max = np.max(icasar_sources)
-        ic_colours = plt.get_cmap('coolwarm')
+        #ic_colours = plt.get_cmap('coolwarm')
+        ic_colours = cmap
         cmap_mid = 1 - ics_max/(ics_max + abs(ics_min))                                     # get the ratio of the data that 0 lies at (eg if data is -15 to 5, ratio is 0.75)
         ic_colours_cent = remappedColorMap(ic_colours, start=0.0, midpoint=cmap_mid, stop=1, name='ic_colours_cent')                    # make the colours for plotting the ICs
         return ic_colours_cent
@@ -723,7 +740,12 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
                 ax_to_update.axvline(x = ticks['n_day'][major_tick_n], color='k', alpha=0.1, linestyle='--')                          
                    
 
-
+    # -2. Check matplotlib backend is set correctly 
+    if out_folder is not None:
+        plt.switch_backend('Agg')                                                           #  works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
+    else: 
+        if plt.get_backend() != 'Qt5Agg':                                                               # check what the backend is 
+            plt.switch_backend('Qt5Agg')                                                           #  and switch to interactive if it wasn't already.  
 
 
 
@@ -764,6 +786,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     fig1.canvas.manager.set_window_title(figtitle)
     grid = gridspec.GridSpec((n_ics + 3), 11, wspace=0.3, hspace=0.1)                        # divide into 2 sections, 1/5 for ifgs and 4/5 for components
 
+    
     # 3: Plot the ifgs along the top
     plot_ifgs(np.cumsum(displacement_r2["incremental_downsampled"], axis = 0), displacement_r2["mask_downsampled"], fig1, grid[0,1:], 
               time_values, t_end, ylabel = 'Cumulative', day0_date = day0_date, cumulative = True)                                                                # cumulative ifgs
@@ -778,10 +801,15 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     for row_n, source_tc in enumerate(sources_tcs):
         # 4a: Plot the source
         ax_source = plt.Subplot(fig1, grid[row_n+2,0])                                                                                      # create an axes for the IC (spatial source)
+       
         if sources_downsampled:
-            im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   # plot the downsampled source
+            #im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   # plot the downsampled source
+            im = ax_source.matshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources) #, vmin = np.min(sources), vmax = np.max(sources))   # plot the downsampled source
         else:
-            im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
+            #im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
+            #im = ax_source.matshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
+            im = ax_source.matshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources) #, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
+            
         ax_source.set_xticks([])
         ax_source.set_yticks([])
         ax_source.set_ylabel(f"IC {row_n}")
@@ -903,6 +931,9 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         filename = "_".join(figtitle.split(" "))                                            # figtitle has spaces, but filename must use underscores instead.  
         fig1.savefig(out_folder / f"{filename}.png", bbox_inches='tight')
         plt.close(fig1)
+        
+    if plt.get_backend() != 'Qt5Agg':                                                           # check if we need to reset the backend (to interactive window)
+        plt.switch_backend('Qt5Agg')                                                           #  
 
 
 
