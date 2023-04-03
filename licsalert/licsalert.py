@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder, 
                          ICASAR_settings, run_ICASAR = True, ICASAR_path = None, ic_classifying_model = None,
-                         figure_intermediate = False, figure_type = 'png', figure_cmap = plt.get_cmap('coolwarm'), 
+                         figure_intermediate = False, figure_type = 'both', figure_cmap = plt.get_cmap('coolwarm'), 
                          downsample_run = 1.0, downsample_plot = 0.5, t_recalculate = 10, residual_type = 'cumulative'):
     """ A function to run the LiCSAlert algorithm on a preprocssed time series.  To run on a time series that is being 
     updated, use LiCSAlert_monitoring_mode.  
@@ -35,7 +35,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         
         LiCSAlert figure settings:
         figure_intermediate | boolean | if True, figures for all time steps in the monitoring phase are created (which is slow).  If False, only the last figure is created.  
-        figure_type          | string | 'png' for png saved in output directory, or 'window' for interactive window
+        figure_type          | string | 'png' for png saved in output directory, or 'window' for interactive window, 'both' for both
         figure_cmap           | matplotlib colourmap | colourmap to be used in figures.    Note that ICASAR currently always uses coolwarm.  
         
         downsample_run | float | data can be downsampled to speed things up
@@ -90,14 +90,9 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
             raise Exception(f"{required_array} is not in displacement_r2, but is one of the required three ('incremental', 'mask', and 'ifg_dates').  Exiting.  ")
                 
 
-    # 1: Sort out the ouput folder, which depends on if ICASAR will be run.  
-    out_folder = Path(out_folder)
-    if figure_type == 'png':
-        licsalert_figure_out_dir = out_folder
-    elif figure_type == 'window':
-        licsalert_figure_out_dir = None 
-    else:
-        raise Exception(f"figure_type can be either 'png' (to save a png), or 'window' (for an interactive figure in a window).  It is {figure_type}, so exiting.  ")
+    # 1: Sort out the ouput folder for the licsalert figure
+    licsalert_figure_out_dir = out_folder
+    
     
     if os.path.exists(out_folder):                                                                                                     # the directory containing both LiCSAlert products and the 'ICASAR_outputs' directory exists
         print(f"The out_folder ({out_folder}) already exists, deleting the LiCSAlert outputs within it.   ")
@@ -142,7 +137,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
         sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                                                                         # downsample for recovered sources for plots
     else:
         try:
-            with open(str(out_folder / "ICASAR_outputs/ICASAR_results.pkl"), 'rb') as f:
+            with open(out_folder / "ICASAR_outputs" / "ICASAR_results.pkl", 'rb') as f:
                 sources = pickle.load(f)    
                 tcs  = pickle.load(f)    
                 source_residuals = pickle.load(f)    
@@ -187,19 +182,20 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
                                                           displacement_r2['mask'], displacement_r2["incremental"][n_baseline_end:], t_recalculate, 
                                                           out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
         
-        #this would allow you to export the data required to make the LiCSALert figure.  E.g. if you want to make a modified version of it for a publication.  
-        with open(out_folder / f"for_publication_figure.pkl", 'wb') as f:
-            pickle.dump(sources_tcs_monitor,f)
-            pickle.dump(residual_monitor,f)
-            pickle.dump(sources,f)
-            pickle.dump(displacement_r2,f)
-            pickle.dump(n_baseline_end,f)
-            pickle.dump(tbaseline_info,f)
-            pickle.dump(sources_labels,f)
+        # #this would allow you to export the data required to make the LiCSALert figure.  E.g. if you want to make a modified version of it for a publication.  
+        # with open(out_folder / f"for_publication_figure.pkl", 'wb') as f:
+        #     pickle.dump(sources_tcs_monitor,f)
+        #     pickle.dump(residual_monitor,f)
+        #     pickle.dump(sources,f)
+        #     pickle.dump(displacement_r2,f)
+        #     pickle.dump(n_baseline_end,f)
+        #     pickle.dump(tbaseline_info,f)
+        #     pickle.dump(sources_labels,f)
         
         LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
                           tbaseline_info['baselines_cumulative'], time_value_end=tbaseline_info['baselines_cumulative'][-1], day0_date = tbaseline_info['acq_dates'][0], 
-                          out_folder = licsalert_figure_out_dir, sources_labels = sources_labels, cmap = figure_cmap)                 
+                          sources_labels = sources_labels, 
+                          figure_out_dir = licsalert_figure_out_dir, figure_type = figure_type,  cmap = figure_cmap)                 
  
 
 #%%
@@ -533,7 +529,7 @@ def tcs_monitoring(tcs_c, sources_tcs, time_values, residual=False):
 #%%
 
 def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline_end, time_values, day0_date=None,
-                     time_value_end=None, out_folder=None, ifg_xpos_scaler = 15, sources_labels = None,
+                     time_value_end=None, figure_type = 'both', figure_out_dir=None, ifg_xpos_scaler = 15, sources_labels = None,
                      cmap = plt.get_cmap('coolwarm')):
     """
     The main fucntion to draw the LiCSAlert figure.  
@@ -554,7 +550,10 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
 
         time_value_end | int or None | if an int, axes are extended to this time value, even if it's larrger than the last value of time_values
                                         N.b. time is in days, so e.g. set it to 96, or 192
-        out_folder | pathlib Path | If not None, output pngs are saved to this location and the matplotib figures closed
+        
+        figure_outtype |
+        figure_outdir  | pathlib Path | 
+        
         ifg_xpos_scaler | int | To be positioned correctly in the x direction, the ifgs that are plotted on the upper row must not be taller
                                 than the axis they lie within.  Increasing this value makes the ifgs smaller, and therefore fit.  
         WIP sources_labels | dict |  keys and variables:
@@ -741,7 +740,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
                    
 
     # -2. Check matplotlib backend is set correctly 
-    if out_folder is not None:
+    if figure_type == 'png':
         plt.switch_backend('Agg')                                                           #  works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
     else: 
         if plt.get_backend() != 'Qt5Agg':                                                               # check what the backend is 
@@ -927,10 +926,10 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
                         f"DEM (m): {int(np.nanmin(displacement_r2['dem'])), int(np.nanmax(displacement_r2['dem']))}", fontsize = 6 )
     
     # 8: Possible save output
-    if out_folder is not None:
+    if (figure_type == 'png') or (figure_type == 'both'):
         filename = "_".join(figtitle.split(" "))                                            # figtitle has spaces, but filename must use underscores instead.  
-        fig1.savefig(out_folder / f"{filename}.png", bbox_inches='tight')
-        plt.close(fig1)
+        fig1.savefig(figure_out_dir / f"{filename}.png", bbox_inches='tight')
+        
         
     if plt.get_backend() != 'Qt5Agg':                                                           # check if we need to reset the backend (to interactive window)
         plt.switch_backend('Qt5Agg')                                                           #  

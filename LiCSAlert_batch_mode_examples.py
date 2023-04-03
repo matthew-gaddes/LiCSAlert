@@ -16,7 +16,9 @@ import licsalert
 from licsalert.licsalert import LiCSAlert_batch_mode
 
 #ICASAR_path = Path("/home/matthew/university_work/15_my_software_releases/ICASAR-2.7.2/")                               # location of ICASAR functions
-ICASAR_path = Path("/home/matthew/university_work/01_blind_signal_separation_python/13_ICASAR/ICASAR_GitHub")           # development version
+ICASAR_path = Path("/home/matthew/university_work/crucial_1000gb/01_blind_signal_separation_python/13_ICASAR/ICASAR_GitHub/")           # development version
+
+
 
 
 #%% Example 3, Running LiCSAlert with a smaller signal (Campi Flegrei, processed with LiCSBAS)
@@ -27,9 +29,10 @@ import icasar
 from icasar.icasar_funcs import LiCSBAS_to_ICASAR
 
 LiCSAlert_settings = {"n_baseline_end" : 55,                                         # n_ifgs that are used in the baseline stage (i.e. by ICASAR)
-                      "out_folder" : "LiCSAlert_03_Campi_Flegrei",    # no spaces, snake or camel case
-                      "run_ICASAR" : True,                                           # If False, attempt to load results from previous run.  If True, run (which can be slow)
-                      "intermediate_figures" : False,                                # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
+                      "out_folder" : Path("LiCSAlert_campi_flegrei"),    # no spaces, snake or camel case
+                      "run_ICASAR" : False,                                           # If False, attempt to load results from previous run.  If True, run (which can be slow)
+                      "figure_intermediate" : False,                                # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
+                      "figure_type"         : 'both',                                 # either 'window' or 'png' (to save as pngs)
                       "downsample_run" : 0.5,                                        # data can be downsampled to speed things up
                       "downsample_plot" : 0.5,                                       # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
                       "residual_type"        : 'cumulative'}                              # controls the type of residual used in the lower plot.  Either cumulative or window   
@@ -40,8 +43,8 @@ ICASAR_settings = {"n_comp" : 5,                                         # numbe
                    "tsne_param" : (30, 12),                             # (perplexity, early_exaggeration)
                    "ica_param" : (1e-2, 150),                           # (tolerance, max iterations)
                    "hdbscan_param" : (100,10),                           # (min_cluster_size, min_samples) Discussed in more detail in Mcinnes et al. (2017). min_cluster_size sets the smallest collection of points that can be considered a cluster. min_samples sets how conservative the clustering is. With larger values, more points will be considered noise. 
-                   "create_all_ifgs_flag" : True,                       # small signals are hard for ICA to extact from time series, so make it easier by creating all possible long temporal baseline ifgs from the incremental data.  
-                   "load_fastICA_results" : True,                      # If all the FastICA runs already exisit, setting this to True speeds up ICASAR as they don't need to be recomputed.  
+                   "ifgs_format"        : 'cum',
+                   "load_fastICA_results" : False,                      # If all the FastICA runs already exisit, setting this to True speeds up ICASAR as they don't need to be recomputed.  
                    "figures" : "png+window"}                            # if png, saved in a folder as .png.  If window, open as interactive matplotlib figures,
 
 
