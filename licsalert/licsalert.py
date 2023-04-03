@@ -133,7 +133,10 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
             if optional_data in displacement_r2:                                                                       # if it's in the main displacement_r2 dict
                 baseline_data[optional_data] = displacement_r2[optional_data]                                          # add it to the baseline data.  
         
-        sources, tcs, residual, Iq, n_clusters, S_all_info, means = ICASAR(spatial_data = baseline_data, out_folder = out_folder/"ICASAR_outputs", **ICASAR_settings)       # run ICASAR to recover the latent sources from the baseline stage
+        sources, tcs, residual, Iq, n_clusters, S_all_info, means, label_sources_output = ICASAR(spatial_data = baseline_data, out_folder = out_folder/"ICASAR_outputs", 
+                                                                                                 label_sources = True, **ICASAR_settings)                                    # run ICASAR to recover the latent sources from the baseline stage
+        
+        pdb.set_trace()
         sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                                                                         # downsample for recovered sources for plots
     else:
         try:
@@ -143,6 +146,7 @@ def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder,
                 source_residuals = pickle.load(f)    
                 Iq_sorted = pickle.load(f)    
                 n_clusters = pickle.load(f)    
+                label_sources_output = pickle.load(f)
             del tcs, source_residuals, Iq_sorted, n_clusters                                                                                      # these ICASAR products are not needed by LiCSAlert
             sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                     # downsample the sources as this can speed up plotting
         except:

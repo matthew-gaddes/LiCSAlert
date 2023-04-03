@@ -29,10 +29,10 @@ import icasar
 from icasar.icasar_funcs import LiCSBAS_to_ICASAR
 
 LiCSAlert_settings = {"n_baseline_end" : 55,                                         # n_ifgs that are used in the baseline stage (i.e. by ICASAR)
-                      "out_folder" : Path("LiCSAlert_campi_flegrei"),    # no spaces, snake or camel case
+                      "out_folder" : Path("LiCSAlert_campi_flegrei"),                # pathlib Path
                       "run_ICASAR" : False,                                           # If False, attempt to load results from previous run.  If True, run (which can be slow)
                       "figure_intermediate" : False,                                # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
-                      "figure_type"         : 'both',                                 # either 'window' or 'png' (to save as pngs)
+                      "figure_type"         : 'png',                                 # either 'window' or 'png' (to save as pngs)
                       "downsample_run" : 0.5,                                        # data can be downsampled to speed things up
                       "downsample_plot" : 0.5,                                       # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
                       "residual_type"        : 'cumulative'}                              # controls the type of residual used in the lower plot.  Either cumulative or window   
@@ -44,7 +44,7 @@ ICASAR_settings = {"n_comp" : 5,                                         # numbe
                    "ica_param" : (1e-2, 150),                           # (tolerance, max iterations)
                    "hdbscan_param" : (100,10),                           # (min_cluster_size, min_samples) Discussed in more detail in Mcinnes et al. (2017). min_cluster_size sets the smallest collection of points that can be considered a cluster. min_samples sets how conservative the clustering is. With larger values, more points will be considered noise. 
                    "ifgs_format"        : 'cum',
-                   "load_fastICA_results" : False,                      # If all the FastICA runs already exisit, setting this to True speeds up ICASAR as they don't need to be recomputed.  
+                   "load_fastICA_results" : True,                      # If all the FastICA runs already exisit, setting this to True speeds up ICASAR as they don't need to be recomputed.  
                    "figures" : "png+window"}                            # if png, saved in a folder as .png.  If window, open as interactive matplotlib figures,
 
 
