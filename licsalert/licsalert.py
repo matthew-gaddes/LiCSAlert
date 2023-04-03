@@ -232,12 +232,16 @@ def LiCSAlert(sources, time_values, ifgs_baseline, mask, ifgs_monitoring = None,
         t_recalcaulte | integer, how often the lines of best fit are redrawn.  
                                                                 
         residual_tcs_monitor | list of dicts | As per above, but only for the cumulative residual (i.e. list is length 1)
+        
+        d_hat            | rank 2 array | reconstructions (of incremrental ifgs)   
+        d_resid         | rank 2 array | residual (d - d_hat)
     
     History:
         2019/12/XX | MEG |  Written from existing script.  
         2020/02/16 | MEG |  Update to work with no monitoring interferograms
         2020/12/14 | MEG | Improve docs and add option to save outputs.  
         2021_11_30 | MEG | Add new residual method (max residual of spatial window / mean of residual of all spatial windows for each ifg)
+        2023_04_03 | MEG | also return residual and reconsructions
     """
     import numpy as np
     import pickle
@@ -279,21 +283,26 @@ def LiCSAlert(sources, time_values, ifgs_baseline, mask, ifgs_monitoring = None,
         
 
     # 1: calculating time courses/distances etc for the baseline data
-    tcs_c, _ = bss_components_inversion(sources, ifgs_baseline, cumulative=True)                                 # compute cumulative time courses for baseline interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources.  )
+    tcs_c, _, d_hat_baseline, d_resid_baseline = bss_components_inversion(sources, ifgs_baseline, cumulative=True)                                 # compute cumulative time courses for baseline interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources. ) Residual (_) not needed as just a single value for each ifg, but we'll calculate it for each pixel.  
     sources_tcs = tcs_baseline(tcs_c, time_values[:n_times_baseline], t_recalculate)                             # lines, gradients, etc for time courses.  Note done by tcs_baseline, which contrasts with tcs_monitoring (which is used lower down)    
     residual = residual_for_pixels(sources, sources_tcs, ifgs_baseline, mask, n_pix_window, residual_type)       # get the cumulative residual for the baseline interferograms, sources are stored as row vectors, and each has an entry in sources_tcs which is a dict (ie a list of dicts).  Ifgs_baseline are ifgs as row vectors, mean centered in space (ie mean of each row is 0)       
     residual_tcs = tcs_baseline(residual, time_values[:n_times_baseline], t_recalculate)                         # lines, gradients. etc for residual 
     del tcs_c, residual
     
+    
+    
     #2: Calculate time courses/distances etc for the monitoring data
     if ifgs_monitoring is not None:
-        tcs_c, _ = bss_components_inversion(sources, ifgs_monitoring, cumulative=True)                      # compute cumulative time courses for monitoring interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources.  )
+        tcs_c, _, d_hat_monitoring, d_resid_monitoring = bss_components_inversion(sources, ifgs_monitoring, cumulative=True)                      # compute cumulative time courses for monitoring interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources.  )
         sources_tcs_monitor = tcs_monitoring(tcs_c, sources_tcs, time_values)                               # update lines, gradients, etc for time courses  Note done by tcs_monitoring, which contrasts with tcs_baseline (which is used before)
     
         #3: and update the residual stuff                                                                            # which is handled slightly differently as must be recalcualted for baseline and monitoring data
         residual_bm = residual_for_pixels(sources, sources_tcs_monitor, ifgs_all, mask, n_pix_window, residual_type)                               # get the cumulative residual for baseline and monitoring (hence _cb)    
         residual_tcs_monitor = tcs_monitoring(residual_bm, residual_tcs, time_values, residual=True)               # lines, gradients. etc for residual 
     
+    # 3: combine the reconsuction and residual for all ifgs
+    d_hat = np.hstack((d_hat_baseline, d_hat_monitoring))                                                                           # reconstruction
+    d_resid = np.hstack((d_resid_baseline, d_resid_monitoring))                                                                     # residual
 
     if ifgs_monitoring is None:
         if out_file is not None:
@@ -309,7 +318,7 @@ def LiCSAlert(sources, time_values, ifgs_baseline, mask, ifgs_monitoring = None,
                 pickle.dump(sources_tcs_monitor, f)
                 pickle.dump(residual_tcs_monitor, f)
             f.close()
-        return sources_tcs_monitor, residual_tcs_monitor
+        return sources_tcs_monitor, residual_tcs_monitor, d_hat, d_resid
     
 
 
@@ -1123,8 +1132,11 @@ def bss_components_inversion(sources, interferograms, cumulative = True):
     Outputs:
         m | rank 1 array | the strengths with which to use each source to reconstruct the ifg.
         mean_l2norm | float | the misfit between the ifg and the ifg reconstructed from sources
+        d_hat 
+        d_resid
 
     2019/12/30 | MEG | Update so handles time series (and not single ifgs), and can return cumulative values
+    2023_04_03 | MEG | Also return the reconstruction (d_hat), and the residual
     """
     import numpy as np
 
@@ -1145,7 +1157,7 @@ def bss_components_inversion(sources, interferograms, cumulative = True):
     if cumulative:
         m = np.cumsum(m, axis=0)
         residual = np.cumsum(residual, axis=0)
-    return m, residual
+    return m, residual, d_hat, d_resid
 
 
 #%%

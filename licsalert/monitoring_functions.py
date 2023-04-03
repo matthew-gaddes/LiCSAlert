@@ -48,6 +48,10 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
     import shutil
     import copy
     from datetime import datetime
+    import numpy.ma as ma
+    
+    from licsalert.plotting import LiCSAlert_aux_figures, plot_1_image
+                
     
     def create_licsalert_outdir(outdir):
         """This directory may already exist (if processing was done but errors occured).  Make it again if so.  
@@ -144,7 +148,6 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
                                                                                                           LiCSAlert_settings['downsample_plot'], verbose = False)
         
         # 4c: Main loop to run LiCSAlert for each date that is required
-        
         for processing_date in LiCSAlert_status['to_process']:                                                        # 
             print(f"Running LiCSAlert for {processing_date}")
             ifg_n = tbaseline_info['acq_dates'].index(processing_date)                                                                                             # instead of working in dates, switch this to ifg_n in the sorted interferograms.   
@@ -154,21 +157,32 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
             displacement_r2_current = shorten_LiCSAlert_data(displacement_r2, n_end=ifg_n + 1)                                                                       # get the ifgs available for this loop (ie one more is added each time the loop progresses),  + 1 as indexing and want to include this data
             cumulative_baselines_current = tbaseline_info['baselines_cumulative'][:ifg_n + 1]                                                                        # also get current time values.  +1 as indexing and want to include this data
             
-            sources_tcs_baseline, residual_tcs_baseline = LiCSAlert(icasar_sources, cumulative_baselines_current,                                                                    # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
-                                                                    ifgs_baseline = displacement_r2_current['incremental'][:(LiCSAlert_settings['baseline_end_ifg_n']+1),],          # baseline ifgs
-                                                                    ifgs_monitoring = displacement_r2_current['incremental'][(LiCSAlert_settings['baseline_end_ifg_n']+1):,],        # monitoring ifgs
-                                                                    mask = displacement_r2_current['mask'],
-                                                                    t_recalculate=10, verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
+            sources_tcs_baseline, residual_tcs_baseline, reconstructions, residuals = LiCSAlert(icasar_sources, cumulative_baselines_current,                                                                    # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
+                                                                                                ifgs_baseline = displacement_r2_current['incremental'][:(LiCSAlert_settings['baseline_end_ifg_n']+1),],          # baseline ifgs
+                                                                                                ifgs_monitoring = displacement_r2_current['incremental'][(LiCSAlert_settings['baseline_end_ifg_n']+1):,],        # monitoring ifgs
+                                                                                                mask = displacement_r2_current['mask'],
+                                                                                                t_recalculate=10, verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
                                                                                                                                                                                      # 6d LiCAlert figure
-            LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, icasar_sources, displacement_r2_current, LiCSAlert_settings['baseline_end_ifg_n'],                         # creat the LiCSAlert figure
-                             cumulative_baselines_current, figure_type = figure_type, figure_out_dir = volcano_dir / processing_date, day0_date = tbaseline_info['acq_dates'][0])    
+            # LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, icasar_sources, displacement_r2_current, LiCSAlert_settings['baseline_end_ifg_n'],                         # creat the LiCSAlert figure
+            #                  cumulative_baselines_current, figure_type = figure_type, figure_out_dir = volcano_dir / processing_date, day0_date = tbaseline_info['acq_dates'][0])    
             
-            
-            
+            LiCSAlert_aux_figures(displacement_r2_current, reconstructions, residuals, tbaseline_info,
+                                  figure_type = figure_type, figure_out_dir = volcano_dir / processing_date)                                                                                # plot the zoom in figures for last cumulative ifg, incremetnal ifg, incremental reconstrution and incremental residual
+                
             if processing_date == LiCSAlert_status['to_process'][-1]:                                                                                      # if it's the last date possible....
                 save_licsalert_products(displacement_r2['dem'], sources_tcs_baseline, residual_tcs_baseline, volcano_dir / processing_date,                         # save some useful outputs,
                                         remove_others = True, acq_dates = tbaseline_info['acq_dates'] )                                                             # and clean up by removing this file from other dates (as we only need the last one)
-                       
+                
+
+                # if the last figure, also plot the aux figures.  
+                aux_fig_dir = volcano_dir / "aux_figures"
+                aux_fig_dir.mkdir(parents=True, exist_ok=True)                                   
+                plot_1_image(ma.compressed(ma.array(displacement_r2['dem'], mask = displacement_r2['mask'])), displacement_r2['mask'],                  # conver the dem to a masked array, then take on the valid points ()
+                             f"DEM", figure_type = 'png', figure_out_dir = aux_fig_dir, figsize = (18,9))
+                for source_n, ic in enumerate(icasar_sources):
+                    plot_1_image(ic, displacement_r2['mask'], 
+                                 f"IC_{source_n}", figure_type = 'png', figure_out_dir = aux_fig_dir, figsize = (18,9))
+        
     sys.stdout = original                                                                                                                                      # return stdout to be normal.  
     f_run_log.close()                                                                                                                                          # and close the log file.  
 
@@ -608,7 +622,8 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
                                             run_ICASAR | Boolean | True if ICASAR will be required.  
                                             run_LiCSAlert | Boolean | True if required.  
                                             'processed_with_errors'   : processed_with_errors,                                  # any dates that have missing LiCSAlert products.  
-                                            'pending'                 : pending,                                                # new dates to be processed (ie update LiCSBAS time series, run LiCSAlert)
+                                            'not_processed'                 : pending,                                                # not processed
+                                            'to process'
                                             'licsbas_last_acq'        : licsbas_last_acq}                                        # date of the most recent sentinel-1 acquisition that there is an interferogram for.  
 
     History:
@@ -695,7 +710,8 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
     
     if not figure_intermediate:
         print(f"Only the last LiCSAlert figure has been requested, so removing any previous figures from the LiCSAlert status dictionary.")
-        LiCSAlert_status['to_process']= [LiCSAlert_status['to_process'][-1]]
+        #LiCSAlert_status['to_process'] = [LiCSAlert_status['to_process'][-1]]
+        LiCSAlert_status['to_process'] = [LiCSAlert_status["licsbas_last_acq"]] 
     
 
     # 8: Print the information to the terminal (and the sys.out file)
