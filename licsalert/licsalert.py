@@ -9,197 +9,197 @@ import matplotlib.pyplot as plt
 
 #%%
 
-def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder, 
-                         ICASAR_settings, run_ICASAR = True, ICASAR_path = None, ic_classifying_model = None,
-                         figure_intermediate = False, figure_type = 'both', figure_cmap = plt.get_cmap('coolwarm'), 
-                         downsample_run = 1.0, downsample_plot = 0.5, t_recalculate = 10, residual_type = 'cumulative'):
-    """ A function to run the LiCSAlert algorithm on a preprocssed time series.  To run on a time series that is being 
-    updated, use LiCSAlert_monitoring_mode.  
+# def LiCSAlert_batch_mode(displacement_r2, n_baseline_end, out_folder, 
+#                          ICASAR_settings, run_ICASAR = True, ICASAR_path = None, ic_classifying_model = None,
+#                          figure_intermediate = False, figure_type = 'both', figure_cmap = plt.get_cmap('coolwarm'), 
+#                          downsample_run = 1.0, downsample_plot = 0.5, t_recalculate = 10, residual_type = 'cumulative'):
+#     """ A function to run the LiCSAlert algorithm on a preprocssed time series.  To run on a time series that is being 
+#     updated, use LiCSAlert_monitoring_mode.  
     
-    Inputs:
-        displacement_r2  | dict | Required: 
-                                     incremental | rank 2 array | row vectors of the ifgs, incremental (ie not cumulative)
-                                     mask  | rank 2 array | mask to conver the row vectors to rank 2 masked arrays.  
-                                     ifg_dates | list of strings | YYYYMMDD_YYYYMMDD of interferograms.  
-                                  Optional:
-                                     lons | rank 2 array | lons of each pixel in the image.  Changed to rank 2 in version 2.0, from rank 1 in version 1.0  .  If supplied, ICs will be geocoded as kmz.  
-                                     lats | rank 2 array | lats of each pixel in the image. Changed to rank 2 in version 2.0, from rank 1 in version 1.0
-                                     dem | rank 2 array | height in metres of each pixel in the image.  If supplied, IC vs dem plots will be produced.  
+#     Inputs:
+#         displacement_r2  | dict | Required: 
+#                                      incremental | rank 2 array | row vectors of the ifgs, incremental (ie not cumulative)
+#                                      mask  | rank 2 array | mask to conver the row vectors to rank 2 masked arrays.  
+#                                      ifg_dates | list of strings | YYYYMMDD_YYYYMMDD of interferograms.  
+#                                   Optional:
+#                                      lons | rank 2 array | lons of each pixel in the image.  Changed to rank 2 in version 2.0, from rank 1 in version 1.0  .  If supplied, ICs will be geocoded as kmz.  
+#                                      lats | rank 2 array | lats of each pixel in the image. Changed to rank 2 in version 2.0, from rank 1 in version 1.0
+#                                      dem | rank 2 array | height in metres of each pixel in the image.  If supplied, IC vs dem plots will be produced.  
                                                            
-        n_baseline_end | int | the interferogram number which is the last in the baseline stage.  
-        out_folder | path or string | name of folder in which to save ouputs.  
-        ICASAR_settings | dict | contains all the settings for the ICASAR algorithm.  See ICASAR for details.  
-        run_ICASAR | boolean | If false, the resutls from a previous run of ICASAR are used, if True it is run again (which can be time consuming)
-        ICASAR_path | path or string | location of ICASAR package.  Note, important to remember the /lib/ part at teh end.  
-        ic_classifying_model | path or string | location of Keras model for classification and localisation of deformation in a single ifg.  
+#         n_baseline_end | int | the interferogram number which is the last in the baseline stage.  
+#         out_folder | path or string | name of folder in which to save ouputs.  
+#         ICASAR_settings | dict | contains all the settings for the ICASAR algorithm.  See ICASAR for details.  
+#         run_ICASAR | boolean | If false, the resutls from a previous run of ICASAR are used, if True it is run again (which can be time consuming)
+#         ICASAR_path | path or string | location of ICASAR package.  Note, important to remember the /lib/ part at teh end.  
+#         ic_classifying_model | path or string | location of Keras model for classification and localisation of deformation in a single ifg.  
         
-        LiCSAlert figure settings:
-        figure_intermediate | boolean | if True, figures for all time steps in the monitoring phase are created (which is slow).  If False, only the last figure is created.  
-        figure_type          | string | 'png' for png saved in output directory, or 'window' for interactive window, 'both' for both
-        figure_cmap           | matplotlib colourmap | colourmap to be used in figures.    Note that ICASAR currently always uses coolwarm.  
+#         LiCSAlert figure settings:
+#         figure_intermediate | boolean | if True, figures for all time steps in the monitoring phase are created (which is slow).  If False, only the last figure is created.  
+#         figure_type          | string | 'png' for png saved in output directory, or 'window' for interactive window, 'both' for both
+#         figure_cmap           | matplotlib colourmap | colourmap to be used in figures.    Note that ICASAR currently always uses coolwarm.  
         
-        downsample_run | float | data can be downsampled to speed things up
-        downsample_plot | float | and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
-        t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
-        residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summer in time for each pixel, then averaged in space across each ifg.  )
-                                                        If window, the residual is the ratio of the max in a window (e.g. 20x20 pixels) over the mean for all windows for that time.  Value at each point is the cumulative.  
-    Returns:
-        out_folder with various items.  
-    History:
-        2020/09/16 | MEG | Created from various scripts.        
-        2021_08_09 | MEG | add option to set r_recalculate, rather than hard coding it.  
-        2023_01_30 | MEG | Improve figure ploting (imshow switched to matshow), and option to select colourbar.  
+#         downsample_run | float | data can be downsampled to speed things up
+#         downsample_plot | float | and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
+#         t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
+#         residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summer in time for each pixel, then averaged in space across each ifg.  )
+#                                                         If window, the residual is the ratio of the max in a window (e.g. 20x20 pixels) over the mean for all windows for that time.  Value at each point is the cumulative.  
+#     Returns:
+#         out_folder with various items.  
+#     History:
+#         2020/09/16 | MEG | Created from various scripts.        
+#         2021_08_09 | MEG | add option to set r_recalculate, rather than hard coding it.  
+#         2023_01_30 | MEG | Improve figure ploting (imshow switched to matshow), and option to select colourbar.  
         
-    Stack overview:
-        LiCSAlert_preprocessing
-        ICASAR
-        LiCSAlert
-        LiCSAlert_figure
-    """
-    import numpy as np
-    from pathlib import Path
-    import glob
-    import os
-    import sys
-    import pickle
-    import shutil
+#     Stack overview:
+#         LiCSAlert_preprocessing
+#         ICASAR
+#         LiCSAlert
+#         LiCSAlert_figure
+#     """
+#     import numpy as np
+#     from pathlib import Path
+#     import glob
+#     import os
+#     import sys
+#     import pickle
+#     import shutil
     
-    from licsalert.licsalert import LiCSAlert, LiCSAlert_figure, save_pickle, shorten_LiCSAlert_data, LiCSAlert_preprocessing
-    from licsalert.downsample_ifgs import downsample_ifgs
-    from licsalert.aux import LiCSAR_ifgs_to_s1_acquisitions, baselines_from_ifgnames
+#     from licsalert.licsalert import LiCSAlert, LiCSAlert_figure, save_pickle, shorten_LiCSAlert_data, LiCSAlert_preprocessing
+#     from licsalert.downsample_ifgs import downsample_ifgs
+#     from licsalert.aux import LiCSAR_ifgs_to_s1_acquisitions, baselines_from_ifgnames
     
-    # 0: Check some inputs and raise Exceptions if they're not suitable.  
-    if ICASAR_path is None:
-        raise Exception(f"LiCSAlert requires the path to the local copy of the ICASAR package, which can be downloaded from https://github.com/matthew-gaddes/ICASAR  Exiting...."  )
-    else:
-        sys.path.append(str(ICASAR_path))                  # location of ICASAR functions
-        import icasar
-        from icasar.icasar_funcs import ICASAR
+#     # 0: Check some inputs and raise Exceptions if they're not suitable.  
+#     if ICASAR_path is None:
+#         raise Exception(f"LiCSAlert requires the path to the local copy of the ICASAR package, which can be downloaded from https://github.com/matthew-gaddes/ICASAR  Exiting...."  )
+#     else:
+#         sys.path.append(str(ICASAR_path))                  # location of ICASAR functions
+#         import icasar
+#         from icasar.icasar_funcs import ICASAR
     
-    if 'out_folder' in ICASAR_settings:
-        print(f"An 'out_folder' can't be set when running ICASAR within LiCSAlert.  Deleting this item from the 'ICASAR_settings' dictionary and continuing.  ")
-        del ICASAR_settings['out_folder']
+#     if 'out_folder' in ICASAR_settings:
+#         print(f"An 'out_folder' can't be set when running ICASAR within LiCSAlert.  Deleting this item from the 'ICASAR_settings' dictionary and continuing.  ")
+#         del ICASAR_settings['out_folder']
         
-    for required_to_be_r2 in ['lons', 'lats']:                                                                          # check that these aren't rank 1 (should be rank 2 - ie a value for every pixel)
-        if required_to_be_r2 in displacement_r2:                                                                        # though we also need to check they are 
-            if len(displacement_r2[required_to_be_r2].shape) != 2:
-                raise Exception(f"{required_to_be_r2} is not rank 2 (i.e. a value for every pixel) so exiting.   ")
+#     for required_to_be_r2 in ['lons', 'lats']:                                                                          # check that these aren't rank 1 (should be rank 2 - ie a value for every pixel)
+#         if required_to_be_r2 in displacement_r2:                                                                        # though we also need to check they are 
+#             if len(displacement_r2[required_to_be_r2].shape) != 2:
+#                 raise Exception(f"{required_to_be_r2} is not rank 2 (i.e. a value for every pixel) so exiting.   ")
                 
-    for required_array in ['incremental', 'mask', 'ifg_dates']:                                                             # some keys are always required in displacement_r2.  Check they exist.  
-        if required_array not in displacement_r2.keys():                                                                    # loop through checkin.  
-            raise Exception(f"{required_array} is not in displacement_r2, but is one of the required three ('incremental', 'mask', and 'ifg_dates').  Exiting.  ")
+#     for required_array in ['incremental', 'mask', 'ifg_dates']:                                                             # some keys are always required in displacement_r2.  Check they exist.  
+#         if required_array not in displacement_r2.keys():                                                                    # loop through checkin.  
+#             raise Exception(f"{required_array} is not in displacement_r2, but is one of the required three ('incremental', 'mask', and 'ifg_dates').  Exiting.  ")
                 
 
-    # 1: Sort out the ouput folder for the licsalert figure
-    licsalert_figure_out_dir = out_folder
+#     # 1: Sort out the ouput folder for the licsalert figure
+#     licsalert_figure_out_dir = out_folder
     
     
-    if os.path.exists(out_folder):                                                                                                     # the directory containing both LiCSAlert products and the 'ICASAR_outputs' directory exists
-        print(f"The out_folder ({out_folder}) already exists, deleting the LiCSAlert outputs within it.   ")
-        files = glob.glob(str(out_folder / 'LiCSAlert*'))                                                                              # get all the files in the folder that have LiCSALert in the name (ie not the ICASAR directory)
-        for f in files:
-            try:
-                os.remove(f)                                                                                                           # try to delete assuming it's a file
-            except:
-                shutil.rmtree(f)                                                                                                       # if that fails, assume it's a directory and try to delete a different way.  
-        if run_ICASAR:                                                                                                                 # if ICASAR is being run, the directory may or may not need to be deleted.  
-            if ICASAR_settings['load_fastICA_results'] == True:                                                                        # if we will load the results of an existing run, the directory must remain 
-                print(f"As run_ICASAR is selected but'load_fastICA_results' is also True, leaving the ICASAR_outputs folder.  ")
-            else:
-                print(f"As run_ICASAR is selected but'load_fastICA_results' is False, deleting the ICASAR_outputs folder.  ")           # if we won't load the results of an existing run, the directory can be deleted.  
-                try:
-                    shutil.rmtree(out_folder / 'ICASAR_outputs')                                                                            # delete the directory
-                except:
-                    print(f"Failed to remove the ICASAR folder ({str(out_folder / 'ICASAR_outputs')}) which is probably "
-                          f"as it doesn't exist, so trying to continue anyway.  ")
-        else:                                                                                                                           # if we're not running ICASAR, leave the directory alone.  
-            print(f"As run_ICASAR is False, leaving the ICASAR_outputs folder")
-    else:
-        os.mkdir(out_folder)                                                                                                            # if nothing exits (i.e. first run), just make the folder                                  
+#     if os.path.exists(out_folder):                                                                                                     # the directory containing both LiCSAlert products and the 'ICASAR_outputs' directory exists
+#         print(f"The out_folder ({out_folder}) already exists, deleting the LiCSAlert outputs within it.   ")
+#         files = glob.glob(str(out_folder / 'LiCSAlert*'))                                                                              # get all the files in the folder that have LiCSALert in the name (ie not the ICASAR directory)
+#         for f in files:
+#             try:
+#                 os.remove(f)                                                                                                           # try to delete assuming it's a file
+#             except:
+#                 shutil.rmtree(f)                                                                                                       # if that fails, assume it's a directory and try to delete a different way.  
+#         if run_ICASAR:                                                                                                                 # if ICASAR is being run, the directory may or may not need to be deleted.  
+#             if ICASAR_settings['load_fastICA_results'] == True:                                                                        # if we will load the results of an existing run, the directory must remain 
+#                 print(f"As run_ICASAR is selected but'load_fastICA_results' is also True, leaving the ICASAR_outputs folder.  ")
+#             else:
+#                 print(f"As run_ICASAR is selected but'load_fastICA_results' is False, deleting the ICASAR_outputs folder.  ")           # if we won't load the results of an existing run, the directory can be deleted.  
+#                 try:
+#                     shutil.rmtree(out_folder / 'ICASAR_outputs')                                                                            # delete the directory
+#                 except:
+#                     print(f"Failed to remove the ICASAR folder ({str(out_folder / 'ICASAR_outputs')}) which is probably "
+#                           f"as it doesn't exist, so trying to continue anyway.  ")
+#         else:                                                                                                                           # if we're not running ICASAR, leave the directory alone.  
+#             print(f"As run_ICASAR is False, leaving the ICASAR_outputs folder")
+#     else:
+#         os.mkdir(out_folder)                                                                                                            # if nothing exits (i.e. first run), just make the folder                                  
 
-    # 2: Prepare a dictionary to store information about the temporal information.  
-    tbaseline_info = {'acq_dates'            : LiCSAR_ifgs_to_s1_acquisitions(displacement_r2['ifg_dates']),                    # get the unique acquisition (epoch) dates
-                      'baselines_cumulative' : np.cumsum(baselines_from_ifgnames(displacement_r2['ifg_dates']))}                # and the cumulative temporal baselines (in days)
+#     # 2: Prepare a dictionary to store information about the temporal information.  
+#     tbaseline_info = {'acq_dates'            : LiCSAR_ifgs_to_s1_acquisitions(displacement_r2['ifg_dates']),                    # get the unique acquisition (epoch) dates
+#                       'baselines_cumulative' : np.cumsum(baselines_from_ifgnames(displacement_r2['ifg_dates']))}                # and the cumulative temporal baselines (in days)
     
    
-    # 3: Either run ICASAR to find latent spatial sources in baseline data, or load the results from a previous run.  
-    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, downsample_run, downsample_plot)                         # mean centre and downsize the data
+#     # 3: Either run ICASAR to find latent spatial sources in baseline data, or load the results from a previous run.  
+#     displacement_r2 = LiCSAlert_preprocessing(displacement_r2, downsample_run, downsample_plot)                         # mean centre and downsize the data
     
-    if run_ICASAR:                                                                                                      # set to True if we need to run ICASAR
-        baseline_data = {'ifgs_dc' : displacement_r2['incremental'][:n_baseline_end],                               # prepare a dictionary of data for ICASAR
-                         'mask'        : displacement_r2['mask'],
-                         'ifg_dates_dc'   : displacement_r2['ifg_dates'][:n_baseline_end]}                                 # ifg dates are stored in displacement_r2,    
-        for optional_data in ['dem', 'lons', 'lats']:                                                                  # these are not guaranteed to be supplied to LiCSAlert, to check if they have been, loop through each one.  
-            if optional_data in displacement_r2:                                                                       # if it's in the main displacement_r2 dict
-                baseline_data[optional_data] = displacement_r2[optional_data]                                          # add it to the baseline data.  
+#     if run_ICASAR:                                                                                                      # set to True if we need to run ICASAR
+#         baseline_data = {'ifgs_dc' : displacement_r2['incremental'][:n_baseline_end],                               # prepare a dictionary of data for ICASAR
+#                          'mask'        : displacement_r2['mask'],
+#                          'ifg_dates_dc'   : displacement_r2['ifg_dates'][:n_baseline_end]}                                 # ifg dates are stored in displacement_r2,    
+#         for optional_data in ['dem', 'lons', 'lats']:                                                                  # these are not guaranteed to be supplied to LiCSAlert, to check if they have been, loop through each one.  
+#             if optional_data in displacement_r2:                                                                       # if it's in the main displacement_r2 dict
+#                 baseline_data[optional_data] = displacement_r2[optional_data]                                          # add it to the baseline data.  
         
-        sources, tcs, residual, Iq, n_clusters, S_all_info, means, label_sources_output = ICASAR(spatial_data = baseline_data, out_folder = out_folder/"ICASAR_outputs", 
-                                                                                                 label_sources = True, **ICASAR_settings)                                    # run ICASAR to recover the latent sources from the baseline stage
+#         sources, tcs, residual, Iq, n_clusters, S_all_info, means, label_sources_output = ICASAR(spatial_data = baseline_data, out_folder = out_folder/"ICASAR_outputs", 
+#                                                                                                  label_sources = True, **ICASAR_settings)                                    # run ICASAR to recover the latent sources from the baseline stage
         
-        pdb.set_trace()
-        sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                                                                         # downsample for recovered sources for plots
-    else:
-        try:
-            with open(out_folder / "ICASAR_outputs" / "ICASAR_results.pkl", 'rb') as f:
-                sources = pickle.load(f)    
-                tcs  = pickle.load(f)    
-                source_residuals = pickle.load(f)    
-                Iq_sorted = pickle.load(f)    
-                n_clusters = pickle.load(f)    
-                label_sources_output = pickle.load(f)
-            del tcs, source_residuals, Iq_sorted, n_clusters                                                                                      # these ICASAR products are not needed by LiCSAlert
-            sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                     # downsample the sources as this can speed up plotting
-        except:
-            raise Exception(f"Unable to open the results of ICASAR (which are usually stored in 'ICASAR_results') "
-                            f"Try re-running and enabling ICASAR with 'run_ICASAR' set to 'True' in the 'LiCSAlert_settings' dictionary.  ")
+#         pdb.set_trace()
+#         sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                                                                         # downsample for recovered sources for plots
+#     else:
+#         try:
+#             with open(out_folder / "ICASAR_outputs" / "ICASAR_results.pkl", 'rb') as f:
+#                 sources = pickle.load(f)    
+#                 tcs  = pickle.load(f)    
+#                 source_residuals = pickle.load(f)    
+#                 Iq_sorted = pickle.load(f)    
+#                 n_clusters = pickle.load(f)    
+#                 label_sources_output = pickle.load(f)
+#             del tcs, source_residuals, Iq_sorted, n_clusters                                                                                      # these ICASAR products are not needed by LiCSAlert
+#             sources_downsampled, _ = downsample_ifgs(sources, displacement_r2["mask"], downsample_plot)                     # downsample the sources as this can speed up plotting
+#         except:
+#             raise Exception(f"Unable to open the results of ICASAR (which are usually stored in 'ICASAR_results') "
+#                             f"Try re-running and enabling ICASAR with 'run_ICASAR' set to 'True' in the 'LiCSAlert_settings' dictionary.  ")
     
-    # 4: Possible use the VUDL-net-21 model to detect and locate deformation in the ICs.      
-    if ic_classifying_model != None:
-        print(f"Using the supplied neural network to determine which ICs are deformation and which are atmosphere.  ",
-              f"This will require keras to be imported.  ")
-        from LiCSAlert_neural_network_functions import sources_though_cnn                                                                        # don't import if we don't need to as this needs Keras and may not be installed
-        sources_labels = {'defo_sources' : ['Dyke', 'Sill/Point', 'Atmosphere' ]}                                                                # one hot encodings to labels for Vudl-net}
-        sources_labels['Y_class'], sources_labels['Y_loc'] = sources_though_cnn(sources, tcs, displacement_r2['mask'], ic_classifying_model)
-    else:
-        sources_labels = None
+#     # 4: Possible use the VUDL-net-21 model to detect and locate deformation in the ICs.      
+#     if ic_classifying_model != None:
+#         print(f"Using the supplied neural network to determine which ICs are deformation and which are atmosphere.  ",
+#               f"This will require keras to be imported.  ")
+#         from LiCSAlert_neural_network_functions import sources_though_cnn                                                                        # don't import if we don't need to as this needs Keras and may not be installed
+#         sources_labels = {'defo_sources' : ['Dyke', 'Sill/Point', 'Atmosphere' ]}                                                                # one hot encodings to labels for Vudl-net}
+#         sources_labels['Y_class'], sources_labels['Y_loc'] = sources_though_cnn(sources, tcs, displacement_r2['mask'], ic_classifying_model)
+#     else:
+#         sources_labels = None
         
 
-    # 5a: Either do LiCSAlert and the LiCSAlert figure for all time steps, 
-    if figure_intermediate:                                                                                                # controls if we enter the intermediate ifgs loop.  
-        for ifg_n in np.arange(n_baseline_end+1, displacement_r2["incremental"].shape[0]+1):
+#     # 5a: Either do LiCSAlert and the LiCSAlert figure for all time steps, 
+#     if figure_intermediate:                                                                                                # controls if we enter the intermediate ifgs loop.  
+#         for ifg_n in np.arange(n_baseline_end+1, displacement_r2["incremental"].shape[0]+1):
             
-            displacement_r2_current = shorten_LiCSAlert_data(displacement_r2, n_end=ifg_n)                                  # get the ifgs available for this loop (ie one more is added each time the loop progresses)
-            baselines_cumulative_current = tbaseline_info['baselines_cumulative'][:ifg_n]                                   # also get current time values
+#             displacement_r2_current = shorten_LiCSAlert_data(displacement_r2, n_end=ifg_n)                                  # get the ifgs available for this loop (ie one more is added each time the loop progresses)
+#             baselines_cumulative_current = tbaseline_info['baselines_cumulative'][:ifg_n]                                   # also get current time values
         
         
-            sources_tcs_monitor, residual_monitor = LiCSAlert(sources, baselines_cumulative_current, displacement_r2_current["incremental"][:n_baseline_end],               # do LiCSAlert
-                                                              displacement_r2['mask'], displacement_r2_current["incremental"][n_baseline_end:], t_recalculate, 
-                                                              out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
+#             sources_tcs_monitor, residual_monitor = LiCSAlert(sources, baselines_cumulative_current, displacement_r2_current["incremental"][:n_baseline_end],               # do LiCSAlert
+#                                                               displacement_r2['mask'], displacement_r2_current["incremental"][n_baseline_end:], t_recalculate, 
+#                                                               out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
         
-            LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2_current, n_baseline_end, 
-                              baselines_cumulative_current, time_value_end=tbaseline_info['baselines_cumulative'][-1], out_folder = licsalert_figure_out_dir,
-                              day0_date = tbaseline_info['acq_dates'][0], sources_labels = sources_labels, cmap = figure_cmap)                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
+#             LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2_current, n_baseline_end, 
+#                               baselines_cumulative_current, time_value_end=tbaseline_info['baselines_cumulative'][-1], out_folder = licsalert_figure_out_dir,
+#                               day0_date = tbaseline_info['acq_dates'][0], sources_labels = sources_labels, cmap = figure_cmap)                                                                                 # main LiCSAlert figure, note that we use downsampled sources to speed things up
 
-    # 5b: Or just do LiCSAlet and the LiCSAlert figure for the final time step (much quicker, but only one LiCSAlert figure is created)
-    else:
-        sources_tcs_monitor, residual_monitor = LiCSAlert(sources, tbaseline_info['baselines_cumulative'], displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
-                                                          displacement_r2['mask'], displacement_r2["incremental"][n_baseline_end:], t_recalculate, 
-                                                          out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
+#     # 5b: Or just do LiCSAlet and the LiCSAlert figure for the final time step (much quicker, but only one LiCSAlert figure is created)
+#     else:
+#         sources_tcs_monitor, residual_monitor = LiCSAlert(sources, tbaseline_info['baselines_cumulative'], displacement_r2["incremental"][:n_baseline_end],                       # Run LiCSAlert once, on the whole time series.  
+#                                                           displacement_r2['mask'], displacement_r2["incremental"][n_baseline_end:], t_recalculate, 
+#                                                           out_file = out_folder / 'LiCSAlert_results.pkl', residual_type = residual_type)    
         
-        # #this would allow you to export the data required to make the LiCSALert figure.  E.g. if you want to make a modified version of it for a publication.  
-        # with open(out_folder / f"for_publication_figure.pkl", 'wb') as f:
-        #     pickle.dump(sources_tcs_monitor,f)
-        #     pickle.dump(residual_monitor,f)
-        #     pickle.dump(sources,f)
-        #     pickle.dump(displacement_r2,f)
-        #     pickle.dump(n_baseline_end,f)
-        #     pickle.dump(tbaseline_info,f)
-        #     pickle.dump(sources_labels,f)
+#         # #this would allow you to export the data required to make the LiCSALert figure.  E.g. if you want to make a modified version of it for a publication.  
+#         # with open(out_folder / f"for_publication_figure.pkl", 'wb') as f:
+#         #     pickle.dump(sources_tcs_monitor,f)
+#         #     pickle.dump(residual_monitor,f)
+#         #     pickle.dump(sources,f)
+#         #     pickle.dump(displacement_r2,f)
+#         #     pickle.dump(n_baseline_end,f)
+#         #     pickle.dump(tbaseline_info,f)
+#         #     pickle.dump(sources_labels,f)
         
-        LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
-                          tbaseline_info['baselines_cumulative'], time_value_end=tbaseline_info['baselines_cumulative'][-1], day0_date = tbaseline_info['acq_dates'][0], 
-                          sources_labels = sources_labels, 
-                          figure_out_dir = licsalert_figure_out_dir, figure_type = figure_type,  cmap = figure_cmap)                 
+#         LiCSAlert_figure(sources_tcs_monitor, residual_monitor, sources, displacement_r2, n_baseline_end,                                                       # and only make the plot once
+#                           tbaseline_info['baselines_cumulative'], time_value_end=tbaseline_info['baselines_cumulative'][-1], day0_date = tbaseline_info['acq_dates'][0], 
+#                           sources_labels = sources_labels, 
+#                           figure_out_dir = licsalert_figure_out_dir, figure_type = figure_type,  cmap = figure_cmap)                 
  
 
 #%%
