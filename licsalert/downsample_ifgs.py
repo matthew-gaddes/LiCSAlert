@@ -5,7 +5,9 @@ Created on Sun Mar  8 17:55:25 2020
 
 @author: matthew
 """
+import pdb
 
+#%%
 
 def downsample_ifgs(ifgs, mask, scale = 0.1, verbose = True):
     """ A function to take ifgs as row vectors (and their associated mask) and return them downsampled (for fast plotting)
@@ -20,6 +22,7 @@ def downsample_ifgs(ifgs, mask, scale = 0.1, verbose = True):
     2018/03/?? | MEG | written
     2018/07/09 | MEG | update skimage.transform.rescale arguments to supress warnings.  
     2020/03/08 | MEG | Major rewrite to deal with smearing/interpolating of the masks when using integer instead of boolean values.  
+    2023_04_04 | MEG | change rescale for scikit image 0.19 (remove multichannel boolean set to False as rescale now assuming single channel)
     """
     
     import numpy as np
@@ -38,7 +41,7 @@ def downsample_ifgs(ifgs, mask, scale = 0.1, verbose = True):
     n_ifgs = np.size(ifgs, axis = 0)                                                                                    # get no. of ifgs
        
     # 3: Downsample the mask, and make sure it stays boolean
-    mask_ds = rescale(mask, scale, multichannel = False, anti_aliasing = False).astype(bool)
+    mask_ds = rescale(mask, scale, anti_aliasing = False).astype(bool)
     n_pixels_ds = np.sum(np.logical_not(mask_ds))                                                                       # get number of pixels that are not masked
     
     if verbose:
@@ -48,7 +51,7 @@ def downsample_ifgs(ifgs, mask, scale = 0.1, verbose = True):
     ifgs_ds = np.zeros((n_ifgs, n_pixels_ds))                                                                           # initiate array to store rows 
     for i, single_ifg in enumerate(ifgs):                                                                               # loop through each ifg (which is a row)
         ifg_ma = col_to_ma(single_ifg, mask)                                                                            # make into a rank 2 masked array
-        ifg_rescale = rescale(ifg_ma, scale, multichannel = False, anti_aliasing = False)                               # rescale, no longer a ma
+        ifg_rescale = rescale(ifg_ma, scale, anti_aliasing = False)                               # rescale, no longer a ma
         ifg_rescale_ma = ma.array(ifg_rescale, mask = mask_ds)                                                          # convert back to ma
         ifgs_ds[i,:] = ma.compressed(ifg_rescale_ma)                                                                    # back to being a row vector
         

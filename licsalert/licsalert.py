@@ -1108,7 +1108,7 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
     # 4: and also downsample other simple data if it's included:
     for product in ['dem', 'E', 'N', 'U']: 
         if product in displacement_r2.keys():
-            displacement_r2[product] = rescale(displacement_r2[product], downsample_run, multichannel = False, anti_aliasing = False)                               # do the rescaling
+            displacement_r2[product] = rescale(displacement_r2[product], downsample_run, anti_aliasing = False)                               # do the rescaling
         
         
     print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
@@ -1364,3 +1364,38 @@ def remappedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
     newcmap = matplotlib.colors.LinearSegmentedColormap(name, cdict)
     #plt.register_cmap(cmap=newcmap)
     return newcmap
+
+
+#%%
+
+
+
+def write_volcano_status(sources_tcs_baseline, residual_tcs_baseline, ics_labels, txt_out_dir):
+    """ For each time step, write a 2 line text file that contains the number of sigmas from the line of best fit that the 
+    deformation source is (change in existing deformation) and that the residual is (new deformation).  
+    Inputs:
+        sources_tcs_baseline | list of dicts | from the licsalert function
+        residual_tcs_baseline | list of dicts | from the licsalert function
+        ics_labels | dict | something like this: {'source_names': ['deformation', 'topo_cor_APS', 'turbulent_APS'], 'labels': array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])}
+        txt_out_dir | Path | pathlib Path to write file to.  
+        
+    Returns:
+        text file.  First row is change in def, second row is new def.  
+        
+    History:
+        2023_04_04 | MEG | Written
+    """
+    import numpy as np
+    
+    # calculate change in def status
+    def_col_n = ics_labels['source_names'].index('deformation')                                     # get which column of the one hot encoding related to deformation
+    def_ic_n = np.argwhere(ics_labels['labels'][:, def_col_n] == 1)[0][0]                           # look in that column to find which source number (row) has 1 (ie is positive)
+    def_n_sigmas = sources_tcs_baseline[def_ic_n]['distances'][-1]                                      # get the last distance (n sigmas from the line of best fit) for the dformation source
+    
+    # calculate new def status
+    new_n_sigmas = residual_tcs_baseline[0]['distances'][-1]                                      # get the last distance (n sigmas from the line of best fit) for the residual (there is only one residual so index with 0)
+    
+    with open(txt_out_dir / 'volcano_status.txt', 'w') as f:
+        f.write(f"{def_n_sigmas[0]}\n")
+        f.write(f"{new_n_sigmas[0]}\n")
+    

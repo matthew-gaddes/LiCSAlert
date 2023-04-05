@@ -5,16 +5,15 @@ channels:
 
 dependencies:
   - python=3.9                            # general
-  - matplotlib                      # 
-  - numpy
+  - matplotlib=3.6                      # 
+  - numpy=1.23
   - spyder                                # interactive plotting of ICASAR is designed to work with Spyder
 
-  - scikit-image                          # for LiCSAlert
-
-  - hdbscan                         # for ICASAR
-  - scikit-learn
-  - simplekml
-  - geopy
+  - hdbscan=0.8                         # for ICASAR
+  - scikit-learn=1.2
+  - scikit-image=0.19                          # for LiCSAlert
+  - simplekml=1.3
+  - geopy=2.3
 
   - astropy                               # For LiCSBAS - not always needed.
   - beautifulsoup4
