@@ -1396,6 +1396,6 @@ def write_volcano_status(sources_tcs_baseline, residual_tcs_baseline, ics_labels
     new_n_sigmas = residual_tcs_baseline[0]['distances'][-1]                                      # get the last distance (n sigmas from the line of best fit) for the residual (there is only one residual so index with 0)
     
     with open(txt_out_dir / 'volcano_status.txt', 'w') as f:
-        f.write(f"{def_n_sigmas[0]}\n")
-        f.write(f"{new_n_sigmas[0]}\n")
+        f.write(f"{def_n_sigmas[0]}\n")                                             # sigma for existing deformation
+        f.write(f"{new_n_sigmas[0]}\n")                                             # sigma for new deformaiton
     
