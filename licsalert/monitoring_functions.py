@@ -22,6 +22,7 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
         region
         volcano
         LiCSAlert_pkg_dir | string | Path to folder containing LiCSAlert functions.  
+        ICASAR_pkg_dir | string | Path to folder containing ICASAR functions.  
         
         Three options to pass data to the function:
             licsbas_dir
@@ -131,6 +132,9 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
         displacement_r2 = data_as_arg['displacement_r2']
         tbaseline_info = data_as_arg["tbaseline_info"]
         
+        
+
+        
     if licsbas_jasmin_dir is not None:
         append_licsbas_date_to_file(licsalert_dir, region, volcano, licsbas_json_creation_time)                                                        # append licsbas .json file date to list of file dates used (in the text file for each volano)
         del licsbas_json_creation_time                                                                                                                  # delete for safety
@@ -190,7 +194,7 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
 
             if processing_date == LiCSAlert_status['to_process'][-1]:                                                                                                #  if it's the last date possible....
                 LiCSAlert_aux_figures(volcano_dir, icasar_sources, displacement_r2['dem'], displacement_r2['mask'])                                                   # also plot the ICS and the DEM
-                
+            
     sys.stdout = original                                                                                                                                      # return stdout to be normal.  
     f_run_log.close()                                                                                                                                          # and close the log file.  
 
@@ -332,6 +336,235 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
 
 
 #%%
+
+def LiCSBAS_json_to_LiCSAlert(json_file):
+    """Given a licsbas .json file (as produced by the processing on Jasmin), extract all the information in it
+    in a form that is compatible with LiCSAlert (and ICASAR).  
+    Inputs:
+        json_file | path | path to file, including extnesion.  
+    Returns:
+        displacment_r3 | dict | Keys: cumulative, incremental.  Stored as masked arrays.  Mask should be consistent through time/interferograms
+                                Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
+                                Also Dem, mask
+        displacment_r2 | dict | Keys: cumulative, incremental, mask.  Stored as row vectors in arrays.  
+                                Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
+                                Also Dem, mask
+        tbaseline_info | dict| acq_dates : acquisition dates as strings
+                              daisy_chain : names of the daisy chain of ifgs, YYYYMMDD_YYYYMMDD
+                              baselines : temporal baselines of incremental ifgs
+                              baselines_cumluative : cumulative baselines.  
+          ref_area | dict | x start x stop etc.  
+      History:
+          2021_10_05 | MEG | Written
+    """
+    import json
+    import numpy as np
+    import numpy.ma as ma
+    from datetime import datetime
+    import os
+    
+    def nested_lists_to_numpy(nested_list):
+        """when opened, .json files have the data as as nested lists.  This function converts
+        those to numpy arrays, and works with any rank of data (but only tested with 1, 2, and 3)
+        Inputs:
+            nested_list | list of lists etc. | 
+        returns:
+            data | numpy array | automatically sizes to the corret rank.  Often flipped in the vertical though.  
+        History:
+            2021_10_04 | MEG | Written
+        """
+        def dimension_unpacker_recursive(nested_list, dims):
+            """Given nested lists, determine how many items are in each list.  Recursive!  
+            Inputs:
+                nested_list | list of lists (of lists?) \ nested list.  
+                dims | empty list | will be filled with number of entres in each dimension
+            returns:
+                dims | list | number of entries in each dimension.  
+            History:
+                2021_10_04 | MEG | Written
+            """
+            dims.append(len(nested_list))                                                           # add the number of entries for this dimension to the list
+            if type(nested_list[0]) == list:                                                        # if the 1st item of our list is still a list
+                dims = dimension_unpacker_recursive(nested_list[0], dims)                           # then apply the same funtion to this item
+            return dims
+        
+        def data_unpacker_recursive(nested_list, index):
+            """Given a nested list of data and the index of the data we want as a tuple, extract it.  
+            Inputs:
+                nested_list | list in list etc.  |
+                index | tuple | e.g. (0,10)  or (5, 16, 45)
+            Returns:
+                data | single value, could be float or int?  
+            History:
+                2021_10_04 | MEG | Written.  
+            """
+            nested_list = nested_list[index[0]]                                             # index our nested list with the first available index
+            if type(nested_list) == list:                                                   # if it's still a list (and not just a single number)
+                nested_list = data_unpacker_recursive(nested_list, index[1:])               # call the function again on this nested list, but using the next index along 
+            return nested_list
+        
+        dims = []                                                                           # initiate to store the number of entres in each dimension
+        dims = dimension_unpacker_recursive(nested_list, dims)                              # find the number of entries in each dimension (and so how many dimensions there are too)
+        data = np.zeros(dims)                                                               # initiate to store the data
+        for index, _ in np.ndenumerate(data):                                               # loop through each item in the data
+            data[index] = data_unpacker_recursive(nested_list, index)                       # and fill it with the correct data item from the nested lists
+        return data
+    
+ 
+    def rank3_ma_to_rank2(ifgs_r3, consistent_mask = False):
+        """A function to take a time series of interferograms stored as a rank 3 array,
+        and convert it into the ICA(SAR) friendly format of a rank 2 array with ifgs as
+        row vectors, and an associated mask.
+
+        For use with ICA, the mask must be consistent (ie the same pixels are masked throughout the time series).
+
+        Inputs:
+            ifgs_r3 | r3 masked array | ifgs in rank 3 format
+            consistent_mask | boolean | If True, areas of incoherence are consistent through the whole stack
+                                        If false, a consistent mask will be made.  N.b. this step can remove the number of pixels dramatically.
+        """
+
+        n_ifgs = ifgs_r3.shape[0]
+        # 1: Deal with masking
+        mask_coh_water = ifgs_r3.mask                                                                                               #get the mask as a rank 3, still boolean
+        if consistent_mask:
+            mask_coh_water_consistent = mask_coh_water[0,]                                                                          # if all ifgs are masked in the same way, just grab the first one
+        else:
+            mask_coh_water_sum = np.sum(mask_coh_water, axis = 0)                                                                   # sum to make an image that shows in how many ifgs each pixel is incoherent
+            mask_coh_water_consistent = np.where(mask_coh_water_sum == 0, np.zeros(mask_coh_water_sum.shape),
+                                                                          np.ones(mask_coh_water_sum.shape)).astype(bool)           # make a mask of pixels that are never incoherent
+        ifgs_r3_consistent = ma.array(ifgs_r3, mask = ma.repeat(mask_coh_water_consistent[np.newaxis,], n_ifgs, axis = 0))          # mask with the new consistent mask
+
+        # 2: Convert from rank 3 to rank 2
+        n_pixs = ma.compressed(ifgs_r3_consistent[0,]).shape[0]                                                        # number of non-masked pixels
+        ifgs_r2 = np.zeros((n_ifgs, n_pixs))
+        for ifg_n, ifg in enumerate(ifgs_r3_consistent):
+            ifgs_r2[ifg_n,:] = ma.compressed(ifg)
+
+        return ifgs_r2, mask_coh_water_consistent
+    
+    def daisy_chain_from_acquisitions(acquisitions):
+        """Given a list of acquisiton dates, form the names of the interferograms that would create a simple daisy chain of ifgs.  
+        Inputs:
+            acquisitions | list | list of acquistiion dates in form YYYYMMDD
+        Returns:
+            daisy_chain | list | names of daisy chain ifgs, in form YYYYMMDD_YYYYMMDD
+        History:
+            2020/02/16 | MEG | Written
+        """
+        daisy_chain = []
+        n_acqs = len(acquisitions)
+        for i in range(n_acqs-1):
+            daisy_chain.append(f"{acquisitions[i]}_{acquisitions[i+1]}")
+        return daisy_chain
+
+    
+    def baseline_from_names(names_list):
+        """Given a list of ifg names in the form YYYYMMDD_YYYYMMDD, find the temporal baselines in days_elapsed
+        Inputs:
+            names_list | list | in form YYYYMMDD_YYYYMMDD
+        Returns:
+            baselines | list of ints | baselines in days
+        History:
+            2020/02/16 | MEG | Documented 
+        """
+        from datetime import datetime
+                
+        baselines = []
+        for file in names_list:
+            master = datetime.strptime(file.split('_')[-2], '%Y%m%d')   
+            slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')   
+            baselines.append(-1 *(master - slave).days)    
+        return baselines
+
+
+    
+    ########## Begin
+    
+    displacement_r2 = {}
+    displacement_r3 = {}
+    tbaseline_info = {}
+    ref_xy = []
+    
+    with open(json_file, 'r') as json_data:
+        licsbas_data = json.load(json_data)
+    
+    #import pdb; pdb.set_trace()
+    licsbas_json_timestamp = licsbas_data['timestamp']                                                  # this is usually made 10-15 seconds beforet the files final write to disk time
+    licsbas_json_creation_time = datetime.fromtimestamp(os.path.getmtime(json_file))                     # which is this time
+    licsbas_json_creation_time = licsbas_json_creation_time.replace(microsecond = 0)
+    
+    print(f"Opening the LiCSBAS .json file with timestamp {licsbas_json_timestamp} and system creation time {licsbas_json_creation_time}.  ")
+    
+    # 0: Get the reference area.  
+    ref_list = licsbas_data['refarea'] 
+    ref_xy = {'x_start' : int(ref_list[0]),                                            # convert the correct part of the string to an integer
+              'x_stop'   : int(ref_list[1]),
+              'y_start'  : int(ref_list[2]),
+              'y_stop'   : int(ref_list[3])}
+        
+    # 1: get the lons and lats of each pixel in the image
+    lons_mg, lats_mg = np.meshgrid(licsbas_data['x'], licsbas_data['y'])    
+    if lats_mg[0,0] < lats_mg[-1,0]:                                                                            # if top left latitude is less than bottom left latitude
+        lats_mg = np.flipud(lats_mg)                                                                            # flip the lats
+    displacement_r2['lons'] = lons_mg
+    displacement_r2['lats'] = lats_mg
+    displacement_r3['lons'] = lons_mg
+    displacement_r3['lats'] = lats_mg
+    
+    # 2: get the mask
+    mask_coh_water = 1 - nested_lists_to_numpy(licsbas_data['mask'])                        # flip as vertical always flipped when working with .json files. Also, LiCSAlert uses 1 for area to be masked, this returns opposite (so 1 - to invert)
+    
+    # 3: get the data, mask, and convert to rank 2 in both cumululative and incremental
+    if 'data_raw' in licsbas_data.keys():                                                                   # data can be called one of two things.      
+        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_raw'])                                    # 
+    elif 'data_filt' in licsbas_data.keys():
+        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_filt'])                                    # 
+    else:
+        raise Exception(f"The deformation information is expected to be stored in the .json file as either 'data_raw' or 'data_filt', but neither of these were present so can't continue.  ")
+    cumulative_r3 *= 0.001                                                                             # licsbas standard is mm, convert to m
+    n_im, length, width = cumulative_r3.shape                                                          # time series size, n_im = n_acquisisions
+    mask_coh_water_r3 = np.repeat(mask_coh_water[np.newaxis,], n_im, axis = 0)                         # new version that has expanded to be the same size as the cumulative ifgs
+    
+    # 3a: Reference the time series
+    ifg_offsets = np.nanmean(cumulative_r3[:, ref_xy['y_start']: ref_xy['y_stop'], ref_xy['x_start']: ref_xy['x_stop']], axis = (1,2))                                          # get the offset between the reference pixel/area and 0 for each time
+    cumulative_r3 = cumulative_r3 - np.repeat(np.repeat(ifg_offsets[:,np.newaxis, np.newaxis], cumulative_r3.shape[1],  axis = 1), cumulative_r3.shape[2], axis = 2)         # do the correction (first make ifg_offsets teh same size as cumulative).      
+    
+    # 3b: Deal with masking etc.
+    cumulative_r3_ma = ma.array(cumulative_r3, mask=mask_coh_water_r3)                                  # mask the cumulative ifgs (first one should be all 0s), note that this could still have nans in it
+    for nan_pixel in np.argwhere(np.isnan(cumulative_r3_ma)):                                           # find any pixels that are nan in this, and iterate over
+        mask_coh_water_r3[:, nan_pixel[1], nan_pixel[2]] = 1                                            # and modify the mask so that they are masked for all times
+    displacement_r3["cumulative"] = ma.array(cumulative_r3, mask=mask_coh_water_r3)                     # recreate the masked array using the new mask.  
+
+    displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], axis = 0)                   # difference these to get the incremental ifgs, should be one less in time dimension than previous.  
+    if displacement_r3["incremental"].mask.shape == ():                                                 # in the case where no pixels are masked, the mask can disappear
+        displacement_r3["incremental"].mask = mask_coh_water_r3[1:]                                        # add a new mask, note that we omit the first one (1:) as we have one less ifg when handling incremental
+        
+    displacement_r2['cumulative'], displacement_r2['mask'] = rank3_ma_to_rank2(displacement_r3['cumulative'])      # convert from rank 3 to rank 2 and a mask
+    displacement_r2['incremental'], _ = rank3_ma_to_rank2(displacement_r3['incremental'])                          # also convert incremental, no need to also get mask as should be same as above
+    
+    # 4: Get the acquisition dates, then calcualet ifg_names, temporal baselines, and cumulative temporal baselines
+    tbaseline_info["acq_dates"] = sorted([''.join(date_hyphen_format.split('-')) for date_hyphen_format in licsbas_data['dates'] ])         # convert from yyy-mm-dd to yyyymmdd
+    tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(tbaseline_info["acq_dates"])                                                # get teh dates of the incremental ifgs
+    tbaseline_info["baselines"] = baseline_from_names(tbaseline_info["ifg_dates"])                                                          # and their temporal baselines
+    tbaseline_info["baselines_cumulative"] = np.cumsum(tbaseline_info["baselines"])                                                         # cumulative baslines, e.g. 12 24 36 48 etc
+    
+    # 5: Try to get the DEM
+    try:
+        dem = nested_lists_to_numpy(licsbas_data['elev'])                                                 # 
+        displacement_r2['dem'] = dem                                                                      # and added to the displacement dict in the same was as the lons and lats
+        displacement_r3['dem'] = dem                                                                      # 
+    except:
+        print(f"Failed to open the DEM from the hgt file for this volcano, but trying to continue anyway.")
+
+    # #################### Debuging Sierra Negra
+    # print(f"Lon min: {np.min(lons_mg)} Lon max: {np.max(lons_mg)}")
+    # print(f"Lat min: {np.min(lats_mg)} Lon max: {np.max(lats_mg)}")
+    # from icasar.aux import r2_arrays_to_googleEarth
+    # r2_arrays_to_googleEarth(dem[np.newaxis, :,:], lons_mg, lats_mg, layer_name_prefix = 'layer', kmz_filename = 'ICs', out_folder = './')
+    # r2_arrays_to_googleEarth(displacement_r3['incremental'][10:11,], lons_mg, lats_mg, layer_name_prefix = 'layer', kmz_filename = 'ifg', out_folder = './')
+    # import pdb; pdb.set_trace()
+    return displacement_r2, displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
 
 
 #%%

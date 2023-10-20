@@ -15,8 +15,7 @@ import numpy as np
 import licsalert
 from licsalert.monitoring_functions import LiCSAlert_monitoring_mode
 
-#ICASAR_pkg_dir = Path("/home/matthew/university_work/crucial_1000gb/15_my_software_releases/ICASAR-2.13/")                                            # location of ICASAR functions
-#ICASAR_pkg_dir = Path("/home/matthew/university_work/crucial_1000gb/01_blind_signal_separation_python/13_ICASAR/ICASAR_GitHub/")           # development version
+
 
 
 # thinkpad
@@ -89,7 +88,6 @@ licsbas_dir = Path("./022D_04826_121209")                                       
 
     
 
-
 #%% We can also make the LiCSAlert figure for all times, but this is slow
 
 licsalert_settings['figure_intermediate'] = True                                                    # Turn on figures for all times 
@@ -97,6 +95,6 @@ licsalert_settings['figure_type'] = 'png'                                       
 
 volcano = 'campi_flegrei_example_all_times'                                                         # new outdir
 
-LiCSAlert_monitoring_mode(region = None, volcano = volcano, LiCSAlert_pkg_dir = LiCSAlert_pkg_dir, 
+LiCSAlert_monitoring_mode(region = None, volcano = volcano, LiCSAlert_pkg_dir = LiCSAlert_pkg_dir, ICASAR_pkg_dir = ICASAR_pkg_dir,
                           licsbas_dir = licsbas_dir, licsalert_dir = licsalert_dir,
                           licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
