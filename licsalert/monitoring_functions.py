@@ -9,7 +9,7 @@ import pdb
 
 #%%
 
-def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir, licsalert_dir,
+def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
                               licsbas_dir = None, licsbas_jasmin_dir = None, data_as_arg = None,
                               licsalert_settings = None, icasar_settings = None,
                               figure_intermediate = True):
@@ -22,7 +22,6 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
         region
         volcano
         LiCSAlert_pkg_dir | string | Path to folder containing LiCSAlert functions.  
-        ICASAR_pkg_dir | string | Path to folder containing ICASAR functions.  
         
         Three options to pass data to the function:
             licsbas_dir
@@ -75,14 +74,17 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
                 licsbas_dates_file.write(f"{licsbas_json_creation_time}\n")            # and write this first dummy date to it,
     
     
-    if str(ICASAR_pkg_dir) not in sys.path:                                                  # check if already on path
-        sys.path.append(str(ICASAR_pkg_dir))                                                 # and if not, add
+    # if str(ICASAR_pkg_dir) not in sys.path:                                                  # check if already on path
+    #     sys.path.append(str(ICASAR_pkg_dir))                                                 # and if not, add
+    # import icasar
+    # from icasar.icasar_funcs import LiCSBAS_to_ICASAR
     
-    from licsalert.licsalert import LiCSAlert_preprocessing, LiCSAlert, LiCSAlert_figure, shorten_LiCSAlert_data, write_volcano_status
-    #from monitoring_functions import read_config_file, detect_new_ifgs, update_mask_sources_ifgs, record_mask_changes
+    import licsalert
+    from licsalert.data_importing import LiCSBAS_to_LiCSAlert, LiCSBAS_json_to_LiCSAlert
+    from licsalert.licsalert import LiCSAlert_preprocessing, LiCSAlert, shorten_LiCSAlert_data, write_volcano_status
     from licsalert.aux import compare_two_dates, Tee
     from licsalert.downsample_ifgs import downsample_ifgs
-    from licsalert.plotting import plot_mask_changes, LiCSAlert_aux_figures, plot_1_image
+    from licsalert.plotting import LiCSAlert_figure, LiCSAlert_epoch_figures, LiCSAlert_aux_figures, LiCSAlert_mask_figure
 
 
     # 1: Log all outputs to a file for that volcano:
@@ -122,23 +124,19 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
         displacement_r2, _, tbaseline_info, ref_xy, licsbas_json_creation_time = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json")          # open the .json LiCSBAS data for this volcano 
     elif licsbas_dir is not None:
         print(f"LiCSAlert is opening a LiCSBAS directory.  ")
-        import icasar
-        from icasar.icasar_funcs import LiCSBAS_to_ICASAR
-        displacement_r2, tbaseline_info, _ = LiCSBAS_to_ICASAR(licsbas_dir, figures=True,  filtered = False, n_cols=5,                              # open various LiCSBAS products, spatial ones in displacement_r2, temporal ones in tbaseline_info
-                                                                crop_pixels = None, return_r3 = False, ref_area = True, mask_type = 'dem')
+        displacement_r2, tbaseline_info, _ = LiCSBAS_to_LiCSAlert(licsbas_dir, figures=True,  filtered = False, n_cols=5,                              # open various LiCSBAS products, spatial ones in displacement_r2, temporal ones in tbaseline_info
+                                                                  crop_pixels = None, return_r3 = False, ref_area = True, mask_type = 'dem')
     else:
         print(f"LiCSAlert is using data that was passed to the function as an argument  ")
         displacement_r2 = data_as_arg['displacement_r2']
         tbaseline_info = data_as_arg["tbaseline_info"]
-        
-        
-
         
     if licsbas_jasmin_dir is not None:
         append_licsbas_date_to_file(licsalert_dir, region, volcano, licsbas_json_creation_time)                                                        # append licsbas .json file date to list of file dates used (in the text file for each volano)
         del licsbas_json_creation_time                                                                                                                  # delete for safety
     try:
         del displacement_r2['cumulative']                                                                                                                 #  this is not needed and is deleted for safety.
+        print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  ")
     except:
         pass
     displacement_r2 = LiCSAlert_preprocessing(displacement_r2, LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])           # mean centre and downsize the data
@@ -166,7 +164,7 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
             ifg_n = tbaseline_info['acq_dates'].index(processing_date)                                                                                             # instead of working in dates, switch this to ifg_n in the sorted interferograms.   
             
             create_licsalert_outdir(volcano_dir / processing_date)                                                                                                 # Create a folder (YYYYMMDD) for the outputs.  
-            plot_mask_changes(icasar_mask, licsbas_mask, displacement_r2['mask'], tbaseline_info['acq_dates'][-1], volcano_dir / processing_date,
+            LiCSAlert_mask_figure(icasar_mask, licsbas_mask, displacement_r2['mask'], tbaseline_info['acq_dates'][-1], volcano_dir / processing_date,
                                 figure_type = LiCSAlert_settings['figure_type'])                                                                                   # create a figure showing the masks (licsbas, icasar, and combined)
                                                                                                                                                                    # 6c: LiCSAlert 
             displacement_r2_current = shorten_LiCSAlert_data(displacement_r2, n_end=ifg_n )                                                                       # get the ifgs available for this loop (ie one more is added each time the loop progresses),  + 1 as indexing and want to include this data
@@ -178,29 +176,21 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, ICASAR_pkg_dir
                                                                                                 mask = displacement_r2_current['mask'],
                                                                                                 t_recalculate=10, verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
                                                                           
-
-                                                                                                               # 6d LiCAlert figure
-            LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, icasar_sources, displacement_r2_current, LiCSAlert_settings['baseline_end_ifg_n'],                             # creat the LiCSAlert figure
-                              cumulative_baselines_current, figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date, day0_date = tbaseline_info['acq_dates'][0])    
+            LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, icasar_sources, displacement_r2_current,                                                  # the main licsalert figure
+                             LiCSAlert_settings['baseline_end_ifg_n'],  cumulative_baselines_current, 
+                             figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date, 
+                             day0_date = tbaseline_info['acq_dates'][0])    
             
-            LiCSAlert_aux_figures(displacement_r2_current, reconstructions, residuals, tbaseline_info,                                                                                   # create the figures of the zoomed in parts of the LiCSAlert figure
-                                  figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date)                                                                              
+            LiCSAlert_epoch_figures(displacement_r2_current, reconstructions, residuals, tbaseline_info,                                                             # 4 large images: cumulative, incremetnal, reconstruction of incremental, residual
+                                    figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date)                                                                              
+            
+            save_epoch_data(sources_tcs_baseline, residual_tcs_baseline, volcano_dir / processing_date)                                                             # save info about the time courses
                
-            write_volcano_status(sources_tcs_baseline, residual_tcs_baseline, ics_labels, volcano_dir / processing_date)                                                                 # write the change in def  / new def text file.  
+            write_volcano_status(sources_tcs_baseline, residual_tcs_baseline, ics_labels, volcano_dir / processing_date)                                           # write the change in def  / new def text file.  
 
-            if processing_date == LiCSAlert_status['to_process'][-1]:                                                                                                            # if it's the last date possible....
-                save_licsalert_products(displacement_r2['dem'], sources_tcs_baseline, residual_tcs_baseline, volcano_dir / processing_date,                                      # save some useful outputs,
-                                        remove_others = True, acq_dates = tbaseline_info['acq_dates'] )                                                                          # and clean up by removing this file from other dates (as we only need the last one)
+            if processing_date == LiCSAlert_status['to_process'][-1]:                                                                                                #  if it's the last date possible....
+                LiCSAlert_aux_figures(volcano_dir, icasar_sources, displacement_r2['dem'], displacement_r2['mask'])                                                   # also plot the ICS and the DEM
                 
-                # if the last figure, also plot the aux figures.  
-                aux_fig_dir = volcano_dir / "aux_figures"
-                aux_fig_dir.mkdir(parents=True, exist_ok=True)                                   
-                plot_1_image(ma.compressed(ma.array(displacement_r2['dem'], mask = displacement_r2['mask'])), displacement_r2['mask'],                  # conver the dem to a masked array, then take on the valid points ()
-                             f"DEM", figure_type = 'png', figure_out_dir = aux_fig_dir, figsize = (18,9))
-                for source_n, ic in enumerate(icasar_sources):
-                    plot_1_image(ic, displacement_r2['mask'], 
-                                 f"IC_{source_n}", figure_type = 'png', figure_out_dir = aux_fig_dir, figsize = (18,9))
-        
     sys.stdout = original                                                                                                                                      # return stdout to be normal.  
     f_run_log.close()                                                                                                                                          # and close the log file.  
 
@@ -343,235 +333,6 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
 
 #%%
 
-def LiCSBAS_json_to_LiCSAlert(json_file):
-    """Given a licsbas .json file (as produced by the processing on Jasmin), extract all the information in it
-    in a form that is compatible with LiCSAlert (and ICASAR).  
-    Inputs:
-        json_file | path | path to file, including extnesion.  
-    Returns:
-        displacment_r3 | dict | Keys: cumulative, incremental.  Stored as masked arrays.  Mask should be consistent through time/interferograms
-                                Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
-                                Also Dem, mask
-        displacment_r2 | dict | Keys: cumulative, incremental, mask.  Stored as row vectors in arrays.  
-                                Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
-                                Also Dem, mask
-        tbaseline_info | dict| acq_dates : acquisition dates as strings
-                              daisy_chain : names of the daisy chain of ifgs, YYYYMMDD_YYYYMMDD
-                              baselines : temporal baselines of incremental ifgs
-                              baselines_cumluative : cumulative baselines.  
-          ref_area | dict | x start x stop etc.  
-      History:
-          2021_10_05 | MEG | Written
-    """
-    import json
-    import numpy as np
-    import numpy.ma as ma
-    from datetime import datetime
-    import os
-    
-    def nested_lists_to_numpy(nested_list):
-        """when opened, .json files have the data as as nested lists.  This function converts
-        those to numpy arrays, and works with any rank of data (but only tested with 1, 2, and 3)
-        Inputs:
-            nested_list | list of lists etc. | 
-        returns:
-            data | numpy array | automatically sizes to the corret rank.  Often flipped in the vertical though.  
-        History:
-            2021_10_04 | MEG | Written
-        """
-        def dimension_unpacker_recursive(nested_list, dims):
-            """Given nested lists, determine how many items are in each list.  Recursive!  
-            Inputs:
-                nested_list | list of lists (of lists?) \ nested list.  
-                dims | empty list | will be filled with number of entres in each dimension
-            returns:
-                dims | list | number of entries in each dimension.  
-            History:
-                2021_10_04 | MEG | Written
-            """
-            dims.append(len(nested_list))                                                           # add the number of entries for this dimension to the list
-            if type(nested_list[0]) == list:                                                        # if the 1st item of our list is still a list
-                dims = dimension_unpacker_recursive(nested_list[0], dims)                           # then apply the same funtion to this item
-            return dims
-        
-        def data_unpacker_recursive(nested_list, index):
-            """Given a nested list of data and the index of the data we want as a tuple, extract it.  
-            Inputs:
-                nested_list | list in list etc.  |
-                index | tuple | e.g. (0,10)  or (5, 16, 45)
-            Returns:
-                data | single value, could be float or int?  
-            History:
-                2021_10_04 | MEG | Written.  
-            """
-            nested_list = nested_list[index[0]]                                             # index our nested list with the first available index
-            if type(nested_list) == list:                                                   # if it's still a list (and not just a single number)
-                nested_list = data_unpacker_recursive(nested_list, index[1:])               # call the function again on this nested list, but using the next index along 
-            return nested_list
-        
-        dims = []                                                                           # initiate to store the number of entres in each dimension
-        dims = dimension_unpacker_recursive(nested_list, dims)                              # find the number of entries in each dimension (and so how many dimensions there are too)
-        data = np.zeros(dims)                                                               # initiate to store the data
-        for index, _ in np.ndenumerate(data):                                               # loop through each item in the data
-            data[index] = data_unpacker_recursive(nested_list, index)                       # and fill it with the correct data item from the nested lists
-        return data
-    
- 
-    def rank3_ma_to_rank2(ifgs_r3, consistent_mask = False):
-        """A function to take a time series of interferograms stored as a rank 3 array,
-        and convert it into the ICA(SAR) friendly format of a rank 2 array with ifgs as
-        row vectors, and an associated mask.
-
-        For use with ICA, the mask must be consistent (ie the same pixels are masked throughout the time series).
-
-        Inputs:
-            ifgs_r3 | r3 masked array | ifgs in rank 3 format
-            consistent_mask | boolean | If True, areas of incoherence are consistent through the whole stack
-                                        If false, a consistent mask will be made.  N.b. this step can remove the number of pixels dramatically.
-        """
-
-        n_ifgs = ifgs_r3.shape[0]
-        # 1: Deal with masking
-        mask_coh_water = ifgs_r3.mask                                                                                               #get the mask as a rank 3, still boolean
-        if consistent_mask:
-            mask_coh_water_consistent = mask_coh_water[0,]                                                                          # if all ifgs are masked in the same way, just grab the first one
-        else:
-            mask_coh_water_sum = np.sum(mask_coh_water, axis = 0)                                                                   # sum to make an image that shows in how many ifgs each pixel is incoherent
-            mask_coh_water_consistent = np.where(mask_coh_water_sum == 0, np.zeros(mask_coh_water_sum.shape),
-                                                                          np.ones(mask_coh_water_sum.shape)).astype(bool)           # make a mask of pixels that are never incoherent
-        ifgs_r3_consistent = ma.array(ifgs_r3, mask = ma.repeat(mask_coh_water_consistent[np.newaxis,], n_ifgs, axis = 0))          # mask with the new consistent mask
-
-        # 2: Convert from rank 3 to rank 2
-        n_pixs = ma.compressed(ifgs_r3_consistent[0,]).shape[0]                                                        # number of non-masked pixels
-        ifgs_r2 = np.zeros((n_ifgs, n_pixs))
-        for ifg_n, ifg in enumerate(ifgs_r3_consistent):
-            ifgs_r2[ifg_n,:] = ma.compressed(ifg)
-
-        return ifgs_r2, mask_coh_water_consistent
-    
-    def daisy_chain_from_acquisitions(acquisitions):
-        """Given a list of acquisiton dates, form the names of the interferograms that would create a simple daisy chain of ifgs.  
-        Inputs:
-            acquisitions | list | list of acquistiion dates in form YYYYMMDD
-        Returns:
-            daisy_chain | list | names of daisy chain ifgs, in form YYYYMMDD_YYYYMMDD
-        History:
-            2020/02/16 | MEG | Written
-        """
-        daisy_chain = []
-        n_acqs = len(acquisitions)
-        for i in range(n_acqs-1):
-            daisy_chain.append(f"{acquisitions[i]}_{acquisitions[i+1]}")
-        return daisy_chain
-
-    
-    def baseline_from_names(names_list):
-        """Given a list of ifg names in the form YYYYMMDD_YYYYMMDD, find the temporal baselines in days_elapsed
-        Inputs:
-            names_list | list | in form YYYYMMDD_YYYYMMDD
-        Returns:
-            baselines | list of ints | baselines in days
-        History:
-            2020/02/16 | MEG | Documented 
-        """
-        from datetime import datetime
-                
-        baselines = []
-        for file in names_list:
-            master = datetime.strptime(file.split('_')[-2], '%Y%m%d')   
-            slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')   
-            baselines.append(-1 *(master - slave).days)    
-        return baselines
-
-
-    
-    ########## Begin
-    
-    displacement_r2 = {}
-    displacement_r3 = {}
-    tbaseline_info = {}
-    ref_xy = []
-    
-    with open(json_file, 'r') as json_data:
-        licsbas_data = json.load(json_data)
-    
-    #import pdb; pdb.set_trace()
-    licsbas_json_timestamp = licsbas_data['timestamp']                                                  # this is usually made 10-15 seconds beforet the files final write to disk time
-    licsbas_json_creation_time = datetime.fromtimestamp(os.path.getmtime(json_file))                     # which is this time
-    licsbas_json_creation_time = licsbas_json_creation_time.replace(microsecond = 0)
-    
-    print(f"Opening the LiCSBAS .json file with timestamp {licsbas_json_timestamp} and system creation time {licsbas_json_creation_time}.  ")
-    
-    # 0: Get the reference area.  
-    ref_list = licsbas_data['refarea'] 
-    ref_xy = {'x_start' : int(ref_list[0]),                                            # convert the correct part of the string to an integer
-              'x_stop'   : int(ref_list[1]),
-              'y_start'  : int(ref_list[2]),
-              'y_stop'   : int(ref_list[3])}
-        
-    # 1: get the lons and lats of each pixel in the image
-    lons_mg, lats_mg = np.meshgrid(licsbas_data['x'], licsbas_data['y'])    
-    if lats_mg[0,0] < lats_mg[-1,0]:                                                                            # if top left latitude is less than bottom left latitude
-        lats_mg = np.flipud(lats_mg)                                                                            # flip the lats
-    displacement_r2['lons'] = lons_mg
-    displacement_r2['lats'] = lats_mg
-    displacement_r3['lons'] = lons_mg
-    displacement_r3['lats'] = lats_mg
-    
-    # 2: get the mask
-    mask_coh_water = 1 - nested_lists_to_numpy(licsbas_data['mask'])                        # flip as vertical always flipped when working with .json files. Also, LiCSAlert uses 1 for area to be masked, this returns opposite (so 1 - to invert)
-    
-    # 3: get the data, mask, and convert to rank 2 in both cumululative and incremental
-    if 'data_raw' in licsbas_data.keys():                                                                   # data can be called one of two things.      
-        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_raw'])                                    # 
-    elif 'data_filt' in licsbas_data.keys():
-        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_filt'])                                    # 
-    else:
-        raise Exception(f"The deformation information is expected to be stored in the .json file as either 'data_raw' or 'data_filt', but neither of these were present so can't continue.  ")
-    cumulative_r3 *= 0.001                                                                             # licsbas standard is mm, convert to m
-    n_im, length, width = cumulative_r3.shape                                                          # time series size, n_im = n_acquisisions
-    mask_coh_water_r3 = np.repeat(mask_coh_water[np.newaxis,], n_im, axis = 0)                         # new version that has expanded to be the same size as the cumulative ifgs
-    
-    # 3a: Reference the time series
-    ifg_offsets = np.nanmean(cumulative_r3[:, ref_xy['y_start']: ref_xy['y_stop'], ref_xy['x_start']: ref_xy['x_stop']], axis = (1,2))                                          # get the offset between the reference pixel/area and 0 for each time
-    cumulative_r3 = cumulative_r3 - np.repeat(np.repeat(ifg_offsets[:,np.newaxis, np.newaxis], cumulative_r3.shape[1],  axis = 1), cumulative_r3.shape[2], axis = 2)         # do the correction (first make ifg_offsets teh same size as cumulative).      
-    
-    # 3b: Deal with masking etc.
-    cumulative_r3_ma = ma.array(cumulative_r3, mask=mask_coh_water_r3)                                  # mask the cumulative ifgs (first one should be all 0s), note that this could still have nans in it
-    for nan_pixel in np.argwhere(np.isnan(cumulative_r3_ma)):                                           # find any pixels that are nan in this, and iterate over
-        mask_coh_water_r3[:, nan_pixel[1], nan_pixel[2]] = 1                                            # and modify the mask so that they are masked for all times
-    displacement_r3["cumulative"] = ma.array(cumulative_r3, mask=mask_coh_water_r3)                     # recreate the masked array using the new mask.  
-
-    displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], axis = 0)                   # difference these to get the incremental ifgs, should be one less in time dimension than previous.  
-    if displacement_r3["incremental"].mask.shape == ():                                                 # in the case where no pixels are masked, the mask can disappear
-        displacement_r3["incremental"].mask = mask_coh_water_r3[1:]                                        # add a new mask, note that we omit the first one (1:) as we have one less ifg when handling incremental
-        
-    displacement_r2['cumulative'], displacement_r2['mask'] = rank3_ma_to_rank2(displacement_r3['cumulative'])      # convert from rank 3 to rank 2 and a mask
-    displacement_r2['incremental'], _ = rank3_ma_to_rank2(displacement_r3['incremental'])                          # also convert incremental, no need to also get mask as should be same as above
-    
-    # 4: Get the acquisition dates, then calcualet ifg_names, temporal baselines, and cumulative temporal baselines
-    tbaseline_info["acq_dates"] = sorted([''.join(date_hyphen_format.split('-')) for date_hyphen_format in licsbas_data['dates'] ])         # convert from yyy-mm-dd to yyyymmdd
-    tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(tbaseline_info["acq_dates"])                                                # get teh dates of the incremental ifgs
-    tbaseline_info["baselines"] = baseline_from_names(tbaseline_info["ifg_dates"])                                                          # and their temporal baselines
-    tbaseline_info["baselines_cumulative"] = np.cumsum(tbaseline_info["baselines"])                                                         # cumulative baslines, e.g. 12 24 36 48 etc
-    
-    # 5: Try to get the DEM
-    try:
-        dem = nested_lists_to_numpy(licsbas_data['elev'])                                                 # 
-        displacement_r2['dem'] = dem                                                                      # and added to the displacement dict in the same was as the lons and lats
-        displacement_r3['dem'] = dem                                                                      # 
-    except:
-        print(f"Failed to open the DEM from the hgt file for this volcano, but trying to continue anyway.")
-
-    # #################### Debuging Sierra Negra
-    # print(f"Lon min: {np.min(lons_mg)} Lon max: {np.max(lons_mg)}")
-    # print(f"Lat min: {np.min(lats_mg)} Lon max: {np.max(lats_mg)}")
-    # from icasar.aux import r2_arrays_to_googleEarth
-    # r2_arrays_to_googleEarth(dem[np.newaxis, :,:], lons_mg, lats_mg, layer_name_prefix = 'layer', kmz_filename = 'ICs', out_folder = './')
-    # r2_arrays_to_googleEarth(displacement_r3['incremental'][10:11,], lons_mg, lats_mg, layer_name_prefix = 'layer', kmz_filename = 'ifg', out_folder = './')
-    # import pdb; pdb.set_trace()
-    return displacement_r2, displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
-
 
 #%%
 def LiCSAlert_dates_status(LiCSAlert_required_dates, LiCSAlert_dates, folder_LiCSAlert):
@@ -686,8 +447,13 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
     if not licsbas_past_baseline:                                                                 # if we haven't passed the baseline stage yet, we can only wait for more Sentinel acquisitions
         print(f"LiCSBAS is up to date until {licsbas_last_acq}, but the baseline stage is set to end on {date_baseline_end} "
               f" and, as this hasn't been reached yet, LiCSAlert cannot be run yet.")
-        run_LiCSBAS = run_ICASAR = run_LiCSAlert = False                                        # nothing to run
-        return run_LiCSBAS, run_ICASAR, run_LiCSAlert
+        
+        LiCSAlert_status = {'run_ICASAR'              : False,                                             # ICASAR is run unless the folder containing it is found
+                            'run_LiCSAlert'           : False,                                          # LiCSAlert is run if some dates with errors exist, or if there are pending dates.  Same as for LICSBAS.  
+                            'processed_with_errors'   : None,                                  # any dates that have missing LiCSAlert products.  
+                            'not_processed'           : None,                                                # new dates to be processed (ie update LiCSBAS time series, run LiCSAlert)
+                            'licsbas_last_acq'        : licsbas_last_acq}                                        # date of the most recent sentinel-1 acquisition that there is an interferogram for.  
+        return LiCSAlert_status
     
     # 2: If we are past the basline stage, determine what dates LiCSAlert has been run for/which need to be run/ which have errors etc.    
     LiCSAlert_required_dates = get_LiCSAlert_required_dates(licsbas_dates, date_baseline_end)                # Determine which dates LiCSAlert should have an output for, which are the dates after the baseline has ended (regardless of if we actually have them)
@@ -844,8 +610,7 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, b
         2023_04_03 | MEG | Add return of ICASAR label_sources_output
     """
     from licsalert.aux import get_baseline_end_ifg_n
-    import icasar
-    from icasar.icasar_funcs import ICASAR
+    from licsalert.icasar.icasar_funcs import ICASAR
     import pickle
       
     baseline_end_ifg_n = get_baseline_end_ifg_n(tbaseline_info['acq_dates'], baseline_end)                                                            # if this is e.g. 14, the 14th ifg would not be in the baseline stage
@@ -949,9 +714,8 @@ def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
 
 
 #%%
-def save_licsalert_products(dem, sources_tcs_baseline, residual_tcs_baseline, outdir, remove_others = True, acq_dates = None):
-    """ Save the useful LiCSAlert outputs in a pickle.  Also include the DEM.  To stop there being a version of this file in every date,
-    it also tries to delete the previous pickle (by looking in all possible acq_dates)
+def save_epoch_data(sources_tcs_baseline, residual_tcs_baseline, outdir):
+    """ Save the useful LiCSAlert outputs in a pickle.  Also include the DEM.  
     
     Inputs:
         dem | rank 2 array | the dem
@@ -961,27 +725,28 @@ def save_licsalert_products(dem, sources_tcs_baseline, residual_tcs_baseline, ou
         acq_dates | list of strings | other acqusition dates that we should try and delete old versions of this file from.  
         remove_others | boolean | If True, try to remove old version of this file from other acquision dates.  
     Returns:
+        
     History:
         2020_10_20 | MEG | Written
+        2023_10_19 | MEG | Remove part of function that deletes old file from previous dates.  
     """
     import pickle
     import os
     
     # 1: save the outputs
-    with open(outdir / 'licsalert_results.pkl', 'wb') as f:
-        pickle.dump(dem, f)
-        pickle.dump(sources_tcs_baseline, f)
-        pickle.dump(residual_tcs_baseline, f)
+    with open(outdir / 'time_course_info.pkl', 'wb') as f:
+        pickle.dump(sources_tcs_baseline, f)                                        # list with dict for each IC.  each dict contains dict_keys(['cumulative_tc', 'gradient', 'lines', 'sigma', 'distances', 't_recalculate'])
+        pickle.dump(residual_tcs_baseline, f)                                       # as above, but list is length 1 as there is only one residual.   
     f.close()
       
-    # 2: delete the previous  licsalert products file (which is done by trying on all possible dates)
-    if remove_others and acq_dates is not None:                                                         # can't delete if we don't have the acquision dates.  
-        current_date = outdir.parts[-1]
-        acq_dates.remove(current_date)
-        for date in acq_dates:
-            try:
-                os.remove(outdir.parents / date / 'licsalert_results.pkl')
-            except:
-                pass
+    # # 2: delete the previous  licsalert products file (which is done by trying on all possible dates)
+    # if remove_others and acq_dates is not None:                                                         # can't delete if we don't have the acquision dates.  
+    #     current_date = outdir.parts[-1]
+    #     acq_dates.remove(current_date)
+    #     for date in acq_dates:
+    #         try:
+    #             os.remove(outdir.parents / date / 'licsalert_results.pkl')
+    #         except:
+    #             pass
 
 

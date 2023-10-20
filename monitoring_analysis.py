@@ -34,9 +34,9 @@ from pathlib import Path
 import pdb
 import os
 from glob import glob
+import sys
 
-#licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/09_jasmin_clone_2023_08_30/01_test/")
-licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/09_jasmin_clone_2023_08_30/02_all/")
+
 
 
 
@@ -88,13 +88,12 @@ def matrix_show(matrix, title=None, ax=None, fig=None, save_path = None, vmin0 =
 
 
 
-
-def pngs_to_gif(input_folder, output_file, image_duration = 0.5):
+def pngs_to_gif(input_folder, output_file, image_duration = 1000):
     """A function to conbime a folder of .pngs into one gif.
     Inputs:
         input_folder | pathlib Path | the location of the pngs.  E.g. "output_data".  Must be a pathlib Path
         output_file  | string | e.g. "output.gif"
-        image_duration | float | the time each png is displayed for in seconds.  e.g. 0.5
+        image_duration | float | the time each png is displayed for in milliseconds.  e.g. 0.5
     Returns:
         gif
     History:
@@ -103,6 +102,7 @@ def pngs_to_gif(input_folder, output_file, image_duration = 0.5):
         2020/08/18 | MEG | Update to handle paths formatted using the pathlib module.  
         2021_05_04 | MEG | Update to handle paths better.  
         2023_09_04 | MEG | Add funtion to make sure all images are the same size.  
+        2023_09_09 | MEG | GIF time units have changed in milliseconds in new version of imageio - update here.  
     """
 
     import imageio
@@ -160,27 +160,34 @@ def pngs_to_gif(input_folder, output_file, image_duration = 0.5):
     min_y, min_x = determine_minimim_image_size(images)                             # fnid the size of the minimum image
     images = crop_if_larger(images, min_y, min_x)                                   # make sure there are none bigger than that.  
 
-            
+    # for image in images:
+    #     print(image.shape)
     
     print('Writing the .gif file...', end = "")
-    imageio.mimsave(output_file, images, duration = image_duration, loop = 1)
+    imageio.mimsave(output_file, images, format = 'GIF', duration = image_duration,  loop = 1)
     print('Done!')
-
 
 
 #%%
 
 
-def get_all_volcano_dirs(licsalert_dir):
+def get_all_volcano_dirs(licsalert_dir, regions = True):
     """ Get the paths to all the licsalert volcano dirs that are split across regions.  
+    Inputs:
+        licsalert_dir | pathlib Path | directory LiCSAlert outputs, possibly containing a subdirectory of regions.  
+        regions | boolean | If True, volcanoes are separated into region directories, as per the COMET Volcano portal
+    Returns:
+        volc_dirs | list of pathlib Paths | list of each volcano's licsalert directory
+        volc_names | 
     """
     volc_dirs = []
-    #region_dirs = os.listdir(licsalert_path)
-    region_dirs = sorted(glob(str(licsalert_dir / '*')))
-    for region_dir in region_dirs:
-    # for region_dir in region_dirs[:2]:
-        # print(f"JUST LOOKING IN 2nd DIR")
-        volc_dirs.extend(sorted(glob(str(Path(region_dir) / '*'))))
+    
+    if regions:
+        region_dirs = sorted(glob(str(licsalert_dir / '*')))
+        for region_dir in region_dirs:
+            volc_dirs.extend(sorted(glob(str(Path(region_dir) / '*'))))
+    else:
+        volc_dirs = sorted(glob(str(licsalert_dir / '*')))
         
     volc_names = []
     for volc_dir in volc_dirs:
@@ -190,6 +197,7 @@ def get_all_volcano_dirs(licsalert_dir):
     
 
 
+#%% create_day_list()
 
 def create_day_list(d_start, d_stop):
     """
@@ -214,7 +222,7 @@ def create_day_list(d_start, d_stop):
     return acq_dates
 
 
-
+#%%
 
 def extract_licsalert_status(volc_dirs, volc_names, day_list):
     """ For every volcano that we do licsalert for, extract the 2 status values for all possible times.  
@@ -289,6 +297,7 @@ def extract_licsalert_status(volc_dirs, volc_names, day_list):
     return licsalert_status_crop, volc_names_crop, volc_dirs_crop
     
 
+#%% find_volcano()
 
 def find_volcano(volc_names, volc_name):
     """ Given a volcano name, find corresponding LiCSAR frames for that name.  
@@ -307,7 +316,7 @@ def find_volcano(volc_names, volc_name):
         name_and_indexes.append((possible_match, volc_names.index(possible_match)))
     return name_and_indexes
 
-
+#%%
 
 
 def remove_dates_with_no_status(volcano_status, day_list):
@@ -342,7 +351,7 @@ def remove_dates_with_no_status(volcano_status, day_list):
     return volcano_status_crop, day_list_crop
     
 
-
+#%% day_list_to_baseline
 
 def day_list_to_baselines(day_list_crop):
     """ Given a list of datetimes, get the temporal baselines relative to the first one.  
@@ -358,9 +367,10 @@ def day_list_to_baselines(day_list_crop):
         tbaselines[day_n] = (day - day_list_crop[0]).days
     return tbaselines
 
+#%%
 
 def licsalert_ts_one_volc(name_and_index, licsalert_status, day_list, fig_type = 'png',
-                          volc_dirs = None, out_dir = None):
+                          volc_dirs = None, out_dir = None, remap = True):
     """ Given a volcano name and its index (col number in the licsalert matrix),
     plot all times for that volcano.  
     Inputs:
@@ -376,39 +386,67 @@ def licsalert_ts_one_volc(name_and_index, licsalert_status, day_list, fig_type =
     from datetime import datetime as dt
     import matplotlib.image as mpimg
     import matplotlib.gridspec as gridspec
+    from adjustText import adjust_text
     
     volcano_status = licsalert_status[:, name_and_index[1], :]                          # index the 3d one for volcanoes x times x metric to just times x metric for one volcano
     volcano_status_crop, day_list_crop = remove_dates_with_no_status(volcano_status, day_list)      # most days don't have an acquisition.  Remove them.  
     tbaselines = day_list_to_baselines(day_list_crop)                                               # get the temporal baselines in days
     
-    
+    if remap:
+        volcano_status_crop_remap = np.zeros(volcano_status_crop.shape)                                                                 # initalise
+        for row_n, row in enumerate(volcano_status_crop):                                                                               # loop through each valid time
+            volcano_status_crop_remap[row_n, 0] = remap_sigmas(row[0], name_and_index[0], start = (10,10), end = (100, 11))             # do the rescaling
+            volcano_status_crop_remap[row_n, 1] = remap_sigmas(row[1], name_and_index[0], start = (10,10), end = (100, 11))             # ditto
+        volcano_status_crop = volcano_status_crop_remap
+            
     # one static plot
     if fig_type == 'png':
         f, ax = plt.subplots()
-        ax.scatter(volcano_status_crop[:,0], volcano_status_crop[:,1], c = tbaselines)
+        points = ax.scatter(volcano_status_crop[:,0], volcano_status_crop[:,1], c = tbaselines)
         ax.set_xlabel('Sigma for exising def.')
         ax.set_ylabel('Sigma for new def.')
-        ax.set_ylim([0,5])
-        ax.set_xlim([0,5])
+        ax.set_ylim([0,11])
+        ax.set_xlim([0,11])
         
+        # colorbar which works in day numbers but displays dates.  
+        cbar = f.colorbar(points)
+        original_tick_labels = cbar.get_ticks()
+        new_tick_labels = []
+        for tick_label in original_tick_labels:
+            try:
+                index = list(tbaselines).index(tick_label)                                      # these should be equivalent
+                new_tick_labels.append(dt.strftime(day_list[index], '%Y_%m_%d'))                # 
+            except:
+                new_tick_labels.append('')
+        cbar.set_ticklabels(new_tick_labels)
+        cbar.set_label(f"Acquisition date")
+        
+        
+        # label the most extreme points with their dates
         label_ratio = 0.2
+        texts = []
         x_threshold = (1 - label_ratio) * np.max(volcano_status_crop[:,0])
         y_threshold = (1 - label_ratio) * np.max(volcano_status_crop[:,1])
         for point_n, status in enumerate(volcano_status_crop):
             if (status[0] > x_threshold) or (status[1] > y_threshold):
-                ax.annotate(dt.strftime(day_list_crop[point_n], '%Y%m%d'), (status[0], status[1]))
-    
+                texts.append(ax.annotate(dt.strftime(day_list_crop[point_n], '%Y%m%d'), (status[0], status[1])))
+        adjust_text(texts, only_move={'points':'y', 'texts':'y'})                                                                                   # adjust how volcanoes of interest are labelled so that the labels don't overlap
+        f.savefig(out_dir / f"{name_and_index[0]}.png", bbox_inches='tight')            
+                
+        
+    # plots for each time step that can be converted into a gif.  
     elif fig_type == 'gif':
-        plt.switch_backend('Agg')                                                           #  works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
-        volc_dir = volc_dirs[name_and_index[1]]                         # get the directory of the volcano we're working with.  
+        plt.switch_backend('Agg')                                                           # works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
+        volc_dir = volc_dirs[name_and_index[1]]                                             # get the directory of the volcano we're working with.  
         for date_n, status in enumerate(volcano_status_crop):
         
-            f = plt.figure(figsize = (25,8))
-            grid = gridspec.GridSpec(2, 6, wspace = 0., hspace = 0.)                        # divide into 2 sections, 1/5 for ifgs and 4/5 for components
+            
+            f = plt.figure(figsize = (20,8))
+            grid = gridspec.GridSpec(2, 6, wspace = 0.0, hspace = 0.0)                        # divide into 2 sections, 1/5 for ifgs and 4/5 for components
             ax_2d = plt.Subplot(f, grid[-2,0])                                                                                      # create an axes for the IC (spatial source)
             ax_im = plt.Subplot(f, grid[:,1:])                                                                                      # create an axes for the IC (spatial source)
-            ax_2d.set_ylim([0,5])
-            ax_2d.set_xlim([0,5])
+            ax_2d.set_ylim([0,11])
+            ax_2d.set_xlim([0,11])
             ax_2d.set_xlabel('Sigma for exising def.')
             ax_2d.set_ylabel('Sigma for new def.')
         
@@ -429,40 +467,114 @@ def licsalert_ts_one_volc(name_and_index, licsalert_status, day_list, fig_type =
                 f.add_subplot(ax)
             f.suptitle(date_string)
             
+         #   pdb.set_trace()
+            
+            
             f.savefig(out_dir / f"{date_string}.png", bbox_inches='tight')            
             print(f"Saved figure {date_n} of {volcano_status_crop.shape[0]} ")
     if plt.get_backend() != 'Qt5Agg':                                                           # check if we need to reset the backend (to interactive window)
         plt.switch_backend('Qt5Agg')                                                           #  
 
-            
-        
+          
 
-            
+
+def remap_sigmas(signal, volc_name, start = (10,10), end = (100, 11)):
+    """
+    Signal below start[0] are not changed are not changed.  
+    Signals in the range set by start [0] and end [0] are remapped into range 
+    start[1] and end [1].  
+    Above end[0], they are set to end[1].  
+    to startValues are considered with input (signal) on the x, and output (signal_remap) on the y.  
+    Inputs:
+        signal | rank 1 | signal 
+        volc_name | string | sigma signal is from this volcano.  
+        start | tuple | (signal, signal_remap) of start of remapping.  
+        end | tuple | (signal, signal_remap) of end of remapping.  
+    Returns:
+        signal_remap | rank 1 | signal in new range.  
+    """
+    if np.isnan(signal):
+        
+        return signal
+    else:
+        threshold = start[0]
+        
+        if signal <= start[0]:                                                              # if below range, don't change.                                   
+            signal_remap = signal
+        elif (start[0] < signal) and (signal <= end[0]):                                    # if in range, remap.  
+            gradient = (end[1] - start[1]) / (end[0] - start[0])                            # delta y / delta x
+            c = start[1] - gradient * start[0]                                              # rearrange y = mx +c, subbing in start point.  
+            signal_remap = (gradient * signal)  + c
+        elif end[1] < signal:                                                               # if above, set to maximum
+            signal_remap = end[1]
+            print(f"Warning: {volc_name} has a sigma value of {signal},"
+                  f"which is above the maximum remapping value of {end[1]}. "
+                  f"It has been set to {end[1]}.  ")
+        else:
+            raise Exception(f"Failed to determine which interval the signal lies in.  Exiting.  ")
+        return signal_remap
+
+        
+#%% Things to set
+
+
+# jasmin outputs
+# #licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/09_jasmin_clone_2023_08_30/01_test/")
+# licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/09_jasmin_clone_2023_08_30/02_all/")
+# out_dir = Path("./monitoring_jasmin/one_volc/ale_bagu")
+# d_start = "20200101"
+# d_stop = "20230901"
+# test_volcano = 'ale_bagu*'
+# regions = True
+
+
+# # local test volcs            
+all_volcs_figs_dir = Path('monitoring_steps_all_volcs_test')
+licsalert_dir = Path("/home/matthew/university_work/31_from_bright/2023_09_08/01a_LiCSAlert_batch_mode_2/")
+regions = False
+# Option for the 1 volc we plot in detail.  
+# option 1
+out_dir = Path("./monitoring_test/one_volc/sierra_negra")
+d_start = "20170101"
+d_stop = "20230901"
+test_volcano = '*sierra*'
+
+# option 2
+# out_dir = Path("./monitoring_test/one_volc/erta_ale")
+# d_start = "20160601"
+# d_stop = "20230901"
+# test_volcano = '*erta*'
 
 
 #%% Initialise
 
 
-day_list = create_day_list("20200101", "20230901")                                      # make a datetime for each day in region of interest.  
+day_list = create_day_list(d_start, d_stop)                                      # make a datetime for each day in region of interest.  
 
-volc_dirs, volc_names = get_all_volcano_dirs(licsalert_dir)                                               # get path to outputs for each volcanoes, and their names (snake case)
+volc_dirs, volc_names = get_all_volcano_dirs(licsalert_dir, regions)                                               # get path to outputs for each volcanoes, and their names (snake case)
 licsalert_status, volc_names, volc_dirs = extract_licsalert_status(volc_dirs, volc_names, day_list)           # get the licsalert status where valid, and shorten the volc_dirs and volc_names to only have them for where licsalert is valid.  
+
+
 
 #%% figure for one volcano at all times.  
 
 # name_and_indexes = find_volcano(volc_names_crop, 'sierra_negra*')                         # couldn't find any.  
-name_and_indexes = find_volcano(volc_names, 'ale_bagu*')
+name_and_indexes = find_volcano(volc_names, test_volcano)
      
-licsalert_ts_one_volc(name_and_indexes[-1], licsalert_status, day_list, fig_type = 'png')                                                                           # 1 figure for all times
-#licsalert_ts_one_volc(name_and_indexes[-1], licsalert_status, day_list, fig_type = 'gif', volc_dirs = volc_dirs, out_dir = Path('monitoring_steps_1volc')    )      # figures for all times, with corresponding licsaelrt
-#pngs_to_gif(Path('monitoring_steps_1volc'), Path('monitoring_steps_1volc') / "animation.gif", image_duration = 0.5)                                                 # convert all times into a gif
+# licsalert_ts_one_volc(name_and_indexes[-1], licsalert_status, day_list, fig_type = 'png', out_dir = out_dir)                                                                           # 1 figure for all times
+#licsalert_ts_one_volc(name_and_indexes[-1], licsalert_status, day_list, fig_type = 'gif', volc_dirs = volc_dirs, out_dir = out_dir / "gif")      # figures for all times, with corresponding licsaelrt
+#pngs_to_gif(out_dir / "gif", out_dir  / "gif" / "animation.gif", image_duration = 0.5)                                                 # convert all times into a gif
+
+
+
 
 #%% 
 
-def licsalert_ts_all_volcs(licsalert_status, volc_names, day_list, out_dir, figsize, xlim = 10, ylim = 10):
+def licsalert_ts_all_volcs(licsalert_status, volc_names, day_list, out_dir, figsize, 
+                           xlim = 11, ylim = 11, plot_frequency = 6, label_fs = 12):
     """
     
-    One plot per day?  
+    
     """
     
     from copy import deepcopy
@@ -470,7 +582,7 @@ def licsalert_ts_all_volcs(licsalert_status, volc_names, day_list, out_dir, figs
     from datetime import datetime as dt
     from adjustText import adjust_text
     plt.switch_backend('Agg')                                                           #  
-    # plt.switch_backend('QtAgg')                                                           #   interactive, used to debug.                    
+    #plt.switch_backend('QtAgg')                                                           #   interactive, used to debug.                    
     
     
     #n_frames = len(day_list)
@@ -486,91 +598,75 @@ def licsalert_ts_all_volcs(licsalert_status, volc_names, day_list, out_dir, figs
     volcs_off_chart_sigmas = []
     
     for day_n, day in enumerate(day_list):                                                                      # loop through all possible days
-    
-        
-        # determine if some sigmas are larger than 5
-
         for volc_n in range(n_volcs):                                                                              # on each day, loop through all volcanoes     
             existing_def = licsalert_status[day_n, volc_n, 0]                                                   # get the number of sigmas for existing deformation
             new_def = licsalert_status[day_n, volc_n, 1]                                                    # and new deformation
             if  (existing_def != 0) and (new_def != 0):                                                     # check if we have values (and not a date in which they're just zeros) 
-            
-                if volc_names[volc_n] in volcs_off_chart:                                               # if we are dealing with a volcano that was previously off the plot
-                    list_index = volcs_off_chart.index(volc_names[volc_n])                              # find where int he list it is
-                    del volcs_off_chart[list_index], volcs_off_chart_sigmas[list_index]                 # so we can delete it as its location is to be updated
-                    
-
-                if (existing_def > xlim) and (new_def > ylim):                                                   # Option 1 of 4: too large in both
-                    volcs_off_chart.append(volc_names[volc_n])
-                    volcs_off_chart_sigmas.append((existing_def, new_def))
-                    existing_def = xlim
-                    new_def = ylim
-                elif (existing_def > xlim):                                                                      # Option 2 of 4: too large in one
-                    volcs_off_chart.append(volc_names[volc_n])
-                    volcs_off_chart_sigmas.append((existing_def, new_def))
-                    existing_def = xlim
-                    new_def = new_def
-                elif (new_def > ylim):                                                                           # Option 3 of 4: too large in other
-                    volcs_off_chart.append(volc_names[volc_n])
-                    volcs_off_chart_sigmas.append((existing_def, new_def))
-                    new_def = ylim
-                    existing_def = existing_def
-                else:                                                                                           # Option 4 of 4: neither too large.  
-                    new_def = new_def
-                    existing_def = existing_def
-
+                existing_def = remap_sigmas(existing_def, volc_names[volc_n], start = (10,10), end = (100, 11))
+                new_def = remap_sigmas(new_def, volc_names[volc_n], start = (10,10), end = (100, 11))
                 licsalert_status_current[volc_n,0]  = existing_def                                              # update the current status
                 licsalert_status_current[volc_n,1]  = new_def                                                   # continued
                 day_counter[volc_n] = tbaselines[day_n]                                                             # also update the counter that records which day number the data are from.  
             
         
         # start the figure.  
-        f, ax = plt.subplots(1, figsize = figsize)                                                                  # one figure per day.  
-
-        points = ax.scatter(licsalert_status_current[:, 0], licsalert_status_current[:, 1], 
-                            c = day_counter, vmin = int(tbaselines[0]), vmax = int(tbaselines[-1]))
+        if day_n % plot_frequency == 0:                                                                             # only make hte figure depending on frequency (% is remainder operator)
         
-        # deal with the colorbar
-        cbar = f.colorbar(points)
-        original_tick_labels = cbar.get_ticks()
-        new_tick_labels = []
-        for tick_label in original_tick_labels:
-            try:
-                index = list(tbaselines).index(tick_label)                                      # these should be equivalent
-                new_tick_labels.append(dt.strftime(day_list[index], '%Y_%m_%d'))                # 
-            except:
-                new_tick_labels.append('')
-        cbar.set_ticklabels(new_tick_labels)
-        cbar.set_label(f"Acquisition date")
-        
-        # label volcano names if above a threshold
-        texts = []
-        label_ratio = 0.2                                                                                                                           # the top ratio are labelled.  
-        x_threshold = (1 - label_ratio) * np.nanmax(licsalert_status_current[:,0])
-        y_threshold = (1 - label_ratio) * np.nanmax(licsalert_status_current[:,1])
-        for volc_n, status in enumerate(licsalert_status_current):                                                                                  # loop through every volcano
-            if (status[0] > x_threshold) or (status[1] > y_threshold):                                                                              # if one measure is above threshold    
-                texts.append(ax.annotate(volc_names[volc_n], (licsalert_status_current[volc_n, 0], licsalert_status_current[volc_n, 1])))           # label the point.  
-        adjust_text(texts, only_move={'points':'y', 'texts':'y'})                                                                                   # adjust how volcanoes of interest are labelled so that the labels don't overlap
-                
-        # tidy up the figure
-        ax.set_xlabel('Sigma for exising def.')
-        ax.set_ylabel('Sigma for new def.')
-        ax.set_ylim([0,ylim])
-        ax.set_xlim([0,xlim])
-        title = dt.strftime(day, '%Y_%m_%d')
-        ax.set_title(title)
-        
-        
-        
-        if len(volcs_off_chart) > 0:                                                        # if there are volcanoes off the chart here
-            off_volcs = f"Volcanoes off chart:\n"
-            for volcs_off_chart_sigma, volc_off_chart in zip(volcs_off_chart_sigmas, volcs_off_chart):
-                off_volcs = off_volcs + f"{volc_off_chart} (x:{volcs_off_chart_sigma[0]:.2f} y:{volcs_off_chart_sigma[1]:.2f})\n"
-            ax.annotate(off_volcs, (xlim - 0.02, ylim - 0.1), horizontalalignment='right',verticalalignment='top',)
-        
-        f.savefig(out_dir / f"{title}.png", bbox_inches='tight')            
-        print(f"Saved figure {title}")
+            f, ax = plt.subplots(1, figsize = figsize)                                                                  # one figure per day.  
+            points = ax.scatter(licsalert_status_current[:, 0], licsalert_status_current[:, 1], 
+                                c = day_counter, vmin = int(tbaselines[0]), vmax = int(tbaselines[-1]))
+            
+            # deal with the colorbar
+            cbar = f.colorbar(points)
+            original_tick_labels = cbar.get_ticks()
+            new_tick_labels = []
+            for tick_label in original_tick_labels:
+                try:
+                    index = list(tbaselines).index(tick_label)                                      # these should be equivalent
+                    new_tick_labels.append(dt.strftime(day_list[index], '%Y_%m_%d'))                # 
+                except:
+                    new_tick_labels.append('')
+            cbar.set_ticklabels(new_tick_labels)
+            cbar.set_label(f"Acquisition date")
+            
+            # label volcano names if above a threshold
+            texts = []
+            label_ratio = 0.2                                                                                                                           # the top ratio are labelled.  
+            x_threshold = (1 - label_ratio) * np.nanmax(licsalert_status_current[:,0])
+            y_threshold = (1 - label_ratio) * np.nanmax(licsalert_status_current[:,1])
+            for volc_n, status in enumerate(licsalert_status_current):                                                                                  # loop through every volcano
+                if (status[0] > x_threshold) or (status[1] > y_threshold):                                                                              # if one measure is above threshold    
+                    texts.append(ax.annotate(volc_names[volc_n], (licsalert_status_current[volc_n, 0], licsalert_status_current[volc_n, 1]),
+                                 fontsize = label_fs))           # label the point.  
+            
+                    
+            # tidy up the figure
+            ax.set_xlabel('Sigma for exising def.')
+            ax.set_ylabel('Sigma for new def.')
+            title = dt.strftime(day, '%Y_%m_%d')
+            ax.set_title(title)
+    
+            ax.set_ylim([0,ylim])                                                                                                   # axes size and ticks and labels.  
+            ax.set_xlim([0,xlim])
+            ticks = np.concatenate((np.arange(0,11, 2), np.array([11])))
+            tick_labels = np.concatenate((np.arange(0,11, 2), np.array([100])))
+            ax.set_xticks(ticks)
+            ax.set_xticklabels(tick_labels)
+            ax.set_yticks(ticks)
+            ax.set_yticklabels(tick_labels)
+            plt.grid(alpha = 0.2)
+            
+            # to be removed as now remap large values
+            # if len(volcs_off_chart) > 0:                                                        # if there are volcanoes off the chart here
+            #     off_volcs = f"Volcanoes off chart:\n"
+            #     for volcs_off_chart_sigma, volc_off_chart in zip(volcs_off_chart_sigmas, volcs_off_chart):
+            #         off_volcs = off_volcs + f"{volc_off_chart} (x:{volcs_off_chart_sigma[0]:.2f} y:{volcs_off_chart_sigma[1]:.2f})\n"
+            #     ax.annotate(off_volcs, (xlim - 0.02, ylim - 0.1), horizontalalignment='right',verticalalignment='top',)
+            
+            adjust_text(texts, only_move={'points':'y', 'texts':'y'})                                                                                   # adjust how volcanoes of interest are labelled so that the labels don't overlap
+            
+            f.savefig(out_dir / f"{title}.png", bbox_inches='tight')            
+            print(f"Saved figure {title}")
 
     if plt.get_backend() != 'Qt5Agg':                                                           # check if we need to reset the backend (to interactive window)
         plt.switch_backend('Qt5Agg')                                                           #  
@@ -579,37 +675,14 @@ def licsalert_ts_all_volcs(licsalert_status, volc_names, day_list, out_dir, figs
     
     
 
-licsalert_ts_all_volcs(licsalert_status, volc_names, day_list,  out_dir = Path('monitoring_steps_all_volcs'), figsize = (20, 12)    )
+# licsalert_ts_all_volcs(licsalert_status, volc_names, day_list,  out_dir = out_dir.parent.parent / "all_volcs", figsize = (20, 12),
+#                        plot_frequency = 6, label_fs = 16)
+
+pngs_to_gif(out_dir.parent.parent / "all_volcs", out_dir.parent.parent / "all_volcs" / "animation.gif", image_duration = 250)                                                 # convert all times into a gif
 
 
 #%%
-           
 
-f, ax = plt.subplots(1)
-xs = np.arange(0,100)
-ys = np.log10(xs)
-ax.plot(xs, ys)
-
-        
-#%%
-
-
-
-    
-
-    
-    
-    
-    
-   
-    
-    
-    
-    
-#matrix_show(licsalert_status[:,:,0], title = 'change to def')    
-
-#matrix_show(licsalert_status[:,:,1], title = 'new  def')    
-    
     
     
     
