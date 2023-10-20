@@ -2,3 +2,5 @@ not_in_repo/
 licsalert/__pycache__/*
 LiCSAlert_03_Campi_Flegrei/ICASAR_outputs/FastICA_results.pkl
 monitoring_steps_all_volcs/*
+monitoring_test/
+monitoring_jasmin/
