@@ -506,7 +506,7 @@ def LiCSAlert_aux_figures(parent_dir, icasar_sources, dem, mask):
     import numpy.ma as ma
     import pickle
     
-    aux_fig_dir = parent_dir / "aux_figures"                                                                                                                    # make a directory to save some aux figures.  
+    aux_fig_dir = parent_dir / "aux_data_figs"                                                                                                                    # make a directory to save some aux figures.  
     aux_fig_dir.mkdir(parents=True, exist_ok=True)                                   
     dem_ma_r1 = ma.compressed(ma.array(dem, mask = mask))
     plot_1_image(dem_ma_r1, mask, f"DEM", figure_type = 'png', figure_out_dir = aux_fig_dir, figsize = (18,9))
@@ -587,3 +587,90 @@ def LiCSAlert_mask_figure(icasar_mask, licsbas_mask, mask_combined, licsbas_date
     f1.canvas.manager.set_window_title(title)
     if (figure_type == 'png') or (figure_type == 'both'):
         f1.savefig(current_output_dir / "mask_status.png", bbox_inches='tight')
+
+
+#%%
+
+         
+
+def make_colormap(seq):
+    """
+    Taken from Stackechange - https://stackoverflow.com/questions/16834861/create-own-colormap-using-matplotlib-and-plot-color-scale
+    Return a LinearSegmentedColormap
+    seq: a sequence of floats and RGB-tuples. The floats should be increasing
+    and in the interval (0,1).
+
+    e.g. useage:  rvb = make_colormap(  [c('black'), c('orange'), 0.33, c('orange'), c('yellow'), 0.66, c('yellow'), c('red')])
+    """
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib.colors as mcolors
+
+
+    seq = [(None,) * 3, 0.0] + list(seq) + [1.0, (None,) * 3]
+    cdict = {'red': [], 'green': [], 'blue': []}
+    for i, item in enumerate(seq):
+        if isinstance(item, float):
+            r1, g1, b1 = seq[i - 1]
+            r2, g2, b2 = seq[i + 1]
+            cdict['red'].append([item, r1, r2])
+            cdict['green'].append([item, g1, g2])
+            cdict['blue'].append([item, b1, b2])
+    return mcolors.LinearSegmentedColormap('CustomMap', cdict)
+
+
+
+def remappedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
+    '''
+    Function to offset the median value of a colormap, and scale the
+    remaining color range (i.e. truncate the colormap so that it isn't
+    compressed on the shorter side) . Useful for data with a negative minimum and
+    positive maximum where you want the middle of the colormap's dynamic
+    range to be at zero.
+    Input
+    -----
+      cmap : The matplotlib colormap to be altered
+      start : Offset from lowest point in the colormap's range.
+          Defaults to 0.0 (no lower ofset). Should be between
+          0.0 and 0.5; if your dataset mean is negative you should leave
+          this at 0.0, otherwise to (vmax-abs(vmin))/(2*vmax)
+      midpoint : The new center of the colormap. Defaults to
+          0.5 (no shift). Should be between 0.0 and 1.0; usually the
+          optimal value is abs(vmin)/(vmax+abs(vmin))
+          Only got this to work with:
+              1 - vmin/(vmax + abs(vmin))
+      stop : Offset from highets point in the colormap's range.
+          Defaults to 1.0 (no upper ofset). Should be between
+          0.5 and 1.0; if your dataset mean is positive you should leave
+          this at 1.0, otherwise to (abs(vmin)-vmax)/(2*abs(vmin))
+
+      2017/??/?? | taken from stack exchange
+      2017/10/11 | update so that crops shorter side of colorbar (so if data are in range [-1 100],
+                   100 will be dark red, and -1 slightly blue (and not dark blue))
+      '''
+    import numpy as np
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+    if midpoint > 0.5:                                      # crop the top or bottom of the colourscale so it's not asymetric.
+        stop=(0.5 + (1-midpoint))
+    else:
+        start=(0.5 - midpoint)
+
+
+    cdict = { 'red': [], 'green': [], 'blue': [], 'alpha': []  }
+    # regular index to compute the colors
+    reg_index = np.hstack([np.linspace(start, 0.5, 128, endpoint=False),  np.linspace(0.5, stop, 129)])
+
+    # shifted index to match the data
+    shift_index = np.hstack([ np.linspace(0.0, midpoint, 128, endpoint=False), np.linspace(midpoint, 1.0, 129)])
+
+    for ri, si in zip(reg_index, shift_index):
+        r, g, b, a = cmap(ri)
+        cdict['red'].append((si, r, r))
+        cdict['green'].append((si, g, g))
+        cdict['blue'].append((si, b, b))
+        cdict['alpha'].append((si, a, a))
+    newcmap = matplotlib.colors.LinearSegmentedColormap(name, cdict)
+    #plt.register_cmap(cmap=newcmap)
+    return newcmap

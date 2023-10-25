@@ -82,10 +82,12 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
     
     import licsalert
     from licsalert.data_importing import LiCSBAS_to_LiCSAlert, LiCSBAS_json_to_LiCSAlert
+    from licsalert.data_exporting import save_licsalert_aux_data
     from licsalert.licsalert import LiCSAlert_preprocessing, LiCSAlert, shorten_LiCSAlert_data, write_volcano_status
     from licsalert.aux import compare_two_dates, Tee
     from licsalert.downsample_ifgs import downsample_ifgs
     from licsalert.plotting import LiCSAlert_figure, LiCSAlert_epoch_figures, LiCSAlert_aux_figures, LiCSAlert_mask_figure
+    
 
 
     # 1: Log all outputs to a file for that volcano:
@@ -194,6 +196,14 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
 
             if processing_date == LiCSAlert_status['to_process'][-1]:                                                                                                #  if it's the last date possible....
                 LiCSAlert_aux_figures(volcano_dir, icasar_sources, displacement_r2['dem'], displacement_r2['mask'])                                                   # also plot the ICS and the DEM
+                save_licsalert_aux_data(volcano_dir, displacement_r2)
+                
+
+                
+
+                
+                
+                
             
     sys.stdout = original                                                                                                                                      # return stdout to be normal.  
     f_run_log.close()                                                                                                                                          # and close the log file.  

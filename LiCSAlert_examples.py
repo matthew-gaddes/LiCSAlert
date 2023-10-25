@@ -82,19 +82,19 @@ volcano = 'campi_flegrei_example'                                               
 licsbas_dir = Path("./022D_04826_121209")                                         # input data
 
 
-# LiCSAlert_monitoring_mode(region = None, volcano = volcano, LiCSAlert_pkg_dir = LiCSAlert_pkg_dir, ICASAR_pkg_dir = ICASAR_pkg_dir,
-#                           licsbas_dir = licsbas_dir, licsalert_dir = licsalert_dir,
-#                           licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
+LiCSAlert_monitoring_mode(region = None, volcano = volcano, LiCSAlert_pkg_dir = LiCSAlert_pkg_dir,
+                          licsbas_dir = licsbas_dir, licsalert_dir = licsalert_dir,
+                          licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
 
     
 
 #%% We can also make the LiCSAlert figure for all times, but this is slow
 
-licsalert_settings['figure_intermediate'] = True                                                    # Turn on figures for all times 
-licsalert_settings['figure_type'] = 'png'                                                           # There will be too many figure windows if this is 'window' or 'both' ! 
+# licsalert_settings['figure_intermediate'] = True                                                    # Turn on figures for all times 
+# licsalert_settings['figure_type'] = 'png'                                                           # There will be too many figure windows if this is 'window' or 'both' ! 
 
-volcano = 'campi_flegrei_example_all_times'                                                         # new outdir
+# volcano = 'campi_flegrei_example_all_times'                                                         # new outdir
 
-LiCSAlert_monitoring_mode(region = None, volcano = volcano, LiCSAlert_pkg_dir = LiCSAlert_pkg_dir, ICASAR_pkg_dir = ICASAR_pkg_dir,
-                          licsbas_dir = licsbas_dir, licsalert_dir = licsalert_dir,
-                          licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
+# LiCSAlert_monitoring_mode(region = None, volcano = volcano, LiCSAlert_pkg_dir = LiCSAlert_pkg_dir,
+#                           licsbas_dir = licsbas_dir, licsalert_dir = licsalert_dir,
+#                           licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
