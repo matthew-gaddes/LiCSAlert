@@ -63,7 +63,7 @@ from small_plot_functions import matrix_show, quick_linegraph
 licsalert_settings = {"baseline_end" : "20170101",                               # end baseline stage at YYYYMMDD, need to be before the last acquisition of LiCSAlert will never monitoring anyhting.  
                       "figure_intermediate" : False,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
                       "figure_type"         : 'both',                             # either 'window' or 'png' (to save as pngs), or 'both'
-                      "downsample_run" : 0.5,                                     # data can be downsampled to speed things up
+                      "downsample_run"      : 0.5,                                     # data can be downsampled to speed things up
                       "downsample_plot"      : 0.5,                               # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
                       "residual_type"        : 'cumulative'}                      # controls the type of residual used in the lower plot.  Either cumulative or window   
 
@@ -73,7 +73,8 @@ icasar_settings = {"n_comp" : 5,                                                
                    "tsne_param" : (30, 12),                                       # (perplexity, early_exaggeration)
                    "ica_param" : (1e-2, 150),                                     # (tolerance, max iterations)
                    "hdbscan_param" : (100,10),                                    # (min_cluster_size, min_samples) Discussed in more detail in Mcinnes et al. (2017). min_cluster_size sets the smallest collection of points that can be considered a cluster. min_samples sets how conservative the clustering is. With larger values, more points will be considered noise. 
-                   "ifgs_format"        : 'cum'}                                  # can be 'all', 'inc' (incremental - short temporal baselines), or 'cum' (cumulative - relative to first acquisition)
+                   "ifgs_format"        : 'cum',                                  # can be 'all', 'inc' (incremental - short temporal baselines), or 'cum' (cumulative - relative to first acquisition)
+                   "sica_tica"          : 'sica' }
 
 
 

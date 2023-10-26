@@ -125,49 +125,13 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
     import pdb
     
     # internal functions
+    from licsalert.data_importing import ifg_timeseries
     from licsalert.icasar.blind_signal_separation import PCA_meg2
     from licsalert.icasar.aux import  bss_components_inversion, maps_tcs_rescale, r2_to_r3, baseline_from_names, create_all_ifgs, create_cumulative_ifgs, signals_to_master_signal_comparison
     from licsalert.icasar.plotting import r2_arrays_to_googleEarth
     from licsalert.icasar.plotting import plot_pca_variance_line, plot_temporal_signals, two_spatial_signals_plot, plot_2d_interactive_fig
     from licsalert.icasar.plotting import prepare_point_colours_for_2d, prepare_legends_for_2d, plot_source_tc_correlations
     
-
-    
-    
-    
-    
-    class ifg_timeseries():
-        def __init__(self, mixtures, ifg_dates):
-            self.mixtures = mixtures
-            self.ifg_dates = ifg_dates
-            self.print_timeseries_info()
-            self.mean_centre_in_space()
-            self.mean_centre_in_time()
-            self.baselines_from_names()
-                        
-        def print_timeseries_info(self):
-            print(f"This interferogram timeseries has {self.mixtures.shape[0]} times and {self.mixtures.shape[1]} pixels.  ")
-            
-        def mean_centre_in_space(self):
-            import numpy as np
-            self.means_space = np.mean(self.mixtures, axis = 1)
-            self.mixtures_mc_space = self.mixtures - self.means_space[:, np.newaxis]
-            
-        def mean_centre_in_time(self):
-            import numpy as np
-            self.means_time = np.mean(self.mixtures, axis = 0)
-            self.mixtures_mc_time = self.mixtures - self.means_time[np.newaxis, :]
-            
-            
-        def baselines_from_names(self):
-            from datetime import datetime, timedelta
-            baselines = []
-            for file in self.ifg_dates:
-                master = datetime.strptime(file.split('_')[-2], '%Y%m%d')
-                slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')
-                baselines.append(-1 *(master - slave).days)
-            self.t_baselines = baselines
-
     
     # -5 Check inputs, unpack either spatial or temporal data, and check for nans
     if temporal_data is None and spatial_data is None:                                                                  # check inputs

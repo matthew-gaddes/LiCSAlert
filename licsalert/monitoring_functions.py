@@ -32,7 +32,8 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
                                           If there are 327 acq dates (as per the example), there are 327 ifg_dates (as these are the short
                                           temporal baseline ifgs joining the acquisitions, )
         
-        licsalert_settings 
+        licsalert_settings :
+            sica_tica | string | sica or tica
         icasar_settings 
 
     Returns:
@@ -109,22 +110,28 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
     except:
         print(f"Failed to open the config file for this volcano.  Trying to populate the LiCSAlert_settings and ICASAR_settings dictionaries with from the "
               "function input arguments ")
-        LiCSAlert_settings = {}
-        ICASAR_settings = {}
-
-    if licsalert_settings is not None:
-        for arg, arg_setting in licsalert_settings.items():                                                                 # loop through them
+        try:
+            LiCSAlert_settings = {}
+            for arg, arg_setting in licsalert_settings.items():                                                                 # loop through them
                 LiCSAlert_settings[arg] = arg_setting                                                                                       # and apply
-    if icasar_settings is not None:
-        for arg, arg_setting in icasar_settings.items():
-            ICASAR_settings[arg] = arg_setting
-    ICASAR_settings['figures'] = LiCSAlert_settings['figure_type']                                                                          # alwyas the same as for LiCSAlert
-    del licsalert_settings, icasar_settings
+            del licsalert_settings
+                
+            ICASAR_settings = {}
+            for arg, arg_setting in icasar_settings.items():
+                ICASAR_settings[arg] = arg_setting
+            del icasar_settings
+            ICASAR_settings['figures'] = LiCSAlert_settings['figure_type']                                                                          # alwyas the same as for LiCSAlert
+        except:
+            raise Exception(f"Failed to load the settings from arguments passed to the function.  Try checking licsalert_settings and icasar_settings.  Exiting.  ")
+
             
     # 3: Open the the input data, which can be in various formats (3 so far)
     if licsbas_jasmin_dir is not None:
         print(f"LiCSAlert is opening a JASMIN COMET Volcano Portal timeseries json file.  ")
         displacement_r2, _, tbaseline_info, ref_xy, licsbas_json_creation_time = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json")          # open the .json LiCSBAS data for this volcano 
+        append_licsbas_date_to_file(licsalert_dir, region, volcano, licsbas_json_creation_time)                                                        # append licsbas .json file date to list of file dates used (in the text file for each volano)
+        del licsbas_json_creation_time                                                                                                                  # delete for safety
+        
     elif licsbas_dir is not None:
         print(f"LiCSAlert is opening a LiCSBAS directory.  ")
         displacement_r2, tbaseline_info, _ = LiCSBAS_to_LiCSAlert(licsbas_dir, figures=True,  filtered = False, n_cols=5,                              # open various LiCSBAS products, spatial ones in displacement_r2, temporal ones in tbaseline_info
@@ -134,22 +141,18 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
         displacement_r2 = data_as_arg['displacement_r2']
         tbaseline_info = data_as_arg["tbaseline_info"]
         
-        
-
-        
-    if licsbas_jasmin_dir is not None:
-        append_licsbas_date_to_file(licsalert_dir, region, volcano, licsbas_json_creation_time)                                                        # append licsbas .json file date to list of file dates used (in the text file for each volano)
-        del licsbas_json_creation_time                                                                                                                  # delete for safety
     try:
         del displacement_r2['cumulative']                                                                                                                 #  this is not needed and is deleted for safety.
         print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  ")
     except:
-        pass
-    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])           # mean centre and downsize the data
+        print(f"LiCSAlert couldn't remove 'cumulative' from 'displacement_r2' which is the expected behaviour as LiCSAlert expects incremental displacments.    ")
+    
+    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, tbaseline_info, ICASAR_settings['sica_tica'], 
+                                              LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])                                      # mean centre in space (sica) or time (tica) and downsize the data
+    
+    # 4: possible run licsalert
     LiCSAlert_status = run_LiCSAlert_status(tbaseline_info['acq_dates'], volcano_dir, LiCSAlert_settings['baseline_end'], LiCSAlert_settings['figure_intermediate'])                       # NOTE volcano_dir used to be licsalert_dir / region / volcano.   determine the LiCSAlert status for this volcano (ie do we need to run ICASAR, is the time series up to date etc.  )
     print(f"LiCSAlert status:  1) Run ICASAR: {LiCSAlert_status['run_ICASAR']}   2) Run LiCSAlert: {LiCSAlert_status['run_LiCSAlert']}")
-   
-    # 4: possible run licsalert
     if LiCSAlert_status['run_LiCSAlert']:                                                                                       # if LiCSAlert will be run...
     
         # 4a: either load or make the ICs (from icasar)
@@ -860,7 +863,7 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, b
     if run_ICASAR:
         print(f"\nRunning ICASAR.")                                      
         
-        spatial_ICASAR_data = {'ifgs_dc' : displacement_r2['incremental'][:(baseline_end_ifg_n+1),],                             # only take up to the last 
+        spatial_ICASAR_data = {'ifgs_dc'     : displacement_r2['incremental'][:(baseline_end_ifg_n+1),],                             # only take up to the last.  ICASAR will deal with transposing this if it's tica
                                'mask'        : displacement_r2['mask'],
                                'lons'        : displacement_r2['lons'],
                                'lats'        : displacement_r2['lats'],
@@ -957,13 +960,13 @@ def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
 
 
 #%%
-def save_epoch_data(sources_tcs_baseline, residual_tcs_baseline, outdir):
+def save_epoch_data(sources_tcs, residual_tcs, outdir):
     """ Save the useful LiCSAlert outputs in a pickle.  Also include the DEM.  
     
     Inputs:
         dem | rank 2 array | the dem
-        sources_tcs_baselines | list of dicts | information about each source that LiCSAlert is using.  
-        residual_tcs_baseline | list of 1 dict | as above, but for the residual.  
+        sources_tcs | list of dicts | information about each source that LiCSAlert is using.  
+        residual_tcs | list of 1 dict | as above, but for the residual.  
         outdir | Path | where to save the output.  
         acq_dates | list of strings | other acqusition dates that we should try and delete old versions of this file from.  
         remove_others | boolean | If True, try to remove old version of this file from other acquision dates.  
@@ -972,14 +975,15 @@ def save_epoch_data(sources_tcs_baseline, residual_tcs_baseline, outdir):
     History:
         2020_10_20 | MEG | Written
         2023_10_19 | MEG | Remove part of function that deletes old file from previous dates.  
+        2023_10_25 | MEG | Update names of variables. 
     """
     import pickle
     import os
     
     # 1: save the outputs
     with open(outdir / 'time_course_info.pkl', 'wb') as f:
-        pickle.dump(sources_tcs_baseline, f)                                        # list with dict for each IC.  each dict contains dict_keys(['cumulative_tc', 'gradient', 'lines', 'sigma', 'distances', 't_recalculate'])
-        pickle.dump(residual_tcs_baseline, f)                                       # as above, but list is length 1 as there is only one residual.   
+        pickle.dump(sources_tcs, f)                                        # list with dict for each IC.  each dict contains dict_keys(['cumulative_tc', 'gradient', 'lines', 'sigma', 'distances', 't_recalculate'])
+        pickle.dump(residual_tcs, f)                                       # as above, but list is length 1 as there is only one residual.   
     f.close()
       
     # # 2: delete the previous  licsalert products file (which is done by trying on all possible dates)

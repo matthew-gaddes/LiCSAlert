@@ -10,6 +10,42 @@ Created on Fri Oct 20 09:59:48 2023
 
 
 
+class ifg_timeseries():
+    def __init__(self, mixtures, ifg_dates):
+        self.mixtures = mixtures
+        self.ifg_dates = ifg_dates
+        self.print_timeseries_info()
+        self.mean_centre_in_space()
+        self.mean_centre_in_time()
+        self.baselines_from_names()
+                    
+    def print_timeseries_info(self):
+        print(f"This interferogram timeseries has {self.mixtures.shape[0]} times and {self.mixtures.shape[1]} pixels.  ")
+        
+    def mean_centre_in_space(self):
+        import numpy as np
+        self.means_space = np.mean(self.mixtures, axis = 1)
+        self.mixtures_mc_space = self.mixtures - self.means_space[:, np.newaxis]
+        
+    def mean_centre_in_time(self):
+        import numpy as np
+        self.means_time = np.mean(self.mixtures, axis = 0)
+        self.mixtures_mc_time = self.mixtures - self.means_time[np.newaxis, :]
+        
+        
+    def baselines_from_names(self):
+        from datetime import datetime, timedelta
+        baselines = []
+        for file in self.ifg_dates:
+            master = datetime.strptime(file.split('_')[-2], '%Y%m%d')
+            slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')
+            baselines.append(-1 *(master - slave).days)
+        self.t_baselines = baselines
+
+#%%
+
+
+
 def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, n_cols=5, crop_pixels = None, return_r3 = False, 
                       ref_area = True, mask_type = 'dem'):
     """ A function to prepare the outputs of LiCSBAS for use with LiCSALERT. Note that this includes the step of referencing the time series to the reference area selected by LiCSBAS.  

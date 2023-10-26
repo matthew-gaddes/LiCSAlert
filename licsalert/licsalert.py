@@ -430,7 +430,8 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
 
 #%%
     
-def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot=0.5, verbose=True, mean_centre = True):
+def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
+                            downsample_run=1.0, downsample_plot=0.5, verbose=True):
     """A function to downsample the data at two scales (one for general working [ie to speed things up], and one 
     for faster plotting.  )  Also, data are mean centered, which is required for ICASAR and LiCSAlert.  
     Note that the downsamples are applied consecutively, so are compound (e.g. if both are 0.5, 
@@ -438,11 +439,13 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
     
     Inputs:
         displacement_r2 | dict | input data stored in a dict as row vectors with a mask    
-                                 Also lons and lats as rank 2 arrays.  
+                                 Also lons and lats as rank 2 arrays.  E N U are components of the look vector for East North Up for each pixel.  
+                                 dict_keys(['dem', 'mask', 'incremental', 'lons', 'lats', 'E', 'N', 'U'])
+        tbaseline_info | dict |  dict_keys(['acq_dates', 'ifg_dates', 'baselines', 'baselines_cumulative'])
+        sica_tica       | string | if sica, spatial ICA, if tica, temporal ica
         downsample_run | float | in range [0 1], and used to downsample the "incremental" data
         downsample_plot | float | in range [0 1] and used to downsample the data again for the "incremental_downsample" data
         verbose | boolean | if True, informatin returned to terminal
-        mean_centre | boolean | add option to control if mean centered.  
         
     Outputs:
         displacement_r2 | dict | input data stored in a dict as row vectors with a mask
@@ -456,32 +459,42 @@ def LiCSAlert_preprocessing(displacement_r2, downsample_run=1.0, downsample_plot
         2021_05_05 | MEG | Add check that lats are always the right way up, and fix bug in lons.  
         2021_10_13 | MEG | Add function to also downsample ENU grids.  
         2021_11_15 | MEG | Add option to control mean centering, and warning that it is happening.  
+        2023_10_26 | MEG | use ifg_timeseries class to handle mean centering more carefully.  
     """
     import numpy as np
     from licsalert.downsample_ifgs import downsample_ifgs
     from licsalert.aux import col_to_ma
+    from licsalert.data_importing import ifg_timeseries
+    
     from skimage.transform import rescale
 
-    
     n_pixs_start = displacement_r2["incremental"].shape[1]                                          # as ifgs are row vectors, this is the number of pixels we start with
     shape_start = displacement_r2["mask"].shape                                                     # and the shape of the ifgs (ny, nx)
     
-    # 0: Mean centre the interferograms (ie. break any connection to a reference pixel/region that the interferogram was set to)
-    if mean_centre:
-        if verbose:
-            print(f"LiCSAlert_preprocessing: mean centering the interferograms before downsampling")
-        displacement_r2["incremental"] = displacement_r2["incremental"] - np.mean(displacement_r2["incremental"], axis = 1)[:,np.newaxis]                            # mean centre the data (along rows) 
-
     # 1: Downsample the ifgs for use in all following functions.  
-    if downsample_run != 1.0:                                                                                       # if we're not actually downsampling, skip for speed
+    if downsample_run != 1.0:                                                                                                                       # if we're not actually downsampling, skip for speed
         displacement_r2["incremental"], displacement_r2["mask"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
                                                                                   downsample_run, verbose = False)
+    
+    # 2: mean centre in time or space, according to if sica or tica (must be done after downsampling for accuracy)
+    ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])            # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)
+    del displacement_r2['incremental']
+    
+    if sica_tica == 'sica':
+        displacement_r2['incremental'] = ifg_ts.mixtures_mc_space
+        displacement_r2['means'] = ifg_ts.means_space
+        print(f"The data have been mean centered in space for use with sICA")
+    elif sica_tica == 'tica':
+        displacement_r2['incremental'] = ifg_ts.mixtures_mc_time
+        displacement_r2['means'] = ifg_ts.means_time
+        print(f"The data have been mean centered in time for use with tICA")
+    else:
+        raise Exception(f"'sica_tica' can be either 'sica' or 'tica', but not {sica_tica}.  Exiting.  ")
+        
 
-    # 2: Downsample for plotting
+    # 3: Downsample for plotting
     displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
                                                                                                       downsample_plot, verbose = False)
-
-
     # 3: Downsample the geocode info (if provided) in the same was as step 1:
     if ('lons' in displacement_r2) and ('lats' in displacement_r2):                                             # check if we have lon lat data as not alway strictly necessary.  
         ifg1 = col_to_ma(displacement_r2['incremental'][0,:], pixel_mask = displacement_r2['mask'])             # get the size of a new ifg (ie convert the row vector to be a rank 2 masked array.  )

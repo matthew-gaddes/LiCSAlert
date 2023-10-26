@@ -26,6 +26,9 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, RadioButtons
 
 from pathlib import Path
+import pickle
+import sys
+from glob import glob
 
 #%%
 
@@ -37,18 +40,92 @@ print("Running")
     
     
     
-licalert_dir = Path("./campi_flegrei_example")
+licsalert_dir = Path("./../campi_flegrei_example")
     
     # open the licsbas data.  
     
-    # open the ICs.  
+sys.path.append("./..")
     
-def open_ics(licsalert_dir):
+import licsalert
+from licsalert.aux import col_to_ma
+    
+def open_aux_data(licsalert_dir):
+    """Open all the data stored in the pickle files in aux_images_data
+    Inputs:
+        licsalert_dir | pathlib Path | output directory when LiCSAlert was run.  
+    Returns:
+        displacement_r2 | dict | contains (['dem', 'mask', 'incremental', 'lons', 'lats', 'E', 'N', 'U', 'incremental_downsampled', 'mask_downsampled'])
+        aux_data | dict | ['icasar_sources', 'dem', 'mask'])
+    History:
+        2023_10_25 | MEG | Written. 
     """
+    
+    with open(licsalert_dir / "aux_data_figs" / 'original_ts_data.pkl', 'rb') as f:
+        displacement_r2 = pickle.load(f)
+    f.close()
+    
+    with open(licsalert_dir / "aux_data_figs" / 'aux_images_data.pkl', 'rb') as f:
+        aux_data = pickle.load(f)
+    f.close()
+    
+    return displacement_r2, aux_data
+    
+    
+    
+def open_tcs(licsalert_dir):
+    """ Open the time course data.  
+    Inputs:
+        licsalert_dir | pathlib Path | output directory when LiCSAlert was run.  
+    Returns:
+        sources_tcs | list of dicts | One item in list for each source, each item contains ['cumulative_tc', 'gradient', 'lines', 'sigma', 'distances', 't_recalculate'])
+    History:
+        2023_10_25 | Written | MEG
     """
     
+    licsalert_items = sorted(glob(str(licsalert_dir / '*')))
+    
+    # remove any items that are not a licsalert data directory.  
+    delete_args = []
+    for item_n, licsalert_item in enumerate(licsalert_items):
+        item_name = Path(licsalert_item).parts[-1]
+        if item_name in ["ICASAR_results", "LiCSAlert_history.txt", "aux_data_figs"]:
+            delete_args.append(item_n)
+    
+    for delete_arg in delete_args[::-1]:
+        del licsalert_items[delete_arg]
+    
+    final_date_dir = Path(sorted(licsalert_items)[-1])
+    
+    with open(final_date_dir / 'time_course_info.pkl', 'rb') as f:
+        sources_tcs = pickle.load(f)
+        residual_tcs = pickle.load(f)
+    f.close()
+
+    return sources_tcs
+
+
     
     
+displacement_r2, aux_data = open_aux_data(licsalert_dir)
+sources_tcs = open_tcs(licsalert_dir)    
+
+f, axes = plt.subplots(1,2)
+
+cum_ifg_r1 = np.sum(displacement_r2['incremental'], axis = 0)
+axes[1].matshow(col_to_ma(cum_ifg_r1, displacement_r2['mask']))
+    
+    
+# switch to a gridspec.  
+# plot ICS and cumulative tcs.  
+# get the means. 
+# function to reconstruct data
+# slection button (can select multiople)
+# redo reconstrutcion on button change.  
+# tica vs sica?  
+
+    
+    
+sys.exit()
     
     
 
