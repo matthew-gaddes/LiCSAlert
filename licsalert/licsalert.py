@@ -695,4 +695,50 @@ def write_volcano_status(sources_tcs_baseline, residual_tcs_baseline, ics_labels
     with open(txt_out_dir / 'volcano_status.txt', 'w') as f:
         f.write(f"{def_n_sigmas[0]}\n")                                             # sigma for existing deformation
         f.write(f"{new_n_sigmas[0]}\n")                                             # sigma for new deformaiton
+
+
+#%%
+
     
+
+
+    
+def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
+    """ Reconstruct a LiCSAlert cumulative time series form the ICs and cumulative time course using a choice of components.
+    Automatically detects if sICA or tICA was run and handles mean centering accordingly.  
+    
+    Inputs:
+        ics_one_hot | list | 1 if IC to be used, 0 if not.  Must be same length as number of ICS  e.g. [1,0,0,0]
+        sources_tcs | list of dicts | one item in list for each IC.  Contains cumulative time course and associated data.  
+        aux_data | dict | dict_keys(['icasar_sources', 'dem', 'mask'])
+        displacement_r2 | dict | dict_keys(['dem', 'mask', 'lons', 'lats', 'E', 'N', 'U', 'incremental', 'means', 'incremental_downsampled', 'mask_downsampled'])
+    Returns:
+        X | r2 array | cumulative ifgs as rows (must be combined with a mask to turn back to masked arrays).  Mean centering has been removed.  
+    History:
+        2023_10_26 | MEG | Written
+        
+    """
+    import numpy as np
+    
+    if len(ics_one_hot) != len(sources_tcs):
+        raise Exception(f"'sources_tcs' is of length {len(sources_tcs)} so contains {len(sources_tcs)} sources.  "
+                        f"However, 'ics_one_hot' is {len(ics_one_hot)}, which doesn't agree.  Exiting.  ")
+        
+    n_sources = len(sources_tcs)
+    n_times = sources_tcs[0]['cumulative_tc'].shape[0]
+    n_pixels = displacement_r2['incremental'].shape[1]
+    
+    A = np.zeros((n_times, n_sources))
+    for n_source in range(n_sources):
+        A[:, n_source] = np.ravel(ics_one_hot[n_source] *  sources_tcs[n_source]['cumulative_tc'])
+    S = aux_data['icasar_sources']
+    
+    if displacement_r2['means'].shape[0] == n_times:                                   # mean for each pixel means sICA was run
+        means_r2 = np.repeat(displacement_r2['means'][:,np.newaxis], n_pixels, axis = 1 )
+    
+    elif displacement_r2['means'].shape[0] == n_pixels:                                   # mean for each pixel means tICA was run
+        means_r2 = np.repeat(displacement_r2['means'][np.newaxis, :], n_times, axis = 0)
+    
+    X = A@S + means_r2
+    
+    return X
