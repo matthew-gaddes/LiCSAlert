@@ -11,13 +11,14 @@ import pdb
 
 #%%
 
-def save_licsalert_aux_data(out_dir, displacement_r2):
+def save_licsalert_aux_data(out_dir, displacement_r2, tbaseline_info):
     """ Save the displacment_r2 dict containing all the time series 
     data that was used by LiCSAlert.
     
     Inputs:
         out_dir \ pathlib Path \ directory where LiCSAlert outputs are written to. 
         displacement_r2 | dict | dict that contains dict_keys(['dem', 'mask', 'incremental', 'lons', 'lats', 'E', 'N', 'U', 'incremental_downsampled', 'mask_downsampled'])
+        tbaseline_info | dict | contains dict_keys(['acq_dates', 'ifg_dates', 'baselines', 'baselines_cumulative'])
     Returns:
         pickle file
     History:
@@ -27,5 +28,6 @@ def save_licsalert_aux_data(out_dir, displacement_r2):
     
     with open(out_dir / "aux_data_figs" / 'original_ts_data.pkl', 'wb') as f:
         pickle.dump(displacement_r2, f)
+        pickle.dump(tbaseline_info, f)
     f.close()    
     

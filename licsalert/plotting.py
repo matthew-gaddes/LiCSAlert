@@ -158,12 +158,6 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         ax_tc2.set_yticklabels([])                                                      # turn off y labels
         ax_tc2.set_ylim(top = 10)                                                       # set so in range 0 to 10
 
-    def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
-        import matplotlib.colors as colors
-        new_cmap = colors.LinearSegmentedColormap.from_list(
-        'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
-        cmap(np.linspace(minval, maxval, n)))
-        return new_cmap 
     
     def xticks_every_3months(ax_to_update, day0_date, time_values, include_tick_labels):
         """Given an axes, update the xticks so the major ones are the 1st of jan/april/july/october, and the minor ones are the first of the 
@@ -591,6 +585,101 @@ def LiCSAlert_mask_figure(icasar_mask, licsbas_mask, mask_combined, licsbas_date
 
 #%%
 
+
+def xticks_every_nmonths(ax_to_update, day0_date, time_values, include_tick_labels, 
+                         major_ticks_n_months = 3, minor_ticks_n_months = 1):
+    """Given an axes, update the xticks so the major ones are the 1st of every n months (e.g. if every 3, would be: jan/april/july/october).  
+    
+    Inputs:
+        ax_to_update | matplotlib axes | the axes to update.  
+        day0_date | string | in form yyyymmdd
+        time_values | rank 1 array | cumulative temporal baselines, e.g. np.array([6,18, 30, 36, 48])
+        include_tick_labels | boolean | if True, tick labels are added to the ticks.  
+        n_months | int | x ticks are very n months.  e.g. 2, 3,4,6,12 (yearly)  Funny spacings (e.g. every 5) not tested.  
+    Returns:
+        updates axes
+    History:
+        2021_09_27 | MEG | Written
+        2022_02_17 | MEG | modify so can be monhtly spacing other than every 3 months.  
+    """
+    import pdb
+    import numpy as np
+    import datetime as dt
+    import copy
+    
+    from dateutil.relativedelta import relativedelta                                                    # add 3 months and check not after end
+    import matplotlib.pyplot as plt
+
+    
+    def create_tick_labels_every_nmonths(day0_date_dt, dayend_date_dt, n_months = 1):
+        """ Given a spacing of every n_months, get the dates and days since the first date for ticks every n_months.  
+        e.g. every month, every 6 months.  
+        
+        Inputs:
+            day0_date_dt | datetime | date of x = 0 on axis.  
+            dayend_date_dt | datetime | date of last x value. 
+            n_months | int | frequency of ticks. 
+            
+        Returns:
+            ticks | dict | contains datetimes : datetimes for each tick
+                                    yyyymmdd : strings to use as labels in form yyyy/mm/dd
+                                    n_day     : day number of tick.  
+        History:
+            2022_03_29 | MEG | Written
+        """
+    
+        # 1: find first tick date (the first of the jan/ april/jul /oct)                        
+        date_tick0 = copy.deepcopy(day0_date_dt)                                                                 # version that can be modified as we iterate through.  
+        while not ( (date_tick0.day) == 1 and (date_tick0.month in (np.arange(0, 12, n_months) + 1))):           # i.e. whilst it's not the 1st of the month, and not jan/apr/jul/oct....
+            date_tick0 +=  dt.timedelta(1)                                                                       # then add one day and keep going.  
+    
+        # 2: get all the other first of the quarters as datetimes (ie keep adding n months until we're gone past the day end date)
+        ticks = {'datetimes' : [date_tick0],
+                 'yyyymmdd'   : [],
+                 'n_day'     : []}
+       
+        while ticks['datetimes'][-1] < (dayend_date_dt - relativedelta(months=+n_months)):                         # while we haven't gone past the last date (and subtract 3 months to make sure we don't go one 3 month jump too far. )
+            ticks['datetimes'].append(ticks['datetimes'][-1] + relativedelta(months=+n_months))                    # append the next date which is n_months more.  
+        
+        # 3: work out what day number each first of the quarter is.  
+        for tick_dt in ticks['datetimes']:                                                                      # loop along the list of datetimes (which are each tick) 
+            ticks['yyyymmdd'].append(dt.datetime.strftime(tick_dt, "%Y/%m/%d"))                                 # as a string that can be used for the tick label (hence why include / to make more readable)
+            ticks['n_day'].append((tick_dt - day0_date_dt).days)
+            
+        return ticks
+
+    
+    xtick_label_angle = 315                                                                              # this angle will read from top left to bottom right (i.e. at a diagonal)
+    
+    tick_labels_days = ax_to_update.get_xticks().tolist()                                                # get the current tick labels
+    day0_date_dt = dt.datetime.strptime(day0_date, "%Y%m%d")                                             # convert the day0 date (date of day number 0) to a datetime.  
+    dayend_date_dt = day0_date_dt +  dt.timedelta(int(time_values[-1]))                                  # the last time value is the number of days we have, so add this to day0 to get the end.  
+
+    ticks_major = create_tick_labels_every_nmonths(day0_date_dt, dayend_date_dt, n_months = major_ticks_n_months)
+    ticks_minor = create_tick_labels_every_nmonths(day0_date_dt, dayend_date_dt, n_months = minor_ticks_n_months)                        # these are used as the minor ticks every month.  
+    
+
+        
+    # 4: Update the figure.  
+    ax_to_update.set_xticks(ticks_major['n_day'])                                                                   # apply major tick labels to the figure
+    ax_to_update.set_xticks(ticks_minor['n_day'], minor = True)                                                                   # apply major tick labels to the figure
+
+    if include_tick_labels:
+        ax_to_update.set_xticklabels(ticks_major['yyyymmdd'], rotation = xtick_label_angle, ha = 'left', size = 8)            # update tick labels, and rotate
+        plt.subplots_adjust(bottom=0.15)
+        #ax_to_update.set_xlabel('Date')
+    else:
+        ax_to_update.set_xticklabels([])                                                                    # remove any tick lables if they aren't to be used.  
+    
+    # add vertical lines every year.  
+    for major_tick_n, datetime_majortick in enumerate(ticks_major['datetimes']):
+        if datetime_majortick.month == 1:                                                                       # if it's the january tick (i.e the 1st of the year)
+            ax_to_update.axvline(x = ticks_major['n_day'][major_tick_n], color='k', alpha=0.1, linestyle='--')                          
+             
+
+
+
+#%%
          
 
 def make_colormap(seq):
@@ -674,3 +763,16 @@ def remappedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
     newcmap = matplotlib.colors.LinearSegmentedColormap(name, cdict)
     #plt.register_cmap(cmap=newcmap)
     return newcmap
+
+#%%
+
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+    """ Take a colorbar and crop it.  Useful for removing blue parts of "terrain""
+    """
+    import matplotlib.colors as colors
+    import numpy as np
+    
+    new_cmap = colors.LinearSegmentedColormap.from_list(
+    'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+    cmap(np.linspace(minval, maxval, n)))
+    return new_cmap 

@@ -178,7 +178,7 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
                                                                                                                                                                    # 6c: LiCSAlert 
             displacement_r2_current = shorten_LiCSAlert_data(displacement_r2, n_end=ifg_n )                                                                       # get the ifgs available for this loop (ie one more is added each time the loop progresses),  + 1 as indexing and want to include this data
             cumulative_baselines_current = tbaseline_info['baselines_cumulative'][:ifg_n ]                                                                        # also get current time values.  +1 as indexing and want to include this data
-                        
+            
             sources_tcs_baseline, residual_tcs_baseline, reconstructions, residuals = LiCSAlert(icasar_sources, cumulative_baselines_current,                                                                    # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
                                                                                                 ifgs_baseline = displacement_r2_current['incremental'][:(LiCSAlert_settings['baseline_end_ifg_n']),],          # baseline ifgs
                                                                                                 ifgs_monitoring = displacement_r2_current['incremental'][(LiCSAlert_settings['baseline_end_ifg_n']):,],        # monitoring ifgs
@@ -199,7 +199,7 @@ def LiCSAlert_monitoring_mode(region, volcano, LiCSAlert_pkg_dir, licsalert_dir,
 
             if processing_date == LiCSAlert_status['to_process'][-1]:                                                                                                #  if it's the last date possible....
                 LiCSAlert_aux_figures(volcano_dir, icasar_sources, displacement_r2['dem'], displacement_r2['mask'])                                                   # also plot the ICS and the DEM
-                save_licsalert_aux_data(volcano_dir, displacement_r2)
+                save_licsalert_aux_data(volcano_dir, displacement_r2, tbaseline_info)
                 
 
                 

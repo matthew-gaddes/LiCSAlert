@@ -9,6 +9,72 @@ Created on Fri Oct 20 09:59:48 2023
 #%%
 
 
+def open_aux_data(licsalert_dir):
+    """Open all the data stored in the pickle files in aux_images_data
+    Inputs:
+        licsalert_dir | pathlib Path | output directory when LiCSAlert was run.  
+    Returns:
+        displacement_r2 | dict | contains (['dem', 'mask', 'incremental', 'lons', 'lats', 'E', 'N', 'U', 'incremental_downsampled', 'mask_downsampled'])
+        aux_data | dict | ['icasar_sources', 'dem', 'mask'])
+    History:
+        2023_10_25 | MEG | Written. 
+    """
+    
+    import pickle
+    
+    with open(licsalert_dir / "aux_data_figs" / 'original_ts_data.pkl', 'rb') as f:
+        displacement_r2 = pickle.load(f)
+        tbaseline_info = pickle.load(f)
+    f.close()
+    
+    with open(licsalert_dir / "aux_data_figs" / 'aux_images_data.pkl', 'rb') as f:
+        aux_data = pickle.load(f)
+    f.close()
+    
+    return displacement_r2, tbaseline_info, aux_data
+    
+
+#%%
+    
+    
+def open_tcs(licsalert_dir):
+    """ Open the time course data.  
+    Inputs:
+        licsalert_dir | pathlib Path | output directory when LiCSAlert was run.  
+    Returns:
+        sources_tcs | list of dicts | One item in list for each source, each item contains ['cumulative_tc', 'gradient', 'lines', 'sigma', 'distances', 't_recalculate'])
+    History:
+        2023_10_25 | Written | MEG
+    """
+    from glob import glob
+    from pathlib import Path
+    import pickle
+    
+    licsalert_items = sorted(glob(str(licsalert_dir / '*')))
+    
+    # remove any items that are not a licsalert data directory.  
+    delete_args = []
+    for item_n, licsalert_item in enumerate(licsalert_items):
+        item_name = Path(licsalert_item).parts[-1]
+        if item_name in ["ICASAR_results", "LiCSAlert_history.txt", "aux_data_figs"]:
+            delete_args.append(item_n)
+    
+    for delete_arg in delete_args[::-1]:
+        del licsalert_items[delete_arg]
+    
+    final_date_dir = Path(sorted(licsalert_items)[-1])
+    
+    with open(final_date_dir / 'time_course_info.pkl', 'rb') as f:
+        sources_tcs = pickle.load(f)
+        residual_tcs = pickle.load(f)
+    f.close()
+
+    return sources_tcs
+
+
+#%%
+
+
 
 class ifg_timeseries():
     def __init__(self, mixtures, ifg_dates):

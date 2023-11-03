@@ -1,0 +1,2258 @@
+
+
+
+
+
+LiCSAlert is being run for 002_campi_flegrei_example_tica at 26/10/2023 15:15:01
+Failed to open the config file for this volcano.  Trying to populate the LiCSAlert_settings and ICASAR_settings dictionaries with from the function input arguments 
+LiCSAlert is opening a LiCSBAS directory.  
+
+
+
+
+
+LiCSAlert is being run for 002_campi_flegrei_example_tica at 26/10/2023 15:15:07
+Failed to open the config file for this volcano.  Trying to populate the LiCSAlert_settings and ICASAR_settings dictionaries with from the function input arguments 
+LiCSAlert is opening a LiCSBAS directory.  
+Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
+LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  
+This interferogram timeseries has 326 times and 8533 pixels.  
+The data have been mean centered in time for use with tICA
+Interferogram were originally (181, 281) (34356 unmasked pixels), but have been downsampled to (90, 140) (8533 unmasked pixels) for use with LiCSAlert, and have been downsampled to (45, 70) (2127 unmasked pixels) for figures.  
+Only the last LiCSAlert figure has been requested, so removing any previous figures from the LiCSAlert status dictionary.
+LiCSBAS date    Past baseline    LiCSAlert      To process
+20141031          no           
+20141218          no           
+20150111          no           
+20150123          no           
+20150216          no           
+20150228          no           
+20150312          no           
+20150324          no           
+20150405          no           
+20150429          no           
+20150511          no           
+20150523          no           
+20150604          no           
+20150710          no           
+20150722          no           
+20150815          no           
+20150920          no           
+20151002          no           
+20151014          no           
+20151107          no           
+20151119          no           
+20151201          no           
+20151213          no           
+20151225          no           
+20160106          no           
+20160118          no           
+20160211          no           
+20160223          no           
+20160306          no           
+20160318          no           
+20160330          no           
+20160411          no           
+20160505          no           
+20160517          no           
+20160529          no           
+20160610          no           
+20160704          no           
+20160716          no           
+20160728          no           
+20160809          no           
+20160821          no           
+20160902          no           
+20160914          no           
+20160926          no           
+20161002          no           
+20161008          no           
+20161014          no           
+20161020          no           
+20161026          no           
+20161101          no           
+20161107          no           
+20161113          no           
+20161119          no           
+20161201          no           
+20161207          no           
+20161213          no           
+20161219          no           
+20161225          no           
+20161231          no           
+20170112          yes          not processed            
+20170118          yes          not processed            
+20170124          yes          not processed            
+20170130          yes          not processed            
+20170205          yes          not processed            
+20170211          yes          not processed            
+20170223          yes          not processed            
+20170301          yes          not processed            
+20170307          yes          not processed            
+20170313          yes          not processed            
+20170319          yes          not processed            
+20170325          yes          not processed            
+20170331          yes          not processed            
+20170406          yes          not processed            
+20170412          yes          not processed            
+20170418          yes          not processed            
+20170424          yes          not processed            
+20170430          yes          not processed            
+20170506          yes          not processed            
+20170512          yes          not processed            
+20170518          yes          not processed            
+20170524          yes          not processed            
+20170530          yes          not processed            
+20170605          yes          not processed            
+20170611          yes          not processed            
+20170617          yes          not processed            
+20170623          yes          not processed            
+20170629          yes          not processed            
+20170705          yes          not processed            
+20170711          yes          not processed            
+20170717          yes          not processed            
+20170723          yes          not processed            
+20170729          yes          not processed            
+20170804          yes          not processed            
+20170816          yes          not processed            
+20170822          yes          not processed            
+20170828          yes          not processed            
+20170903          yes          not processed            
+20170909          yes          not processed            
+20170915          yes          not processed            
+20170921          yes          not processed            
+20170927          yes          not processed            
+20171009          yes          not processed            
+20171015          yes          not processed            
+20171021          yes          not processed            
+20171027          yes          not processed            
+20171102          yes          not processed            
+20171108          yes          not processed            
+20171114          yes          not processed            
+20171120          yes          not processed            
+20171202          yes          not processed            
+20171208          yes          not processed            
+20171214          yes          not processed            
+20171226          yes          not processed            
+20180101          yes          not processed            
+20180107          yes          not processed            
+20180113          yes          not processed            
+20180119          yes          not processed            
+20180125          yes          not processed            
+20180131          yes          not processed            
+20180206          yes          not processed            
+20180218          yes          not processed            
+20180224          yes          not processed            
+20180302          yes          not processed            
+20180308          yes          not processed            
+20180314          yes          not processed            
+20180320          yes          not processed            
+20180326          yes          not processed            
+20180401          yes          not processed            
+20180407          yes          not processed            
+20180413          yes          not processed            
+20180419          yes          not processed            
+20180425          yes          not processed            
+20180501          yes          not processed            
+20180507          yes          not processed            
+20180513          yes          not processed            
+20180519          yes          not processed            
+20180525          yes          not processed            
+20180531          yes          not processed            
+20180606          yes          not processed            
+20180612          yes          not processed            
+20180618          yes          not processed            
+20180630          yes          not processed            
+20180712          yes          not processed            
+20180718          yes          not processed            
+20180724          yes          not processed            
+20180730          yes          not processed            
+20180805          yes          not processed            
+20180811          yes          not processed            
+20180817          yes          not processed            
+20180823          yes          not processed            
+20180829          yes          not processed            
+20180904          yes          not processed            
+20180910          yes          not processed            
+20180916          yes          not processed            
+20180922          yes          not processed            
+20180928          yes          not processed            
+20181004          yes          not processed            
+20181010          yes          not processed            
+20181016          yes          not processed            
+20181022          yes          not processed            
+20181028          yes          not processed            
+20181109          yes          not processed            
+20181115          yes          not processed            
+20181121          yes          not processed            
+20181127          yes          not processed            
+20181203          yes          not processed            
+20181209          yes          not processed            
+20181215          yes          not processed            
+20181221          yes          not processed            
+20181227          yes          not processed            
+20190102          yes          not processed            
+20190108          yes          not processed            
+20190114          yes          not processed            
+20190120          yes          not processed            
+20190126          yes          not processed            
+20190201          yes          not processed            
+20190207          yes          not processed            
+20190213          yes          not processed            
+20190225          yes          not processed            
+20190303          yes          not processed            
+20190309          yes          not processed            
+20190321          yes          not processed            
+20190402          yes          not processed            
+20190408          yes          not processed            
+20190414          yes          not processed            
+20190420          yes          not processed            
+20190426          yes          not processed            
+20190502          yes          not processed            
+20190508          yes          not processed            
+20190520          yes          not processed            
+20190526          yes          not processed            
+20190601          yes          not processed            
+20190607          yes          not processed            
+20190613          yes          not processed            
+20190625          yes          not processed            
+20190701          yes          not processed            
+20190707          yes          not processed            
+20190713          yes          not processed            
+20190719          yes          not processed            
+20190725          yes          not processed            
+20190731          yes          not processed            
+20190806          yes          not processed            
+20190812          yes          not processed            
+20190818          yes          not processed            
+20190824          yes          not processed            
+20190830          yes          not processed            
+20190905          yes          not processed            
+20190911          yes          not processed            
+20190917          yes          not processed            
+20190923          yes          not processed            
+20191005          yes          not processed            
+20191011          yes          not processed            
+20191017          yes          not processed            
+20191023          yes          not processed            
+20191029          yes          not processed            
+20191104          yes          not processed            
+20191116          yes          not processed            
+20191122          yes          not processed            
+20191128          yes          not processed            
+20191204          yes          not processed            
+20191210          yes          not processed            
+20191216          yes          not processed            
+20191222          yes          not processed            
+20191228          yes          not processed            
+20200103          yes          not processed            
+20200109          yes          not processed            
+20200115          yes          not processed            
+20200121          yes          not processed            
+20200127          yes          not processed            
+20200202          yes          not processed            
+20200208          yes          not processed            
+20200214          yes          not processed            
+20200220          yes          not processed            
+20200226          yes          not processed            
+20200303          yes          not processed            
+20200309          yes          not processed            
+20200315          yes          not processed            
+20200321          yes          not processed            
+20200402          yes          not processed            
+20200408          yes          not processed            
+20200414          yes          not processed            
+20200420          yes          not processed            
+20200426          yes          not processed            
+20200502          yes          not processed            
+20200508          yes          not processed            
+20200514          yes          not processed            
+20200520          yes          not processed            
+20200526          yes          not processed            
+20200601          yes          not processed            
+20200607          yes          not processed            
+20200613          yes          not processed            
+20200619          yes          not processed            
+20200625          yes          not processed            
+20200701          yes          not processed            
+20200707          yes          not processed            
+20200713          yes          not processed            
+20200719          yes          not processed            
+20200725          yes          not processed            
+20200731          yes          not processed            
+20200806          yes          not processed            
+20200812          yes          not processed            
+20200818          yes          not processed            
+20200824          yes          not processed            
+20200830          yes          not processed            
+20200905          yes          not processed            
+20200911          yes          not processed            
+20200917          yes          not processed            
+20200923          yes          not processed            
+20200929          yes          not processed            
+20201005          yes          not processed            
+20201011          yes          not processed            
+20201017          yes          not processed            
+20201023          yes          not processed            
+20201029          yes          not processed            
+20201104          yes          not processed            
+20201110          yes          not processed            
+20201116          yes          not processed            
+20201122          yes          not processed            
+20201128          yes          not processed            
+20201204          yes          not processed            
+20201210          yes          not processed            
+20201216          yes          not processed            
+20201222          yes          not processed            
+20201228          yes          not processed            
+20210103          yes          not processed            
+20210109          yes          not processed            
+20210115          yes          not processed            
+20210121          yes          not processed            
+20210127          yes          not processed            
+20210202          yes          not processed            
+20210208          yes          not processed            
+20210214          yes          not processed            
+20210220          yes          not processed            
+20210226          yes          not processed            
+20210304          yes          not processed            
+20210310          yes          not processed            
+20210316          yes          not processed            
+20210322          yes          not processed            
+20210328          yes          not processed            
+20210403          yes          not processed            
+20210409          yes          not processed            
+20210415          yes          not processed            
+20210421          yes          not processed            
+20210427          yes          not processed            
+20210503          yes          not processed            
+20210509          yes          not processed            
+20210515          yes          not processed            
+20210521          yes          not processed            
+20210527          yes          not processed            
+20210602          yes          not processed            
+20210608          yes          not processed            
+20210614          yes          not processed            
+20210620          yes          not processed            
+20210626          yes          not processed            
+20210702          yes          not processed            
+20210708          yes          not processed            
+20210714          yes          not processed            
+20210720          yes          not processed            
+20210726          yes          not processed            
+20210801          yes          not processed            
+20210807          yes          not processed            
+20210813          yes          not processed            
+20210819          yes          not processed            
+20210825          yes          not processed            
+20210831          yes          not processed            
+20210906          yes          not processed            
+20210912          yes          not processed            to process
+LiCSAlert status:  1) Run ICASAR: True   2) Run LiCSAlert: True
+
+Running ICASAR.
+From the data passed to ICASAR, I understand it to be spatial data (e.g. time series of images)
+As 'lons' and 'lats' have been provided, the ICs will be geocoded.  
+For tICA, the cumulative interferograms are required.  These will be calculated from the incremental (daisy chain) interferograms.  
+Creating all possible variations of the time series (incremental/daisy chain, cumulative, and all possible).  
+When creating all interferograms, 59 were passed to the function, and these were found to make 1 connected networks.  From these, 1000 interferograms were created.  
+This interferogram timeseries has 59 times and 8533 pixels.  
+This interferogram timeseries has 1000 times and 8533 pixels.  
+This interferogram timeseries has 59 times and 8533 pixels.  
+Performing PCA to whiten the data....Starting to create the 02_PCA_sources_correlations figure:
+Updating masks and ICA sources.  Of the 8533 in the sources and 8278 in the current LiCSBAS time series, 8270 are in both and can be used in this iteration of LiCSAlert.  
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
+
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
+
+Done.  
+No results were found for the multiple ICA runs, so these will now be performed.  
+FastICA progress with bootstrapping: There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+0% FastICA algorithm converged in 8 iterations.  
+1% FastICA algorithm converged in 6 iterations.  
+1% FastICA algorithm converged in 6 iterations.  
+2% FastICA algorithm converged in 5 iterations.  
+2% FastICA algorithm converged in 7 iterations.  
+3% FastICA algorithm converged in 6 iterations.  
+3% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+4% FastICA algorithm converged in 9 iterations.  
+4% FastICA algorithm converged in 10 iterations.  
+5% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+5% FastICA algorithm converged in 7 iterations.  
+6% FastICA algorithm converged in 5 iterations.  
+6% FastICA algorithm converged in 8 iterations.  
+7% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+7% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+8% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+8% FastICA algorithm converged in 13 iterations.  
+9% FastICA algorithm converged in 5 iterations.  
+9% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+10% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+10% FastICA algorithm converged in 9 iterations.  
+11% FastICA algorithm converged in 8 iterations.  
+11% FastICA algorithm converged in 3 iterations.  
+12% FastICA algorithm converged in 3 iterations.  
+12% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 8 iterations.  
+13% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+13% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+14% FastICA algorithm converged in 2 iterations.  
+14% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 9 iterations.  
+15% FastICA algorithm converged in 6 iterations.  
+15% FastICA algorithm converged in 9 iterations.  
+16% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+16% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+17% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+17% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+18% FastICA algorithm converged in 6 iterations.  
+18% FastICA algorithm converged in 4 iterations.  
+19% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+19% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+20% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+20% FastICA algorithm converged in 4 iterations.  
+21% FastICA algorithm converged in 4 iterations.  
+21% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 8 iterations.  
+22% FastICA algorithm converged in 8 iterations.  
+22% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+23% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+23% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+24% FastICA algorithm converged in 7 iterations.  
+24% FastICA algorithm converged in 5 iterations.  
+25% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+25% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 8 iterations.  
+26% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+26% FastICA algorithm converged in 9 iterations.  
+27% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+27% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 11 iterations.  
+28% FastICA algorithm converged in 3 iterations.  
+28% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+28% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+29% FastICA algorithm converged in 6 iterations.  
+30% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+30% FastICA algorithm converged in 5 iterations.  
+31% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+31% FastICA algorithm converged in 3 iterations.  
+32% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+32% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+33% FastICA algorithm converged in 6 iterations.  
+33% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+34% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+34% FastICA algorithm converged in 5 iterations.  
+35% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+35% FastICA algorithm converged in 5 iterations.  
+36% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 14 iterations.  
+36% FastICA algorithm converged in 5 iterations.  
+37% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+37% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 8 iterations.  
+38% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+38% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 8 iterations.  
+39% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 13 iterations.  
+39% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+40% FastICA algorithm converged in 9 iterations.  
+40% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+41% FastICA algorithm converged in 3 iterations.  
+41% FastICA algorithm converged in 7 iterations.  
+42% FastICA algorithm converged in 4 iterations.  
+42% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 8 iterations.  
+43% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
+43% FastICA algorithm converged in 3 iterations.  
+44% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 23 iterations.  
+44% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 55 iterations.  
+45% FastICA algorithm converged in 3 iterations.  
+45% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+46% FastICA algorithm converged in 6 iterations.  
+46% FastICA algorithm converged in 6 iterations.  
+47% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+47% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+48% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+48% FastICA algorithm converged in 6 iterations.  
+49% FastICA algorithm converged in 5 iterations.  
+49% FastICA algorithm converged in 4 iterations.  
+50% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+50% FastICA algorithm converged in 6 iterations.  
+51% FastICA algorithm converged in 6 iterations.  
+51% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+52% FastICA algorithm converged in 4 iterations.  
+52% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+53% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 10 iterations.  
+53% FastICA algorithm converged in 6 iterations.  
+54% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+54% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+55% FastICA algorithm converged in 6 iterations.  
+55% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 31 iterations.  
+56% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+56% FastICA algorithm converged in 7 iterations.  
+56% FastICA algorithm converged in 3 iterations.  
+57% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+57% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 10 iterations.  
+58% FastICA algorithm converged in 3 iterations.  
+59% FastICA algorithm converged in 7 iterations.  
+59% FastICA algorithm converged in 4 iterations.  
+60% FastICA algorithm converged in 9 iterations.  
+60% FastICA algorithm converged in 3 iterations.  
+61% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+61% FastICA algorithm converged in 11 iterations.  
+62% FastICA algorithm converged in 6 iterations.  
+62% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
+63% FastICA algorithm converged in 6 iterations.  
+63% FastICA algorithm converged in 5 iterations.  
+64% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+64% FastICA algorithm converged in 5 iterations.  
+65% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+65% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 17 iterations.  
+66% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+66% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+67% FastICA algorithm converged in 5 iterations.  
+67% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+68% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 11 iterations.  
+68% FastICA algorithm converged in 4 iterations.  
+69% FastICA algorithm converged in 5 iterations.  
+69% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 11 iterations.  
+70% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+70% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+71% FastICA algorithm converged in 4 iterations.  
+71% FastICA algorithm converged in 13 iterations.  
+72% FastICA algorithm converged in 9 iterations.  
+72% FastICA algorithm converged in 5 iterations.  
+73% FastICA algorithm converged in 7 iterations.  
+73% FastICA algorithm converged in 7 iterations.  
+74% FastICA algorithm converged in 7 iterations.  
+74% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 9 iterations.  
+75% FastICA algorithm converged in 8 iterations.  
+75% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+76% FastICA algorithm converged in 5 iterations.  
+76% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+77% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+77% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 8 iterations.  
+78% FastICA algorithm converged in 10 iterations.  
+78% FastICA algorithm converged in 6 iterations.  
+79% FastICA algorithm converged in 4 iterations.  
+79% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+80% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 9 iterations.  
+80% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+81% FastICA algorithm converged in 29 iterations.  
+81% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+82% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+82% FastICA algorithm converged in 9 iterations.  
+83% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+83% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 10 iterations.  
+84% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+84% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
+85% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 10 iterations.  
+85% FastICA algorithm converged in 20 iterations.  
+86% FastICA algorithm converged in 4 iterations.  
+86% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
+87% FastICA algorithm converged in 5 iterations.  
+87% FastICA algorithm converged in 6 iterations.  
+88% FastICA algorithm converged in 7 iterations.  
+88% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+89% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+89% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+90% FastICA algorithm converged in 7 iterations.  
+90% FastICA algorithm converged in 3 iterations.  
+91% FastICA algorithm converged in 4 iterations.  
+91% FastICA algorithm converged in 8 iterations.  
+92% FastICA algorithm converged in 5 iterations.  
+92% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
+93% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+93% FastICA algorithm converged in 12 iterations.  
+94% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+94% FastICA algorithm converged in 5 iterations.  
+95% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+95% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+96% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+96% FastICA algorithm converged in 5 iterations.  
+97% FastICA algorithm converged in 4 iterations.  
+97% FastICA algorithm converged in 6 iterations.  
+98% FastICA algorithm converged in 6 iterations.  
+98% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+99% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+99% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+100% 
+Starting to compute the pairwise distance matrices....Done!
+Starting to cluster the sources using HDBSCAN....Done!
+Starting to calculate the 2D manifold representation....Done!
+Calculating the centrotypes and associated time courses...Done!
+Starting to create the 03_ICA_sources_correlations figure:
+Updating masks and ICA sources.  Of the 8533 in the sources and 8278 in the current LiCSBAS time series, 8270 are in both and can be used in this iteration of LiCSAlert.  
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
+
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
+
+Done.  
+Creating a Google Earth .kmz of the geocoded independent components... Done!
+
+
+Source 0: deformation
+Source 1: turbulent_APS
+Source 2: topo_cor_APS
+Source 3: turbulent_APS
+Source 4: turbulent_APS
+
+
+Saving the key results as a .pkl file... Done!
+Updating masks and ICA sources.  Of the 8533 in the sources and 8533 in the current LiCSBAS time series, 8533 are in both and can be used in this iteration of LiCSAlert.  
+Running LiCSAlert for 20210912
+There are 326 times (set by time_values), which agrees with the  58 interferograms in ifgs_baseline and 268 in ifgs_monitoring.  
+
+
+
+
+
+LiCSAlert is being run for 002_campi_flegrei_example_tica at 01/11/2023 13:13:21
+Failed to open the config file for this volcano.  Trying to populate the LiCSAlert_settings and ICASAR_settings dictionaries with from the function input arguments 
+LiCSAlert is opening a LiCSBAS directory.  
+Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
+LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  
+This interferogram timeseries has 326 times and 8533 pixels.  
+The data have been mean centered in time for use with tICA
+Interferogram were originally (181, 281) (34356 unmasked pixels), but have been downsampled to (90, 140) (8533 unmasked pixels) for use with LiCSAlert, and have been downsampled to (45, 70) (2127 unmasked pixels) for figures.  
+Only the last LiCSAlert figure has been requested, so removing any previous figures from the LiCSAlert status dictionary.
+LiCSBAS date    Past baseline    LiCSAlert      To process
+20141031          no           
+20141218          no           
+20150111          no           
+20150123          no           
+20150216          no           
+20150228          no           
+20150312          no           
+20150324          no           
+20150405          no           
+20150429          no           
+20150511          no           
+20150523          no           
+20150604          no           
+20150710          no           
+20150722          no           
+20150815          no           
+20150920          no           
+20151002          no           
+20151014          no           
+20151107          no           
+20151119          no           
+20151201          no           
+20151213          no           
+20151225          no           
+20160106          no           
+20160118          no           
+20160211          no           
+20160223          no           
+20160306          no           
+20160318          no           
+20160330          no           
+20160411          no           
+20160505          no           
+20160517          no           
+20160529          no           
+20160610          no           
+20160704          no           
+20160716          no           
+20160728          no           
+20160809          no           
+20160821          no           
+20160902          no           
+20160914          no           
+20160926          no           
+20161002          no           
+20161008          no           
+20161014          no           
+20161020          no           
+20161026          no           
+20161101          no           
+20161107          no           
+20161113          no           
+20161119          no           
+20161201          no           
+20161207          no           
+20161213          no           
+20161219          no           
+20161225          no           
+20161231          no           
+20170112          yes          not processed            
+20170118          yes          not processed            
+20170124          yes          not processed            
+20170130          yes          not processed            
+20170205          yes          not processed            
+20170211          yes          not processed            
+20170223          yes          not processed            
+20170301          yes          not processed            
+20170307          yes          not processed            
+20170313          yes          not processed            
+20170319          yes          not processed            
+20170325          yes          not processed            
+20170331          yes          not processed            
+20170406          yes          not processed            
+20170412          yes          not processed            
+20170418          yes          not processed            
+20170424          yes          not processed            
+20170430          yes          not processed            
+20170506          yes          not processed            
+20170512          yes          not processed            
+20170518          yes          not processed            
+20170524          yes          not processed            
+20170530          yes          not processed            
+20170605          yes          not processed            
+20170611          yes          not processed            
+20170617          yes          not processed            
+20170623          yes          not processed            
+20170629          yes          not processed            
+20170705          yes          not processed            
+20170711          yes          not processed            
+20170717          yes          not processed            
+20170723          yes          not processed            
+20170729          yes          not processed            
+20170804          yes          not processed            
+20170816          yes          not processed            
+20170822          yes          not processed            
+20170828          yes          not processed            
+20170903          yes          not processed            
+20170909          yes          not processed            
+20170915          yes          not processed            
+20170921          yes          not processed            
+20170927          yes          not processed            
+20171009          yes          not processed            
+20171015          yes          not processed            
+20171021          yes          not processed            
+20171027          yes          not processed            
+20171102          yes          not processed            
+20171108          yes          not processed            
+20171114          yes          not processed            
+20171120          yes          not processed            
+20171202          yes          not processed            
+20171208          yes          not processed            
+20171214          yes          not processed            
+20171226          yes          not processed            
+20180101          yes          not processed            
+20180107          yes          not processed            
+20180113          yes          not processed            
+20180119          yes          not processed            
+20180125          yes          not processed            
+20180131          yes          not processed            
+20180206          yes          not processed            
+20180218          yes          not processed            
+20180224          yes          not processed            
+20180302          yes          not processed            
+20180308          yes          not processed            
+20180314          yes          not processed            
+20180320          yes          not processed            
+20180326          yes          not processed            
+20180401          yes          not processed            
+20180407          yes          not processed            
+20180413          yes          not processed            
+20180419          yes          not processed            
+20180425          yes          not processed            
+20180501          yes          not processed            
+20180507          yes          not processed            
+20180513          yes          not processed            
+20180519          yes          not processed            
+20180525          yes          not processed            
+20180531          yes          not processed            
+20180606          yes          not processed            
+20180612          yes          not processed            
+20180618          yes          not processed            
+20180630          yes          not processed            
+20180712          yes          not processed            
+20180718          yes          not processed            
+20180724          yes          not processed            
+20180730          yes          not processed            
+20180805          yes          not processed            
+20180811          yes          not processed            
+20180817          yes          not processed            
+20180823          yes          not processed            
+20180829          yes          not processed            
+20180904          yes          not processed            
+20180910          yes          not processed            
+20180916          yes          not processed            
+20180922          yes          not processed            
+20180928          yes          not processed            
+20181004          yes          not processed            
+20181010          yes          not processed            
+20181016          yes          not processed            
+20181022          yes          not processed            
+20181028          yes          not processed            
+20181109          yes          not processed            
+20181115          yes          not processed            
+20181121          yes          not processed            
+20181127          yes          not processed            
+20181203          yes          not processed            
+20181209          yes          not processed            
+20181215          yes          not processed            
+20181221          yes          not processed            
+20181227          yes          not processed            
+20190102          yes          not processed            
+20190108          yes          not processed            
+20190114          yes          not processed            
+20190120          yes          not processed            
+20190126          yes          not processed            
+20190201          yes          not processed            
+20190207          yes          not processed            
+20190213          yes          not processed            
+20190225          yes          not processed            
+20190303          yes          not processed            
+20190309          yes          not processed            
+20190321          yes          not processed            
+20190402          yes          not processed            
+20190408          yes          not processed            
+20190414          yes          not processed            
+20190420          yes          not processed            
+20190426          yes          not processed            
+20190502          yes          not processed            
+20190508          yes          not processed            
+20190520          yes          not processed            
+20190526          yes          not processed            
+20190601          yes          not processed            
+20190607          yes          not processed            
+20190613          yes          not processed            
+20190625          yes          not processed            
+20190701          yes          not processed            
+20190707          yes          not processed            
+20190713          yes          not processed            
+20190719          yes          not processed            
+20190725          yes          not processed            
+20190731          yes          not processed            
+20190806          yes          not processed            
+20190812          yes          not processed            
+20190818          yes          not processed            
+20190824          yes          not processed            
+20190830          yes          not processed            
+20190905          yes          not processed            
+20190911          yes          not processed            
+20190917          yes          not processed            
+20190923          yes          not processed            
+20191005          yes          not processed            
+20191011          yes          not processed            
+20191017          yes          not processed            
+20191023          yes          not processed            
+20191029          yes          not processed            
+20191104          yes          not processed            
+20191116          yes          not processed            
+20191122          yes          not processed            
+20191128          yes          not processed            
+20191204          yes          not processed            
+20191210          yes          not processed            
+20191216          yes          not processed            
+20191222          yes          not processed            
+20191228          yes          not processed            
+20200103          yes          not processed            
+20200109          yes          not processed            
+20200115          yes          not processed            
+20200121          yes          not processed            
+20200127          yes          not processed            
+20200202          yes          not processed            
+20200208          yes          not processed            
+20200214          yes          not processed            
+20200220          yes          not processed            
+20200226          yes          not processed            
+20200303          yes          not processed            
+20200309          yes          not processed            
+20200315          yes          not processed            
+20200321          yes          not processed            
+20200402          yes          not processed            
+20200408          yes          not processed            
+20200414          yes          not processed            
+20200420          yes          not processed            
+20200426          yes          not processed            
+20200502          yes          not processed            
+20200508          yes          not processed            
+20200514          yes          not processed            
+20200520          yes          not processed            
+20200526          yes          not processed            
+20200601          yes          not processed            
+20200607          yes          not processed            
+20200613          yes          not processed            
+20200619          yes          not processed            
+20200625          yes          not processed            
+20200701          yes          not processed            
+20200707          yes          not processed            
+20200713          yes          not processed            
+20200719          yes          not processed            
+20200725          yes          not processed            
+20200731          yes          not processed            
+20200806          yes          not processed            
+20200812          yes          not processed            
+20200818          yes          not processed            
+20200824          yes          not processed            
+20200830          yes          not processed            
+20200905          yes          not processed            
+20200911          yes          not processed            
+20200917          yes          not processed            
+20200923          yes          not processed            
+20200929          yes          not processed            
+20201005          yes          not processed            
+20201011          yes          not processed            
+20201017          yes          not processed            
+20201023          yes          not processed            
+20201029          yes          not processed            
+20201104          yes          not processed            
+20201110          yes          not processed            
+20201116          yes          not processed            
+20201122          yes          not processed            
+20201128          yes          not processed            
+20201204          yes          not processed            
+20201210          yes          not processed            
+20201216          yes          not processed            
+20201222          yes          not processed            
+20201228          yes          not processed            
+20210103          yes          not processed            
+20210109          yes          not processed            
+20210115          yes          not processed            
+20210121          yes          not processed            
+20210127          yes          not processed            
+20210202          yes          not processed            
+20210208          yes          not processed            
+20210214          yes          not processed            
+20210220          yes          not processed            
+20210226          yes          not processed            
+20210304          yes          not processed            
+20210310          yes          not processed            
+20210316          yes          not processed            
+20210322          yes          not processed            
+20210328          yes          not processed            
+20210403          yes          not processed            
+20210409          yes          not processed            
+20210415          yes          not processed            
+20210421          yes          not processed            
+20210427          yes          not processed            
+20210503          yes          not processed            
+20210509          yes          not processed            
+20210515          yes          not processed            
+20210521          yes          not processed            
+20210527          yes          not processed            
+20210602          yes          not processed            
+20210608          yes          not processed            
+20210614          yes          not processed            
+20210620          yes          not processed            
+20210626          yes          not processed            
+20210702          yes          not processed            
+20210708          yes          not processed            
+20210714          yes          not processed            
+20210720          yes          not processed            
+20210726          yes          not processed            
+20210801          yes          not processed            
+20210807          yes          not processed            
+20210813          yes          not processed            
+20210819          yes          not processed            
+20210825          yes          not processed            
+20210831          yes          not processed            
+20210906          yes          not processed            
+20210912          yes          processed           to process
+LiCSAlert status:  1) Run ICASAR: False   2) Run LiCSAlert: True
+Updating masks and ICA sources.  Of the 8533 in the sources and 8533 in the current LiCSBAS time series, 8533 are in both and can be used in this iteration of LiCSAlert.  
+Running LiCSAlert for 20210912
+The folder 20210912 appears to exists already.  This is usually due to the date not having all the required LiCSAlert products, and LiCSAlert is now trying to fill this date again.  
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(184)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    182 [1;33m            [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    183 [1;33m[1;33m[0m[0m
+[0m[1;32m--> 184 [1;33m            sources_tcs_baseline, residual_tcs_baseline, reconstructions, residuals = LiCSAlert(icasar_sources, cumulative_baselines_current,                                                                    # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
+[0m[1;32m    185 [1;33m                                                                                                [0mifgs_baseline[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m:[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m,[0m[1;33m][0m[1;33m,[0m          [1;31m# baseline ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    186 [1;33m                                                                                                [0mifgs_monitoring[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m:[0m[1;33m,[0m[1;33m][0m[1;33m,[0m        [1;31m# monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(185)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    183 [1;33m[1;33m[0m[0m
+[0m[1;32m    184 [1;33m            sources_tcs_baseline, residual_tcs_baseline, reconstructions, residuals = LiCSAlert(icasar_sources, cumulative_baselines_current,                                                                    # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
+[0m[1;32m--> 185 [1;33m                                                                                                [0mifgs_baseline[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m:[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m,[0m[1;33m][0m[1;33m,[0m          [1;31m# baseline ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    186 [1;33m                                                                                                [0mifgs_monitoring[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m:[0m[1;33m,[0m[1;33m][0m[1;33m,[0m        [1;31m# monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    187 [1;33m                                                                                                [0mmask[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'mask'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(186)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    184 [1;33m            sources_tcs_baseline, residual_tcs_baseline, reconstructions, residuals = LiCSAlert(icasar_sources, cumulative_baselines_current,                                                                    # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
+[0m[1;32m    185 [1;33m                                                                                                [0mifgs_baseline[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m:[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m,[0m[1;33m][0m[1;33m,[0m          [1;31m# baseline ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m--> 186 [1;33m                                                                                                [0mifgs_monitoring[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m:[0m[1;33m,[0m[1;33m][0m[1;33m,[0m        [1;31m# monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    187 [1;33m                                                                                                [0mmask[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'mask'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    188 [1;33m                                                                                                t_recalculate=10, verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(187)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    185 [1;33m                                                                                                [0mifgs_baseline[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m:[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m,[0m[1;33m][0m[1;33m,[0m          [1;31m# baseline ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    186 [1;33m                                                                                                [0mifgs_monitoring[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m:[0m[1;33m,[0m[1;33m][0m[1;33m,[0m        [1;31m# monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m--> 187 [1;33m                                                                                                [0mmask[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'mask'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    188 [1;33m                                                                                                t_recalculate=10, verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
+[0m[1;32m    189 [1;33m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(188)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    186 [1;33m                                                                                                [0mifgs_monitoring[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m:[0m[1;33m,[0m[1;33m][0m[1;33m,[0m        [1;31m# monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    187 [1;33m                                                                                                [0mmask[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'mask'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m--> 188 [1;33m                                                                                                t_recalculate=10, verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
+[0m[1;32m    189 [1;33m[1;33m[0m[0m
+[0m[1;32m    190 [1;33m            LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, icasar_sources, displacement_r2_current,                                                  # the main licsalert figure
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(184)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    182 [1;33m            [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    183 [1;33m[1;33m[0m[0m
+[0m[1;32m--> 184 [1;33m            sources_tcs_baseline, residual_tcs_baseline, reconstructions, residuals = LiCSAlert(icasar_sources, cumulative_baselines_current,                                                                    # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
+[0m[1;32m    185 [1;33m                                                                                                [0mifgs_baseline[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m:[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m,[0m[1;33m][0m[1;33m,[0m          [1;31m# baseline ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    186 [1;33m                                                                                                [0mifgs_monitoring[0m [1;33m=[0m [0mdisplacement_r2_current[0m[1;33m[[0m[1;34m'incremental'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[0mLiCSAlert_settings[0m[1;33m[[0m[1;34m'baseline_end_ifg_n'[0m[1;33m][0m[1;33m)[0m[1;33m:[0m[1;33m,[0m[1;33m][0m[1;33m,[0m        [1;31m# monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m
+--Call--
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(13)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     11 [1;33m[1;31m#%%[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     12 [1;33m[1;33m[0m[0m
+[0m[1;32m---> 13 [1;33mdef LiCSAlert(sources, time_values, ifgs_baseline, mask, ifgs_monitoring = None, t_recalculate = 10, verbose=False, 
+[0m[1;32m     14 [1;33m              n_pix_window = 20, residual_type = 'cumulative'):
+[0m[1;32m     15 [1;33m    """ Main LiCSAlert algorithm for a daisy-chain timeseries of interferograms.  
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(52)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     50 [1;33m        [1;36m2023_10_19[0m [1;33m|[0m [0mMEG[0m [1;33m|[0m [0mremove[0m [0moption[0m [0mto[0m [0msave[0m [0msome[0m [0mproducts[0m[1;33m.[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     51 [1;33m    """
+[0m[1;32m---> 52 [1;33m    [1;32mimport[0m [0mnumpy[0m [1;32mas[0m [0mnp[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     53 [1;33m    [1;32mimport[0m [0mpickle[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     54 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0mlicsalert[0m [1;32mimport[0m [0mbss_components_inversion[0m[1;33m,[0m [0mresidual_for_pixels[0m[1;33m,[0m [0mtcs_baseline[0m[1;33m,[0m [0mtcs_monitoring[0m[1;33m[0m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(53)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     51 [1;33m    """
+[0m[1;32m     52 [1;33m    [1;32mimport[0m [0mnumpy[0m [1;32mas[0m [0mnp[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 53 [1;33m    [1;32mimport[0m [0mpickle[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     54 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0mlicsalert[0m [1;32mimport[0m [0mbss_components_inversion[0m[1;33m,[0m [0mresidual_for_pixels[0m[1;33m,[0m [0mtcs_baseline[0m[1;33m,[0m [0mtcs_monitoring[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     55 [1;33m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(54)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     52 [1;33m    [1;32mimport[0m [0mnumpy[0m [1;32mas[0m [0mnp[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     53 [1;33m    [1;32mimport[0m [0mpickle[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 54 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0mlicsalert[0m [1;32mimport[0m [0mbss_components_inversion[0m[1;33m,[0m [0mresidual_for_pixels[0m[1;33m,[0m [0mtcs_baseline[0m[1;33m,[0m [0mtcs_monitoring[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     55 [1;33m[1;33m[0m[0m
+[0m[1;32m     56 [1;33m    [1;31m# -1: Check common input errors (number of pixels first, number of time second)[0m[1;33m[0m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(57)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     55 [1;33m[1;33m[0m[0m
+[0m[1;32m     56 [1;33m    [1;31m# -1: Check common input errors (number of pixels first, number of time second)[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 57 [1;33m    [1;32mif[0m [0msources[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m1[0m[1;33m][0m [1;33m!=[0m [0mifgs_baseline[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m1[0m[1;33m][0m[1;33m:[0m                                                                                              [1;31m# 2nd dimension ([1] bit) is the number of pixels, which we compare.[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     58 [1;33m        raise Exception(f"The sources don't have the same number of pixels ({sources.shape[1]}) as the interferograms "
+[0m[1;32m     59 [1;33m                        [1;34mf"({ifgs_baseline.shape[1]}), so can't be used to fit them.  This is usually due to changing "[0m[1;33m[0m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(62)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     60 [1;33m                        f"the cropped region but not re-running ICASAR.  Exiting...")
+[0m[1;32m     61 [1;33m    [1;32melse[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 62 [1;33m        [1;32mpass[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     63 [1;33m[1;33m[0m[0m
+[0m[1;32m     64 [1;33m    [1;32mif[0m [0mifgs_monitoring[0m [1;32mis[0m [1;32mNone[0m[1;33m:[0m                                                                                                                     [1;31m# in the case that there are no monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(64)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     62 [1;33m        [1;32mpass[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     63 [1;33m[1;33m[0m[0m
+[0m[1;32m---> 64 [1;33m    [1;32mif[0m [0mifgs_monitoring[0m [1;32mis[0m [1;32mNone[0m[1;33m:[0m                                                                                                                     [1;31m# in the case that there are no monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     65 [1;33m        [1;32mif[0m [0mtime_values[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m0[0m[1;33m][0m [1;33m!=[0m [0mifgs_baseline[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m0[0m[1;33m][0m[1;33m:[0m                                                                                          [1;31m# check the number of times agree[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     66 [1;33m            raise Exception(f"There appears to be a mismatch between the number of times ({time_values.shape[0]}, set by time_values), "            # error if they don't agree
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(72)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     70 [1;33m                  f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline.  " )
+[0m[1;32m     71 [1;33m    [1;32melse[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 72 [1;33m        [1;32mif[0m [0mtime_values[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m0[0m[1;33m][0m [1;33m!=[0m [1;33m([0m[0mifgs_baseline[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m0[0m[1;33m][0m [1;33m+[0m [0mifgs_monitoring[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m0[0m[1;33m][0m[1;33m)[0m[1;33m:[0m                                                             [1;31m# check in the case that there are monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     73 [1;33m            raise Exception(f"There appears to be a mismatch between the number of times ({time_values.shape[0]}, set by time_values), "            # error if they don't agree
+[0m[1;32m     74 [1;33m                            f"and the number of interferograms ({ifgs_baseline.shape[0]}, in ifgs_baseline; and {ifgs_monitoring.shape[0]}, in ifgs_monitoring)).  Exiting..." )
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(76)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     74 [1;33m                            f"and the number of interferograms ({ifgs_baseline.shape[0]}, in ifgs_baseline; and {ifgs_monitoring.shape[0]}, in ifgs_monitoring)).  Exiting..." )
+[0m[1;32m     75 [1;33m        [1;32melse[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 76 [1;33m            print(f"There are {time_values.shape[0]} times (set by time_values), which agrees with the  "                                            # or update user that all ok if they do
+[0m[1;32m     77 [1;33m                  f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline and {ifgs_monitoring.shape[0]} in ifgs_monitoring.  " )
+[0m[1;32m     78 [1;33m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(77)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     75 [1;33m        [1;32melse[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     76 [1;33m            print(f"There are {time_values.shape[0]} times (set by time_values), which agrees with the  "                                            # or update user that all ok if they do
+[0m[1;32m---> 77 [1;33m                  f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline and {ifgs_monitoring.shape[0]} in ifgs_monitoring.  " )
+[0m[1;32m     78 [1;33m[1;33m[0m[0m
+[0m[1;32m     79 [1;33m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(76)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     74 [1;33m                            f"and the number of interferograms ({ifgs_baseline.shape[0]}, in ifgs_baseline; and {ifgs_monitoring.shape[0]}, in ifgs_monitoring)).  Exiting..." )
+[0m[1;32m     75 [1;33m        [1;32melse[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 76 [1;33m            print(f"There are {time_values.shape[0]} times (set by time_values), which agrees with the  "                                            # or update user that all ok if they do
+[0m[1;32m     77 [1;33m                  f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline and {ifgs_monitoring.shape[0]} in ifgs_monitoring.  " )
+[0m[1;32m     78 [1;33m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(77)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     75 [1;33m        [1;32melse[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     76 [1;33m            print(f"There are {time_values.shape[0]} times (set by time_values), which agrees with the  "                                            # or update user that all ok if they do
+[0m[1;32m---> 77 [1;33m                  f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline and {ifgs_monitoring.shape[0]} in ifgs_monitoring.  " )
+[0m[1;32m     78 [1;33m[1;33m[0m[0m
+[0m[1;32m     79 [1;33m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(76)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     74 [1;33m                            f"and the number of interferograms ({ifgs_baseline.shape[0]}, in ifgs_baseline; and {ifgs_monitoring.shape[0]}, in ifgs_monitoring)).  Exiting..." )
+[0m[1;32m     75 [1;33m        [1;32melse[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 76 [1;33m            print(f"There are {time_values.shape[0]} times (set by time_values), which agrees with the  "                                            # or update user that all ok if they do
+[0m[1;32m     77 [1;33m                  f"{ifgs_baseline.shape[0]} interferograms in ifgs_baseline and {ifgs_monitoring.shape[0]} in ifgs_monitoring.  " )
+[0m[1;32m     78 [1;33m[1;33m[0m[0m
+[0m
+There are 326 times (set by time_values), which agrees with the  58 interferograms in ifgs_baseline and 268 in ifgs_monitoring.  
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(81)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     79 [1;33m[1;33m[0m[0m
+[0m[1;32m     80 [1;33m    [1;31m# 0: Ensure we can still run LiCSAlert in the case that we have no monitoring interferograms (yet)[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 81 [1;33m    [0mn_times_baseline[0m [1;33m=[0m [0mifgs_baseline[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m0[0m[1;33m][0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     82 [1;33m    [1;32mif[0m [0mifgs_monitoring[0m [1;32mis[0m [1;32mNone[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     83 [1;33m        [0mifgs_all[0m [1;33m=[0m [0mnp[0m[1;33m.[0m[0mcopy[0m[1;33m([0m[0mifgs_baseline[0m[1;33m)[0m                                                                [1;31m# if there are no monitoring ifgs, ifgs_all is just the set of baseline ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(82)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     80 [1;33m    [1;31m# 0: Ensure we can still run LiCSAlert in the case that we have no monitoring interferograms (yet)[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     81 [1;33m    [0mn_times_baseline[0m [1;33m=[0m [0mifgs_baseline[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m0[0m[1;33m][0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 82 [1;33m    [1;32mif[0m [0mifgs_monitoring[0m [1;32mis[0m [1;32mNone[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     83 [1;33m        [0mifgs_all[0m [1;33m=[0m [0mnp[0m[1;33m.[0m[0mcopy[0m[1;33m([0m[0mifgs_baseline[0m[1;33m)[0m                                                                [1;31m# if there are no monitoring ifgs, ifgs_all is just the set of baseline ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     84 [1;33m        [0mn_times_monitoring[0m [1;33m=[0m [1;36m0[0m                                                                           [1;31m# there are no monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(86)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     84 [1;33m        [0mn_times_monitoring[0m [1;33m=[0m [1;36m0[0m                                                                           [1;31m# there are no monitoring ifgs[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     85 [1;33m    [1;32melse[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 86 [1;33m        [0mifgs_all[0m [1;33m=[0m [0mnp[0m[1;33m.[0m[0mvstack[0m[1;33m([0m[1;33m([0m[0mifgs_baseline[0m[1;33m,[0m [0mifgs_monitoring[0m[1;33m)[0m[1;33m)[0m                                           [1;31m# ifgs are row vectors, so stack vertically[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     87 [1;33m        [0mn_times_monitoring[0m [1;33m=[0m [0mifgs_monitoring[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m0[0m[1;33m][0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     88 [1;33m    [1;31m#print(f"LiCSAlert with {n_times_baseline} baseline interferograms and {n_times_monitoring} monitoring interferogram(s).  ")[0m[1;33m[0m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(87)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     85 [1;33m    [1;32melse[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     86 [1;33m        [0mifgs_all[0m [1;33m=[0m [0mnp[0m[1;33m.[0m[0mvstack[0m[1;33m([0m[1;33m([0m[0mifgs_baseline[0m[1;33m,[0m [0mifgs_monitoring[0m[1;33m)[0m[1;33m)[0m                                           [1;31m# ifgs are row vectors, so stack vertically[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 87 [1;33m        [0mn_times_monitoring[0m [1;33m=[0m [0mifgs_monitoring[0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m0[0m[1;33m][0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     88 [1;33m    [1;31m#print(f"LiCSAlert with {n_times_baseline} baseline interferograms and {n_times_monitoring} monitoring interferogram(s).  ")[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     89 [1;33m[1;33m[0m[0m
+[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(92)[0;36mLiCSAlert[1;34m()[0m
+[1;32m     90 [1;33m[1;33m[0m[0m
+[0m[1;32m     91 [1;33m    [1;31m# 1: calculating time courses/distances etc for the baseline data[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m---> 92 [1;33m    [0mtcs_c[0m[1;33m,[0m [0m_[0m[1;33m,[0m [0md_hat_baseline[0m[1;33m,[0m [0md_resid_baseline[0m [1;33m=[0m [0mbss_components_inversion[0m[1;33m([0m[0msources[0m[1;33m,[0m [0mifgs_baseline[0m[1;33m,[0m [0mcumulative[0m[1;33m=[0m[1;32mTrue[0m[1;33m)[0m                                 [1;31m# compute cumulative time courses for baseline interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources. ) Residual (_) not needed as just a single value for each ifg, but we'll calculate it for each pixel.[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     93 [1;33m    [0msources_tcs[0m [1;33m=[0m [0mtcs_baseline[0m[1;33m([0m[0mtcs_c[0m[1;33m,[0m [0mtime_values[0m[1;33m[[0m[1;33m:[0m[0mn_times_baseline[0m[1;33m][0m[1;33m,[0m [0mt_recalculate[0m[1;33m)[0m                             [1;31m# lines, gradients, etc for time courses.  Note done by tcs_baseline, which contrasts with tcs_monitoring (which is used lower down)[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     94 [1;33m    [0mresidual[0m [1;33m=[0m [0mresidual_for_pixels[0m[1;33m([0m[0msources[0m[1;33m,[0m [0msources_tcs[0m[1;33m,[0m [0mifgs_baseline[0m[1;33m,[0m [0mmask[0m[1;33m,[0m [0mn_pix_window[0m[1;33m,[0m [0mresidual_type[0m[1;33m)[0m       [1;31m# get the cumulative residual for the baseline interferograms, sources are stored as row vectors, and each has an entry in sources_tcs which is a dict (ie a list of dicts).  Ifgs_baseline are ifgs as row vectors, mean centered in space (ie mean of each row is 0)[0m[1;33m[0m[1;33m[0m[0m
+[0m
+[4;33mReloaded modules[24m: licsalert, small_plot_functions, licsalert.data_importing, licsalert.data_exporting, licsalert.licsalert, licsalert.aux, licsalert.downsample_ifgs, licsalert.plotting, licsalert.icasar, licsalert.icasar.aux, licsalert.icasar.icasar_funcs, licsalert.monitoring_functions[0m
+
+
+
+
+
+LiCSAlert is being run for 002_campi_flegrei_example_tica at 01/11/2023 13:17:21
+
+
+
+
+LiCSAlert is being run for 002_campi_flegrei_example_tica at 01/11/2023 13:17:21
+
+Failed to open the config file for this volcano.  Trying to populate the LiCSAlert_settings and ICASAR_settings dictionaries with from the function input arguments Failed to open the config file for this volcano.  Trying to populate the LiCSAlert_settings and ICASAR_settings dictionaries with from the function input arguments 
+
+LiCSAlert is opening a LiCSBAS directory.  LiCSAlert is opening a LiCSBAS directory.  
+
+Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
+
+LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  
+
+This interferogram timeseries has 326 times and 8533 pixels.  This interferogram timeseries has 326 times and 8533 pixels.  
+
+The data have been mean centered in time for use with tICAThe data have been mean centered in time for use with tICA
+
+Interferogram were originally (181, 281) (34356 unmasked pixels), but have been downsampled to (90, 140) (8533 unmasked pixels) for use with LiCSAlert, and have been downsampled to (45, 70) (2127 unmasked pixels) for figures.  Interferogram were originally (181, 281) (34356 unmasked pixels), but have been downsampled to (90, 140) (8533 unmasked pixels) for use with LiCSAlert, and have been downsampled to (45, 70) (2127 unmasked pixels) for figures.  
+
+Only the last LiCSAlert figure has been requested, so removing any previous figures from the LiCSAlert status dictionary.Only the last LiCSAlert figure has been requested, so removing any previous figures from the LiCSAlert status dictionary.
+
+LiCSBAS date    Past baseline    LiCSAlert      To processLiCSBAS date    Past baseline    LiCSAlert      To process
+
+20141031          20141031          no           no           
+
+20141218          20141218          no           no           
+
+20150111          20150111          no           no           
+
+20150123          20150123          no           no           
+
+20150216          20150216          no           no           
+
+20150228          20150228          no           no           
+
+20150312          20150312          no           no           
+
+20150324          20150324          no           no           
+
+20150405          20150405          no           no           
+
+20150429          20150429          no           no           
+
+20150511          20150511          no           no           
+
+20150523          20150523          no           no           
+
+20150604          20150604          no           no           
+
+20150710          20150710          no           no           
+
+20150722          20150722          no           no           
+
+20150815          20150815          no           no           
+
+20150920          20150920          no           no           
+
+20151002          20151002          no           no           
+
+20151014          20151014          no           no           
+
+20151107          20151107          no           no           
+
+20151119          20151119          no           no           
+
+20151201          20151201          no           no           
+
+20151213          20151213          no           no           
+
+20151225          20151225          no           no           
+
+20160106          20160106          no           no           
+
+20160118          20160118          no           no           
+
+20160211          20160211          no           no           
+
+20160223          20160223          no           no           
+
+20160306          20160306          no           no           
+
+20160318          20160318          no           no           
+
+20160330          20160330          no           no           
+
+20160411          20160411          no           no           
+
+20160505          20160505          no           no           
+
+20160517          20160517          no           no           
+
+20160529          20160529          no           no           
+
+20160610          20160610          no           no           
+
+20160704          20160704          no           no           
+
+20160716          20160716          no           no           
+
+20160728          20160728          no           no           
+
+20160809          20160809          no           no           
+
+20160821          20160821          no           no           
+
+20160902          20160902          no           no           
+
+20160914          20160914          no           no           
+
+20160926          20160926          no           no           
+
+20161002          20161002          no           no           
+
+20161008          20161008          no           no           
+
+20161014          20161014          no           no           
+
+20161020          20161020          no           no           
+
+20161026          20161026          no           no           
+
+20161101          20161101          no           no           
+
+20161107          20161107          no           no           
+
+20161113          20161113          no           no           
+
+20161119          20161119          no           no           
+
+20161201          20161201          no           no           
+
+20161207          20161207          no           no           
+
+20161213          20161213          no           no           
+
+20161219          20161219          no           no           
+
+20161225          20161225          no           no           
+
+20161231          20161231          no           no           
+
+20170112          20170112          yes          yes          not processed            not processed            
+
+20170118          20170118          yes          yes          not processed            not processed            
+
+20170124          20170124          yes          yes          not processed            not processed            
+
+20170130          20170130          yes          yes          not processed            not processed            
+
+20170205          20170205          yes          yes          not processed            not processed            
+
+20170211          20170211          yes          yes          not processed            not processed            
+
+20170223          20170223          yes          yes          not processed            not processed            
+
+20170301          20170301          yes          yes          not processed            not processed            
+
+20170307          20170307          yes          yes          not processed            not processed            
+
+20170313          20170313          yes          yes          not processed            not processed            
+
+20170319          20170319          yes          yes          not processed            not processed            
+
+20170325          20170325          yes          yes          not processed            not processed            
+
+20170331          20170331          yes          yes          not processed            not processed            
+
+20170406          20170406          yes          yes          not processed            not processed            
+
+20170412          20170412          yes          yes          not processed            not processed            
+
+20170418          20170418          yes          yes          not processed            not processed            
+
+20170424          20170424          yes          yes          not processed            not processed            
+
+20170430          20170430          yes          yes          not processed            not processed            
+
+20170506          20170506          yes          yes          not processed            not processed            
+
+20170512          20170512          yes          yes          not processed            not processed            
+
+20170518          20170518          yes          yes          not processed            not processed            
+
+20170524          20170524          yes          yes          not processed            not processed            
+
+20170530          20170530          yes          yes          not processed            not processed            
+
+20170605          20170605          yes          yes          not processed            not processed            
+
+20170611          20170611          yes          yes          not processed            not processed            
+
+20170617          20170617          yes          yes          not processed            not processed            
+
+20170623          20170623          yes          yes          not processed            not processed            
+
+20170629          20170629          yes          yes          not processed            not processed            
+
+20170705          20170705          yes          yes          not processed            not processed            
+
+20170711          20170711          yes          yes          not processed            not processed            
+
+20170717          20170717          yes          yes          not processed            not processed            
+
+20170723          20170723          yes          yes          not processed            not processed            
+
+20170729          20170729          yes          yes          not processed            not processed            
+
+20170804          20170804          yes          yes          not processed            not processed            
+
+20170816          20170816          yes          yes          not processed            not processed            
+
+20170822          20170822          yes          yes          not processed            not processed            
+
+20170828          20170828          yes          yes          not processed            not processed            
+
+20170903          20170903          yes          yes          not processed            not processed            
+
+20170909          20170909          yes          yes          not processed            not processed            
+
+20170915          20170915          yes          yes          not processed            not processed            
+
+20170921          20170921          yes          yes          not processed            not processed            
+
+20170927          20170927          yes          yes          not processed            not processed            
+
+20171009          20171009          yes          yes          not processed            not processed            
+
+20171015          20171015          yes          yes          not processed            not processed            
+
+20171021          20171021          yes          yes          not processed            not processed            
+
+20171027          20171027          yes          yes          not processed            not processed            
+
+20171102          20171102          yes          yes          not processed            not processed            
+
+20171108          20171108          yes          yes          not processed            not processed            
+
+20171114          20171114          yes          yes          not processed            not processed            
+
+20171120          20171120          yes          yes          not processed            not processed            
+
+20171202          20171202          yes          yes          not processed            not processed            
+
+20171208          20171208          yes          yes          not processed            not processed            
+
+20171214          20171214          yes          yes          not processed            not processed            
+
+20171226          20171226          yes          yes          not processed            not processed            
+
+20180101          20180101          yes          yes          not processed            not processed            
+
+20180107          20180107          yes          yes          not processed            not processed            
+
+20180113          20180113          yes          yes          not processed            not processed            
+
+20180119          20180119          yes          yes          not processed            not processed            
+
+20180125          20180125          yes          yes          not processed            not processed            
+
+20180131          20180131          yes          yes          not processed            not processed            
+
+20180206          20180206          yes          yes          not processed            not processed            
+
+20180218          20180218          yes          yes          not processed            not processed            
+
+20180224          20180224          yes          yes          not processed            not processed            
+
+20180302          20180302          yes          yes          not processed            not processed            
+
+20180308          20180308          yes          yes          not processed            not processed            
+
+20180314          20180314          yes          yes          not processed            not processed            
+
+20180320          20180320          yes          yes          not processed            not processed            
+
+20180326          20180326          yes          yes          not processed            not processed            
+
+20180401          20180401          yes          yes          not processed            not processed            
+
+20180407          20180407          yes          yes          not processed            not processed            
+
+20180413          20180413          yes          yes          not processed            not processed            
+
+20180419          20180419          yes          yes          not processed            not processed            
+
+20180425          20180425          yes          yes          not processed            not processed            
+
+20180501          20180501          yes          yes          not processed            not processed            
+
+20180507          20180507          yes          yes          not processed            not processed            
+
+20180513          20180513          yes          yes          not processed            not processed            
+
+20180519          20180519          yes          yes          not processed            not processed            
+
+20180525          20180525          yes          yes          not processed            not processed            
+
+20180531          20180531          yes          yes          not processed            not processed            
+
+20180606          20180606          yes          yes          not processed            not processed            
+
+20180612          20180612          yes          yes          not processed            not processed            
+
+20180618          20180618          yes          yes          not processed            not processed            
+
+20180630          20180630          yes          yes          not processed            not processed            
+
+20180712          20180712          yes          yes          not processed            not processed            
+
+20180718          20180718          yes          yes          not processed            not processed            
+
+20180724          20180724          yes          yes          not processed            not processed            
+
+20180730          20180730          yes          yes          not processed            not processed            
+
+20180805          20180805          yes          yes          not processed            not processed            
+
+20180811          20180811          yes          yes          not processed            not processed            
+
+20180817          20180817          yes          yes          not processed            not processed            
+
+20180823          20180823          yes          yes          not processed            not processed            
+
+20180829          20180829          yes          yes          not processed            not processed            
+
+20180904          20180904          yes          yes          not processed            not processed            
+
+20180910          20180910          yes          yes          not processed            not processed            
+
+20180916          20180916          yes          yes          not processed            not processed            
+
+20180922          20180922          yes          yes          not processed            not processed            
+
+20180928          20180928          yes          yes          not processed            not processed            
+
+20181004          20181004          yes          yes          not processed            not processed            
+
+20181010          20181010          yes          yes          not processed            not processed            
+
+20181016          20181016          yes          yes          not processed            not processed            
+
+20181022          20181022          yes          yes          not processed            not processed            
+
+20181028          20181028          yes          yes          not processed            not processed            
+
+20181109          20181109          yes          yes          not processed            not processed            
+
+20181115          20181115          yes          yes          not processed            not processed            
+
+20181121          20181121          yes          yes          not processed            not processed            
+
+20181127          20181127          yes          yes          not processed            not processed            
+
+20181203          20181203          yes          yes          not processed            not processed            
+
+20181209          20181209          yes          yes          not processed            not processed            
+
+20181215          20181215          yes          yes          not processed            not processed            
+
+20181221          20181221          yes          yes          not processed            not processed            
+
+20181227          20181227          yes          yes          not processed            not processed            
+
+20190102          20190102          yes          yes          not processed            not processed            
+
+20190108          20190108          yes          yes          not processed            not processed            
+
+20190114          20190114          yes          yes          not processed            not processed            
+
+20190120          20190120          yes          yes          not processed            not processed            
+
+20190126          20190126          yes          yes          not processed            not processed            
+
+20190201          20190201          yes          yes          not processed            not processed            
+
+20190207          20190207          yes          yes          not processed            not processed            
+
+20190213          20190213          yes          yes          not processed            not processed            
+
+20190225          20190225          yes          yes          not processed            not processed            
+
+20190303          20190303          yes          yes          not processed            not processed            
+
+20190309          20190309          yes          yes          not processed            not processed            
+
+20190321          20190321          yes          yes          not processed            not processed            
+
+20190402          20190402          yes          yes          not processed            not processed            
+
+20190408          20190408          yes          yes          not processed            not processed            
+
+20190414          20190414          yes          yes          not processed            not processed            
+
+20190420          20190420          yes          yes          not processed            not processed            
+
+20190426          20190426          yes          yes          not processed            not processed            
+
+20190502          20190502          yes          yes          not processed            not processed            
+
+20190508          20190508          yes          yes          not processed            not processed            
+
+20190520          20190520          yes          yes          not processed            not processed            
+
+20190526          20190526          yes          yes          not processed            not processed            
+
+20190601          20190601          yes          yes          not processed            not processed            
+
+20190607          20190607          yes          yes          not processed            not processed            
+
+20190613          20190613          yes          yes          not processed            not processed            
+
+20190625          20190625          yes          yes          not processed            not processed            
+
+20190701          20190701          yes          yes          not processed            not processed            
+
+20190707          20190707          yes          yes          not processed            not processed            
+
+20190713          20190713          yes          yes          not processed            not processed            
+
+20190719          20190719          yes          yes          not processed            not processed            
+
+20190725          20190725          yes          yes          not processed            not processed            
+
+20190731          20190731          yes          yes          not processed            not processed            
+
+20190806          20190806          yes          yes          not processed            not processed            
+
+20190812          20190812          yes          yes          not processed            not processed            
+
+20190818          20190818          yes          yes          not processed            not processed            
+
+20190824          20190824          yes          yes          not processed            not processed            
+
+20190830          20190830          yes          yes          not processed            not processed            
+
+20190905          20190905          yes          yes          not processed            not processed            
+
+20190911          20190911          yes          yes          not processed            not processed            
+
+20190917          20190917          yes          yes          not processed            not processed            
+
+20190923          20190923          yes          yes          not processed            not processed            
+
+20191005          20191005          yes          yes          not processed            not processed            
+
+20191011          20191011          yes          yes          not processed            not processed            
+
+20191017          20191017          yes          yes          not processed            not processed            
+
+20191023          20191023          yes          yes          not processed            not processed            
+
+20191029          20191029          yes          yes          not processed            not processed            
+
+20191104          20191104          yes          yes          not processed            not processed            
+
+20191116          20191116          yes          yes          not processed            not processed            
+
+20191122          20191122          yes          yes          not processed            not processed            
+
+20191128          20191128          yes          yes          not processed            not processed            
+
+20191204          20191204          yes          yes          not processed            not processed            
+
+20191210          20191210          yes          yes          not processed            not processed            
+
+20191216          20191216          yes          yes          not processed            not processed            
+
+20191222          20191222          yes          yes          not processed            not processed            
+
+20191228          20191228          yes          yes          not processed            not processed            
+
+20200103          20200103          yes          yes          not processed            not processed            
+
+20200109          20200109          yes          yes          not processed            not processed            
+
+20200115          20200115          yes          yes          not processed            not processed            
+
+20200121          20200121          yes          yes          not processed            not processed            
+
+20200127          20200127          yes          yes          not processed            not processed            
+
+20200202          20200202          yes          yes          not processed            not processed            
+
+20200208          20200208          yes          yes          not processed            not processed            
+
+20200214          20200214          yes          yes          not processed            not processed            
+
+20200220          20200220          yes          yes          not processed            not processed            
+
+20200226          20200226          yes          yes          not processed            not processed            
+
+20200303          20200303          yes          yes          not processed            not processed            
+
+20200309          20200309          yes          yes          not processed            not processed            
+
+20200315          20200315          yes          yes          not processed            not processed            
+
+20200321          20200321          yes          yes          not processed            not processed            
+
+20200402          20200402          yes          yes          not processed            not processed            
+
+20200408          20200408          yes          yes          not processed            not processed            
+
+20200414          20200414          yes          yes          not processed            not processed            
+
+20200420          20200420          yes          yes          not processed            not processed            
+
+20200426          20200426          yes          yes          not processed            not processed            
+
+20200502          20200502          yes          yes          not processed            not processed            
+
+20200508          20200508          yes          yes          not processed            not processed            
+
+20200514          20200514          yes          yes          not processed            not processed            
+
+20200520          20200520          yes          yes          not processed            not processed            
+
+20200526          20200526          yes          yes          not processed            not processed            
+
+20200601          20200601          yes          yes          not processed            not processed            
+
+20200607          20200607          yes          yes          not processed            not processed            
+
+20200613          20200613          yes          yes          not processed            not processed            
+
+20200619          20200619          yes          yes          not processed            not processed            
+
+20200625          20200625          yes          yes          not processed            not processed            
+
+20200701          20200701          yes          yes          not processed            not processed            
+
+20200707          20200707          yes          yes          not processed            not processed            
+
+20200713          20200713          yes          yes          not processed            not processed            
+
+20200719          20200719          yes          yes          not processed            not processed            
+
+20200725          20200725          yes          yes          not processed            not processed            
+
+20200731          20200731          yes          yes          not processed            not processed            
+
+20200806          20200806          yes          yes          not processed            not processed            
+
+20200812          20200812          yes          yes          not processed            not processed            
+
+20200818          20200818          yes          yes          not processed            not processed            
+
+20200824          20200824          yes          yes          not processed            not processed            
+
+20200830          20200830          yes          yes          not processed            not processed            
+
+20200905          20200905          yes          yes          not processed            not processed            
+
+20200911          20200911          yes          yes          not processed            not processed            
+
+20200917          20200917          yes          yes          not processed            not processed            
+
+20200923          20200923          yes          yes          not processed            not processed            
+
+20200929          20200929          yes          yes          not processed            not processed            
+
+20201005          20201005          yes          yes          not processed            not processed            
+
+20201011          20201011          yes          yes          not processed            not processed            
+
+20201017          20201017          yes          yes          not processed            not processed            
+
+20201023          20201023          yes          yes          not processed            not processed            
+
+20201029          20201029          yes          yes          not processed            not processed            
+
+20201104          20201104          yes          yes          not processed            not processed            
+
+20201110          20201110          yes          yes          not processed            not processed            
+
+20201116          20201116          yes          yes          not processed            not processed            
+
+20201122          20201122          yes          yes          not processed            not processed            
+
+20201128          20201128          yes          yes          not processed            not processed            
+
+20201204          20201204          yes          yes          not processed            not processed            
+
+20201210          20201210          yes          yes          not processed            not processed            
+
+20201216          20201216          yes          yes          not processed            not processed            
+
+20201222          20201222          yes          yes          not processed            not processed            
+
+20201228          20201228          yes          yes          not processed            not processed            
+
+20210103          20210103          yes          yes          not processed            not processed            
+
+20210109          20210109          yes          yes          not processed            not processed            
+
+20210115          20210115          yes          yes          not processed            not processed            
+
+20210121          20210121          yes          yes          not processed            not processed            
+
+20210127          20210127          yes          yes          not processed            not processed            
+
+20210202          20210202          yes          yes          not processed            not processed            
+
+20210208          20210208          yes          yes          not processed            not processed            
+
+20210214          20210214          yes          yes          not processed            not processed            
+
+20210220          20210220          yes          yes          not processed            not processed            
+
+20210226          20210226          yes          yes          not processed            not processed            
+
+20210304          20210304          yes          yes          not processed            not processed            
+
+20210310          20210310          yes          yes          not processed            not processed            
+
+20210316          20210316          yes          yes          not processed            not processed            
+
+20210322          20210322          yes          yes          not processed            not processed            
+
+20210328          20210328          yes          yes          not processed            not processed            
+
+20210403          20210403          yes          yes          not processed            not processed            
+
+20210409          20210409          yes          yes          not processed            not processed            
+
+20210415          20210415          yes          yes          not processed            not processed            
+
+20210421          20210421          yes          yes          not processed            not processed            
+
+20210427          20210427          yes          yes          not processed            not processed            
+
+20210503          20210503          yes          yes          not processed            not processed            
+
+20210509          20210509          yes          yes          not processed            not processed            
+
+20210515          20210515          yes          yes          not processed            not processed            
+
+20210521          20210521          yes          yes          not processed            not processed            
+
+20210527          20210527          yes          yes          not processed            not processed            
+
+20210602          20210602          yes          yes          not processed            not processed            
+
+20210608          20210608          yes          yes          not processed            not processed            
+
+20210614          20210614          yes          yes          not processed            not processed            
+
+20210620          20210620          yes          yes          not processed            not processed            
+
+20210626          20210626          yes          yes          not processed            not processed            
+
+20210702          20210702          yes          yes          not processed            not processed            
+
+20210708          20210708          yes          yes          not processed            not processed            
+
+20210714          20210714          yes          yes          not processed            not processed            
+
+20210720          20210720          yes          yes          not processed            not processed            
+
+20210726          20210726          yes          yes          not processed            not processed            
+
+20210801          20210801          yes          yes          not processed            not processed            
+
+20210807          20210807          yes          yes          not processed            not processed            
+
+20210813          20210813          yes          yes          not processed            not processed            
+
+20210819          20210819          yes          yes          not processed            not processed            
+
+20210825          20210825          yes          yes          not processed            not processed            
+
+20210831          20210831          yes          yes          not processed            not processed            
+
+20210906          20210906          yes          yes          not processed            not processed            
+
+20210912          20210912          yes          yes          processed with errors           processed with errors           to processto process
+
+LiCSAlert status:  1) Run ICASAR: False   2) Run LiCSAlert: TrueLiCSAlert status:  1) Run ICASAR: False   2) Run LiCSAlert: True
+
+Updating masks and ICA sources.  Of the 8533 in the sources and 8533 in the current LiCSBAS time series, 8533 are in both and can be used in this iteration of LiCSAlert.  Updating masks and ICA sources.  Of the 8533 in the sources and 8533 in the current LiCSBAS time series, 8533 are in both and can be used in this iteration of LiCSAlert.  
+
+Running LiCSAlert for 20210912Running LiCSAlert for 20210912
+
+The folder 20210912 appears to exists already.  This is usually due to the date not having all the required LiCSAlert products, and LiCSAlert is now trying to fill this date again.  The folder 20210912 appears to exists already.  This is usually due to the date not having all the required LiCSAlert products, and LiCSAlert is now trying to fill this date again.  
+
+There are 326 times (set by time_values), which agrees with the  58 interferograms in ifgs_baseline and 268 in ifgs_monitoring.  There are 326 times (set by time_values), which agrees with the  58 interferograms in ifgs_baseline and 268 in ifgs_monitoring.  
+
+[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, small_plot_functions, licsalert.data_importing, licsalert.data_exporting, licsalert.licsalert, licsalert.aux, licsalert.downsample_ifgs, licsalert.plotting, licsalert.icasar, licsalert.icasar.aux, licsalert.icasar.icasar_funcs[0m
+
+
+
+
+
+LiCSAlert is being run for 001_campi_flegrei_example at 01/11/2023 13:19:11
+Failed to open the config file for this volcano.  Trying to populate the LiCSAlert_settings and ICASAR_settings dictionaries with from the function input arguments 
+LiCSAlert is opening a LiCSBAS directory.  
+Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
+LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  
+This interferogram timeseries has 326 times and 8533 pixels.  
+The data have been mean centered in space for use with sICA
+Interferogram were originally (181, 281) (34356 unmasked pixels), but have been downsampled to (90, 140) (8533 unmasked pixels) for use with LiCSAlert, and have been downsampled to (45, 70) (2127 unmasked pixels) for figures.  
+Only the last LiCSAlert figure has been requested, so removing any previous figures from the LiCSAlert status dictionary.
+LiCSBAS date    Past baseline    LiCSAlert      To process
+20141031          no           
+20141218          no           
+20150111          no           
+20150123          no           
+20150216          no           
+20150228          no           
+20150312          no           
+20150324          no           
+20150405          no           
+20150429          no           
+20150511          no           
+20150523          no           
+20150604          no           
+20150710          no           
+20150722          no           
+20150815          no           
+20150920          no           
+20151002          no           
+20151014          no           
+20151107          no           
+20151119          no           
+20151201          no           
+20151213          no           
+20151225          no           
+20160106          no           
+20160118          no           
+20160211          no           
+20160223          no           
+20160306          no           
+20160318          no           
+20160330          no           
+20160411          no           
+20160505          no           
+20160517          no           
+20160529          no           
+20160610          no           
+20160704          no           
+20160716          no           
+20160728          no           
+20160809          no           
+20160821          no           
+20160902          no           
+20160914          no           
+20160926          no           
+20161002          no           
+20161008          no           
+20161014          no           
+20161020          no           
+20161026          no           
+20161101          no           
+20161107          no           
+20161113          no           
+20161119          no           
+20161201          no           
+20161207          no           
+20161213          no           
+20161219          no           
+20161225          no           
+20161231          no           
+20170112          yes          not processed            
+20170118          yes          not processed            
+20170124          yes          not processed            
+20170130          yes          not processed            
+20170205          yes          not processed            
+20170211          yes          not processed            
+20170223          yes          not processed            
+20170301          yes          not processed            
+20170307          yes          not processed            
+20170313          yes          not processed            
+20170319          yes          not processed            
+20170325          yes          not processed            
+20170331          yes          not processed            
+20170406          yes          not processed            
+20170412          yes          not processed            
+20170418          yes          not processed            
+20170424          yes          not processed            
+20170430          yes          not processed            
+20170506          yes          not processed            
+20170512          yes          not processed            
+20170518          yes          not processed            
+20170524          yes          not processed            
+20170530          yes          not processed            
+20170605          yes          not processed            
+20170611          yes          not processed            
+20170617          yes          not processed            
+20170623          yes          not processed            
+20170629          yes          not processed            
+20170705          yes          not processed            
+20170711          yes          not processed            
+20170717          yes          not processed            
+20170723          yes          not processed            
+20170729          yes          not processed            
+20170804          yes          not processed            
+20170816          yes          not processed            
+20170822          yes          not processed            
+20170828          yes          not processed            
+20170903          yes          not processed            
+20170909          yes          not processed            
+20170915          yes          not processed            
+20170921          yes          not processed            
+20170927          yes          not processed            
+20171009          yes          not processed            
+20171015          yes          not processed            
+20171021          yes          not processed            
+20171027          yes          not processed            
+20171102          yes          not processed            
+20171108          yes          not processed            
+20171114          yes          not processed            
+20171120          yes          not processed            
+20171202          yes          not processed            
+20171208          yes          not processed            
+20171214          yes          not processed            
+20171226          yes          not processed            
+20180101          yes          not processed            
+20180107          yes          not processed            
+20180113          yes          not processed            
+20180119          yes          not processed            
+20180125          yes          not processed            
+20180131          yes          not processed            
+20180206          yes          not processed            
+20180218          yes          not processed            
+20180224          yes          not processed            
+20180302          yes          not processed            
+20180308          yes          not processed            
+20180314          yes          not processed            
+20180320          yes          not processed            
+20180326          yes          not processed            
+20180401          yes          not processed            
+20180407          yes          not processed            
+20180413          yes          not processed            
+20180419          yes          not processed            
+20180425          yes          not processed            
+20180501          yes          not processed            
+20180507          yes          not processed            
+20180513          yes          not processed            
+20180519          yes          not processed            
+20180525          yes          not processed            
+20180531          yes          not processed            
+20180606          yes          not processed            
+20180612          yes          not processed            
+20180618          yes          not processed            
+20180630          yes          not processed            
+20180712          yes          not processed            
+20180718          yes          not processed            
+20180724          yes          not processed            
+20180730          yes          not processed            
+20180805          yes          not processed            
+20180811          yes          not processed            
+20180817          yes          not processed            
+20180823          yes          not processed            
+20180829          yes          not processed            
+20180904          yes          not processed            
+20180910          yes          not processed            
+20180916          yes          not processed            
+20180922          yes          not processed            
+20180928          yes          not processed            
+20181004          yes          not processed            
+20181010          yes          not processed            
+20181016          yes          not processed            
+20181022          yes          not processed            
+20181028          yes          not processed            
+20181109          yes          not processed            
+20181115          yes          not processed            
+20181121          yes          not processed            
+20181127          yes          not processed            
+20181203          yes          not processed            
+20181209          yes          not processed            
+20181215          yes          not processed            
+20181221          yes          not processed            
+20181227          yes          not processed            
+20190102          yes          not processed            
+20190108          yes          not processed            
+20190114          yes          not processed            
+20190120          yes          not processed            
+20190126          yes          not processed            
+20190201          yes          not processed            
+20190207          yes          not processed            
+20190213          yes          not processed            
+20190225          yes          not processed            
+20190303          yes          not processed            
+20190309          yes          not processed            
+20190321          yes          not processed            
+20190402          yes          not processed            
+20190408          yes          not processed            
+20190414          yes          not processed            
+20190420          yes          not processed            
+20190426          yes          not processed            
+20190502          yes          not processed            
+20190508          yes          not processed            
+20190520          yes          not processed            
+20190526          yes          not processed            
+20190601          yes          not processed            
+20190607          yes          not processed            
+20190613          yes          not processed            
+20190625          yes          not processed            
+20190701          yes          not processed            
+20190707          yes          not processed            
+20190713          yes          not processed            
+20190719          yes          not processed            
+20190725          yes          not processed            
+20190731          yes          not processed            
+20190806          yes          not processed            
+20190812          yes          not processed            
+20190818          yes          not processed            
+20190824          yes          not processed            
+20190830          yes          not processed            
+20190905          yes          not processed            
+20190911          yes          not processed            
+20190917          yes          not processed            
+20190923          yes          not processed            
+20191005          yes          not processed            
+20191011          yes          not processed            
+20191017          yes          not processed            
+20191023          yes          not processed            
+20191029          yes          not processed            
+20191104          yes          not processed            
+20191116          yes          not processed            
+20191122          yes          not processed            
+20191128          yes          not processed            
+20191204          yes          not processed            
+20191210          yes          not processed            
+20191216          yes          not processed            
+20191222          yes          not processed            
+20191228          yes          not processed            
+20200103          yes          not processed            
+20200109          yes          not processed            
+20200115          yes          not processed            
+20200121          yes          not processed            
+20200127          yes          not processed            
+20200202          yes          not processed            
+20200208          yes          not processed            
+20200214          yes          not processed            
+20200220          yes          not processed            
+20200226          yes          not processed            
+20200303          yes          not processed            
+20200309          yes          not processed            
+20200315          yes          not processed            
+20200321          yes          not processed            
+20200402          yes          not processed            
+20200408          yes          not processed            
+20200414          yes          not processed            
+20200420          yes          not processed            
+20200426          yes          not processed            
+20200502          yes          not processed            
+20200508          yes          not processed            
+20200514          yes          not processed            
+20200520          yes          not processed            
+20200526          yes          not processed            
+20200601          yes          not processed            
+20200607          yes          not processed            
+20200613          yes          not processed            
+20200619          yes          not processed            
+20200625          yes          not processed            
+20200701          yes          not processed            
+20200707          yes          not processed            
+20200713          yes          not processed            
+20200719          yes          not processed            
+20200725          yes          not processed            
+20200731          yes          not processed            
+20200806          yes          not processed            
+20200812          yes          not processed            
+20200818          yes          not processed            
+20200824          yes          not processed            
+20200830          yes          not processed            
+20200905          yes          not processed            
+20200911          yes          not processed            
+20200917          yes          not processed            
+20200923          yes          not processed            
+20200929          yes          not processed            
+20201005          yes          not processed            
+20201011          yes          not processed            
+20201017          yes          not processed            
+20201023          yes          not processed            
+20201029          yes          not processed            
+20201104          yes          not processed            
+20201110          yes          not processed            
+20201116          yes          not processed            
+20201122          yes          not processed            
+20201128          yes          not processed            
+20201204          yes          not processed            
+20201210          yes          not processed            
+20201216          yes          not processed            
+20201222          yes          not processed            
+20201228          yes          not processed            
+20210103          yes          not processed            
+20210109          yes          not processed            
+20210115          yes          not processed            
+20210121          yes          not processed            
+20210127          yes          not processed            
+20210202          yes          not processed            
+20210208          yes          not processed            
+20210214          yes          not processed            
+20210220          yes          not processed            
+20210226          yes          not processed            
+20210304          yes          not processed            
+20210310          yes          not processed            
+20210316          yes          not processed            
+20210322          yes          not processed            
+20210328          yes          not processed            
+20210403          yes          not processed            
+20210409          yes          not processed            
+20210415          yes          not processed            
+20210421          yes          not processed            
+20210427          yes          not processed            
+20210503          yes          not processed            
+20210509          yes          not processed            
+20210515          yes          not processed            
+20210521          yes          not processed            
+20210527          yes          not processed            
+20210602          yes          not processed            
+20210608          yes          not processed            
+20210614          yes          not processed            
+20210620          yes          not processed            
+20210626          yes          not processed            
+20210702          yes          not processed            
+20210708          yes          not processed            
+20210714          yes          not processed            
+20210720          yes          not processed            
+20210726          yes          not processed            
+20210801          yes          not processed            
+20210807          yes          not processed            
+20210813          yes          not processed            
+20210819          yes          not processed            
+20210825          yes          not processed            
+20210831          yes          not processed            
+20210906          yes          not processed            
+20210912          yes          not processed            to process
+LiCSAlert status:  1) Run ICASAR: False   2) Run LiCSAlert: True
+Updating masks and ICA sources.  Of the 8533 in the sources and 8533 in the current LiCSBAS time series, 8533 are in both and can be used in this iteration of LiCSAlert.  
+Running LiCSAlert for 20210912
+There are 326 times (set by time_values), which agrees with the  58 interferograms in ifgs_baseline and 268 in ifgs_monitoring.  
+[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, small_plot_functions, licsalert.data_importing, licsalert.data_exporting, licsalert.licsalert, licsalert.aux, licsalert.downsample_ifgs, licsalert.plotting, licsalert.icasar, licsalert.icasar.aux, licsalert.icasar.icasar_funcs[0m
+Running

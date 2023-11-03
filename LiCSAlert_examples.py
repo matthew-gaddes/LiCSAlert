@@ -78,8 +78,8 @@ icasar_settings = {"n_comp" : 5,                                                
 
 
 
-licsalert_dir = Path("./")                                                        # outdir parent
-volcano = 'campi_flegrei_example'                                                 # outdir final                                                                                                                      
+licsalert_dir = Path("./")                                                        # path to licsalert package
+volcano = '001_campi_flegrei_example'                                                 # outdir final                                                                                                                      
 licsbas_dir = Path("./022D_04826_121209")                                         # input data
 
 
@@ -87,7 +87,18 @@ LiCSAlert_monitoring_mode(region = None, volcano = volcano, LiCSAlert_pkg_dir = 
                           licsbas_dir = licsbas_dir, licsalert_dir = licsalert_dir,
                           licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
 
+sys.exit()
+
     
+#%% Example 2: temporal ICA
+
+volcano = '002_campi_flegrei_example_tica'                                                         # new outdir
+icasar_settings["sica_tica"] = 'tica'
+
+LiCSAlert_monitoring_mode(region = None, volcano = volcano, LiCSAlert_pkg_dir = LiCSAlert_pkg_dir,
+                          licsbas_dir = licsbas_dir, licsalert_dir = licsalert_dir,
+                          licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
+
 
 #%% We can also make the LiCSAlert figure for all times, but this is slow
 
