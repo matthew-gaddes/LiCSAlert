@@ -476,9 +476,47 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
         displacement_r2["incremental"], displacement_r2["mask"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
                                                                                   downsample_run, verbose = False)
     
+    
+
+    print("\n\n there is debug commented here \n\n")          
+    # pdb.set_trace()
+    # import sys
+    # plt.switch_backend('qt5agg')
+    # debug_scripts = "/home/matthew/university_work/python_stuff/python_scripts"
+    # if debug_scripts not in sys.path:                                                                             # check if already on path
+    #     sys.path.append(debug_scripts)
+    # from small_plot_functions import matrix_show, quick_linegraph
+    
+    # from licsalert.aux import col_to_ma
+    # import numpy as np
+    
+    # ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])            # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)    
+    
+    # # 1 last ifg
+    # matrix_show(col_to_ma(displacement_r2['incremental'][-1,], displacement_r2['mask']))          #ifg
+    # matrix_show(col_to_ma(ifg_ts.mixtures_mc_time[-1,], displacement_r2['mask']))          # probably same ifg
+    
+    # # 2 calculate cs
+    # ifg_n = -1
+    # matrix_show(col_to_ma(np.cumsum(displacement_r2['incremental'], axis = 0)[-1,], displacement_r2['mask']))          # cumulative ts, looks about right.  
+    # matrix_show(col_to_ma(np.cumsum(ifg_ts.mixtures_mc_time, axis =0)[-1,], displacement_r2['mask']))          # noise and zeros
+    
+    
+    # # up to here
+    
+    # matrix_show(col_to_ma(np.sum(displacement_r2['incremental'][:,], axis = 0), displacement_r2['mask']))          # noise and zeros
+    # matrix_show(col_to_ma(displacement_r2['incremental'][-1,], displacement_r2['mask']))                    # looks like a normal ifg
+    
+    
+    # matrix_show(col_to_ma(ifg_ts.mixtures_mc_time[-1,], displacement_r2['mask']))          # noise and zeros
+    # matrix_show(col_to_ma(np.cumsum(ifg_ts.mixtures_mc_time, axis = 0)[-2,], displacement_r2['mask']))          # noise and zeros
+    
+    
     # 2: mean centre in time or space, according to if sica or tica (must be done after downsampling for accuracy)
     ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])            # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)
     del displacement_r2['incremental']
+    
+    displacement_r2['ifg_ts'] = ifg_ts                                                                      # put the whole object in the dict.  
     
     if sica_tica == 'sica':
         displacement_r2['incremental'] = ifg_ts.mixtures_mc_space
@@ -490,7 +528,7 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
         print(f"The data have been mean centered in time for use with tICA")
     else:
         raise Exception(f"'sica_tica' can be either 'sica' or 'tica', but not {sica_tica}.  Exiting.  ")
-        
+
 
     # 3: Downsample for plotting
     displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
@@ -742,3 +780,90 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
     X = A@S + means_r2
     
     return X
+
+
+#%%
+
+
+
+def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, baseline_end, out_dir, ICASAR_settings):
+    """
+    ICASAR results are always required by LiCSAlert, and these need either to be computed (usually only once at the start),
+    or loaded (more common).  
+    
+    Inputs:
+        run_ICASAR | boolean | whether ICASAR should be run, or the results from a previous run loaded.  
+        displacment_r2 | dict | interferograms and associated data that are used by the ICASAR algorithm  
+        tbaseline_info | dict | various temporal information, such as ifg_dates
+        baseline_end | string | YYYYMMDD that the baseline ends on.  
+        acq_dates | list of strings | dates of each Sentinel-1 acquisition.  
+    Returns:
+        icasar_sources | rank 2 array | sources as row vectors
+        mask_sources
+        baseline_end_ifg_n
+        label_sources_output | ? | Dict of one hot encoding of labels (defo / topo correlated atmosphere / turbulent atmsophere)
+    History:
+        2021_10_15 | MEG | Written.  
+        2023_04_03 | MEG | Add return of ICASAR label_sources_output
+    """
+    from licsalert.aux import get_baseline_end_ifg_n
+    from licsalert.icasar.icasar_funcs import ICASAR
+    import pickle
+    import numpy as np
+    
+    def check_means(sources, tcs):
+        """ Print some information about the means of the data returned by the ICASAR function.  
+        Inputs:
+            sources | r2 array | Images as rows.  n_images x n_pixels.  
+            tcs | r2 array | Incremental time courses as columns.  n_times x n_images
+        History:
+            2023_11_08 | Written.  
+        """
+        import numpy as np 
+        source_means = np.mean(sources, axis = 1)
+        print(f"Means for each row of sources (these should be images): {source_means}")
+        tcs_means = np.mean(tcs, axis = 0)
+        print(f"Means for each column of the tcs (these should be time courses): {tcs_means}")
+      
+    baseline_end_ifg_n = get_baseline_end_ifg_n(tbaseline_info['acq_dates'], baseline_end)                                                            # if this is e.g. 14, the 14th ifg would not be in the baseline stage
+    if run_ICASAR:
+        print(f"\nRunning ICASAR.")                                      
+        
+        spatial_ICASAR_data = {'ifgs_dc'       : displacement_r2['incremental'][:(baseline_end_ifg_n+1),],                             # only take up to the last.  ICASAR will deal with transposing this if it's tica
+                               'mask'          : displacement_r2['mask'],
+                               'lons'          : displacement_r2['lons'],
+                               'lats'          : displacement_r2['lats'],
+                               'ifg_dates_dc'  : tbaseline_info['ifg_dates'][:(baseline_end_ifg_n+1)]}                             # ifg dates (yyyymmdd_yyyymmdd), but only up to the end of the baseline stage
+        if 'dem' in displacement_r2.keys():
+            spatial_ICASAR_data['dem'] = displacement_r2['dem']
+        
+        if ICASAR_settings['figures'] == 'both':
+            ICASAR_settings['figures'] = 'png+window'                                                                                  # update licsalert name to ICASAR name.  
+            
+        sources, tcs, residual, Iq, n_clusters, S_all_info, r2_ifg_means, ics_labels  = ICASAR(spatial_data = spatial_ICASAR_data,                                      # Run ICASAR (slow))
+                                                                                               out_folder = out_dir, **ICASAR_settings,
+                                                                                               ica_verbose = 'short', label_sources = True)                     # note that tcs are incremental (i.e. no cumulative)
+        mask_sources = displacement_r2['mask']                                                                                                              # rename a copy of the mask
+
+        if ICASAR_settings['sica_tica'] == 'tica':                                                                                                         # possibly deal with mean centering which is problematic with tica 
+            # check_means(sources, tcs)                                                                                                                     # as the sources are cumulative time courses, and only these are guaranteed  
+            sources -= np.repeat(np.mean(sources, axis = 1)[:,np.newaxis], axis = 1, repeats = sources.shape[1])                                            # to be mean centered.  images (sources) and incremental time courses (tcs) won't be.  
+            tcs -= np.repeat(np.mean(tcs, axis = 0)[np.newaxis, : ], axis = 0, repeats = tcs.shape[0])
+            check_means(sources, tcs)
+            
+        
+    else:
+        with open(out_dir / "ICASAR_results.pkl", 'rb') as f_icasar:                                                                     # Or open the products from a previous ICASAR run.  
+            sources = pickle.load(f_icasar)   
+            mask_sources = pickle.load(f_icasar)
+            tcs  = pickle.load(f_icasar)    
+            source_residuals = pickle.load(f_icasar)    
+            Iq_sorted = pickle.load(f_icasar)    
+            n_clusters = pickle.load(f_icasar)    
+            xy_tsne = pickle.load(f_icasar)                             # not used
+            labels_hdbscan = pickle.load(f_icasar)                      # not used
+            ics_labels = pickle.load(f_icasar)
+        f_icasar.close()                                                                                                                           
+    
+    return sources, mask_sources,  baseline_end_ifg_n, ics_labels
+

@@ -13,6 +13,8 @@ def two_spatial_signals_plot(images, mask, dem, tcs_dc, tcs_all, t_baselines_dc,
                              title, ifg_dates_dc, fig_kwargs):
     """
     Product the two plots that show spatial sources (comparison to DEM and ifg baseline, and then sources and cumulative time courses).  
+    Note that this figure doesn't mind if we are working spatially or temporally - it just plots what it is given.  
+    
     Inputs:
         images | n_images x n_pixels | spatial signals as row vectors.  
         mask | boolean rank 2 |         mask to convert row vector to a masked array.  
@@ -34,9 +36,9 @@ def two_spatial_signals_plot(images, mask, dem, tcs_dc, tcs_all, t_baselines_dc,
         
     """
     
-    # 1: First figure is simpler as only use daisy chain time courses
-    plot_spatial_signals(images.T, mask, tcs_dc.T, mask.shape, title = f"{title}_time",
-                         temporal_baselines = t_baselines_dc, ifg_dates_dc = ifg_dates_dc, **fig_kwargs)                      # the usual plot of the sources and their time courses (ie contributions to each ifg)                              
+    # 1: First figure is just sources and their cumulative time courses
+    plot_spatial_signals(images.T, mask, tcs_dc.T, mask.shape, title = f"{title}_time",                                     # note that uses incremental (daisy chain) time courses and coverts these to cumulative.  
+                         temporal_baselines = t_baselines_dc, ifg_dates_dc = ifg_dates_dc, **fig_kwargs)                      # 
 
     # 2: Second figure may have access to all interfergram time courses and temporal baselines, but may also not.          
     if t_baselines_all is not None:

@@ -339,7 +339,7 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
     if not load_fastICA_results:
        print(f"No results were found for the multiple ICA runs, so these will now be performed.  ")
        S_hist, A_hist = perform_multiple_ICA_runs(n_comp, X_mc, bootstrapping_param, ica_param,
-                                                  x_white, PC_dewhiten_mat, ica_verbose) 
+                                                  x_white, PC_dewhiten_mat, ica_verbose)                                                    # slow part that runs FastICA multiple times.  
        with open(out_folder / 'FastICA_results.pkl', 'wb') as f:
             pickle.dump(S_hist, f)
             pickle.dump(A_hist, f)
@@ -356,15 +356,14 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
                             f" FastICA results that are being loaded are from a different set of data.  If not, something "
                             f" is inconsitent with the mask and the coherent pixels.  Exiting.  ")
 
-    
     # 3: Convert the sources from lists from each run to a single matrix.  
     if spatial:
         if sica_tica == 'sica':                                                               # if its spatial dat and sica, sources are images
             sources_all_r2, sources_all_r3 = sources_list_to_r2_r3(S_hist, mask)                            # convert to more useful format.  r2 one is (n_components x n_runs) x n_pixels, r3 one is (n_components x n_runs) x ny x nx, and a masked array
         elif sica_tica == 'tica':
-            sources_all_r2 = S_hist[0]                                                                      # get the sources recovered by the first run
+            sources_all_r2 = S_hist[0]                                                                      # get the sources recovered by the first run.  Note that these are 1d displacments for a pixel through time.  
             for S_hist_one in S_hist[1:]:                                                                   # and then loop through the rest
-                sources_all_r2 = np.vstack((sources_all_r2, S_hist_one))                                    # stacking them vertically.  
+                sources_all_r2 = np.vstack((sources_all_r2, S_hist_one))                                    # stacking them vertically onto the original array.  
     else:                                                                                               # else they're time courses.  
         sources_all_r2 = S_hist[0]                                                                      # get the sources recovered by the first run
         for S_hist_one in S_hist[1:]:                                                                   # and then loop through the rest
@@ -405,7 +404,7 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
                                 fig_filename = plot_2d_labels['title'], **fig_kwargs)
 
 
-
+    
     # 5: Make time courses using centrotypes (i.e. S_ica, the spatial patterns found by ICA), or viceversa if tICA 
     if spatial: 
         if sica_tica == 'sica':
@@ -418,23 +417,21 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
                                                                                                           A_ica_dc, A_ica_all, ifgs_dc.t_baselines, ifgs_all.t_baselines,
                                                                                                           "03_ICA_sources", spatial_data['ifg_dates_dc'], fig_kwargs)
         elif sica_tica == 'tica':
-            S_ica_cum = S_ica                                                                                                                                     # if temporal, sources are time courses, and are for the cumulative ifgs (as the transpose of these was given to the ICA function)
-            S_ica_dc = np.diff(S_ica_cum, axis = 1, prepend = 0)                                                                                                  # the diff of the cumluative time courses is the incremnetal (daisy chain) time course.  Prepend a 0 to make it thesame size as the original diays chain (ie. the capture the difference between 0 and first value).  
+            S_ica_cum = S_ica                                                                                                                                     # if temporal, sources are time courses, and are for the cumulative ifgs (as the transpose of these was given to the ICA function).  Note that these each have a mean of 0
+            S_ica_dc = np.diff(S_ica_cum, axis = 1, prepend = 0)                                                                                                  # the diff of the cumluative time courses is the incremnetal (daisy chain) time course.  Prepend a 0 to make it thesame size as the original diays chain (ie. the capture the difference between 0 and first value).  Note that these are no longer each mean centered
             del S_ica           
-            inversion_results = bss_components_inversion(S_ica_cum, [ifgs_cum.mixtures_mc_time.T])                                                                # inversion to fit the time series for each pixel (why it's the transpose), using the sources which are time courses (as its tICA)
-            A_ica = inversion_results[0]['tcs']                                                                                                                   # in tICA, spatial sources are row vectors.  
+            inversion_results = bss_components_inversion(S_ica_cum, [ifgs_cum.mixtures_mc_time.T])                                                                # inversion to fit the time series for each pixel (why it's the transpose), using the sources which are time courses (as its tICA).  Note that eveything here is mean centered in time
+            A_ica = inversion_results[0]['tcs']                                                                                                                   # in tICA, spatial sources are row vector (ie these are the images)
             source_residuals = inversion_results[0]['residual']                                                                                                   # how well the cumulative time courses are fit?  Not clear.  
             if fig_kwargs['figures'] != "none":
-                dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons = two_spatial_signals_plot(A_ica, spatial_data['mask'], spatial_data['dem'], 
+                dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons = two_spatial_signals_plot(A_ica, spatial_data['mask'], spatial_data['dem'],                           # here A are the images, simply the result of the inversion and no consideration given to their mean
                                                                                                         S_ica_dc.T, S_ica_cum.T, ifgs_dc.t_baselines, ifgs_cum.t_baselines,          # 
                                                                                                         "03_ICA_sources", spatial_data['ifg_dates_dc'], fig_kwargs)                    
-
     else:
         inversion_results = bss_components_inversion(S_ica, [X_mc])                                                 # invert to fit the mean centered mixture.    
         source_residuals = inversion_results[0]['residual']                                                         # how well we fit those
         A_ica = inversion_results[0]['tcs'].T                                                                       # and the time coruses to remake them.                  
         plot_temporal_signals(S_ica, '04_ICASAR_sources', **fig_kwargs)
-                
  
      
     # 7: Possibly geocode the recovered sources and make a Google Earth file.     
@@ -442,9 +439,9 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
         if ge_kmz:
             print('Creating a Google Earth .kmz of the geocoded independent components... ', end = '')
             if sica_tica == 'sica':
-                S_ica_r3 = r2_to_r3(S_ica, mask)
+                S_ica_r3 = r2_to_r3(S_ica, mask)                                                                                                        # if sica, sources (S) are images
             elif sica_tica == 'tica':
-                S_ica_r3 = r2_to_r3(A_ica, mask)
+                S_ica_r3 = r2_to_r3(A_ica, mask)                                                                                                            # but if tica, time courses (A) are images.  
             r2_arrays_to_googleEarth(S_ica_r3, spatial_data['lons'], spatial_data['lats'], 'IC', out_folder = out_folder)                              # note that lons and lats should be rank 2 (ie an entry for each pixel in the ifgs)
             print('Done!')
     
@@ -483,16 +480,40 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
                   'xy' : xy_tsne       }
     print('Saving the key results as a .pkl file... ', end = '')                                            # note that we don't save S_all_info as it's a huge file.  
     if spatial:
-        with open(out_folder / 'ICASAR_results.pkl', 'wb') as f:
+        with open(out_folder / 'ICASAR_results.pkl', 'wb') as f:                            # first save spatial patterns, then time courses (incremental, not cumulative)
             if sica_tica == 'sica':
-                pickle.dump(S_ica, f)
+                pickle.dump(S_ica, f)                                                       # spatial patterns are row vectors
             elif sica_tica == 'tica':
-                pickle.dump(A_ica, f)                                                       # spatial images are in A
+                pickle.dump(A_ica, f)                                                       # spatial images are in A, neither mean centered in time or space
             pickle.dump(mask, f)
-            if sica_tica == 'sica':
-                pickle.dump(A_ica_dc, f)
+            if sica_tica == 'sica':                             
+                pickle.dump(A_ica_dc, f)                                                    # time courses
             elif sica_tica == 'tica':
-                pickle.dump(S_ica_dc.T, f)                                                  # time courses are sourcesa and in S
+                pickle.dump(S_ica_dc.T, f)                                                  # time courses are sources and in S.  Note that because these are incremental, they are no longer mean centered.  
+
+            # ##
+        
+            # # S_ica_cum = S_ica                                                                                                                                     # if temporal, sources are time courses, and are for the cumulative ifgs (as the transpose of these was given to the ICA function).  Note that these each have a mean of 0
+            # # S_ica_dc = np.diff(S_ica_cum, axis = 1, prepend = 0)                                                                                                  # the diff of the cumluative time courses is the incremnetal (daisy chain) time course.  Prepend a 0 to make it thesame size as the original diays chain (ie. the capture the difference between 0 and first value).  Note that these are no longer each mean centered
+            # # del S_ica           
+            
+            # d = np.mean(S_ica_cum, axis = 1)                    # means are 0 (within floating point accuracy)
+            # a = np.diff(S_ica_cum, axis = 1)                                                                                                  # the diff of the cumluative time courses is the incremnetal (daisy chain) time course.  Prepend a 0 to make it thesame size as the original diays chain (ie. the capture the difference between 0 and first value).  Note that these are no longer each mean centered
+            # b = np.cumsum(a, axis = 0)
+            # c = np.mean(b, axis = 1)
+        
+            # a = np.arange(1, 10)
+            # a = a- np.mean(a)
+            # b = np.diff(a)
+            # c = np.cumsum(b)
+
+        
+            # S_ica_c = np.cumsum(S_ica_dc, axis = 0)
+            # means = np.mean(S_ica_c, axis = 1)
+            
+            # means_c = np.mean(S_ica_cum, axis = 1)
+
+            # # end debug
 
             pickle.dump(source_residuals, f)
             pickle.dump(Iq_sorted, f)
@@ -503,6 +524,8 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
                 pickle.dump(label_sources_output, f)
         f.close()
         print("Done!")
+        
+
 
         if sica_tica == 'sica':
             if label_sources:
