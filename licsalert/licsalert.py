@@ -473,8 +473,27 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
     
     # 1: Downsample the ifgs for use in all following functions.  
     if downsample_run != 1.0:                                                                                                                       # if we're not actually downsampling, skip for speed
-        displacement_r2["incremental"], displacement_r2["mask"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
+        displacement_r2["incremental"], displacement_r2["mask"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],          # downsample just the ifgs and their mask.  Uses: from skimage.transform import rescale
                                                                                   downsample_run, verbose = False)
+        
+        # remake lons and lats at new resolution
+        if ('lons' in displacement_r2) and ('lats' in displacement_r2):                                             # check if we have lon lat data as not alway strictly necessary.  
+            ifg1 = col_to_ma(displacement_r2['incremental'][0,:], pixel_mask = displacement_r2['mask'])             # get the size of a new ifg (ie convert the row vector to be a rank 2 masked array.  )
+            lons = np.linspace(displacement_r2['lons'][0,0], displacement_r2['lons'][-1,-1], ifg1.shape[1])          # remake the correct number of lons (to suit the number of pixels in the new ifgs, first as 1d
+            displacement_r2['lons'] = np.repeat(lons[np.newaxis, :], ifg1.shape[0], axis = 0)                       # then as 2D
+            lats = np.linspace(displacement_r2['lats'][0,0], displacement_r2['lats'][-1,0], ifg1.shape[0])          # remake the correct number of lats (to suit the number of pixels in the new ifgs, first as 1d
+            displacement_r2['lats'] = np.repeat(lats[:, np.newaxis], ifg1.shape[1], axis = 1)                       # then as 2D
+            if displacement_r2['lats'][0,0] < displacement_r2['lats'][-1,0]:                                        # if the lat in the top row is less than the lat in the bottom row
+                displacement_r2['lats'] = np.flipud(displacement_r2['lats'])                                        # something is reveresed, so flip up down so that the highest lats are in the top row.  
+            
+        # also downsample other simple data if it's included:
+        for product in ['dem', 'E', 'N', 'U']: 
+            if product in displacement_r2.keys():
+                displacement_r2[product] = rescale(displacement_r2[product], downsample_run, anti_aliasing = False)                               # do the rescaling
+            
+    # 2: Downsample further for plotting.  
+    displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
+                                                                                                      downsample_plot, verbose = False)
     
     
 
@@ -512,41 +531,26 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
     # matrix_show(col_to_ma(np.cumsum(ifg_ts.mixtures_mc_time, axis = 0)[-2,], displacement_r2['mask']))          # noise and zeros
     
     
-    # 2: mean centre in time or space, according to if sica or tica (must be done after downsampling for accuracy)
+    # 3: mean centre in time or space, according to if sica or tica (must be done after downsampling for accuracy)
     ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])            # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)
-    del displacement_r2['incremental']
+    #displacement_r2['ifg_ts'] = ifg_ts                                                                      # put the whole object in the dict.  
     
-    displacement_r2['ifg_ts'] = ifg_ts                                                                      # put the whole object in the dict.  
     
+    displacement_r2['incremental_mc_space'] = ifg_ts.mixtures_mc_space
+    displacement_r2['means_space'] = ifg_ts.means_space
+    
+
+    displacement_r2['incremental_mc_time'] = ifg_ts.mixtures_mc_time
+    displacement_r2['means_time'] = ifg_ts.means_time
+
     if sica_tica == 'sica':
-        displacement_r2['incremental'] = ifg_ts.mixtures_mc_space
+        displacement_r2['mixtures_mc'] = ifg_ts.mixtures_mc_space
         displacement_r2['means'] = ifg_ts.means_space
-        print(f"The data have been mean centered in space for use with sICA")
     elif sica_tica == 'tica':
-        displacement_r2['incremental'] = ifg_ts.mixtures_mc_time
+        displacement_r2['mixtures_mc'] = ifg_ts.mixtures_mc_time
         displacement_r2['means'] = ifg_ts.means_time
-        print(f"The data have been mean centered in time for use with tICA")
     else:
         raise Exception(f"'sica_tica' can be either 'sica' or 'tica', but not {sica_tica}.  Exiting.  ")
-
-
-    # 3: Downsample for plotting
-    displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
-                                                                                                      downsample_plot, verbose = False)
-    # 3: Downsample the geocode info (if provided) in the same was as step 1:
-    if ('lons' in displacement_r2) and ('lats' in displacement_r2):                                             # check if we have lon lat data as not alway strictly necessary.  
-        ifg1 = col_to_ma(displacement_r2['incremental'][0,:], pixel_mask = displacement_r2['mask'])             # get the size of a new ifg (ie convert the row vector to be a rank 2 masked array.  )
-        lons = np.linspace(displacement_r2['lons'][0,0], displacement_r2['lons'][-1,-1], ifg1.shape[1])          # remake the correct number of lons (to suit the number of pixels in the new ifgs, first as 1d
-        displacement_r2['lons'] = np.repeat(lons[np.newaxis, :], ifg1.shape[0], axis = 0)                       # then as 2D
-        lats = np.linspace(displacement_r2['lats'][0,0], displacement_r2['lats'][-1,0], ifg1.shape[0])          # remake the correct number of lats (to suit the number of pixels in the new ifgs, first as 1d
-        displacement_r2['lats'] = np.repeat(lats[:, np.newaxis], ifg1.shape[1], axis = 1)                       # then as 2D
-        if displacement_r2['lats'][0,0] < displacement_r2['lats'][-1,0]:                                        # if the lat in the top row is less than the lat in the bottom row
-            displacement_r2['lats'] = np.flipud(displacement_r2['lats'])                                        # something is reveresed, so flip up down so that the highest lats are in the top row.  
-        
-    # 4: and also downsample other simple data if it's included:
-    for product in ['dem', 'E', 'N', 'U']: 
-        if product in displacement_r2.keys():
-            displacement_r2[product] = rescale(displacement_r2[product], downsample_run, anti_aliasing = False)                               # do the rescaling
         
         
     print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
@@ -766,9 +770,9 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
     n_times = sources_tcs[0]['cumulative_tc'].shape[0]
     n_pixels = displacement_r2['incremental'].shape[1]
     
-    A = np.zeros((n_times, n_sources))
+    A = np.zeros((n_times, n_sources))                                                                                                      # initialise
     for n_source in range(n_sources):
-        A[:, n_source] = np.ravel(ics_one_hot[n_source] *  sources_tcs[n_source]['cumulative_tc'])
+        A[:, n_source] = np.ravel(ics_one_hot[n_source] *  sources_tcs[n_source]['cumulative_tc'])                                          # multiply by 1 or 0 to include or not, and then put as column in matrix.  
     S = aux_data['icasar_sources']
     
     if displacement_r2['means'].shape[0] == n_times:                                   # mean for each pixel means sICA was run
@@ -783,6 +787,7 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
 
 
 #%%
+
 
 
 
@@ -829,7 +834,7 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, b
     if run_ICASAR:
         print(f"\nRunning ICASAR.")                                      
         
-        spatial_ICASAR_data = {'ifgs_dc'       : displacement_r2['incremental'][:(baseline_end_ifg_n+1),],                             # only take up to the last.  ICASAR will deal with transposing this if it's tica
+        spatial_ICASAR_data = {'ifgs_dc'       : displacement_r2['mixtures_mc'][:(baseline_end_ifg_n+1),],                             # the mixtures, mean centered (either in time or space)
                                'mask'          : displacement_r2['mask'],
                                'lons'          : displacement_r2['lons'],
                                'lats'          : displacement_r2['lats'],
