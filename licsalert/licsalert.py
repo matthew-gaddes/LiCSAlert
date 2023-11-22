@@ -741,10 +741,42 @@ def write_volcano_status(sources_tcs_baseline, residual_tcs_baseline, ics_labels
 
 #%%
 
+
+def reconstruct_ts_from_dir(ics_one_hot, licsalert_out_dir):
+    """
+    Simple wrapper to open the data required to reconstruct the cumulative time series.  
+    Inputs:
+        ics_one_hot | list | one hot encoding for which components to use in the reconstruction.  Must be tthe same length as the number of sources. 
+                            If set to 1, that IC is used in the reconstruction.  
+                            If set to 0, that IC is not used in the reconstruction.  
+                            E.g. [1,0,0] to use onlyl IC0 and to ignore IC1 and IC2
+        licsalert_out_dir | pathlib Path | path to directory containing the results of LiCSAlert run.  
+    Returns:
+        X_r3 | rank 3 masked array | n_times x ny x nx.  Reconstrutcion of the original data.  All mean centering in space or time has been undone, giving
+                                     data that should be very close to the input data.  
+    History:
+        2023_11_22 | MEG | Written.  
+    """
+    
+    from licsalert.licsalert import reconstruct_ts
+    from licsalert.data_importing import open_aux_data, open_tcs
+    from licsalert.aux import r2_to_r3
+    
+    displacement_r2, tbaseline_info, aux_data = open_aux_data(licsalert_out_dir)
+    sources_tcs = open_tcs(licsalert_out_dir)    
+
+    if len(sources_tcs) != len(ics_one_hot):
+        raise Exception(f"There are {len(sources_tcs)}, but ics_one_hot is {len(ics_one_hot)} items long.  These must match to continue.  Exiting.")
+
     
 
-
+    X_r2 = reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2)                             # this returns a rank 2, n_times x n_pixels, of the cumulative data.  
+    X_r3 = r2_to_r3(X_r2, displacement_r2['mask'])                                                          # conver to a rank 3 masked array (i.e. n_times x ny x nx)
     
+    return X_r3
+
+#%%
+
 def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
     """ Reconstruct a LiCSAlert cumulative time series form the ICs and cumulative time course using a choice of components.
     Automatically detects if sICA or tICA was run and handles mean centering accordingly.  

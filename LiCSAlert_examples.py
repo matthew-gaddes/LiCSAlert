@@ -16,6 +16,7 @@ import pdb
 import licsalert
 from licsalert.monitoring_functions import LiCSAlert_monitoring_mode
 from licsalert.plotting import licsalert_results_explorer
+from licsalert.licsalert import reconstruct_ts_from_dir
 
 
 
@@ -84,14 +85,14 @@ volcano = '001_campi_flegrei_example'                                           
 licsbas_dir = Path("./022D_04826_121209_campi_flegrei")                                         # input data
 
 
-LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
-                          licsbas_dir = licsbas_dir,
-                          licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
-
-
-
+# LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
+#                           licsbas_dir = licsbas_dir,
+#                           licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
 
 licsalert_results_explorer(outdir / volcano, fig_width = 18)                                                 # use this function to explore the results
+
+ics_one_hot = [1, 1, 1, 1, 1]                                                                   # One hot encoding of which sources to use in the reconstruction.  1 means used, 0 means not.  list must be the same length as the number of ICs.  
+X_r3 = reconstruct_ts_from_dir(ics_one_hot, outdir / volcano)                               # return the cumualtive interferograms reconstrutced using the ICs selected above.  All mean centering has been removed.  
 
 
 #%%
