@@ -413,8 +413,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         plt.switch_backend('Qt5Agg')                                                           #  
 
 
-#%%
-
+#%% interactive figure removed rom here
 
 
 def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
@@ -423,6 +422,22 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     Inputs:
         licsalert_out_dir | pathlib Path | path to directory of LiCSAlert results.   e.g. Path("./../001_campi_flegrei_example")
         fig_width | int | figure width in inches.  Height is set relative to this and optimised for display on two FHD screens (i.e. 2 x 1920 x 1080)
+        
+        
+    Functions used:
+        
+        replot_on_ic_select(label)              - just seems to be a string of the name of the IC that is selected.  
+        replot_on_pixel_select(event, rax, check)# event is the click, rax is the axes for the radio button, check is the radio button
+            
+        
+        
+        plot_ts()
+        plot_original_reconstruction()
+        
+        
+        # things to keep track of:
+            - ICs
+            - pixel
     
     """
     
@@ -438,7 +453,50 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     from licsalert.aux import r2_to_r3, moving_average, col_to_ma
     
     
-    def plot_original_reconstruction_dem(fig, ax_orig, ax_reco, ax_dem, cax_def, cax_dem, cumulative_r2, cumulative_reco_r2, displacement_r2, pixel):
+    def plot_ics_ctcs(f, grid, cbar_ax, icasar_sources, mask, sources_tcs, acq_dates, baselines_cumulative):
+        """ Plot the ICs and their cumulative time courses.  
+        """
+        ax_ics = []
+        ## Plot the ICs 
+        vmin = np.min(icasar_sources)
+        vmax = np.max(icasar_sources)
+        for source_n, source in enumerate(icasar_sources):
+            # plot spatial pattern
+            ax_ic = plt.Subplot(f, grid[source_n, 0])                                                # a thin but wide axes for all the thumbnail ifgs along the top to go in
+            ax_ics.append(ax_ic)
+            ic = ax_ic.matshow(col_to_ma(source, mask), vmin = vmin, vmax = vmax)                         # Plot the raw data last cumulative ifg.  
+            ax_ic.set_title(f'IC {source_n}: On')
+            ax_ic.set_xticks([])
+            ax_ic.set_yticks([])
+            f.add_subplot(ax_ic)
+            
+            # plot the cumulative tc
+            ax_ctc = plt.Subplot(f, grid[source_n, 1:5])                                                # a thin but wide axes for all the thumbnail ifgs along the top to go in
+            ctc = np.concatenate((np.array([[0]]), sources_tcs[source_n]['cumulative_tc']), axis = 0)
+            ctc_smooth, valid = moving_average(ctc)                                                           # smooth it 
+            ax_ctc.scatter(np.concatenate((np.array([0]), baselines_cumulative)), ctc, alpha = 0.4, marker = '.', s = 2) 
+            ax_ctc.plot(np.concatenate((np.array([0]), baselines_cumulative)), ctc_smooth)                                   # and the smoothed one as a line
+            ax_ctc.axhline(0, c = 'k')
+            ax_ctc.grid(True)
+            ax_ctc.yaxis.tick_right()
+            ax_ctc.tick_params(axis='both', which='both', labelsize=8)
+            f.add_subplot(ax_ctc)
+            
+            if source_n == (n_sources - 1):
+                include_tick_labels = True
+            else:
+                include_tick_labels = False
+            xticks_every_nmonths(ax_ctc, acq_dates[0], baselines_cumulative, include_tick_labels = include_tick_labels, 
+                                  major_ticks_n_months = 12, minor_ticks_n_months = 1)
+            
+        f.colorbar(ic, cax = cbar_ax, orientation = 'horizontal')                                    # ICs colorbar, tick only 0 and the max (and check max is not a nan)
+        cax_ics.tick_params(axis='both', which='major', labelsize=8, rotation = 315)                                               #
+        cax_ics.set_xlabel('IC')            
+        return ax_ics
+    
+    
+    def plot_original_reconstruction_dem_resid(fig, ax_orig, ax_reco, ax_resid, ax_dem, 
+                                         cumulative_r2, cumulative_reco_r2, displacement_r2, pixel):
         """ Make the three plots that show the raw signal (from the input time series) and the reconstruction using various 
         IC components, and the DEM.  
         
@@ -446,8 +504,6 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
             ax_orig | matplotlib axes | axes to plot the orignal data on
             ax_reco | matplotlib axes | axes to plot the reconstruction data on
             ax_dem  | matplotlib axes | axes to plot the DEM on
-            cax_dem | matplotlib axes | axes  for the horizontal colorbar for DEM
-            cax_def | matplotlib axes | axes  for the horizontal colorbar for deformaiton (original and reconstruction)
             
             cumulative_r2 | r2 array | cumulative ifgs as row vectors.  
             cumulative_reco_r2 | r2 array | cumulative ifgs as row vectors, reconstructed using the ICs
@@ -461,51 +517,44 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         #from matplotlib import ticker
         from licsalert.plotting import truncate_colormap
         
-        for ax in [ax_orig, ax_reco, ax_dem]:
+        
+        #data = [displacement_r2["dem"], cumulative_r2[-1,], cumulative_reco_r2[-1,], (cumulative_r2 - cumulative_reco_r2)[-1,]]
+        axs = [ax_dem, ax_orig, ax_reco, ax_resid]
+        names = ['DEM', 'Original', 'Reconstruction', 'Residual']
+        
+        for ax, name in zip(axs, names):
+
             ax.clear()
             
-        vmin = np.min(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
-        vmax = np.max(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
-        
-        reconstruction = ax_reco.matshow(col_to_ma(cumulative_reco_r2[-1,], displacement_r2['mask']), vmin = vmin, vmax = vmax)             # Plot the reconstructed last cumulative ifg.  
-        ax_reco.scatter(pixel['x'], pixel['y'], s = 20, c = 'r', marker = 'x')
-        ax_reco.set_ylabel('Reconstruction')        
+            if  name in ['Original', 'Reconstruction']:
+
+                vmin = np.min(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
+                vmax = np.max(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
+                if name == 'Original':
+                    data_plotted = ax.matshow(col_to_ma(cumulative_r2[-1,], displacement_r2['mask']), vmin = vmin, vmax = vmax)             # Plot the reconstructed last cumulative ifg.  
+                else:
+                    data_plotted = ax.matshow(col_to_ma(cumulative_reco_r2[-1,], displacement_r2['mask']), vmin = vmin, vmax = vmax)             # Plot the reconstructed last cumulative ifg.  
+            elif name == 'DEM':
+                terrain_cmap = plt.get_cmap('terrain')                                                                                  # appropriate colours for a dem
+                terrain_cmap = truncate_colormap(terrain_cmap, 0.2, 1)                                                                  # but crop (truncate) the blue parts as we are only interested in land
+                data_plotted = ax_dem.matshow(displacement_r2["dem"], cmap = terrain_cmap)                                                   # plot the DEM
+            else:
+                data_plotted = ax.matshow(col_to_ma((cumulative_r2[-1,] - cumulative_reco_r2[-1,]), displacement_r2['mask']))             # Plot the reconstructed last cumulative ifg.  
+
+            ax.scatter(pixel['x'], pixel['y'], s = 20, c = 'r', marker = 'x')
+
+            # cbar
+            cax = ax.inset_axes([0.25, 0.0, 0.5 ,0.05]) 
+            fig.colorbar(data_plotted, cax=cax, orientation='horizontal')
+            cax.xaxis.set_ticks_position('top')
+            f.text(0.01, 0.99, name, ha='left', va='top',
+                   transform = ax.transAxes, color  = 'tab:orange')
             
-        original = ax_orig.matshow(col_to_ma(cumulative_r2[-1,], displacement_r2['mask']), vmin = vmin, vmax = vmax)                         # Plot the raw data last cumulative ifg.  
-        ax_orig.scatter(pixel['x'], pixel['y'], s = 20, c = 'r', marker = 'x')
-        ax_orig.set_ylabel('Cumulative\nInterferogram')
-        
-        for ax in [ax_reco, ax_orig]:
             ax.set_xticks([])
             ax.set_yticks([])
             fig.add_subplot(ax)
-            
-        # : Plot the colorbar
-        ics_cbar = fig.colorbar(original, cax=cax_def, orientation='horizontal')
-        tick_locator = ticker.MaxNLocator(nbins=4)
-        ics_cbar.locator = tick_locator
-        ics_cbar.update_ticks()
-        ics_cbar.set_label('LOS displacement (m)')
-        
-        # plot the DEM
-        terrain_cmap = plt.get_cmap('terrain')                                                                                  # appropriate colours for a dem
-        terrain_cmap = truncate_colormap(terrain_cmap, 0.2, 1)                                                                  # but crop (truncate) the blue parts as we are only interested in land
-        dem_plot = ax_dem.matshow(displacement_r2["dem"], cmap = terrain_cmap)                                                   # plot the DEM
-        ax_dem.tick_params(axis='both', which='major', labelsize=7)                                                             # adjust fontsize
-        ax_dem.tick_params(axis='both', which='minor', labelsize=7)
-        ax_dem.set_xticks([0, displacement_r2['dem'].shape[1]])                                                                 # tick only the min and max in each direction
-        ax_dem.set_yticks([0, displacement_r2['dem'].shape[0]])
-        ax_dem.set_xticklabels([str(round(displacement_r2['lons'][-1,0], 2)) + "$^\circ$", str(round(displacement_r2['lons'][-1,-1], 2)) + "$^\circ$" ])
-        ax_dem.set_yticklabels([str(round(displacement_r2['lats'][0,0], 2))  + "$^\circ$", str(round(displacement_r2['lats'][-1,0], 2)) + "$^\circ$"])
-        ax_dem.yaxis.tick_right()
-        ax_dem.scatter(pixel['x'], pixel['y'], s = 20, c = 'r', marker = 'x')
-        fig.add_subplot(ax_dem)
-        
-        fig.colorbar(dem_plot, cax = cax_dem, orientation = 'horizontal')                                    # colorbar, tick only 0 and the max (and check max is not a nan)
-        cax_dem.tick_params(axis='both', which='major', labelsize=8, rotation = 315)                                               #
-        cax_dem.set_xlabel('DEM (m)')            
     
-        
+
     
     
     def plot_ts(fig, ax_ts, cumulative_r2, cumulative_reco_r2, mask, tbaseline_info, pixel):
@@ -524,12 +573,9 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
             Plot in axes
         History:
             2023 | MEG | Written
-    
         """
-        
         from licsalert.aux import r2_to_r3, moving_average
-        from licsalert.plotting import xticks_every_nmonths
-        
+        #from licsalert.plotting import xticks_every_nmonths
         
         data_colours = ['tab:purple', 'tab:orange']
         data_names = ['Original', 'Reconstruction']
@@ -546,7 +592,7 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
                           ts, alpha = 0.4, marker = '.', s = 4, 
                           label = data_names[i], c = data_colours[i])                                       # plot each point for the 
             ax_ts.plot(np.concatenate((np.array([0]), tbaseline_info['baselines_cumulative'])),
-                       ts_smooth, c = data_colours[i])                                   # and the smoothed one as a line
+                        ts_smooth, c = data_colours[i])                                   # and the smoothed one as a line
         
         
         ax_ts.axhline(0, c = 'k')
@@ -557,40 +603,46 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         ax_ts.set_ylabel("LOS displacemnt (m)")
         
         xticks_every_nmonths(ax_ts, tbaseline_info['acq_dates'][0], tbaseline_info['baselines_cumulative'], include_tick_labels = True, 
-                             major_ticks_n_months = 12, minor_ticks_n_months = 1)
+                              major_ticks_n_months = 12, minor_ticks_n_months = 1)
     
         ax_ts.legend()
-
-    def replot_on_pixel_select(event):
+    
+    def replot_on_click(event): #, rax, check):
         """ When the selected pixel changes, replot the time series for that point and the three images with a point showing where was clicked.  
         """
-        
-        button=event.button
-        if (event.inaxes is ax_reco) or (event.inaxes is ax_cum) or (event.inaxes is ax_dem):                          # check we are in axes as otherwise there's no meaning to click position in data coords.  
-            pixel['x'] = int(event.xdata)                                                                               # get the data coords of where we clicked and update hte dict.  
-            pixel['y'] = int(event.ydata)
-            ax_ts.clear()                                                                                               # remove previous plot
-            plot_ts(f, ax_ts, cumulative_r2, cumulative_reco_r2,        
-                    displacement_r2['mask'], tbaseline_info,  pixel)                                                    # plot the time series for that pixel in original and reconstruction.  
-        
-            plot_original_reconstruction_dem(f, ax_cum, ax_reco, ax_dem, cax_def, cax_dem, 
-                                             cumulative_r2, cumulative_reco_r2, displacement_r2, pixel)         # also replot the images with a cross on the selected point.  
-            plt.draw()
+        if (event.inaxes is ax_reco) or (event.inaxes is ax_cum) or (event.inaxes is ax_dem) or (event.inaxes is ax_resid):                          # check we are in axes as otherwise there's no meaning to click position in data coords.  
+            figure_status['pixel']['x'] = int(event.xdata)                                                                               # get the data coords of where we clicked and update hte dict.  
+            figure_status['pixel']['y'] = int(event.ydata)
+            replot()
+            
+            
+        for ic_n, ax in enumerate(figure_status['ic_axs']):
+            if event.inaxes is ax:
+                figure_status['ic_status'][ic_n] = not figure_status['ic_status'][ic_n]                     # switch from on to off, or off to on.  
+                if figure_status['ic_status'][ic_n]:
+                    ax.set_title(f"IC {ic_n}: On")
+                else:
+                    ax.set_title(f"IC {ic_n}: Off")
+                    
+                cumulative_reco_r2 = reconstruct_ts(figure_status['ic_status'], sources_tcs, aux_data, displacement_r2)                               # make the time series with those sources.
+                cumulative_reco_r2 = np.concatenate((np.zeros((1, n_pixels)), cumulative_reco_r2))                                     # add zero to first acquisition
+                figure_status['cumulative_reco_r2'] = cumulative_reco_r2                                                            # store in the mutable object
+                replot()
+                
+                
     
-    def replot_on_ic_select(label):
-        """ When the ICs selected changes, replot the reconstruction and the time series using those ICs.  
+    def replot():
+        """ When an update to the figure is required, replot the images and the time series for a pixel.  
         """
-        ics_one_hot = [1 if status else 0 for status in check.get_status()]                                                    # convert boolean to ints and work out which buttons are currently selected
-        cumulative_reco_r2 = reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2)                               # make the time series with those sources.
-        cumulative_reco_r2 = np.concatenate((np.zeros((1, n_pixels)), cumulative_reco_r2))                                     # add zero to first acquisition
-        plot_original_reconstruction_dem(f, ax_cum, ax_reco, ax_dem, cax_def, cax_dem, 
-                                         cumulative_r2, cumulative_reco_r2, displacement_r2, pixel)                    # plot the images with the new reconsrution.   
+        plot_original_reconstruction_dem_resid(f, ax_cum, ax_reco, ax_resid, ax_dem, 
+                                          cumulative_r2, figure_status['cumulative_reco_r2'], 
+                                          displacement_r2, figure_status['pixel'])                            # plot the images with the new reconsrution.   
         ax_ts.clear()                                                                                                          # clear the time series plot ready for new plot
-        plot_ts(f, ax_ts, cumulative_r2, cumulative_reco_r2,    
-                displacement_r2['mask'], tbaseline_info, pixel)                                                                 # replot the time series using the new reconstruction.  
+        plot_ts(f, ax_ts, cumulative_r2, figure_status['cumulative_reco_r2'],    
+                displacement_r2['mask'], tbaseline_info, figure_status['pixel'])                                                                 # replot the time series using the new reconstruction.  
+    
         plt.draw()
     
-
       
     # 1: Open data and some simple processing 
     displacement_r2, tbaseline_info, aux_data = open_aux_data(licsalert_out_dir)
@@ -602,35 +654,10 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     cumulative_r2 = np.concatenate((np.zeros((1, n_pixels)), np.cumsum(displacement_r2['incremental'], axis = 0)), axis = 0)                                                 # calculate the cumulative displacments, 0 on first acquisition
     cumulative_reco_r2 = np.concatenate((np.zeros((1, n_pixels)), reconstruct_ts([1 for i in range(n_sources)], sources_tcs, aux_data, displacement_r2)), axis = 0)          # reconstruct the data using all the sources, 0 on first acquisition
     cumulative_r3 = r2_to_r3(cumulative_r2, displacement_r2['mask'])                                                                                                         # conver to rank 3
+    t, y, x = np.unravel_index(np.argmax(cumulative_r3), cumulative_r3.shape)                                                                                                # which makes finding the pixel of maximum deformation easy
+    pixel = {'x' : x, 'y' : y}                                                                                                                                              # first pixel to plot will be maximum deformation
+    del t, y, x, cumulative_r3                                                                                                                                                  # remove un-needed
     
-    
-    #% debugging
-    # pdb.set_trace()
-    # plt.switch_backend('qt5agg')
-    
-    # matrix_show(col_to_ma(np.sum(displacement_r2['incremental'][:,], axis = 0), displacement_r2['mask']))          # cumulative ifg, shows tiny signal of ~-15cm
-    
-    # for i in range(5):
-    
-    #     matrix_show(col_to_ma(displacement_r2['incremental'][i,], displacement_r2['mask']))                    # 
-    
-    # matrix_show(col_to_ma(cumulative_r2[-1], displacement_r2['mask']))          # noise and zeros
-    # matrix_show(cumulative_r3[-1,])                                             # noise and zeros
-    
-    # cumulative_reco_r3 = r2_to_r3(cumulative_reco_r2, displacement_r2['mask'])                                                                                            # conver to rank 3
-
-    # matrix_show(cumulative_reco_r3[-1,])                    # signal, but very small?
-    
-    
-    ################## end debug %
-    
-    t, y, x = np.unravel_index(np.argmax(cumulative_r3), cumulative_r3.shape)                                                                                   # which makes finding the 
-    pixel = {'x' : x, 'y' : y}
-    del t, y, x, cumulative_r3
-    
-    
-    
-
     # 2: start the figure.      
     f = plt.figure(figsize = (fig_width, fig_width /  (2 * (1920 / 1080))))
     f.canvas.manager.set_window_title('LiCSAlert results visualiser')
@@ -642,65 +669,31 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     grid = gridspec.GridSpec(n_rows, 20, wspace=0.2, hspace=0.2)                                            # 
     
     # create all the axes from the grid
-    ax_cum = plt.Subplot(f, grid[:int(n_sources/2), 10:15])                                                # for the final cumulative ifg.  
-    ax_reco = plt.Subplot(f, grid[int(n_sources/2) : , 10:15])                                             # for the reconstruction of the cumulative ifg.  
+    #pdb.set_trace()
+    ax_cum   = plt.Subplot(f, grid[:int(n_sources/2)+1, 10:15])                                                # for the final cumulative ifg.  
+    ax_reco  = plt.Subplot(f, grid[int(n_sources/2)+1: , 10:15])                                             # for the reconstruction of the cumulative ifg.  
+    ax_dem   = plt.Subplot(f, grid[:int(n_sources/2)+1, 5:10])                                               # for the dem 
+    ax_resid = plt.Subplot(f, grid[int(n_sources/2)+1:, 5:10])                                               # for the residual
     ax_ts = plt.subplot(grid[:5,15:])                                                                      # for the time series of a point in both original and reconstruted.  
-    ax_dem = plt.Subplot(f, grid[int(n_sources/2) : , 5:10])                                               # for the dem 
-    cax_def = f.add_axes([0.535, 0.1, 0.15, 0.02])                                                         # cumulative and reconstruction shared colorbar
-    cax_dem = f.add_axes([0.34, 0.1, 0.15, 0.02])                                                          # dem colorbar 
     cax_ics = f.add_axes([0.125, 0.11, 0.03, 0.02])                                                        # ICs colorbar
-    rax = plt.axes([0.35, 0.6, 0.1, 0.2])                                                                  # radio buttons
-    
     
     # 3: start plotting.  
-    plot_original_reconstruction_dem(f, ax_cum, ax_reco, ax_dem, cax_def, cax_dem, 
-                                     cumulative_r2, cumulative_reco_r2, displacement_r2, pixel)     # plot the cumulative, reconscructcion, and DEM.   
+    plot_original_reconstruction_dem_resid(f, ax_cum, ax_reco, ax_resid, ax_dem, 
+                                      cumulative_r2, cumulative_reco_r2, displacement_r2, pixel)     # plot the cumulative, reconscructcion, and DEM.   
     
     plot_ts(f, ax_ts, cumulative_r2, cumulative_reco_r2, displacement_r2['mask'], tbaseline_info, pixel)    # plot the time series for the point of interest in the two ways.  
     
-    ## Plot the ICs 
-    vmin = np.min(aux_data['icasar_sources'])
-    vmax = np.max(aux_data['icasar_sources'])
-    for source_n, source in enumerate(aux_data['icasar_sources']):
-        # plot spatial pattern
-        ax_ic = plt.Subplot(f, grid[source_n, 0])                                                # a thin but wide axes for all the thumbnail ifgs along the top to go in
-        ic = ax_ic.matshow(col_to_ma(source, displacement_r2['mask']), vmin = vmin, vmax = vmax)                         # Plot the raw data last cumulative ifg.  
-        ax_ic.set_title(f'IC {source_n}')
-        ax_ic.set_xticks([])
-        ax_ic.set_yticks([])
-        f.add_subplot(ax_ic)
-        
-        # plot the cumulative tc
-        ax_ctc = plt.Subplot(f, grid[source_n, 1:5])                                                # a thin but wide axes for all the thumbnail ifgs along the top to go in
-        ctc = np.concatenate((np.array([[0]]), sources_tcs[source_n]['cumulative_tc']), axis = 0)
-        ctc_smooth, valid = moving_average(ctc)                                                           # smooth it 
-        ax_ctc.scatter(np.concatenate((np.array([0]), tbaseline_info['baselines_cumulative'])), ctc, alpha = 0.4, marker = '.', s = 2) 
-        ax_ctc.plot(np.concatenate((np.array([0]), tbaseline_info['baselines_cumulative'])), ctc_smooth)                                   # and the smoothed one as a line
-        ax_ctc.axhline(0, c = 'k')
-        ax_ctc.grid(True)
-        ax_ctc.yaxis.tick_right()
-        ax_ctc.tick_params(axis='both', which='both', labelsize=8)
-        f.add_subplot(ax_ctc)
-        
-        if source_n == (n_sources - 1):
-            include_tick_labels = True
-        else:
-            include_tick_labels = False
-        xticks_every_nmonths(ax_ctc, tbaseline_info['acq_dates'][0], tbaseline_info['baselines_cumulative'], include_tick_labels = include_tick_labels, 
-                             major_ticks_n_months = 12, minor_ticks_n_months = 1)
-        
-    f.colorbar(ic, cax = cax_ics, orientation = 'horizontal')                                    # ICs colorbar, tick only 0 and the max (and check max is not a nan)
-    cax_ics.tick_params(axis='both', which='major', labelsize=8, rotation = 315)                                               #
-    cax_ics.set_xlabel('IC')            
+    ax_ics = plot_ics_ctcs(f, grid, cax_ics, aux_data['icasar_sources'], displacement_r2['mask'], 
+                            sources_tcs, tbaseline_info['acq_dates'], tbaseline_info['baselines_cumulative'])
     
-    # 3:  start the interative bit
-    button_names = [f"IC{i}" for i in range(n_sources)]
-    button_status = [True for i in range(n_sources)]
-    check = CheckButtons(rax, button_names, button_status)
+    # 3:  start the interactive bit
+    figure_status = {'pixel' : pixel,                                                                               # mutable object that is mutated by the interactive functions.  get current pixel that time series is plotted for.  
+                      "cumulative_reco_r2" : cumulative_reco_r2,                                                    # reconsruction using selected ICs (assumed all at first.)
+                      "ic_axs"              : ax_ics,
+                      "ic_status"                 : [True for i in range(n_sources)]}                           # all ICs on at the start
+    
+    cid = f.canvas.mpl_connect('button_press_event', replot_on_click)                   # click on point to plot it.  
 
-    check.on_clicked(replot_on_ic_select)                                                       # check buttons to select which IC
-    cid = f.canvas.mpl_connect('button_press_event', replot_on_pixel_select)                    # click on point to plot it.  
-    
 
 
 
@@ -896,7 +889,7 @@ def xticks_every_nmonths(ax_to_update, day0_date, time_values, include_tick_labe
     import copy
     
     from dateutil.relativedelta import relativedelta                                                    # add 3 months and check not after end
-    import matplotlib.pyplot as plt
+    #import matplotlib.pyplot as plt
 
     
     def create_tick_labels_every_nmonths(day0_date_dt, dayend_date_dt, n_months = 1):
@@ -954,7 +947,7 @@ def xticks_every_nmonths(ax_to_update, day0_date, time_values, include_tick_labe
 
     if include_tick_labels:
         ax_to_update.set_xticklabels(ticks_major['yyyymmdd'], rotation = xtick_label_angle, ha = 'left', size = 8)            # update tick labels, and rotate
-        plt.subplots_adjust(bottom=0.15)
+        #plt.subplots_adjust(bottom=0.15)
         #ax_to_update.set_xlabel('Date')
     else:
         ax_to_update.set_xticklabels([])                                                                    # remove any tick lables if they aren't to be used.  
