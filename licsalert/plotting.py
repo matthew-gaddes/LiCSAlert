@@ -458,7 +458,7 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     import numpy as np
     import matplotlib.pyplot as plt
     from matplotlib import ticker
-    from matplotlib.widgets import CheckButtons
+    #from matplotlib.widgets import CheckButtons
     import matplotlib.gridspec as gridspec
     
     from licsalert.licsalert import reconstruct_ts
