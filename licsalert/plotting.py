@@ -11,8 +11,9 @@ import matplotlib.pyplot as plt
 #%%
 
 
-def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline_end, time_values, day0_date=None,
-                     time_value_end=None, figure_type = 'both', figure_out_dir=None, ifg_xpos_scaler = 15, sources_labels = None,
+def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, 
+                     figure_date, acq_dates, baselines_cs, baseline_end_date, dayend_date = None,
+                     figure_type = 'both', figure_out_dir=None, ifg_xpos_scaler = 15, sources_labels = None,
                      cmap = plt.get_cmap('coolwarm')):
     """
     The main fucntion to draw the LiCSAlert figure.  
@@ -27,12 +28,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         displacement_r2 | dict | contains ifgs as row vectors in "incremental" and their mask ("mask"), and also downsampled versions for faster figures,
                                   and their mask.  Downsampled ones used in plotting!  
         mask | r2 array | to convert an ifg (or source) as a row vector into a rank 2 masked array
-        n_baseline_end | int | number of ifgs at which we switch from baseline to monitoring
-        time_values | r1 array | time values to end date of each ifg.  e.g. [12,24,36] etc.  Also could be called cumulative baselines
-        day0_date | string or None |  date of start of time series / first acquisition.  Used along with time values to make x tick labels as dates
 
-        time_value_end | int or None | if an int, axes are extended to this time value, even if it's larrger than the last value of time_values
-                                        N.b. time is in days, so e.g. set it to 96, or 192
         
         figure_outtype |
         figure_outdir  | pathlib Path | 
@@ -49,7 +45,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         
     History:
         2020/01/XX | MEG | Written
-        2020/01/10 | MEG | update to add "upper_time_values"
+        2020/01/10 | MEG | update to add "upper_baselines_cs"
         2020/02/16 | MEG | add ifg_xpos_scaler to make sure ifgs are plotted with the correct x value.  
         2020/03/08 | MEG | Change plotting of ifgs and sources to awlays be the downsampled ones.  
         2020/04/20 | MEG | Update so that x tick labels are dates and not numbers since time series started.  
@@ -71,9 +67,10 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     import datetime as dt 
     
     from licsalert.aux import col_to_ma
+    from licsalert.licsalert import licsalert_date_obj
         
     def calcualte_line_args(n_ifgs, t_recalculate):
-        """Lines of best fit are calculated for eahc time step, but we don't want
+        """Lines of best fit are calculated for each time step, but we don't want
         to plot them all (as they lie on top of each other, mostly).  
         Therefore, calcaulte the numbers of which to plot so that they don't overlap.  '
         """
@@ -86,8 +83,10 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         return line_args
     
 
-    def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, time_values, xlim, ylabel = '', day0_date = None, cumulative = False):
-        """ Plot all the ifgs (baseline and monitoring) within the grispec_area.  
+    def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, baselines_cs, ylabel, 
+                  day0_date, figure_date, dayend_date,   cumulative = False):
+        """ Plot all the ifgs (baseline and monitoring) within the grispec_area,
+        up to the date set by figure_date
         """
         from mpl_toolkits.axes_grid1.inset_locator import inset_axes            
         # 1: Create a single wide axes for the inset axes to be plotted on
@@ -95,19 +94,17 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         fig1.add_subplot(ax_ifgs)                                                                   # add to figure
         ax_ifgs.set_yticks([])                                                                      # no y ticks
         ax_ifgs.set_ylim(bottom = 0, top = 1)
-        ax_ifgs.set_xlim(left = 0, right = xlim)                                                    # set x axis upper limit to be the number of acquisitions in the time series
-        if day0_date is not None:       
-            xticks_every_3months(ax_ifgs, day0_date, time_values, include_tick_labels = False)      # update the ticks (but not labels) to be the same as the time course and residual axis
+        ax_ifgs.set_xlim(left = 0, right = dayend_date.day_n)                                                    # set x axis upper limit to be the number of acquisitions in the time series
 
-        for ifg_n, source in enumerate(ifgs):                                                                                # ifgs are rows, loop through
-            iax = ax_ifgs.inset_axes([time_values[ifg_n], 0., (xlim/ifg_xpos_scaler), 1.], transform=ax_ifgs.transData)      # [xpos, ypos, xwidth, ywidth], note the x_pos_scaler that reduces the size of the inset axes to make sure it remains in tehe right place
-            #ifg_plot = iax.imshow(col_to_ma(source, pixel_mask), cmap = plt.get_cmap('coolwarm'))                                       # plot on the axes
+        xticks_every_3months(ax_ifgs, day0_date.date, baselines_cs, include_tick_labels = False)      # update the ticks (but not labels) to be the same as the time course and residual axis
+
+        for ifg_n, source in enumerate(ifgs[:figure_date.acq_n, :]):                                                         # ifgs are rows, loop through.  Make sure we don't try to iterate through more than we have dates for  
+            iax = ax_ifgs.inset_axes([baselines_cs[ifg_n], 0., (dayend_date.day_n/ifg_xpos_scaler), 1.], transform=ax_ifgs.transData)      # [xpos, ypos, xwidth, ywidth], note the x_pos_scaler that reduces the size of the inset axes to make sure it remains in tehe right place
             ifg_plot = iax.matshow(col_to_ma(source, pixel_mask), cmap = cmap)                                       # plot on the axes
             iax.set_xticks([])                                                                                               # images so get rid of x and y ticks (nb this is just for the inset axes)
             iax.set_yticks([])
-            # print(time_values[ifg_n])                                                                       # for debugging
-            # plt.pause(1)                                                                                    # "
-            if ifg_n == (ifgs.shape[0] -1):                                                                                             # if it's the last interferogram
+            
+            if ifg_n == (figure_date.acq_n -1):                                                                                             # if it's the last interferogram
                 cbar_ax = inset_axes(iax, width="7%", height="40%",   loc='lower left',  bbox_to_anchor=(1.05, 0.1, 1, 1),              # Colorbar: isnet axes just to left of the main axis
                                      bbox_transform=iax.transAxes,borderpad=0)
                 
@@ -116,18 +113,14 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
                 cbar.set_ticks([np.nanmin(source), np.nanmax(source)])
                 cbar.set_ticklabels([f"{np.nanmin(source):.3} m", f"{np.nanmax(source):.3} m"])
                 cbar_ax.tick_params(labelsize=6)                                                                                         #                                    
-                if day0_date is None:                                                                                                   # if we don't have date information,
-                    pass                                                                                                                # we can't add it via the colorbar title
-                    #cbar_ax.set_title('LOS disp. (m)', fontsize = 6, loc = 'left')
-                else:                                                                                                                    # if we do ahve date information
-                    day0_date_dt = dt.datetime.strptime(day0_date, "%Y%m%d")                                                             # label the ifg with date interval, start by converting day0 date
-                    if cumulative:                                                                                                       # cumulative ifg spans from start to end
-                        ifg_start_date = day0_date_dt
-                    else:
-                        ifg_start_date = day0_date_dt + dt.timedelta(int(time_values[-2]))                                               # but incremental is from previous date
-                    ifg_end_date = day0_date_dt + dt.timedelta(int(time_values[-1]))                                                     # to final date
-                    cbar_ax.set_title(f"{dt.datetime.strftime(ifg_start_date, '%Y%m%d')}\n"
-                                      f"{dt.datetime.strftime(ifg_end_date, '%Y%m%d')}", fontsize = 6, loc = 'left')
+                
+                if cumulative:                                                                                                       # cumulative ifg spans from start to end
+                    ifg_start_date = day0_date.dt
+                else:
+                    ifg_start_date = day0_date.dt + dt.timedelta(int(baselines_cs[-2]))                                               # but incremental is from previous date
+                ifg_end_date = day0_date.dt + dt.timedelta(int(baselines_cs[-1]))                                                     # to final date
+                cbar_ax.set_title(f"{dt.datetime.strftime(ifg_start_date, '%Y%m%d')}\n"
+                                  f"{dt.datetime.strftime(ifg_end_date, '%Y%m%d')}", fontsize = 6, loc = 'left')
         ax_ifgs.set_ylabel(ylabel, fontsize = 7, labelpad = -1)
         
 
@@ -214,7 +207,31 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         for major_tick_n, datetime_majortick in enumerate(ticks['datetimes']):
             if datetime_majortick.month == 1:
                 ax_to_update.axvline(x = ticks['n_day'][major_tick_n], color='k', alpha=0.1, linestyle='--')                          
-                   
+
+    
+
+    # -3: dealing with time.  
+    # if not (sources_tcs[0]['cumulative_tc'].shape)[0] == displacement_r2['incremental_downsampled'].shape[0] == baselines_cs.shape[0] == (len(acq_dates) - 1):          # check all the sizes agree.  
+    #     raise Exception(f"The time courses have {(sources_tcs[0]['cumulative_tc'].shape)[0]} entries,  "
+    #                     f"there are {displacement_r2['incremental_downsampled'].shape[0]} interferograms, "
+    #                     f"the cumulative baselines have {baselines_cs.shape[0]} entries, and "
+    #                     f"there are {len(acq_dates)} acquisition dates (which should be 1 more than the others). "
+    #                     f"As these don't agree, exiting.  ")
+    n_times = baselines_cs.shape[0] 
+    day0_date = licsalert_date_obj(acq_dates[0], acq_dates)                          # time of first acquisition (x = 0 value)
+    figure_date = licsalert_date_obj(figure_date, acq_dates)                         # the x value (time) that the figure is plotted to
+    baseline_end_date = licsalert_date_obj(baseline_end_date, acq_dates)
+    if dayend_date is None:
+        print(f"No dayend_date was provided which sets the time the plots spans to (although "
+              f" the data doesn't necessarily fill the whole plot.  Setting it to the last  "
+              f"acquisition date.  ")
+        dayend_date = licsalert_date_obj(acq_dates[-1], acq_dates)                         # the highest x value (time) of the figure, although data doesn't necesarily plot to here
+    else:
+        dayend_date = licsalert_date_obj(dayend_date, acq_dates)                         # the highest x value (time) of the figure, although data doesn't necesarily plot to here
+
+
+
+        
 
     # -2. Check matplotlib backend is set correctly 
     if figure_type == 'png':
@@ -225,7 +242,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
 
 
 
-    # -1: Check that the sizes of the sources and the interferograms agree.  Raise error if not.  
+    # -1: Check that the sizes of the sources and the interferograms agree in x and y.  Raise error if not.  
     if sources.shape[1] == displacement_r2['incremental'].shape[1]:
         sources_downsampled = False
     elif sources.shape[1] == displacement_r2['incremental_downsampled'].shape[1]:
@@ -240,22 +257,19 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
     # 0: Start, some definitions that shouldn't need changing (ie hard coded variables)
     #line_best_fit_alpha = 0.7
     dot_marker_size = 12
-    if time_value_end is None:
-        t_end = time_values[-1]                                                         # last time value - i.e. the right hand x value of all the axes
-    else:
-        t_end = time_value_end                                                          # or if it was provided, just use that value
+    
     
     
     # 1 set some preliminary stuff
     t_recalculate = sources_tcs[0]["t_recalculate"]
     n_ics = len(sources_tcs)
-    n_times = time_values.shape[0] 
-    n_ifgs = displacement_r2["incremental"].shape[0]
-    line_args= calcualte_line_args(n_times, t_recalculate)                      # which lines of best fit to plot
+    
+    #n_ifgs = displacement_r2["incremental"].shape[0]
+    line_args= calcualte_line_args(n_times, t_recalculate)                      # which lines of best fit to plot (units are acq_n)
     c = mpl.colors.ColorConverter().to_rgb                                      
     cmap_discrete = make_colormap(  [c('black'), c('orange'), 0.33, c('orange'), c('yellow'), 0.66, c('yellow'), c('red')])     # custom colorbar for number of sigmas from line
     cmap_sources = colourbar_for_sources(sources)
-    figtitle = f'LiCSAlert figure with {(n_ifgs-n_baseline_end):03d} monitoring interferograms'
+    figtitle = f'LiCSAlert figure on {figure_date.date}'
 
     # 2 Initiate the figure    
     fig1 = plt.figure(figsize=(18,10))
@@ -264,28 +278,21 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
 
     
     # 3: Plot the ifgs along the top
-    plot_ifgs(np.cumsum(displacement_r2["incremental_downsampled"], axis = 0), displacement_r2["mask_downsampled"], fig1, grid[0,1:], 
-              time_values, t_end, ylabel = 'Cumulative', day0_date = day0_date, cumulative = True)                                                                # cumulative ifgs
-    plot_ifgs(displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"], fig1, grid[1,1:], 
-              time_values, t_end, ylabel = ' Incremental', day0_date = day0_date, cumulative = False)                                                               # incremental ifgs
-
+    plot_ifgs(np.cumsum(displacement_r2["incremental_downsampled"], axis = 0), displacement_r2["mask_downsampled"], 
+              fig1, grid[0,1:], baselines_cs, 'Cumulative', 
+              day0_date, figure_date, dayend_date, cumulative = True)                                                                # cumulative ifgs
+    plot_ifgs(displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"], 
+              fig1, grid[1,1:], baselines_cs, 'Incremental', 
+              day0_date, figure_date, dayend_date, cumulative = False)                                                                # cumulative ifgs
+    
     # 4: Plot each source and its time course 
-    try:
-        baseline_monitor_change = np.mean([time_values[n_baseline_end-1], time_values[n_baseline_end]])                                     # Vertical line will be drawn at this time value to show that we switch from baseline to monitoring
-    except:
-        baseline_monitor_change = np.mean([time_values[n_baseline_end-1], time_values[n_baseline_end-1] + 12])                              # But the above won't work if there are no monitoring ifgs, so just guess next ifg will be after 12 days and draw line as if that were true (ie 6 days after last point)
     for row_n, source_tc in enumerate(sources_tcs):
         # 4a: Plot the source
         ax_source = plt.Subplot(fig1, grid[row_n+2,0])                                                                                      # create an axes for the IC (spatial source)
-       
         if sources_downsampled:
-            #im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))   # plot the downsampled source
             im = ax_source.matshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources) #, vmin = np.min(sources), vmax = np.max(sources))   # plot the downsampled source
         else:
-            #im = ax_source.imshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
-            #im = ax_source.matshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
             im = ax_source.matshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources) #, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
-            
         ax_source.set_xticks([])
         ax_source.set_yticks([])
         ax_source.set_ylabel(f"IC {row_n}")
@@ -312,38 +319,45 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, n_baseline
         
         # 4c: plot the time courses for that IC, and the rolling lines of best fit      
         ax_tc = plt.Subplot(fig1, grid[row_n+2,1:])
-        ax_tc.scatter(time_values, source_tc["cumulative_tc"], c = source_tc["distances"], marker='o', 
-                      s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, )                                      # note that time_values don't start at 0 as the cumualtive tcs also don't start at 0 
+        ax_tc.scatter(baselines_cs[:figure_date.acq_n], source_tc["cumulative_tc"][:figure_date.acq_n], 
+                      c = source_tc["distances"][:figure_date.acq_n], marker='o', 
+                      s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, )                                      # note that baselines_cs don't start at 0 as the cumualtive tcs also don't start at 0 
         for line_arg in line_args:                                                                                          # line args sets which lines of best fit to plot (there is a line of best fit for each point, but it's too busy if we plot them all)
-            ax_tc.plot(time_values, source_tc["lines"][:,line_arg], c = 'k')                                                # ie each column is a line of best fit
+            if line_arg < figure_date.acq_n:                                                                                # check that line_arg is not in the future relative to the acquisition date we're currently on
+                ax_tc.plot(baselines_cs[:figure_date.acq_n], source_tc["lines"][:figure_date.acq_n,line_arg], c = 'k')      # ie each column is a line of best fit, but crop it so it's the same length as the baselines_cs
     
         # 4d: tidy up some stuff on the axes
         ax_tc.axhline(y=0, color='k', alpha=0.3)  
-        ax_tc.axvline(x = baseline_monitor_change, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
-        ax_tc.set_xlim(left = 0, right = t_end)
+        ax_tc.axvline(x = baseline_end_date.day_n, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
+        ax_tc.set_xlim(left = 0, right = dayend_date.day_n)
         if day0_date is not None:
-            xticks_every_3months(ax_tc, day0_date, time_values, include_tick_labels = False)
+            xticks_every_3months(ax_tc, day0_date.date, baselines_cs, include_tick_labels = False)
         fig1.add_subplot(ax_tc)
-        sigma_bar_plotter(ax_tc, time_values, source_tc["distances"], cmap_discrete)                # draw the bar graph showing sigma values
+        sigma_bar_plotter(ax_tc, baselines_cs[:figure_date.acq_n], 
+                          source_tc["distances"][:figure_date.acq_n], cmap_discrete)                # draw the bar graph showing sigma values
         ax_tc.yaxis.tick_right()                                                                    # has to be called after sigma_bar_plotter
         
                                                                 
     # 5: Plot the residual
     ax_residual = plt.Subplot(fig1, grid[-1,1:])                                                                    # plot on the last row
-    ax_residual.scatter(time_values, residual[0]["cumulative_tc"], marker='o', s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, c = residual[0]["distances"])         # 
+    ax_residual.scatter(baselines_cs[:figure_date.acq_n], residual[0]["cumulative_tc"][:figure_date.acq_n],
+                        marker='o', s = dot_marker_size, cmap = cmap_discrete,
+                        vmin = 0, vmax = 5, c = residual[0]["distances"][:figure_date.acq_n])         # 
     for line_arg in line_args:                                                                                      # plot the rolling line of best fit, but not all of them (only those in line_args)
-        ax_residual.plot(time_values, residual[0]["lines"][:,line_arg], c = 'k')                                    # each column is a line of best fit
+        if line_arg < figure_date.acq_n:
+            ax_residual.plot(baselines_cs[:figure_date.acq_n], residual[0]["lines"][:figure_date.acq_n,line_arg], c = 'k')                                    # each column is a line of best fit
     ax_residual.axhline(y=0, color='k', alpha=0.3)
-    ax_residual.axvline(x = baseline_monitor_change, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
-    ax_residual.set_xlim(left = 0, right = t_end)                    # and finaly tidy up axis and labels etc.  
+    ax_residual.axvline(x = baseline_end_date.day_n, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
+    ax_residual.set_xlim(left = 0, right = dayend_date.day_n)                    # and finaly tidy up axis and labels etc.  
     ax_residual.yaxis.tick_right()
     ax_residual.yaxis.set_label_position("right")
     ax_residual.set_ylabel('RMS\nresidual')
     fig1.add_subplot(ax_residual)
-    sigma_bar_plotter(ax_residual, time_values, residual[0]["distances"], cmap_discrete)                    # draw the bar graph showing sigma values
+    sigma_bar_plotter(ax_residual, baselines_cs[:figure_date.acq_n], 
+                      residual[0]["distances"][:figure_date.acq_n], cmap_discrete)                    # draw the bar graph showing sigma values
     ax_residual.yaxis.tick_right()                                                                        # has to be called after sigma_bar_plotter
     if day0_date is not None:
-        xticks_every_3months(ax_residual, day0_date, time_values, include_tick_labels = True)                   # create the ticks and labels on the 1st of the quater.  
+        xticks_every_3months(ax_residual, day0_date.date, baselines_cs, include_tick_labels = True)                   # create the ticks and labels on the 1st of the quater.  
     
     ## 6: add the two colorbars
     cax = fig1.add_axes([0.12, 0.08, 0.005, 0.1])                                      # source strength
@@ -738,13 +752,13 @@ def LiCSAlert_epoch_figures(displacement_r2_current, reconstructions, residuals,
     
     # 1: do the plots
     plot_1_image(np.sum(displacement_r2_current['incremental'], axis = 0), displacement_r2_current['mask'], f"01_cumulative_{cum_ifg_date}", 
-                 figure_type, figure_out_dir)
+                 figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
     plot_1_image(displacement_r2_current['incremental'][-1, :], displacement_r2_current['mask'], f"02_incremental_{inc_ifg_date}",
-                 figure_type, figure_out_dir)
-    plot_1_image(reconstructions[:,-1], displacement_r2_current['mask'], f"03_reconstruction_{inc_ifg_date}",
-                 figure_type, figure_out_dir)
-    plot_1_image(residuals[:, -1], displacement_r2_current['mask'], f"04_residual_{inc_ifg_date}",
-                 figure_type, figure_out_dir)
+                 figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
+    plot_1_image(reconstructions[-1,:], displacement_r2_current['mask'], f"03_reconstruction_{inc_ifg_date}",
+                 figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
+    plot_1_image(residuals[-1, :], displacement_r2_current['mask'], f"04_residual_{inc_ifg_date}",
+                 figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
 
     #  save the data that is plotted as png
     epoch_images = {'cumulative'     : np.sum(displacement_r2_current['incremental'], axis = 0),
@@ -798,7 +812,7 @@ def LiCSAlert_aux_figures(parent_dir, icasar_sources, dem, mask):
         
 #%%
 
-def plot_1_image(im_r1, mask, title, figure_type, figure_out_dir, figsize = (18,9)):
+def plot_1_image(im_r1, mask, title, figure_type, figure_out_dir, figsize = (18,9), cmap =  plt.get_cmap('viridis')):
     """Plot a single image (column or row vector) when also given its mask.  
     
     """
@@ -807,7 +821,7 @@ def plot_1_image(im_r1, mask, title, figure_type, figure_out_dir, figsize = (18,
     
     
     f, ax = plt.subplots(1,1, figsize = figsize)
-    im = ax.matshow(col_to_ma(im_r1, mask))
+    im = ax.matshow(col_to_ma(im_r1, mask), cmap = cmap)
     f.colorbar(im, label = 'Displacement (m)')
     f.suptitle(title)
     

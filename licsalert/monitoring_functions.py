@@ -76,22 +76,16 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
                 #licsbas_dates_file.write(f"{datetime.strftime(licsbas_json_timestamp, '%Y-%m-%d %H:%M:%S')}\n")            # and write this first dummy date to it,
                 licsbas_dates_file.write(f"{licsbas_json_creation_time}\n")            # and write this first dummy date to it,
     
-    
-    # if str(ICASAR_pkg_dir) not in sys.path:                                                  # check if already on path
-    #     sys.path.append(str(ICASAR_pkg_dir))                                                 # and if not, add
-    # import icasar
-    # from icasar.icasar_funcs import LiCSBAS_to_ICASAR
-    
+
     import licsalert
     from licsalert.data_importing import LiCSBAS_to_LiCSAlert, LiCSBAS_json_to_LiCSAlert
     from licsalert.data_exporting import save_licsalert_aux_data
     from licsalert.licsalert import LiCSAlert_preprocessing, LiCSAlert, shorten_LiCSAlert_data, write_volcano_status, load_or_create_ICASAR_results
+    from licsalert.licsalert import crop_licsalert_results_in_time
     from licsalert.aux import compare_two_dates, Tee
     from licsalert.downsample_ifgs import downsample_ifgs
     from licsalert.plotting import LiCSAlert_figure, LiCSAlert_epoch_figures, LiCSAlert_aux_figures, LiCSAlert_mask_figure
     
-
-
     # 1: Log all outputs to a file for that volcano:
     if region == None:
         volcano_dir = outdir / volcano
@@ -126,7 +120,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
             raise Exception(f"Failed to load the settings from arguments passed to the function.  Try checking licsalert_settings and icasar_settings.  Exiting.  ")
 
             
-    # 3: Open the the input data, which can be in various formats (3 so far)
+    # 3: Open the the input data, which can be in various formats (3 so far), and deal with mean centering (either in time or space)
     if licsbas_jasmin_dir is not None:
         print(f"LiCSAlert is opening a JASMIN COMET Volcano Portal timeseries json file.  ")
         displacement_r2, _, tbaseline_info, ref_xy, licsbas_json_creation_time = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json")          # open the .json LiCSBAS data for this volcano 
@@ -147,51 +141,21 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
         print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  ")
     except:
         pass
-        #print(f"LiCSAlert couldn't remove 'cumulative' from 'displacement_r2' which is the expected behaviour as LiCSAlert expects incremental displacments.    ")
 
+    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, tbaseline_info, ICASAR_settings['sica_tica'],                                                    #  mean centre in space (sica) or time (tica) and downsize the data.  
+                                              LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])                                      # mixtures_mc and means contains the daisy chain of ifgs mean centered either in space or time, depending on whther sica or tica
     
-    # #%% debug
-    # pdb.set_trace()
-
-    # debug_scripts = "/home/matthew/university_work/python_stuff/python_scripts"
-    # if debug_scripts not in sys.path:                                                                             # check if already on path
-    #     sys.path.append(debug_scripts)
-    # from small_plot_functions import matrix_show, quick_linegraph
-    
-    # from licsalert.aux import col_to_ma
-    # import numpy as np
-
-    
-    # matrix_show(col_to_ma(np.sum(displacement_r2['incremental'][:-1,], axis = 0), displacement_r2['mask']))          # noise and zeros
-    # matrix_show(col_to_ma(displacement_r2['incremental'][-1,], displacement_r2['mask']))                    # looks like a normal ifg
-    print(f"\n\n\n\n\nthere is a debug here to remove")
-    
-    
-
-    
-    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, tbaseline_info, ICASAR_settings['sica_tica'], 
-                                              LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])                                      # mean centre in space (sica) or time (tica) and downsize the data.  Note mean centering is done by ifg_timeseries class
-    #displacement_r2 = LiCSAlert_preprocessing(displacement_r2, tbaseline_info,  LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])     # mean centre in space (sica) or time (tica) and downsize the data.  Note mean centering is done by ifg_timeseries class
-    
-    
-    #pdb.set_trace()
     
     # 4: possible run licsalert
     LiCSAlert_status = run_LiCSAlert_status(tbaseline_info['acq_dates'], volcano_dir, LiCSAlert_settings['baseline_end'], LiCSAlert_settings['figure_intermediate'])                       # NOTE volcano_dir used to be licsalert_dir / region / volcano.   determine the LiCSAlert status for this volcano (ie do we need to run ICASAR, is the time series up to date etc.  )
     print(f"LiCSAlert status:  1) Run ICASAR: {LiCSAlert_status['run_ICASAR']}   2) Run LiCSAlert: {LiCSAlert_status['run_LiCSAlert']}")
+    
+
     if LiCSAlert_status['run_LiCSAlert']:                                                                                       # if LiCSAlert will be run...
     
-        # 4a: either load or make the ICs (from icasar)
-        # if ICASAR_settings['sica_tica'] == 'sica':
-        #     icasar_mixtures = displacement_r2['incremental_mc_space']
-        # elif ICASAR_settings['sica_tica'] == 'tica':
-        #     icasar_mixtures = displacement_r2['incremental_mc_time']
-        # else:
-        #     raise Exception(f"' ICASAR_settings['sica_tica'] ' can be either 'sica' or 'tica', but not ICASAR_settings['sica_tica'] .  Exiting.  ")
-        icasar_sources, icasar_mask, LiCSAlert_settings['baseline_end_ifg_n'], ics_labels = load_or_create_ICASAR_results(LiCSAlert_status['run_ICASAR'], displacement_r2, tbaseline_info,                       # either load or create the ICASAR sources
-                                                                                                                          LiCSAlert_settings['baseline_end'],  volcano_dir / "ICASAR_results", ICASAR_settings)
+        icasar_sources, icasar_mask, LiCSAlert_settings['baseline_end_ifg_n'], ics_labels = load_or_create_ICASAR_results(LiCSAlert_status['run_ICASAR'], displacement_r2, tbaseline_info,                             # either load or create the ICASAR sources.  
+                                                                                                                          LiCSAlert_settings['baseline_end'],  volcano_dir / "ICASAR_results", ICASAR_settings)        # Note that this uses mixtures_mc, which are mean centered in space or time already depending on if sica or tica is being used.  
 
-        
         # 4b: Deal with changes to the mask of pixels 
         licsbas_mask = displacement_r2['mask']                                                                                                                              # make a copy of the licsbas mask before it gets overwritten with the new combined mask
 
@@ -202,7 +166,9 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
                                                                                                           LiCSAlert_settings['downsample_plot'], verbose = False)
         
         # 4c: Main loop to run LiCSAlert for each date that is required
-        for processing_date in LiCSAlert_status['to_process']:                                                        # 
+        for processing_date in (LiCSAlert_status['dates_monitoring'].pending + LiCSAlert_status['dates_monitoring'].processed_with_errors):                                                        # 
+        # for processing_date in sorted(LiCSAlert_status['dates_monitoring'].pending + LiCSAlert_status['dates_monitoring'].processed_with_errors)[-1:0]:                                                        # 
+        #     print(f"TEMPORARYILY JUST USING LAST FEW DATES")
             ifg_n = tbaseline_info['acq_dates'].index(processing_date)                                                                                             # instead of working in dates, switch this to ifg_n in the sorted interferograms.   
             print(f"Running LiCSAlert for {processing_date} (# {ifg_n} of {len(tbaseline_info['acq_dates'])})")
             
@@ -210,35 +176,73 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
             LiCSAlert_mask_figure(icasar_mask, licsbas_mask, displacement_r2['mask'], tbaseline_info['acq_dates'][-1], volcano_dir / processing_date,
                                 figure_type = LiCSAlert_settings['figure_type'])                                                                                   # create a figure showing the masks (licsbas, icasar, and combined)
                                                                                                                                                                    
-            
-            sources_tcs_baseline, residual_tcs_baseline, reconstructions, residuals = LiCSAlert(icasar_sources, tbaseline_info['baselines_cumulative'][:ifg_n ],                                               # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
-                                                                                                ifgs_baseline = displacement_r2['incremental_mc_space'][:(LiCSAlert_settings['baseline_end_ifg_n']),],          # baseline ifgs, always mean centered in space (after having been downsampled)
-                                                                                                ifgs_monitoring = displacement_r2['incremental_mc_space'][(LiCSAlert_settings['baseline_end_ifg_n']):ifg_n,],   # monitoring ifgs, always mean centered in space (after having been downsampled)
-                                                                                                mask = displacement_r2['mask'],
-                                                                                                t_recalculate=10, verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
+            sources_tcs, residual_tcs, reconstructions, residuals = LiCSAlert(icasar_sources, tbaseline_info['baselines_cumulative'][:ifg_n ],                                               # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
+                                                                              ifgs_baseline = displacement_r2['incremental_mc_space'][:(LiCSAlert_settings['baseline_end_ifg_n']),],          # baseline ifgs, always mean centered in space (after having been downsampled)
+                                                                              ifgs_monitoring = displacement_r2['incremental_mc_space'][(LiCSAlert_settings['baseline_end_ifg_n']):ifg_n,],   # monitoring ifgs, always mean centered in space (after having been downsampled)
+                                                                              mask = displacement_r2['mask'],
+                                                                              t_recalculate=LiCSAlert_settings['t_recalculate'], verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
                                                                           
-            LiCSAlert_figure(sources_tcs_baseline, residual_tcs_baseline, icasar_sources, displacement_r2,                                                  # the main licsalert figure
-                             LiCSAlert_settings['baseline_end_ifg_n'],  tbaseline_info['baselines_cumulative'][:ifg_n ], 
-                             figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date, 
-                             day0_date = tbaseline_info['acq_dates'][0])    
+           
+            LiCSAlert_figure(sources_tcs, residual_tcs, icasar_sources, displacement_r2,                                                  # the main licsalert figure
+                             figure_date = processing_date, acq_dates = tbaseline_info['acq_dates'], baselines_cs = tbaseline_info['baselines_cumulative'],
+                             baseline_end_date = LiCSAlert_settings['baseline_end'],  dayend_date = LiCSAlert_settings['baseline_end'],
+                             figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date,
+                             ifg_xpos_scaler = LiCSAlert_settings['inset_ifgs_scaling'])    
             
-            # LiCSAlert_epoch_figures(displacement_r2_current, reconstructions, residuals, tbaseline_info,                                                             # 4 large images: cumulative, incremetnal, reconstruction of incremental, residual
             LiCSAlert_epoch_figures(displacement_r2, reconstructions, residuals, tbaseline_info,                                                             # 4 large images: cumulative, incremetnal, reconstruction of incremental, residual
                                     figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date)                                                                              
+            save_epoch_data(sources_tcs, residual_tcs, volcano_dir / processing_date)                                                             # save info about the time courses
+            write_volcano_status(sources_tcs, residual_tcs, ics_labels, volcano_dir / processing_date)                                           # write the change in def  / new def text file.  
+
             
-            save_epoch_data(sources_tcs_baseline, residual_tcs_baseline, volcano_dir / processing_date)                                                             # save info about the time courses
-               
-            write_volcano_status(sources_tcs_baseline, residual_tcs_baseline, ics_labels, volcano_dir / processing_date)                                           # write the change in def  / new def text file.  
+        LiCSAlert_aux_figures(volcano_dir, icasar_sources, displacement_r2['dem'], displacement_r2['mask'])                                                   # also plot the ICS and the DEM
+        save_licsalert_aux_data(volcano_dir, displacement_r2, tbaseline_info)
+                
+        
+        
+        # 5: Extra part to make figures during the baseline stage.  
+        for processing_date in (LiCSAlert_status['dates_baseline'].pending + LiCSAlert_status['dates_baseline'].processed_with_errors):                                                        # 
+        
+            if processing_date == tbaseline_info['acq_dates'][0]:                                                                                       # there are no interferograms on the first acquisition date so can't make a figure.  
+                pass
+            else:
+            
+                create_licsalert_outdir(volcano_dir / processing_date)                                                                                                 # Create a folder (YYYYMMDD) for the outputs.  
+                ifg_n = tbaseline_info['acq_dates'].index(processing_date)                                                                                             # instead of working in dates, switch this to ifg_n in the sorted interferograms.   
+            
+                print(f"LiCSALert figure only for baseline date: {processing_date}")
 
-            if processing_date == LiCSAlert_status['to_process'][-1]:                                                                                                #  if it's the last date possible....
-                LiCSAlert_aux_figures(volcano_dir, icasar_sources, displacement_r2['dem'], displacement_r2['mask'])                                                   # also plot the ICS and the DEM
-                save_licsalert_aux_data(volcano_dir, displacement_r2, tbaseline_info)
+                if 'sources_tcs' not in locals().keys():
+                    print(f"Rerunning LiCSAlert as all the information for the figure is not available.  ")
+                    sources_tcs, residual_tcs, reconstructions, residuals = LiCSAlert(icasar_sources, tbaseline_info['baselines_cumulative'],                                               # the LiCSAlert algoirthm, using the sources with the combined mask (sources_mask_combined)
+                                                                                      ifgs_baseline = displacement_r2['incremental_mc_space'][:(LiCSAlert_settings['baseline_end_ifg_n']),],          # baseline ifgs, always mean centered in space (after having been downsampled)
+                                                                                      ifgs_monitoring = displacement_r2['incremental_mc_space'][(LiCSAlert_settings['baseline_end_ifg_n']):,],   # monitoring ifgs, always mean centered in space (after having been downsampled)
+                                                                                      mask = displacement_r2['mask'],
+                                                                                      t_recalculate=LiCSAlert_settings['t_recalculate'], verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
+                    
+                LiCSAlert_mask_figure(icasar_mask, licsbas_mask, displacement_r2['mask'], 
+                                      tbaseline_info['acq_dates'][-1], volcano_dir / processing_date,
+                                      figure_type = LiCSAlert_settings['figure_type'])                                                                                   
                 
+                LiCSAlert_figure(sources_tcs, residual_tcs, icasar_sources, displacement_r2,                                                  # the main licsalert figure
+                                 figure_date = processing_date, acq_dates = tbaseline_info['acq_dates'], baselines_cs = tbaseline_info['baselines_cumulative'],
+                                 baseline_end_date = LiCSAlert_settings['baseline_end'],  dayend_date = LiCSAlert_settings['baseline_end'],
+                                 figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date,
+                                 ifg_xpos_scaler = LiCSAlert_settings['inset_ifgs_scaling'])    
+                
+                
+                    
+                sources_tcs_c, residual_tcs_c, reconstructions_c, residuals_c, displacement_r2_c = crop_licsalert_results_in_time(processing_date, tbaseline_info['acq_dates'], sources_tcs, residual_tcs,
+                                                                                                                                  reconstructions, residuals, displacement_r2)
+                    
+                
+                LiCSAlert_epoch_figures(displacement_r2_c, reconstructions_c, residuals_c, tbaseline_info,                                                             # 4 large images: cumulative, incremetnal, reconstruction of incremental, residual
+                                        figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date)                                                                              
+                
+                save_epoch_data(sources_tcs_c, residual_tcs_c, volcano_dir / processing_date)                                                             # save info about the time courses
+                   
+                write_volcano_status(sources_tcs_c, residual_tcs_c, ics_labels, volcano_dir / processing_date)                                           # write the change in def  / new def text file.  
 
-                
-
-                
-                
                 
             
     sys.stdout = original                                                                                                                                      # return stdout to be normal.  
@@ -614,56 +618,6 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
 
 
 #%%
-def LiCSAlert_dates_status(LiCSAlert_required_dates, LiCSAlert_dates, folder_LiCSAlert):
-    """ Given a list of dates in which LiCSAlert has been run, check that the required outputs are present in each folder.  
-    Inputs:
-        dates | list of strings | dates that LiCSAlert was run until.  In form YYYYMMDD
-    Returns:
-        dates_incomplete | list of strings | dates that a LiCSAlert folder exisits, but it doesn't have all the ouptuts.  
-    History:
-        2020/11/13 | MEG | Written
-        2020_11_17 | MEG | Overhauled ready for version 2
-        2021_10_20 | MEG | reduce number of mask figures sought.  
-    """
-    from pathlib import Path
-    import os
-    import fnmatch                                                                      # used to compare lists and strings using wildcards
-    
-    constant_outputs = ['mask_status.png']                                      # The output files that are expected to exist and never change name
-
-    variable_outputs = ['LiCSAlert_figure_with_*_monitoring_interferograms.png']        # The output files that are expected to exist and change name.  
-
-    # 0: The dates that still need to be processed
-    pending  = []
-    for LiCSAlert_required_date in LiCSAlert_required_dates:
-        if LiCSAlert_required_date not in LiCSAlert_dates:
-            pending.append(LiCSAlert_required_date)
-        
-    # 1: All the dates that haven been processed are either processed, or processed with errors.  Loop through and decide which.  
-    processed = []
-    processed_with_errors = []
-    for LiCSAlert_date in LiCSAlert_dates:
-        LiCSAlert_date_folder = folder_LiCSAlert / LiCSAlert_date                                     # join to make a path to the current LiCSAlert_date folder
-        LiCSAlert_date_files = sorted([f.name for f in os.scandir(LiCSAlert_date_folder)])                  # get names of the files in this folder (no paths)
-        
-        # 1: look for the products that don't change name (ie all but the first)
-        all_products_complete = True                                                                                 # initiate as True
-        for constant_output in constant_outputs:                                                                     # loop through the outputs that can't change name
-            all_products_complete = (all_products_complete) and (constant_output in LiCSAlert_date_files)            # update boolean 
-        # 2: look for the product that does change name (the main figure)
-        for variable_output in variable_outputs:                                                                     # loop through the outputs that can change name
-            output = fnmatch.filter(LiCSAlert_date_files, "LiCSAlert_figure_with_*_monitoring_interferograms.png")   # check for file with wildcard for changing name
-            all_products_complete = (all_products_complete) and (len(output) > 0)                                    # empty list if file doesn't exit, use to update boolean
-        
-        if all_products_complete:
-            processed.append(LiCSAlert_date)
-        else:
-            processed_with_errors.append(LiCSAlert_date)
-            
-    return processed, processed_with_errors, pending
-
-
-#%%
 
 def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_intermediate):
     """ When 'LiCSAlert_monitoring_mode' is run in a directory, this function determines which steps
@@ -702,24 +656,133 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
     from pathlib import Path
     from licsalert.aux import compare_two_dates, LiCSAR_ifgs_to_s1_acquisitions, Tee
     
-    def get_LiCSAlert_required_dates(LiCSAR_dates, date_baseline_end):
-        """ Given a list of dates, determine which ones are after the baseline stage ended.  
+    
+    
+    def determine_baseline_or_monitoring(LiCSAR_dates, date_baseline_end):
+        """ Given a list of dates, determine which ones are in the baseline stage
+        (before date_baseline_end) and which ones are in monitoring (after date_baseline_end).  
+                                                                     .  
         Inputs:
             LiCSAR_dates | list | Dates of Sentinel-1 acquisitions used to make LiCSAR ifgs in form YYYYMMDD
             baseline_end | string | Date that LiCSAlert baseline stage ended at, in form YYYYMMDD
         Returns:
-            LiCSAlert_required_dates | list | Dates for which there should be LiCSAlert outputs, given the current LiCSAR time series.  
+            baseline_monitoring_dates | dict | baseline and monitoring lists.  
         History:
             2020_11_18 | MEG | Written
+            2023_11_31 | MEG | Update to divide into baseline and monitoring.  
         """
         from licsalert.aux import compare_two_dates
-        LiCSAlert_required_dates = []
+        baseline_monitoring_dates = {'baseline'   : [],
+                                     'monitoring' : []}
+
         for LiCSAR_date in LiCSAR_dates:
             after_baseline_end = compare_two_dates(date_baseline_end, LiCSAR_date)               # check if the date was after the end of the baseline stage.  
             if after_baseline_end:
-                LiCSAlert_required_dates.append(LiCSAR_date)
-        return LiCSAlert_required_dates
+                baseline_monitoring_dates['monitoring'].append(LiCSAR_date)
+            else:
+                baseline_monitoring_dates['baseline'].append(LiCSAR_date)
+        return baseline_monitoring_dates
     
+    
+
+    def get_existing_licsalert_dates(volcano_path):
+        """ Determine which dates at least have directories made by LiCSAlert
+        Also check if the ICASAR directory exists and has the pickle of 
+        ICASAR results 
+        """
+        
+        dirs = sorted([f.name for f in os.scandir(volcano_path) if f.is_dir()])                       # get names of folders produced by LiCSAR (ie the ifgs), and keep chronological.  
+        
+        # 1: Determine if we need to run ICASAR
+        if 'ICASAR_results' not in dirs:                                                             # the line above will also catch the ICASAR_results folder, and can be used to check if it exists.  
+            run_ICASAR = True                                                                                   # if it doesn't exist, it will need to be run.      
+        else:                                                                                                   # However, just because the folder exisits, doesn't mean that it has the crucial files (ie it could have crashed)
+            ICASAR_files = [f.name for f in os.scandir(volcano_path / 'ICASAR_results')]              # if the folder exists, see what's in it
+            if 'ICASAR_results.pkl' in ICASAR_files:
+                run_ICASAR = False                                                                                  # if it exists, it will not need to be run
+            else:
+                run_ICASAR = True                                                                                # The folder exisits, but the important file doesn't, so ICASAR still needs to be run
+            
+        # 2: Determine which dates have been processed, processed with errors, or processing is pending.  
+        for unneeded_folder in ['LiCSBAS', 'ICASAR_results', 'aux_data_figs']:                                    # these folders get caught in the dates list, but aren't dates so need to be deleted.  
+            try:
+                dirs.remove(unneeded_folder)                                                         # note that the LiCSBAS folder also gets caught by this, and needs removing as it's not a date.  
+            except:
+                pass                                                                                            # however, on the first ever run these don't exist.  
+        
+        return dirs, run_ICASAR
+    
+        
+    class licsalert_dates:
+        def __init__(self, existing_dates, required_dates, licsalert_dir, baseline_dates = True,):
+            self.existing_dates = existing_dates
+            self.required_dates = required_dates
+            self.baseline_dates = baseline_dates
+            self.licsalert_dir = licsalert_dir
+            self.figure_intermediate = figure_intermediate
+            self.determine_pending_or_processed()                       # if the date has been processed or not                   
+            if len(self.processed) > 0:
+                self.determine_processed_correctly()                        # if it has been processed, do all products exist.  
+            else:
+                self.processed_succesfully = []                     # if nothing has been processed, nothing can be succesful
+                self.processed_with_errors = []                     # if nothing has been processed, there can't be any errors.  
+            
+            
+        def determine_pending_or_processed(self):
+            """ Iterate through the required dates and see if 
+            they exist, creating a list of those that do (processed), 
+            and those that still need to be (pending)
+            """
+            self.pending  = []
+            self.processed = []
+            for required_date in self.required_dates:
+                if required_date in self.existing_dates:                        # if the date exists
+                    self.processed.append(required_date)                        # lets say it's been processed
+                else:
+                    self.pending.append(required_date)                          # else procesing is pending.  
+                    
+        def determine_processed_correctly(self):
+            """ For the processed dates, check they have been processed correctly 
+            (no missing files)
+            """
+            import fnmatch
+
+            # these files don't change in name depending on the date
+            constant_outputs = ['epoch_images_data.pkl',
+                                'mask_status.png',
+                                'time_course_info.pkl',
+                                'volcano_status.txt',]
+            # these fiels do change in name depending on the date
+            variable_outputs = ['LiCSAlert_figure_on*.png',
+                                '01_cumulative*.png',
+                                '02_incremental*.png',
+                                '03_reconstruction*.png',
+                                '04_residual*.png']
+
+            
+            self.processed_with_errors = []
+            self.processed_succesfully = []
+            
+            for processed_date in self.processed:
+                date_dir = self.licsalert_dir / processed_date                                     # join to make a path to the current LiCSAlert_date folder
+                date_dir_files = sorted([f.name for f in os.scandir(date_dir)])                  # get names of the files in this folder (no paths)
+                all_products_complete = True                                                                                 # initiate as True
+                
+                for constant_output in constant_outputs:                                                                     # loop through the outputs that can't change name
+                    all_products_complete = (all_products_complete) and (constant_output in date_dir_files)            # update boolean 
+                
+                for variable_output in variable_outputs:                                                                     # loop through the outputs that can change name
+                    output = fnmatch.filter(date_dir_files, variable_output)                                                # check for file with wildcard for changing name
+                    all_products_complete = (all_products_complete) and (len(output) > 0)                                    # empty list if file doesn't exit, use to update boolean
+                    
+                if all_products_complete:
+                    self.processed_succesfully.append(processed_date)
+                else:
+                    self.processed_with_errors.append(processed_date)
+
+    
+
+
     # 1: Determine if we can run LiCSAlert yet (ie past the baseline stage)
     licsbas_last_acq = licsbas_dates[-1]
     licsbas_past_baseline = compare_two_dates(date_baseline_end, licsbas_last_acq)                 # determine if the last LiCSAR date is after the baseline stage has ended.  
@@ -731,33 +794,27 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
                             'run_LiCSAlert'           : False,                                          # LiCSAlert is run if some dates with errors exist, or if there are pending dates.  Same as for LICSBAS.  
                             'processed_with_errors'   : None,                                  # any dates that have missing LiCSAlert products.  
                             'not_processed'           : None,                                                # new dates to be processed (ie update LiCSBAS time series, run LiCSAlert)
+                            'create_figure'           : None,
                             'licsbas_last_acq'        : licsbas_last_acq}                                        # date of the most recent sentinel-1 acquisition that there is an interferogram for.  
         return LiCSAlert_status
-    
-    # 2: If we are past the basline stage, determine what dates LiCSAlert has been run for/which need to be run/ which have errors etc.    
-    LiCSAlert_required_dates = get_LiCSAlert_required_dates(licsbas_dates, date_baseline_end)                # Determine which dates LiCSAlert should have an output for, which are the dates after the baseline has ended (regardless of if we actually have them)
-    LiCSAlert_dates = sorted([f.name for f in os.scandir(volcano_path) if f.is_dir()])                       # get names of folders produced by LiCSAR (ie the ifgs), and keep chronological.  
-    
-    # 4: Determine if we need to run ICASAR
-    if 'ICASAR_results' not in LiCSAlert_dates:                                                             # the line above will also catch the ICASAR_results folder, and can be used to check if it exists.  
-        run_ICASAR = True                                                                                   # if it doesn't exist, it will need to be run.      
-    else:                                                                                                   # However, just because the folder exisits, doesn't mean that it has the crucial files (ie it could have crashed)
-        ICASAR_files = [f.name for f in os.scandir(volcano_path / 'ICASAR_results')]              # if the folder exists, see what's in it
-        if 'ICASAR_results.pkl' in ICASAR_files:
-            run_ICASAR = False                                                                                  # if it exists, it will not need to be run
-        else:
-            run_ICASAR = True                                                                                # The folder exisits, but the important file doesn't, so ICASAR still needs to be run
         
-    # 5: Determine which dates have been processed, processed with errors, or processing is pending.  
-    for unneeded_folder in ['LiCSBAS', 'ICASAR_results', 'aux_figures']:                                                   # these folders get caught in the dates list, but aren't dates so need to be deleted.  
-        try:
-            LiCSAlert_dates.remove(unneeded_folder)                                                         # note that the LiCSBAS folder also gets caught by this, and needs removing as it's not a date.  
-        except:
-            pass                                                                                            # however, on the first ever run these don't exist.  
-    processed, processed_with_errors, pending = LiCSAlert_dates_status(LiCSAlert_required_dates, LiCSAlert_dates, volcano_path)     # do the determing.  
+    existing_licsalert_dirs, run_ICASAR = get_existing_licsalert_dates(volcano_path)    
+    baseline_monitoring_dates = determine_baseline_or_monitoring(licsbas_dates, date_baseline_end)                # Determine which dates LiCSAlert should have an output for, which are the dates after the baseline has ended (regardless of if we actually have them)
+    
+    if not figure_intermediate:
+        baseline_monitoring_dates = {'baseline'   : [],                                                         # no figures required for the baseline dates
+                                     'monitoring' : [sorted(baseline_monitoring_dates['monitoring'])[-1]]}        # figure and processing only required on last date.  
+        
+    dates_baseline  = licsalert_dates(existing_licsalert_dirs , baseline_monitoring_dates['baseline'],
+                                         volcano_path, baseline_dates = True)                                       # get the status for all the dates in the baseline stage (i.e. do we need to make a figure for them)
 
-    if (len(processed_with_errors) > 0) or (len(pending) > 0):                                              # if there are any dates in either pending or processed with errors
-        run_LiCSAlert = True                                                                                # 
+
+    
+    dates_monitoring  = licsalert_dates(existing_licsalert_dirs , baseline_monitoring_dates['monitoring'],
+                                         volcano_path, baseline_dates = False)                                      # get the status for all the dates in the monitoring stage (i.e. do we need to run LiCSALert and make a figure for them)
+
+    if (len(dates_monitoring.processed_with_errors) > 0) or (len(dates_monitoring.pending) > 0):                    # if there are any dates in either pending or processed with errors
+        run_LiCSAlert = True                                                                                        # Then we need to run LiCSAlert
     else:
         run_LiCSAlert = False  
 
@@ -765,34 +822,29 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
     # 7: Bundle together all outputs to return as a single dict.  
     LiCSAlert_status = {'run_ICASAR'              : run_ICASAR,                                             # ICASAR is run unless the folder containing it is found
                         'run_LiCSAlert'           : run_LiCSAlert,                                          # LiCSAlert is run if some dates with errors exist, or if there are pending dates.  Same as for LICSBAS.  
-                        'processed_with_errors'   : processed_with_errors,                                  # any dates that have missing LiCSAlert products.  
-                        'not_processed'           : pending,                                                # new dates to be processed (ie update LiCSBAS time series, run LiCSAlert)
-                        'licsbas_last_acq'        : licsbas_last_acq}                                        # date of the most recent sentinel-1 acquisition that there is an interferogram for.  
+                        'licsbas_last_acq'        : licsbas_last_acq,                                        # date of the most recent sentinel-1 acquisition that there is an interferogram for.  
+                        'dates_baseline'          : dates_baseline,
+                        'dates_monitoring'        : dates_monitoring}
     
-    LiCSAlert_status['to_process'] = sorted(list(set(LiCSAlert_status['not_processed'] + LiCSAlert_status['processed_with_errors'])))             # get a sorted and unique list of all the dates we need LiCSAlert for
-    
-    if not figure_intermediate:
-        print(f"Only the last LiCSAlert figure has been requested, so removing any previous figures from the LiCSAlert status dictionary.")
-        #LiCSAlert_status['to_process'] = [LiCSAlert_status['to_process'][-1]]
-        LiCSAlert_status['to_process'] = [LiCSAlert_status["licsbas_last_acq"]] 
-    
-
     # 8: Print the information to the terminal (and the sys.out file)
-    print(f"LiCSBAS date    Past baseline    LiCSAlert      To process")
+    print(f"LiCSBAS date    Past baseline    LiCSAlert      ")
     for date_n, date in enumerate(sorted(licsbas_dates)):                                               # iterate over all acquistisions
         print(f"{date}          ", end = '')
         if dt.strptime(date, '%Y%m%d') >   dt.strptime(date_baseline_end, '%Y%m%d'):                     # check if after end of baseline   
-            print('yes          ', end = '')
+            print('yes             ', end = '')
         else:
-            print('no           ', end = '')
-        if date in processed:                                                                           # if it has been processed
-            print("processed           ", end = '')
-        elif date in LiCSAlert_status['processed_with_errors']:                                                             # if it has been processed with errors
+            print('no              ', end = '')
+        
+        if (date in dates_baseline.processed_succesfully) or (date in dates_monitoring.processed_succesfully):                                                                           # if it has been processed
+            print("processed succesfuly", end = '')
+        elif (date in dates_baseline.processed_with_errors) or (date in dates_monitoring.processed_with_errors):                                                             # if it has been processed with errors
             print("processed with errors           ", end = '')
-        elif date in LiCSAlert_status['not_processed']:                                                                           # if it is pending.  
-            print("not processed            ", end = '')
-        if date in LiCSAlert_status['to_process']:
-            print("to process", end = '')
+        elif (date in dates_baseline.pending):
+            print("pending (figure only)", end = '')
+        elif (date in dates_monitoring.pending):                                                                           # if it is pending.  
+             print("pending ", end = '')
+        else:
+             print("not requested", end = '')
         print('')
 
     return LiCSAlert_status

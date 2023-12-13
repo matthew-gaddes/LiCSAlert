@@ -276,3 +276,6 @@ def add_square_plot(x_start, x_stop, y_start, y_stop, ax, colour = 'k'):
     ax.plot((x_start, x_stop), (y_stop, y_stop), c= colour)             # bottom
     ax.plot((x_stop, x_stop), (y_stop, y_start), c= colour)             # righ hand side
     ax.plot((x_stop, x_start), (y_start, y_start), c= colour)             # top
+    
+    
+    

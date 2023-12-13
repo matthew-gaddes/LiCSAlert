@@ -64,11 +64,13 @@ from small_plot_functions import matrix_show, quick_linegraph
 
 
 licsalert_settings = {"baseline_end" : "20170101",                               # end baseline stage at YYYYMMDD, need to be before the last acquisition of LiCSAlert will never monitoring anyhting.  
-                      "figure_intermediate" : False,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
-                      "figure_type"         : 'both',                             # either 'window' or 'png' (to save as pngs), or 'both'
+                      "figure_intermediate" : True,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
+                      "figure_type"         : 'png',                             # either 'window' or 'png' (to save as pngs), or 'both'
                       "downsample_run"      : 0.5,                                     # data can be downsampled to speed things up
-                      "downsample_plot"      : 0.5,                               # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
-                      "residual_type"        : 'cumulative'}                      # controls the type of residual used in the lower plot.  Either cumulative or window   
+                      "downsample_plot"     : 0.5,                               # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
+                      "residual_type"       : 'cumulative',                      # controls the type of residual used in the lower plot.  Either cumulative or window   
+                      "t_recalculate"       : 10,
+                      'inset_ifgs_scaling'   : 5}                               # scales the size of the incremental and cumulative ifgs in the top row of the figure.  Smaller values gives a bigger figures.  
 
 
 icasar_settings = {"n_comp" : 5,                                                  # number of components to recover with ICA (ie the number of PCA sources to keep)
@@ -85,9 +87,9 @@ volcano = '001_campi_flegrei_example'                                           
 licsbas_dir = Path("./022D_04826_121209_campi_flegrei")                                         # input data
 
 
-# LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
-#                           licsbas_dir = licsbas_dir,
-#                           licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
+LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
+                          licsbas_dir = licsbas_dir,
+                          licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
 
 
 

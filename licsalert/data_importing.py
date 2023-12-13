@@ -61,13 +61,21 @@ def open_tcs(licsalert_dir):
     
     for delete_arg in delete_args[::-1]:
         del licsalert_items[delete_arg]
+        
+    if len(licsalert_items) == 0:
+        raise Exception(f"There are no LiCSAlert date directories (of the form YYYYMMDD), so there "
+                        f"are no LiCSAlert results to open.  Exiting.")
     
     final_date_dir = Path(sorted(licsalert_items)[-1])
     
-    with open(final_date_dir / 'time_course_info.pkl', 'rb') as f:
-        sources_tcs = pickle.load(f)
-        residual_tcs = pickle.load(f)
-    f.close()
+    try:
+        with open(final_date_dir / 'time_course_info.pkl', 'rb') as f:
+            sources_tcs = pickle.load(f)
+            residual_tcs = pickle.load(f)
+        f.close()
+    except:
+        raise Exception(f"Unable to open the time course information for this date.  Perhaps it's "
+                        f"a baseline date so doesn't have enough information to create the licsalert figure? Exiting  ")
 
     return sources_tcs
 

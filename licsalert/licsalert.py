@@ -107,8 +107,8 @@ def LiCSAlert(sources, time_values, ifgs_baseline, mask, ifgs_monitoring = None,
         residual_tcs_monitor = tcs_monitoring(residual_bm, residual_tcs, time_values, residual=True)               # lines, gradients. etc for residual 
     
     # 3: combine the reconsuction and residual for all ifgs
-    d_hat = np.hstack((d_hat_baseline, d_hat_monitoring))                                                                           # reconstruction
-    d_resid = np.hstack((d_resid_baseline, d_resid_monitoring))                                                                     # residual
+    d_hat = (np.hstack((d_hat_baseline, d_hat_monitoring))).T                                                                           # reconstruction, n_times x n_pixels 
+    d_resid = (np.hstack((d_resid_baseline, d_resid_monitoring))).T                                                                     # residual
 
     if ifgs_monitoring is None:
         return sources_tcs, residual_tcs
@@ -452,6 +452,27 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
                                  updated so that "incremental" is downsampled (and its mask), 
                                  and a new key is created, called "incremental_downsampled" 
                                  that is downsamled further for fast plotting                                 
+                                 
+                                 'dem' - the DEM, downsampled.  
+                                 'mask' - mask, downsampled.  
+                                 'incremental' - daisy chain of short temporal baseline ifgs, downsampled but not mean centered.  
+                                 'lons' - longitude for each pixel, downsampled.  
+                                 'lats' - latitude for each pixel, downsmapled. 
+                                 'E' - east component of look vector, downsmapled.  
+                                 'N' - north component of look vector, downsmapled.
+                                 'U' - up componennt of look vector, downsampled.  
+                                 'incremental_downsampled' - as above, but downsampled again (so downsampled_run * downsample_plot)
+                                 'mask_downsampled' - mask for double downsamled data.  
+                                 
+                                 'incremental_mc_space' - as for incremental, but mean cenetered in space.  
+                                 'means_space' - to undo mean centering in space.  
+                                 'incremental_mc_time' - as for incremental, but mean centered in time. 
+                                 'means_time' - to undo mean centering in time.  
+                                 
+                                 'mixtures_mc' - mean centered in space or time, depending on how sica_tica was set.  
+                                 'means' - to undo above mean centering.  
+                                 
+                                 
     History:
         2020/01/13 | MEG | Written
         2020/12/15 | MEG | Update to also downsample the lons and lats in the ICASAR geocoding information.  
@@ -494,52 +515,12 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
     # 2: Downsample further for plotting.  
     displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
                                                                                                       downsample_plot, verbose = False)
-    
-    
-
-    print("\n\n there is debug commented here \n\n")          
-    # pdb.set_trace()
-    # import sys
-    # plt.switch_backend('qt5agg')
-    # debug_scripts = "/home/matthew/university_work/python_stuff/python_scripts"
-    # if debug_scripts not in sys.path:                                                                             # check if already on path
-    #     sys.path.append(debug_scripts)
-    # from small_plot_functions import matrix_show, quick_linegraph
-    
-    # from licsalert.aux import col_to_ma
-    # import numpy as np
-    
-    # ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])            # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)    
-    
-    # # 1 last ifg
-    # matrix_show(col_to_ma(displacement_r2['incremental'][-1,], displacement_r2['mask']))          #ifg
-    # matrix_show(col_to_ma(ifg_ts.mixtures_mc_time[-1,], displacement_r2['mask']))          # probably same ifg
-    
-    # # 2 calculate cs
-    # ifg_n = -1
-    # matrix_show(col_to_ma(np.cumsum(displacement_r2['incremental'], axis = 0)[-1,], displacement_r2['mask']))          # cumulative ts, looks about right.  
-    # matrix_show(col_to_ma(np.cumsum(ifg_ts.mixtures_mc_time, axis =0)[-1,], displacement_r2['mask']))          # noise and zeros
-    
-    
-    # # up to here
-    
-    # matrix_show(col_to_ma(np.sum(displacement_r2['incremental'][:,], axis = 0), displacement_r2['mask']))          # noise and zeros
-    # matrix_show(col_to_ma(displacement_r2['incremental'][-1,], displacement_r2['mask']))                    # looks like a normal ifg
-    
-    
-    # matrix_show(col_to_ma(ifg_ts.mixtures_mc_time[-1,], displacement_r2['mask']))          # noise and zeros
-    # matrix_show(col_to_ma(np.cumsum(ifg_ts.mixtures_mc_time, axis = 0)[-2,], displacement_r2['mask']))          # noise and zeros
-    
-    
     # 3: mean centre in time or space, according to if sica or tica (must be done after downsampling for accuracy)
-    ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])            # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)
-    #displacement_r2['ifg_ts'] = ifg_ts                                                                      # put the whole object in the dict.  
-    
+    ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])                     # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)
     
     displacement_r2['incremental_mc_space'] = ifg_ts.mixtures_mc_space
     displacement_r2['means_space'] = ifg_ts.means_space
     
-
     displacement_r2['incremental_mc_time'] = ifg_ts.mixtures_mc_time
     displacement_r2['means_time'] = ifg_ts.means_time
 
@@ -553,6 +534,18 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
         raise Exception(f"'sica_tica' can be either 'sica' or 'tica', but not {sica_tica}.  Exiting.  ")
         
         
+    # # check sizes of things
+    # n_acq = len(tbaseline_info['acq_dates'])
+    
+    # for key, value in tbaseline_info.items():
+    #     print(f"{key} : {len(value)}")
+        
+    # for key, value in displacement_r2.items():
+    #     try:
+    #         print(f"{key} : {value.shape}")
+    #     except:
+    #         pass
+    
     print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
           f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
           f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
@@ -904,3 +897,62 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, b
     
     return sources, mask_sources,  baseline_end_ifg_n, ics_labels
 
+
+#%%
+
+
+class licsalert_date_obj:
+    def __init__(self, date, acq_dates):
+        """ Express date as a string, as a datetime, as the days since
+        the time series started, and in acqusition number since the time
+        series started.  
+        """
+        from datetime import datetime as dt
+        self.date = date
+        self.dt = dt.strptime(self.date, "%Y%m%d")                                            
+        self.day_n = (self.dt - dt.strptime(acq_dates[0], "%Y%m%d")).days
+        try:
+            self.acq_n = acq_dates.index(self.date)
+        except:
+            pass
+
+
+#%%
+
+def crop_licsalert_results_in_time(processing_date, acq_dates, sources_tcs, residual_tcs,
+                                   reconstructions, residuals, displacement_r2):
+    """ Crop some licsalert products in time.  
+    Inputs:
+        processing_date | string YYYYMMDD | Date to crop to. Must be an acquisition date.  
+        acq_dates | list of strings YYYYMMDD | Dates of acqusitions.  
+    Returns:
+        cropped in time deep copies.  
+    History:
+        2023_12_08 | MEG | Written
+    """
+    from copy import deepcopy
+    displacement_r2_crop = deepcopy(displacement_r2)
+    sources_tcs_crop = deepcopy(sources_tcs)
+    residual_tcs_crop = deepcopy(residual_tcs)
+    reconstructions_crop = deepcopy(reconstructions)
+    residuals_crop = deepcopy(residuals)
+    
+    
+    from licsalert.licsalert import licsalert_date_obj
+    processing_date = licsalert_date_obj(processing_date, acq_dates)
+    for source_tc in sources_tcs_crop:
+        for key in ['cumulative_tc', 'lines', 'distances']:
+            source_tc[key] = source_tc[key][:processing_date.acq_n, ]
+
+    for residual_tc in residual_tcs_crop:
+        for key in ['cumulative_tc', 'lines', 'distances']:
+            residual_tc[key] = residual_tc[key][:processing_date.acq_n, ]
+
+    reconstructions_crop = reconstructions_crop[:processing_date.acq_n]                    # odd how these are 
+    residuals_crop = residuals_crop[:processing_date.acq_n, ]
+    
+    for key in ['incremental', 'incremental_downsampled', 'incremental_mc_space', 'means_space', 
+                'incremental_mc_time', 'means_time', 'mixtures_mc', 'means']:
+        displacement_r2_crop[key] = displacement_r2_crop[key][:processing_date.acq_n, ]
+
+    return sources_tcs_crop, residual_tcs_crop, reconstructions_crop, residuals_crop, displacement_r2_crop

@@ -1,6 +1,12 @@
 not_in_repo/
 licsalert/__pycache__/*
-LiCSAlert_03_Campi_Flegrei/ICASAR_outputs/FastICA_results.pkl
+
+001_campi_flegrei_example/ICASAR_outputs/FastICA_results.pkl
+002_vesuvius_example_tica/ICASAR_outputs/FastICA_results.pkl
+
+
 monitoring_steps_all_volcs/*
 monitoring_test/
 monitoring_jasmin/
+
+campi_flegrei_example_all_times/*
