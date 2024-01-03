@@ -415,7 +415,8 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
     # 4: work with the acquisiton dates to produces names of daisy chain ifgs, and baselines
     tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(tbaseline_info["acq_dates"])
     tbaseline_info["baselines"] = baseline_from_names(tbaseline_info["ifg_dates"])
-    tbaseline_info["baselines_cumulative"] = np.cumsum(tbaseline_info["baselines"])                                                            # cumulative baslines, e.g. 12 24 36 48 etc
+    # calculate the cumulative baselines from the baselines, ensure 0 at start.  
+    tbaseline_info["baselines_cumulative"] = np.concatenate((np.zeros((1)), np.cumsum(tbaseline_info["baselines"])), axis = 0)                                                            
     
     # 5: get the lons and lats of each pixel in the ifgs
     geocode_info = create_lon_lat_meshgrids(cumh5['corner_lon'][()], cumh5['corner_lat'][()], 
@@ -704,7 +705,8 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     tbaseline_info["acq_dates"] = sorted([''.join(date_hyphen_format.split('-')) for date_hyphen_format in licsbas_data['dates'] ])         # convert from yyy-mm-dd to yyyymmdd
     tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(tbaseline_info["acq_dates"])                                                # get teh dates of the incremental ifgs
     tbaseline_info["baselines"] = baseline_from_names(tbaseline_info["ifg_dates"])                                                          # and their temporal baselines
-    tbaseline_info["baselines_cumulative"] = np.cumsum(tbaseline_info["baselines"])                                                         # cumulative baslines, e.g. 12 24 36 48 etc
+    # make cumulative baselines, and ensure that 0 at the start.  
+    tbaseline_info["baselines_cumulative"] = np.concatenate((np.zeros((1,1)), np.cumsum(tbaseline_info["baselines"])), axis = 0)                                                            
     
     # 5: Try to get the DEM
     try:

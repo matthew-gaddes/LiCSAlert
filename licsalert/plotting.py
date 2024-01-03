@@ -27,7 +27,13 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
                                      If set to None, the full resolution source will be plotted        
         displacement_r2 | dict | contains ifgs as row vectors in "incremental" and their mask ("mask"), and also downsampled versions for faster figures,
                                   and their mask.  Downsampled ones used in plotting!  
-        mask | r2 array | to convert an ifg (or source) as a row vector into a rank 2 masked array
+
+    figure_date
+    acq_dates | list | acquisition dates as strings in form yyyymmdd
+    baselines_cs | r1 array | temporal baselines of each acquisition from the first acquisition (so starts at 0)
+    baseline_end_date 
+    dayend_date
+    
 
         
         figure_outtype |
@@ -69,17 +75,17 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
     from licsalert.aux import col_to_ma
     from licsalert.licsalert import licsalert_date_obj
         
-    def calcualte_line_args(n_ifgs, t_recalculate):
+    def calcualte_line_args(n_acqs, t_recalculate):
         """Lines of best fit are calculated for each time step, but we don't want
         to plot them all (as they lie on top of each other, mostly).  
         Therefore, calcaulte the numbers of which to plot so that they don't overlap.  '
         """
         line_args = []    
-        for k in range(n_ifgs):
-            if k % t_recalculate == 0 and k != 0:                                   # pick which ones, but have to exclue the 0th one
-                line_args.append(k-1)
-            if k == (n_ifgs-1) and k not in line_args:                              # and always pick the last one
-                line_args.append(k)
+        for n_acq in range(n_acqs):
+            if n_acq % t_recalculate == 0 and n_acq != 0:                                   # picn_acq which ones, but have to exclue the 0th one
+                line_args.append(n_acq-1)
+            if n_acq == (n_acqs-1) and n_acq not in line_args:                              # and always pick the last one
+                line_args.append(n_acq)
         return line_args
     
 
@@ -217,17 +223,17 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
     #                     f"the cumulative baselines have {baselines_cs.shape[0]} entries, and "
     #                     f"there are {len(acq_dates)} acquisition dates (which should be 1 more than the others). "
     #                     f"As these don't agree, exiting.  ")
-    n_times = baselines_cs.shape[0] 
+    n_acqs = baselines_cs.shape[0] 
     day0_date = licsalert_date_obj(acq_dates[0], acq_dates)                          # time of first acquisition (x = 0 value)
-    figure_date = licsalert_date_obj(figure_date, acq_dates)                         # the x value (time) that the figure is plotted to
-    baseline_end_date = licsalert_date_obj(baseline_end_date, acq_dates)
+    #figure_date = licsalert_date_obj(figure_date, acq_dates)                         # the x value (time) that the figure is plotted to
+    #baseline_end_date = licsalert_date_obj(baseline_end_date, acq_dates)
     if dayend_date is None:
         print(f"No dayend_date was provided which sets the time the plots spans to (although "
               f" the data doesn't necessarily fill the whole plot.  Setting it to the last  "
               f"acquisition date.  ")
         dayend_date = licsalert_date_obj(acq_dates[-1], acq_dates)                         # the highest x value (time) of the figure, although data doesn't necesarily plot to here
     else:
-        dayend_date = licsalert_date_obj(dayend_date, acq_dates)                         # the highest x value (time) of the figure, although data doesn't necesarily plot to here
+        dayend_date = dayend_date
 
 
 
@@ -265,7 +271,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
     n_ics = len(sources_tcs)
     
     #n_ifgs = displacement_r2["incremental"].shape[0]
-    line_args= calcualte_line_args(n_times, t_recalculate)                      # which lines of best fit to plot (units are acq_n)
+    line_args= calcualte_line_args(n_acqs, t_recalculate)                      # which lines of best fit to plot (units are acq_n)
     c = mpl.colors.ColorConverter().to_rgb                                      
     cmap_discrete = make_colormap(  [c('black'), c('orange'), 0.33, c('orange'), c('yellow'), 0.66, c('yellow'), c('red')])     # custom colorbar for number of sigmas from line
     cmap_sources = colourbar_for_sources(sources)
@@ -319,12 +325,18 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
         
         # 4c: plot the time courses for that IC, and the rolling lines of best fit      
         ax_tc = plt.Subplot(fig1, grid[row_n+2,1:])
-        ax_tc.scatter(baselines_cs[:figure_date.acq_n], source_tc["cumulative_tc"][:figure_date.acq_n], 
-                      c = source_tc["distances"][:figure_date.acq_n], marker='o', 
+        ax_tc.scatter(baselines_cs[:figure_date.acq_n+1], source_tc["cumulative_tc"][:figure_date.acq_n+1], 
+                      c = source_tc["distances"][:figure_date.acq_n+1], marker='o', 
                       s = dot_marker_size, cmap = cmap_discrete, vmin = 0, vmax = 5, )                                      # note that baselines_cs don't start at 0 as the cumualtive tcs also don't start at 0 
+        
         for line_arg in line_args:                                                                                          # line args sets which lines of best fit to plot (there is a line of best fit for each point, but it's too busy if we plot them all)
-            if line_arg < figure_date.acq_n:                                                                                # check that line_arg is not in the future relative to the acquisition date we're currently on
-                ax_tc.plot(baselines_cs[:figure_date.acq_n], source_tc["lines"][:figure_date.acq_n,line_arg], c = 'k')      # ie each column is a line of best fit, but crop it so it's the same length as the baselines_cs
+            if line_arg <= figure_date.acq_n:                                                                                # check that line_arg is not in the future relative to the acquisition date we're currently on
+
+                #ax_tc.plot(baselines_cs[:figure_date.acq_n], source_tc["lines"][:figure_date.acq_n,line_arg], c = 'k')      # ie each column is a line of best fit, but crop it so it's the same length as the baselines_cs
+                # ensure that the start acquisition doens't go negative 
+                start_acq = np.max(0, line_arg - source_tc['t_recalculate'])
+                ax_tc.plot(baselines_cs[start_acq: line_arg+1], 
+                           source_tc["lines"][line_arg], c = 'k')      # 
     
         # 4d: tidy up some stuff on the axes
         ax_tc.axhline(y=0, color='k', alpha=0.3)  
@@ -340,12 +352,18 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
                                                                 
     # 5: Plot the residual
     ax_residual = plt.Subplot(fig1, grid[-1,1:])                                                                    # plot on the last row
-    ax_residual.scatter(baselines_cs[:figure_date.acq_n], residual[0]["cumulative_tc"][:figure_date.acq_n],
+    ax_residual.scatter(baselines_cs[:figure_date.acq_n+1], residual[0]["cumulative_tc"][:figure_date.acq_n+1],
                         marker='o', s = dot_marker_size, cmap = cmap_discrete,
-                        vmin = 0, vmax = 5, c = residual[0]["distances"][:figure_date.acq_n])         # 
+                        vmin = 0, vmax = 5, c = residual[0]["distances"][:figure_date.acq_n+1])         # 
     for line_arg in line_args:                                                                                      # plot the rolling line of best fit, but not all of them (only those in line_args)
         if line_arg < figure_date.acq_n:
-            ax_residual.plot(baselines_cs[:figure_date.acq_n], residual[0]["lines"][:figure_date.acq_n,line_arg], c = 'k')                                    # each column is a line of best fit
+            # ax_residual.plot(baselines_cs[:figure_date.acq_n], residual[0]["lines"][:figure_date.acq_n,line_arg], c = 'k')                                    # each column is a line of best fit            
+            
+            start_acq = np.max(0, line_arg - source_tc['t_recalculate'])
+            ax_residual.plot(baselines_cs[start_acq: line_arg+1],
+                             residual[0]["lines"][line_arg], c = 'k')                                    # each column is a line of best fit
+
+            
     ax_residual.axhline(y=0, color='k', alpha=0.3)
     ax_residual.axvline(x = baseline_end_date.day_n, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
     ax_residual.set_xlim(left = 0, right = dayend_date.day_n)                    # and finaly tidy up axis and labels etc.  
@@ -598,9 +616,9 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         cumulative_reco_r3 = r2_to_r3(cumulative_reco_r2, mask)
         
         
-        for i, data in enumerate([cumulative_r3, cumulative_reco_r3]):
+        for i, data in enumerate([cumulative_r3, cumulative_reco_r3]):                                      # iterate though original data and reconstruction of data
     
-            ts = data[:, pixel['y'], pixel['y']]                                                                                   # get the time series for the pixel of interest
+            ts = data[:, pixel['y'], pixel['y']]                                                            # get the time series for the pixel of interest
             ts_smooth, valid = moving_average(ts)                                                           # smooth it 
             ax_ts.scatter(np.concatenate((np.array([0]), tbaseline_info['baselines_cumulative'])),
                           ts, alpha = 0.4, marker = '.', s = 4, 
@@ -657,10 +675,37 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     
         plt.draw()
     
+    print(f"Starting the LiCSAlert interactive time series explorer.  ")
       
     # 1: Open data and some simple processing 
     displacement_r2, tbaseline_info, aux_data = open_aux_data(licsalert_out_dir)
     sources_tcs = open_tcs(licsalert_out_dir)    
+    
+    
+
+    #%% Debug
+    
+    # pdb.set_trace()
+    # incremental_r3 = r2_to_r3(displacement_r2['incremental'], displacement_r2['mask'])                                                                                                         # conver to rank 3
+    # cumulative_r3 = np.cumsum(incremental_r3, axis = 0)
+    
+    # f, ax = plt.subplots(1)
+    # ax.matshow(cumulative_r3[-1,:])
+    
+    # f, ax = plt.subplots(1)
+    # ax.plot(cumulative_r3[:, 33, 62 ])
+    
+     
+    
+    #%%
+    
+
+
+    # for i in range(4):
+    #     f, ax = plt.subplots()
+    #     ax.plot(sources_tcs[i]['cumulative_tc'])
+    #     plt.pause(2)
+        
     
     n_sources = len(sources_tcs)
     n_pixels = np.size(displacement_r2['incremental'], axis = 1)

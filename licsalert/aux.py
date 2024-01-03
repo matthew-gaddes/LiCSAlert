@@ -93,31 +93,31 @@ def r2_to_r3(ifgs_r2, mask):
 
 #%%
 
-def get_baseline_end_ifg_n(LiCSBAS_imdates, baseline_end):
-    """ Given a list of the dates that there are steps in the LICSBAS time series for (i.e. when there was a Sentinel-1 acquisition),
-    find which number is the last before the baseline stage ends.  Note the baseline stage can end on any date (i.e. not one when there's an acquisition)
+# def get_baseline_end_ifg_n(LiCSBAS_imdates, baseline_end):
+#     """ Given a list of the dates that there are steps in the LICSBAS time series for (i.e. when there was a Sentinel-1 acquisition),
+#     find which number is the last before the baseline stage ends.  Note the baseline stage can end on any date (i.e. not one when there's an acquisition)
                                                                                                                 
-    The number returned is the imdate number that is the last in the baseline, starting counting at 0.  If you wanted to index imdates and include this,
-    you would have to do date_n + 1.  
+#     The number returned is the imdate number that is the last in the baseline, starting counting at 0.  If you wanted to index imdates and include this,
+#     you would have to do date_n + 1.  
     
-    Inputs:
-        LiCSBAS_imdates | list of strings | dates of Sentinel-1 acquisitions, in form YYYYMMDD
-        baseline_end | string | dates of end of baseline stage, in form YYYYMMDD
-    Returns:
-        date_n | int | the number of the last date_n that is in the baseline stage, starting counting at 0.  
-    History:
-        2020/11/25 | MEG | Written
+#     Inputs:
+#         LiCSBAS_imdates | list of strings | dates of Sentinel-1 acquisitions, in form YYYYMMDD
+#         baseline_end | string | dates of end of baseline stage, in form YYYYMMDD
+#     Returns:
+#         date_n | int | the number of the last date_n that is in the baseline stage, starting counting at 0.  
+#     History:
+#         2020/11/25 | MEG | Written
     
-    """
-    acq_after_baseline = False                                                                  # initiate as False
-    date_n = 0                                                                                  # initate the counter
-    while acq_after_baseline is False:                                                          # while loop
-        acq_after_baseline = compare_two_dates(baseline_end, LiCSBAS_imdates[date_n])           # check if imdate is after baseline_end
-        if acq_after_baseline is False:
-            date_n += 1                                                                         # if not, update the counter
-        else:
-            date_n -= 1                                                                         # but if it is, go back one to get the ifg number of the last ifg in the baseline stage (ie before it switched to True).  
-    return date_n
+#     """
+#     acq_after_baseline = False                                                                  # initiate as False
+#     date_n = 0                                                                                  # initate the counter
+#     while acq_after_baseline is False:                                                          # while loop
+#         acq_after_baseline = compare_two_dates(baseline_end, LiCSBAS_imdates[date_n])           # check if imdate is after baseline_end
+#         if acq_after_baseline is False:
+#             date_n += 1                                                                         # if not, update the counter
+#         else:
+#             date_n -= 1                                                                         # but if it is, go back one to get the ifg number of the last ifg in the baseline stage (ie before it switched to True).  
+#     return date_n
 
 #%%
 
@@ -279,3 +279,17 @@ def add_square_plot(x_start, x_stop, y_start, y_stop, ax, colour = 'k'):
     
     
     
+
+#%%
+
+def find_nearest_date(given_date, date_list):
+    """  Given a list of dates in the form yyyymmdd and a date in the form
+    yyyymmdd, find the date nearest to the given one.  
+    """
+    from datetime import datetime
+    given_datetime = datetime.strptime(given_date, '%Y%m%d')
+    date_list = [datetime.strptime(date, '%Y%m%d') for date in date_list]
+    time_diffs = [abs(given_datetime - date) for date in date_list]
+    nearest_date_index = time_diffs.index(min(time_diffs))
+
+    return date_list[nearest_date_index].strftime('%Y%m%d')
