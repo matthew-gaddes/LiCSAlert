@@ -95,6 +95,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
         up to the date set by figure_date
         """
         from mpl_toolkits.axes_grid1.inset_locator import inset_axes            
+        
         # 1: Create a single wide axes for the inset axes to be plotted on
         ax_ifgs = plt.Subplot(figure, gridspec_area)                                                # a thin but wide axes for all the thumbnail ifgs along the top to go in
         fig1.add_subplot(ax_ifgs)                                                                   # add to figure
@@ -105,16 +106,18 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
         xticks_every_3months(ax_ifgs, day0_date.date, baselines_cs, include_tick_labels = False)      # update the ticks (but not labels) to be the same as the time course and residual axis
 
         for ifg_n, source in enumerate(ifgs[:figure_date.acq_n, :]):                                                         # ifgs are rows, loop through.  Make sure we don't try to iterate through more than we have dates for  
-            iax = ax_ifgs.inset_axes([baselines_cs[ifg_n], 0., (dayend_date.day_n/ifg_xpos_scaler), 1.], transform=ax_ifgs.transData)      # [xpos, ypos, xwidth, ywidth], note the x_pos_scaler that reduces the size of the inset axes to make sure it remains in tehe right place
-            ifg_plot = iax.matshow(col_to_ma(source, pixel_mask), cmap = cmap)                                       # plot on the axes
-            iax.set_xticks([])                                                                                               # images so get rid of x and y ticks (nb this is just for the inset axes)
+            #make the ax for the ifg,  x pos, y pox, x width, y width,
+            iax = ax_ifgs.inset_axes([baselines_cs[ifg_n+1], 0., (dayend_date.day_n/ifg_xpos_scaler), 1.],
+                                     transform=ax_ifgs.transData)      
+            ifg_plot = iax.matshow(col_to_ma(source, pixel_mask), cmap = cmap)                                       
+            iax.set_xticks([])                                                                                               
             iax.set_yticks([])
             
-            if ifg_n == (figure_date.acq_n -1):                                                                                             # if it's the last interferogram
-                cbar_ax = inset_axes(iax, width="7%", height="40%",   loc='lower left',  bbox_to_anchor=(1.05, 0.1, 1, 1),              # Colorbar: isnet axes just to left of the main axis
+            # the last ifg has colorbar and label of range.  
+            if ifg_n == (figure_date.acq_n -1):                                                                                             
+                cbar_ax = inset_axes(iax, width="7%", height="40%",   loc='lower left',  bbox_to_anchor=(1.05, 0.1, 1, 1),              
                                      bbox_transform=iax.transAxes,borderpad=0)
-                
-                #cbar = fig1.colorbar(ifg_plot, cax = cbar_ax, ticks = [np.nanmin(source), np.nanmax(source)])                            # colorbar, tick only 0 and the max (and check max is not a nan)
+
                 cbar = fig1.colorbar(ifg_plot, cax = cbar_ax)                           
                 cbar.set_ticks([np.nanmin(source), np.nanmax(source)])
                 cbar.set_ticklabels([f"{np.nanmin(source):.3} m", f"{np.nanmax(source):.3} m"])
@@ -225,8 +228,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
     #                     f"As these don't agree, exiting.  ")
     n_acqs = baselines_cs.shape[0] 
     day0_date = licsalert_date_obj(acq_dates[0], acq_dates)                          # time of first acquisition (x = 0 value)
-    #figure_date = licsalert_date_obj(figure_date, acq_dates)                         # the x value (time) that the figure is plotted to
-    #baseline_end_date = licsalert_date_obj(baseline_end_date, acq_dates)
+
     if dayend_date is None:
         print(f"No dayend_date was provided which sets the time the plots spans to (although "
               f" the data doesn't necessarily fill the whole plot.  Setting it to the last  "
@@ -331,13 +333,11 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
         
         for line_arg in line_args:                                                                                          # line args sets which lines of best fit to plot (there is a line of best fit for each point, but it's too busy if we plot them all)
             if line_arg <= figure_date.acq_n:                                                                                # check that line_arg is not in the future relative to the acquisition date we're currently on
-
-                #ax_tc.plot(baselines_cs[:figure_date.acq_n], source_tc["lines"][:figure_date.acq_n,line_arg], c = 'k')      # ie each column is a line of best fit, but crop it so it's the same length as the baselines_cs
                 # ensure that the start acquisition doens't go negative 
-                start_acq = np.max(0, line_arg - source_tc['t_recalculate'])
+                start_acq = np.max((0, (line_arg+1) - source_tc['t_recalculate']))
                 ax_tc.plot(baselines_cs[start_acq: line_arg+1], 
                            source_tc["lines"][line_arg], c = 'k')      # 
-    
+   
         # 4d: tidy up some stuff on the axes
         ax_tc.axhline(y=0, color='k', alpha=0.3)  
         ax_tc.axvline(x = baseline_end_date.day_n, color='k', alpha=0.3)                          #line the splits between baseline and monitoring ifgs
@@ -359,7 +359,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
         if line_arg < figure_date.acq_n:
             # ax_residual.plot(baselines_cs[:figure_date.acq_n], residual[0]["lines"][:figure_date.acq_n,line_arg], c = 'k')                                    # each column is a line of best fit            
             
-            start_acq = np.max(0, line_arg - source_tc['t_recalculate'])
+            start_acq = np.max((0, (line_arg+1) - source_tc['t_recalculate']))
             ax_residual.plot(baselines_cs[start_acq: line_arg+1],
                              residual[0]["lines"][line_arg], c = 'k')                                    # each column is a line of best fit
 
@@ -476,11 +476,11 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     import numpy as np
     import matplotlib.pyplot as plt
     from matplotlib import ticker
-    #from matplotlib.widgets import CheckButtons
     import matplotlib.gridspec as gridspec
     
     from licsalert.licsalert import reconstruct_ts
-    from licsalert.data_importing import open_aux_data, open_tcs
+    from licsalert.data_importing import open_aux_data, open_tcs, determine_last_licsalert_date
+    from licsalert.data_importing import crop_licsalert_results_in_time
     from licsalert.plotting import truncate_colormap, xticks_every_nmonths
     from licsalert.aux import r2_to_r3, moving_average, col_to_ma
     
@@ -506,8 +506,8 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
             ax_ctc = plt.Subplot(f, grid[source_n, 1:5])                                                # a thin but wide axes for all the thumbnail ifgs along the top to go in
             ctc = np.concatenate((np.array([[0]]), sources_tcs[source_n]['cumulative_tc']), axis = 0)
             ctc_smooth, valid = moving_average(ctc)                                                           # smooth it 
-            ax_ctc.scatter(np.concatenate((np.array([0]), baselines_cumulative)), ctc, alpha = 0.4, marker = '.', s = 2) 
-            ax_ctc.plot(np.concatenate((np.array([0]), baselines_cumulative)), ctc_smooth)                                   # and the smoothed one as a line
+            ax_ctc.scatter(baselines_cumulative, ctc, alpha = 0.4, marker = '.', s = 2) 
+            ax_ctc.plot(baselines_cumulative, ctc_smooth)                                   # and the smoothed one as a line
             ax_ctc.axhline(0, c = 'k')
             ax_ctc.grid(True)
             ax_ctc.yaxis.tick_right()
@@ -615,16 +615,16 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         cumulative_r3 = r2_to_r3(cumulative_r2, mask)
         cumulative_reco_r3 = r2_to_r3(cumulative_reco_r2, mask)
         
-        
-        for i, data in enumerate([cumulative_r3, cumulative_reco_r3]):                                      # iterate though original data and reconstruction of data
-    
-            ts = data[:, pixel['y'], pixel['y']]                                                            # get the time series for the pixel of interest
-            ts_smooth, valid = moving_average(ts)                                                           # smooth it 
-            ax_ts.scatter(np.concatenate((np.array([0]), tbaseline_info['baselines_cumulative'])),
-                          ts, alpha = 0.4, marker = '.', s = 4, 
-                          label = data_names[i], c = data_colours[i])                                       # plot each point for the 
-            ax_ts.plot(np.concatenate((np.array([0]), tbaseline_info['baselines_cumulative'])),
-                        ts_smooth, c = data_colours[i])                                   # and the smoothed one as a line
+
+        # iterate through the original and reconstructed data        
+        for i, data in enumerate([cumulative_r3, cumulative_reco_r3]):                                      
+            # get the pixel to be plotted
+            ts = data[:, pixel['y'], pixel['y']]                                                            
+            ts_smooth, valid = moving_average(ts)                                                           
+            ax_ts.scatter(tbaseline_info['baselines_cumulative'], ts, alpha = 0.4,
+                           marker = '.', s = 4,  label = data_names[i], c = data_colours[i])                                       
+            ax_ts.plot(tbaseline_info['baselines_cumulative'], ts_smooth,
+                       c = data_colours[i])                                   
         
         
         ax_ts.axhline(0, c = 'k')
@@ -679,7 +679,19 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
       
     # 1: Open data and some simple processing 
     displacement_r2, tbaseline_info, aux_data = open_aux_data(licsalert_out_dir)
-    sources_tcs = open_tcs(licsalert_out_dir)    
+    final_date_dir = determine_last_licsalert_date(licsalert_out_dir)
+    sources_tcs, residual_tcs = open_tcs(final_date_dir)    
+    
+    print(f"A LiCSAlert directory for {final_date_dir.parts[-1]} was found "
+          f"so the interactive figure will be created up to this date.  ")
+    
+    
+    
+    crop = crop_licsalert_results_in_time(final_date_dir.parts[-1], tbaseline_info['acq_dates'],
+                                          sources_tcs, residual_tcs,
+                                          None, None, displacement_r2, tbaseline_info)
+    
+    sources_tcs, residual_tcs, _, _, displacement_r2, tbaseline_info = crop; del crop
     
     
 
@@ -694,17 +706,13 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     
     # f, ax = plt.subplots(1)
     # ax.plot(cumulative_r3[:, 33, 62 ])
-    
-     
-    
-    #%%
-    
-
 
     # for i in range(4):
     #     f, ax = plt.subplots()
     #     ax.plot(sources_tcs[i]['cumulative_tc'])
     #     plt.pause(2)
+    
+    #%%
         
     
     n_sources = len(sources_tcs)

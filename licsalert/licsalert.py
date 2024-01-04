@@ -305,7 +305,7 @@ def tcs_baseline(tcs_c, baselines_cs, t_recalculate):
         tc_dict["lines"] = []
         for n_acq in range(n_acqs):                                                        # loop through each time step, to calculate it
             # get the start acq of the line of best fit, can't be less than 0
-            start_acq = np.max((0, n_acq - (t_recalculate)))
+            start_acq = np.max((0, (n_acq+1) - (t_recalculate)))
             # get the y values for the line of best fit for this acquisition (it and previous ones)
             tc_dict["lines"].append(line_yvals[start_acq:n_acq+1])              # copy the y values for that little bit of line
                 
@@ -924,6 +924,10 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
     
     elif displacement_r2['means'].shape[0] == n_pixels:                                   # mean for each pixel means tICA was run
         means_r2 = np.repeat(displacement_r2['means'][np.newaxis, :], n_times, axis = 0)
+    else:
+        raise Exception(f"The number of acquisitions in the time courses ({n_times}) "
+                        f"does not match the number of times in the interferogams "
+                        f"({displacement_r2['means'].shape[0]}).  Exiting.  ")
     
     X = A@S + means_r2
     
@@ -1039,40 +1043,3 @@ class licsalert_date_obj:
 
 #%%
 
-def crop_licsalert_results_in_time(processing_date, acq_dates, sources_tcs, residual_tcs,
-                                   reconstructions, residuals, displacement_r2):
-    """ Crop some licsalert products in time.  
-    Inputs:
-        processing_date | string YYYYMMDD | Date to crop to. Must be an acquisition date.  
-        acq_dates | list of strings YYYYMMDD | Dates of acqusitions.  
-    Returns:
-        cropped in time deep copies.  
-    History:
-        2023_12_08 | MEG | Written
-    """
-    from copy import deepcopy
-    displacement_r2_crop = deepcopy(displacement_r2)
-    sources_tcs_crop = deepcopy(sources_tcs)
-    residual_tcs_crop = deepcopy(residual_tcs)
-    reconstructions_crop = deepcopy(reconstructions)
-    residuals_crop = deepcopy(residuals)
-    
-    
-    from licsalert.licsalert import licsalert_date_obj
-    processing_date = licsalert_date_obj(processing_date, acq_dates)
-    for source_tc in sources_tcs_crop:
-        for key in ['cumulative_tc', 'lines', 'distances']:
-            source_tc[key] = source_tc[key][:processing_date.acq_n, ]
-
-    for residual_tc in residual_tcs_crop:
-        for key in ['cumulative_tc', 'lines', 'distances']:
-            residual_tc[key] = residual_tc[key][:processing_date.acq_n, ]
-
-    reconstructions_crop = reconstructions_crop[:processing_date.acq_n]                    # odd how these are 
-    residuals_crop = residuals_crop[:processing_date.acq_n, ]
-    
-    for key in ['incremental', 'incremental_downsampled', 'incremental_mc_space', 'means_space', 
-                'incremental_mc_time', 'means_time', 'mixtures_mc', 'means']:
-        displacement_r2_crop[key] = displacement_r2_crop[key][:processing_date.acq_n, ]
-
-    return sources_tcs_crop, residual_tcs_crop, reconstructions_crop, residuals_crop, displacement_r2_crop

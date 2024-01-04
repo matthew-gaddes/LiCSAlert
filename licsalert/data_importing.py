@@ -6,6 +6,70 @@ Created on Fri Oct 20 09:59:48 2023
 @author: matthew
 """
 
+import pdb
+
+#%%
+
+
+def crop_licsalert_results_in_time(processing_date, acq_dates, sources_tcs, residual_tcs,
+                                   reconstructions, residuals, 
+                                   displacement_r2, tbaseline_info):
+    """ Crop some licsalert products in time.  
+    Inputs:
+        processing_date | string YYYYMMDD | Date to crop to. Must be an acquisition date.  
+        acq_dates | list of strings YYYYMMDD | Dates of acqusitions.  
+    Returns:
+        cropped in time deep copies.  
+    History:
+        2023_12_08 | MEG | Written
+    """
+    from copy import deepcopy
+    from licsalert.licsalert import licsalert_date_obj
+    
+    # make deep copies that will become the cropped outputs.  
+    sources_tcs_crop = deepcopy(sources_tcs)
+    residual_tcs_crop = deepcopy(residual_tcs)
+    displacement_r2_crop = deepcopy(displacement_r2)
+    tbaseline_info_crop = deepcopy(tbaseline_info)
+    reconstructions_crop = deepcopy(reconstructions)
+    residuals_crop = deepcopy(residuals)
+    
+    # crop the time course information in time
+    processing_date = licsalert_date_obj(processing_date, acq_dates)
+    for source_tc in sources_tcs_crop:
+        for key in ['cumulative_tc', 'distances']:
+            source_tc[key] = source_tc[key][:processing_date.acq_n, ]
+        # as this is a list, need indexing without trailling ,
+        source_tc['lines'] = source_tc['lines'][:processing_date.acq_n]
+
+    # crop the residual information in time
+    for residual_tc in residual_tcs_crop:
+        for key in ['cumulative_tc', 'distances']:
+            residual_tc[key] = residual_tc[key][:processing_date.acq_n, ]
+        # as this is a list, need indexing without trailling ,
+        residual_tc['lines'] = residual_tc['lines'][:processing_date.acq_n]
+            
+    # crop the time series information in time
+    for key in ['incremental', 'incremental_downsampled', 'incremental_mc_space', 'means_space', 
+                'incremental_mc_time', 'means_time', 'mixtures_mc', 'means']:
+        displacement_r2_crop[key] = displacement_r2_crop[key][:processing_date.acq_n, ]
+        
+    # croppping in time, note +1 to make upper index inclusive.  
+    for key in ['acq_dates', 'baselines_cumulative']:
+        tbaseline_info_crop[key] = tbaseline_info[key][:(processing_date.acq_n + 1)]
+    # but no +1 here as tehre is no baselines of 0 for ifg acq0_acq0
+    for key in ['ifg_dates', 'baselines']:
+        tbaseline_info_crop[key] = tbaseline_info[key][:(processing_date.acq_n)]
+        
+    # optional ones to crop. 
+    if reconstructions_crop is not None:
+        reconstructions_crop = reconstructions_crop[:processing_date.acq_n]                    
+    if reconstructions_crop is not None:    
+        residuals_crop = residuals_crop[:processing_date.acq_n, ]
+    
+    return sources_tcs_crop, residual_tcs_crop, reconstructions_crop, residuals_crop, displacement_r2_crop, tbaseline_info_crop
+
+
 #%%
 
 
@@ -34,21 +98,20 @@ def open_aux_data(licsalert_dir):
     return displacement_r2, tbaseline_info, aux_data
     
 
-#%%
-    
-    
-def open_tcs(licsalert_dir):
-    """ Open the time course data.  
+#%% 
+
+def determine_last_licsalert_date(licsalert_dir):
+    """ Given a directory of LiCSAlert outputs, find the youngest date.  
     Inputs:
         licsalert_dir | pathlib Path | output directory when LiCSAlert was run.  
     Returns:
-        sources_tcs | list of dicts | One item in list for each source, each item contains ['cumulative_tc', 'gradient', 'lines', 'sigma', 'distances', 't_recalculate'])
+        final_date_dir | pathlib Path | directory of youngest licsalert output.  
     History:
-        2023_10_25 | Written | MEG
+        2024_12_04 | MEG | Written
     """
     from glob import glob
     from pathlib import Path
-    import pickle
+    
     
     licsalert_items = sorted(glob(str(licsalert_dir / '*')))
     
@@ -68,6 +131,25 @@ def open_tcs(licsalert_dir):
     
     final_date_dir = Path(sorted(licsalert_items)[-1])
     
+    return final_date_dir
+    
+    
+#%%
+
+    
+def open_tcs(final_date_dir):
+    """ Open the time course data.  
+    Inputs:
+        
+    Returns:
+        sources_tcs | list of dicts | One item in list for each source, each item contains ['cumulative_tc', 'gradient', 'lines', 'sigma', 'distances', 't_recalculate'])
+    History:
+        2023_10_25 | MEG | Written
+        2024_01_04 | MEG | move functionality that finds youngest direcotyr to new function.  
+    """
+    
+    import pickle
+
     try:
         with open(final_date_dir / 'time_course_info.pkl', 'rb') as f:
             sources_tcs = pickle.load(f)
@@ -77,7 +159,7 @@ def open_tcs(licsalert_dir):
         raise Exception(f"Unable to open the time course information for this date.  Perhaps it's "
                         f"a baseline date so doesn't have enough information to create the licsalert figure? Exiting  ")
 
-    return sources_tcs
+    return sources_tcs, residual_tcs
 
 
 #%%
