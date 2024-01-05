@@ -456,6 +456,15 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
         print(f"Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  ")
     except:
         print(f"Failed to reference the LiCSBAS time series - use with caution!  ")
+        
+    #######
+    # print(f"DEBUG")
+    # f, ax = plt.subplots()
+    # ax.plot(cumh5['cum'][:,76, 122 ])
+    # ax.set_title('After referencing')
+    # pdb.set_trace()
+    ##############
+    
     
     
     #3: Open the mask and the DEM
@@ -530,33 +539,19 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
             ax.imshow(col_to_ma(displacement_r2['incremental'][ifg_n_plot,:], displacement_r2['mask']),
                                 interpolation='none', aspect='auto')                                            # plot the uncropped ifg
         
-        #import pdb; pdb.set_trace()
+        # loop through and crop, determing if r2 or r3 array.  
         for product in displacement_r3:
-            if len(displacement_r3[product].shape) == 2:                                                                                  # if it's a rank 2, assume only x, y
-                resized_r2 = displacement_r3[product][crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]               # and crop
+            if len(displacement_r3[product].shape) == 2:                                                                                  
+                resized_r2 = displacement_r3[product][crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]               
                 displacement_r2[product] = resized_r2
                 displacement_r3[product] = resized_r2
-            elif len(displacement_r3[product].shape) == 3:                                                                                # if it's a rank 3, assume times, x, y
-                resized_r3 = displacement_r3[product][:, crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]            # and crop only last two dimensions
+            elif len(displacement_r3[product].shape) == 3:                                                                                
+                resized_r3 = displacement_r3[product][:, crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]            
                 displacement_r3[product] = resized_r3
-                displacement_r2[product], displacement_r2['mask'] = rank3_ma_to_rank2(resized_r3)      # convert from rank 3 to rank 2 and a mask
+                displacement_r2[product], displacement_r2['mask'] = rank3_ma_to_rank2(resized_r3)      
             else:
                 pass
-            
-    
-
-        # for product in displacement_r3:
-        #     print(f"{product} : {displacement_r3[product].shape}")
         
-        # import pdb; pdb.set_trace()
-        # for disp_dict in [displacement_r2, displacement_r3]:
-        #     for product in disp_dict:
-        #         if len(disp_dict[product].shape) == 2:                                                                                  # if it's a rank 2, assume only x, y
-        #             disp_dict[product] = disp_dict[product][crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]               # and crop
-        #         elif len(disp_dict[product].shape) == 3:                                                                                # if it's a rank 3, assume times, x, y
-        #             disp_dict[product] = disp_dict[product][:, crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]            # and crop only last two dimensions
-        #         else:
-        #             pass
     
 
         if figures:

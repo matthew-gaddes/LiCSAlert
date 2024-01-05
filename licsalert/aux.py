@@ -8,6 +8,35 @@ Created on Sun Mar  8 18:10:21 2020
 
 import pdb
 
+
+#%%
+
+def determine_abs_max_pixel(cumulative_r3, cumulative_r2):
+    """ Given a time series as a rank 3 tensor, find the pixel
+     with the largest absolution deformation (ie could be negative 
+     or positive)
+     Inputs:
+         cumulative_r3 | r3 masked array | time x y x x
+     Returns:
+         y | int | y pixel of max abs deformation
+         x | int | x pixel of max abs deformation
+     History:
+         2024_01_05 | MEG | Written
+    """
+    import numpy as np
+    import numpy.ma as ma    
+    
+    def_max = ma.max(cumulative_r3)
+    def_min = ma.min(cumulative_r3)
+    
+    if def_max > np.abs(def_min):
+        t, y, x = np.unravel_index(ma.argmax(cumulative_r3), cumulative_r3.shape)
+        col_r2 = np.argwhere(cumulative_r2 == def_max)[0,-1]
+    else:
+        t, y, x = np.unravel_index(ma.argmin(cumulative_r3), cumulative_r3.shape)
+        col_r2 = np.argwhere(cumulative_r2 == def_min)[0,-1]
+    return x, y, col_r2
+
 #%%
 
 

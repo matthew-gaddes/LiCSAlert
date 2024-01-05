@@ -140,6 +140,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
     except:
         pass
 
+
     displacement_r2 = LiCSAlert_preprocessing(displacement_r2, tbaseline_info, ICASAR_settings['sica_tica'],                                                    #  mean centre in space (sica) or time (tica) and downsize the data.  
                                               LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])                                      # mixtures_mc and means contains the daisy chain of ifgs mean centered either in space or time, depending on whther sica or tica
     
@@ -171,9 +172,10 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
                                                                                                           LiCSAlert_settings['downsample_plot'], verbose = False)
         
         # 4c: Loop through each monitoring date to run LiCSAlert
+        print(f"SHORTENING THE DATA TO PROCESS")
         processing_dates = []
-        processing_dates.extend(LiCSAlert_status['dates_monitoring'].pending)
-        processing_dates.extend(LiCSAlert_status['dates_monitoring'].processed_with_errors)
+        # processing_dates.extend(LiCSAlert_status['dates_monitoring'].pending)
+        # processing_dates.extend(LiCSAlert_status['dates_monitoring'].processed_with_errors)
         processing_dates.extend(LiCSAlert_status['dates_baseline'].pending)
         processing_dates.extend(LiCSAlert_status['dates_baseline'].processed_with_errors)
         
@@ -226,9 +228,9 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
                              ifg_xpos_scaler = LiCSAlert_settings['inset_ifgs_scaling'])    
             
             
-            
-            LiCSAlert_epoch_figures(displacement_r2, reconstructions, residuals, tbaseline_info,                                                             # 4 large images: cumulative, incremetnal, reconstruction of incremental, residual
-                                    figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date.date)                                                                              
+            LiCSAlert_epoch_figures(processing_date, displacement_r2, reconstructions, 
+                                    residuals, tbaseline_info, figure_type = LiCSAlert_settings['figure_type'], 
+                                    figure_out_dir = volcano_dir / processing_date.date)                                                                              
             save_epoch_data(sources_tcs, residual_tcs, volcano_dir / processing_date.date)                                                             # save info about the time courses
             write_volcano_status(sources_tcs, residual_tcs, ics_labels, volcano_dir / processing_date.date)                                           # write the change in def  / new def text file.  
 

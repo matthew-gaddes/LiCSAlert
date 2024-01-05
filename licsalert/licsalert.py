@@ -601,6 +601,7 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
     # 2: Downsample further for plotting.  
     displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
                                                                                                       downsample_plot, verbose = False)
+    
     # 3: mean centre in time or space, according to if sica or tica (must be done after downsampling for accuracy)
     ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])                     # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)
     

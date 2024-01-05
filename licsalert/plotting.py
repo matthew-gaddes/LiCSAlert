@@ -482,7 +482,7 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     from licsalert.data_importing import open_aux_data, open_tcs, determine_last_licsalert_date
     from licsalert.data_importing import crop_licsalert_results_in_time
     from licsalert.plotting import truncate_colormap, xticks_every_nmonths
-    from licsalert.aux import r2_to_r3, moving_average, col_to_ma
+    from licsalert.aux import r2_to_r3, moving_average, col_to_ma, determine_abs_max_pixel
     
     
     def plot_ics_ctcs(f, grid, cbar_ax, icasar_sources, mask, sources_tcs, acq_dates, baselines_cumulative):
@@ -619,7 +619,7 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         # iterate through the original and reconstructed data        
         for i, data in enumerate([cumulative_r3, cumulative_reco_r3]):                                      
             # get the pixel to be plotted
-            ts = data[:, pixel['y'], pixel['y']]                                                            
+            ts = data[:, pixel['y'], pixel['x']]                                                            
             ts_smooth, valid = moving_average(ts)                                                           
             ax_ts.scatter(tbaseline_info['baselines_cumulative'], ts, alpha = 0.4,
                            marker = '.', s = 4,  label = data_names[i], c = data_colours[i])                                       
@@ -638,6 +638,7 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
                               major_ticks_n_months = 12, minor_ticks_n_months = 1)
     
         ax_ts.legend()
+        
     
     def replot_on_click(event): #, rax, check):
         """ When the selected pixel changes, replot the time series for that point and the three images with a point showing where was clicked.  
@@ -676,6 +677,11 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         plt.draw()
     
     print(f"Starting the LiCSAlert interactive time series explorer.  ")
+    
+    # this figure only works interactively, so ensure backend is set for this
+    if plt.get_backend() != 'Qt5Agg':                                                               
+        print(f"Updating the backend to Qt5Agg as this figure is interactive.  ")
+        plt.switch_backend('Qt5Agg')                                                           
       
     # 1: Open data and some simple processing 
     displacement_r2, tbaseline_info, aux_data = open_aux_data(licsalert_out_dir)
@@ -695,25 +701,6 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     
     
 
-    #%% Debug
-    
-    # pdb.set_trace()
-    # incremental_r3 = r2_to_r3(displacement_r2['incremental'], displacement_r2['mask'])                                                                                                         # conver to rank 3
-    # cumulative_r3 = np.cumsum(incremental_r3, axis = 0)
-    
-    # f, ax = plt.subplots(1)
-    # ax.matshow(cumulative_r3[-1,:])
-    
-    # f, ax = plt.subplots(1)
-    # ax.plot(cumulative_r3[:, 33, 62 ])
-
-    # for i in range(4):
-    #     f, ax = plt.subplots()
-    #     ax.plot(sources_tcs[i]['cumulative_tc'])
-    #     plt.pause(2)
-    
-    #%%
-        
     
     n_sources = len(sources_tcs)
     n_pixels = np.size(displacement_r2['incremental'], axis = 1)
@@ -721,9 +708,10 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     cumulative_r2 = np.concatenate((np.zeros((1, n_pixels)), np.cumsum(displacement_r2['incremental'], axis = 0)), axis = 0)                                                 # calculate the cumulative displacments, 0 on first acquisition
     cumulative_reco_r2 = np.concatenate((np.zeros((1, n_pixels)), reconstruct_ts([1 for i in range(n_sources)], sources_tcs, aux_data, displacement_r2)), axis = 0)          # reconstruct the data using all the sources, 0 on first acquisition
     cumulative_r3 = r2_to_r3(cumulative_r2, displacement_r2['mask'])                                                                                                         # conver to rank 3
-    t, y, x = np.unravel_index(np.argmax(cumulative_r3), cumulative_r3.shape)                                                                                                # which makes finding the pixel of maximum deformation easy
-    pixel = {'x' : x, 'y' : y}                                                                                                                                              # first pixel to plot will be maximum deformation
-    del t, y, x, cumulative_r3                                                                                                                                                  # remove un-needed
+    
+    x, y, col = determine_abs_max_pixel(cumulative_r3, cumulative_r2)
+    pixel = {'x' : x, 'y' : y}                                                                                                                                              
+    del y, x, cumulative_r3, col
     
     # 2: start the figure.      
     f = plt.figure(figsize = (fig_width, fig_width /  (2 * (1920 / 1080))))
@@ -763,10 +751,9 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
 
 
 
-
 #%%
 
-def LiCSAlert_epoch_figures(displacement_r2_current, reconstructions, residuals, tbaseline_info,
+def LiCSAlert_epoch_figures(processing_date, displacement_r2_current, reconstructions, residuals, tbaseline_info,
                             figure_type, figure_out_dir):
     """
     Plot last cumulative ifg, last incremetnal ifg, reconstrution for last incremental ifg, and residual for last incremental ifg. 
@@ -792,6 +779,8 @@ def LiCSAlert_epoch_figures(displacement_r2_current, reconstructions, residuals,
     from licsalert.aux import col_to_ma
     import pickle
     
+    pdb.set_trace()
+    
     # 0 Check matplotlib backend is set correctly 
     if figure_type == 'png':
         plt.switch_backend('Agg')                                                           #  works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
@@ -799,7 +788,6 @@ def LiCSAlert_epoch_figures(displacement_r2_current, reconstructions, residuals,
         if plt.get_backend() != 'Qt5Agg':                                                               # check what the backend is 
             plt.switch_backend('Qt5Agg')                                                           #  and switch to interactive if it wasn't already.  
         
-    ifg_n = displacement_r2_current['incremental'].shape[0]
     inc_ifg_date = tbaseline_info['ifg_dates'][ifg_n-1]
     cum_ifg_date = f"{tbaseline_info['ifg_dates'][0][:8]}_{tbaseline_info['ifg_dates'][ifg_n-1][-8:]}"
     
