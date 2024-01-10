@@ -11,6 +11,7 @@ import pickle
 from pathlib import Path
 import copy
 import numpy as np
+import matplotlib.pyplot as plt
 import pdb
 
 import licsalert
@@ -91,23 +92,21 @@ licsbas_dir = Path("./022D_04826_121209_campi_flegrei")                         
 #                           licsbas_dir = licsbas_dir,
 #                           licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
 
-
-
-# licsalert_out_dir = outdir / volcano
+licsalert_out_dir = outdir / volcano
 
 # licsalert_results_explorer(outdir / volcano, fig_width = 18)                                                 # use this function to explore the results
 
-# ics_one_hot = [1, 1, 1, 1, 1]                                                                   # One hot encoding of which sources to use in the reconstruction.  1 means used, 0 means not.  list must be the same length as the number of ICs.  
-# X_r3 = reconstruct_ts_from_dir(ics_one_hot, outdir / volcano)                               # return the cumualtive interferograms reconstrutced using the ICs selected above.  All mean centering has been removed.  
+# ics_one_hot = [1, 1, 1, 1]                                                                   # One hot encoding of which sources to use in the reconstruction.  1 means used, 0 means not.  list must be the same length as the number of ICs.  
+# X_inc_r3, X_cum_r3 = reconstruct_ts_from_dir(ics_one_hot, outdir / volcano)                               # return the cumualtive interferograms reconstrutced using the ICs selected above.  All mean centering has been removed.  
 
 
 #%% Example 2: make all intermediate figures
 
-# licsalert_settings["figure_intermediate"] = True                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
+licsalert_settings["figure_intermediate"] = True                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
 
-# outdir = Path("./")
-# volcano = '002_campi_flegrei_example_all_figures'                                                 # outdir final                                                                                                                      
-# licsbas_dir = Path("./022D_04826_121209_campi_flegrei")                                         # input data
+outdir = Path("./")
+volcano = '002_campi_flegrei_example_all_figures'                                                 # outdir final                                                                                                                      
+licsbas_dir = Path("./022D_04826_121209_campi_flegrei")                                         # input data
 
 
 # LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
@@ -124,13 +123,13 @@ licsbas_dir = Path("./022D_04826_121209_vesuvius_crop_rationalized")            
 
 
 licsalert_settings = {"baseline_end" : "20170101",                               # end baseline stage at YYYYMMDD, need to be before the last acquisition of LiCSAlert will never monitoring anyhting.  
-                      "figure_intermediate" : True,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
+                      "figure_intermediate" : False,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
                       "figure_type"         : 'png',                             # either 'window' or 'png' (to save as pngs), or 'both'
                       "downsample_run"      : 0.5,                                     # data can be downsampled to speed things up
                       "downsample_plot"      : 0.5,                               # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
                       "t_recalculate"       : 10,                                   # Number of acquisitions that the lines of best fit are calcualted over.  Larger value makes the algorithm more sensitive
                       "residual_type"        : 'cumulative',                      # controls the type of residual used in the lower plot.  Either cumulative or window   
-                      'inset_ifgs_scaling'   : 5}                               # scales the size of the incremental and cumulative ifgs in the top row of the figure.  Smaller values gives a bigger figures.  
+                      'inset_ifgs_scaling'   : 15}                               # scales the size of the incremental and cumulative ifgs in the top row of the figure.  Smaller values gives a bigger figures.  
 
 icasar_settings = {"n_comp" : 5,                                                  # number of components to recover with ICA (ie the number of PCA sources to keep)
                     "bootstrapping_param" : (200, 0),                              # (number of runs with bootstrapping, number of runs without bootstrapping)                    "hdbscan_param" : (35, 10),                        # (min_cluster_size, min_samples)
@@ -143,8 +142,8 @@ icasar_settings = {"n_comp" : 5,                                                
 
 
 
-LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
-                          licsbas_dir = licsbas_dir,
-                          licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
+# LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
+#                           licsbas_dir = licsbas_dir,
+#                           licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
 
 licsalert_results_explorer(outdir / volcano, fig_width = 18)                                                 # use this function to explore the results

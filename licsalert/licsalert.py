@@ -865,28 +865,36 @@ def reconstruct_ts_from_dir(ics_one_hot, licsalert_out_dir):
                             E.g. [1,0,0] to use onlyl IC0 and to ignore IC1 and IC2
         licsalert_out_dir | pathlib Path | path to directory containing the results of LiCSAlert run.  
     Returns:
-        X_r3 | rank 3 masked array | n_times x ny x nx.  Reconstrutcion of the original data.  All mean centering in space or time has been undone, giving
-                                     data that should be very close to the input data.  
+        X_inc_r3 | rank 3 masked array | (n_acqs - 1) x ny x nx.  Reconstruction 
+                                       of short temporal baseline / daisy chain /
+                                       incremental ifgs.  Mean centering removed 
+                                       (i.e. back to original reference pixel)
+        X_cum_r3 | rank 3 masked array | (n_acqs) x ny x nx.  Reconstruction 
+                                       of cumulative ifgs . Mean centering removed 
+                                       (i.e. back to original reference pixel)
+
     History:
         2023_11_22 | MEG | Written.  
+        2024_01_06 | MEG | Return both incremental and cumulative.  
     """
     
     from licsalert.licsalert import reconstruct_ts
     from licsalert.data_importing import open_aux_data, open_tcs
+    from licsalert.data_importing import determine_last_licsalert_date
     from licsalert.aux import r2_to_r3
     
     displacement_r2, tbaseline_info, aux_data = open_aux_data(licsalert_out_dir)
-    sources_tcs = open_tcs(licsalert_out_dir)    
+    final_date_dir = determine_last_licsalert_date(licsalert_out_dir)
+    sources_tcs, residual_tcs = open_tcs(final_date_dir)    
 
     if len(sources_tcs) != len(ics_one_hot):
-        raise Exception(f"There are {len(sources_tcs)}, but ics_one_hot is {len(ics_one_hot)} items long.  These must match to continue.  Exiting.")
+        raise Exception(f"There are {len(sources_tcs)} time courses, but ics_one_hot is {len(ics_one_hot)} items long.  These must match to continue.  Exiting.")
 
+    X_inc_r2, X_cum_r2 = reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2)                             # this returns a rank 2, n_times x n_pixels, of the cumulative data.  
+    X_inc_r3 = r2_to_r3(X_inc_r2, displacement_r2['mask'])                                                          # conver to a rank 3 masked array (i.e. n_times x ny x nx)
+    X_cum_r3 = r2_to_r3(X_cum_r2, displacement_r2['mask'])                                                          # conver to a rank 3 masked array (i.e. n_times x ny x nx)
     
-
-    X_r2 = reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2)                             # this returns a rank 2, n_times x n_pixels, of the cumulative data.  
-    X_r3 = r2_to_r3(X_r2, displacement_r2['mask'])                                                          # conver to a rank 3 masked array (i.e. n_times x ny x nx)
-    
-    return X_r3
+    return X_inc_r3, X_cum_r3
 
 #%%
 
@@ -900,9 +908,12 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
         aux_data | dict | dict_keys(['icasar_sources', 'dem', 'mask'])
         displacement_r2 | dict | dict_keys(['dem', 'mask', 'lons', 'lats', 'E', 'N', 'U', 'incremental', 'means', 'incremental_downsampled', 'mask_downsampled'])
     Returns:
-        X | r2 array | cumulative ifgs as rows (must be combined with a mask to turn back to masked arrays).  Mean centering has been removed.  
+        X_inc | r2 array | incremental (short temporal baseline) ifgs as rows,
+        mean centering has been removed.  
+        X_icum | r2 array | cumulative ifgs as rows, m
     History:
         2023_10_26 | MEG | Written
+        2024_01_06 | MEG | Return both cumualtive and incremental displacements.  
         
     """
     import numpy as np
@@ -912,27 +923,37 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
                         f"However, 'ics_one_hot' is {len(ics_one_hot)}, which doesn't agree.  Exiting.  ")
         
     n_sources = len(sources_tcs)
-    n_times = sources_tcs[0]['cumulative_tc'].shape[0]
+    n_acqs = sources_tcs[0]['cumulative_tc'].shape[0]
     n_pixels = displacement_r2['incremental'].shape[1]
     
-    A = np.zeros((n_times, n_sources))                                                                                                      # initialise
+    # make the cumulative time courses
+    A_cum = np.zeros((n_acqs, n_sources))                                                                                                      
     for n_source in range(n_sources):
-        A[:, n_source] = np.ravel(ics_one_hot[n_source] *  sources_tcs[n_source]['cumulative_tc'])                                          # multiply by 1 or 0 to include or not, and then put as column in matrix.  
+        A_cum[:, n_source] = np.ravel(ics_one_hot[n_source] *  sources_tcs[n_source]['cumulative_tc'])                                          # multiply by 1 or 0 to include or not, and then put as column in matrix.  
+    # the daisy chain ifgs are just the different between each succesive cumulative ifgs.  
+    A_inc = np.diff(A_cum, axis = 0)    
     S = aux_data['icasar_sources']
     
-    if displacement_r2['means'].shape[0] == n_times:                                   # mean for each pixel means sICA was run
+    
+    # mean for each incremental ifg (n_acq - 1) means sICA was run
+    if displacement_r2['means'].shape[0] == n_acqs-1:                                   
         means_r2 = np.repeat(displacement_r2['means'][:,np.newaxis], n_pixels, axis = 1 )
     
-    elif displacement_r2['means'].shape[0] == n_pixels:                                   # mean for each pixel means tICA was run
-        means_r2 = np.repeat(displacement_r2['means'][np.newaxis, :], n_times, axis = 0)
+    # mean for each pixel means tICA was run
+    elif displacement_r2['means'].shape[0] == n_pixels:                                   
+        means_r2 = np.repeat(displacement_r2['means'][np.newaxis, :], n_acqs-1, axis = 0)
     else:
-        raise Exception(f"The number of acquisitions in the time courses ({n_times}) "
+        raise Exception(f"The number of acquisitions in the time courses ({n_acqs}) "
                         f"does not match the number of times in the interferogams "
                         f"({displacement_r2['means'].shape[0]}).  Exiting.  ")
     
-    X = A@S + means_r2
+    # reconstruct the daisy chain of short temporal baseline ifgs.  
+    X_inc = A_inc@S + means_r2
     
-    return X
+    # reconstruct the cumulative ifgs, ensure that all zeros on first acquisition
+    X_cum = np.concatenate((np.zeros((1, n_pixels)), np.cumsum(X_inc, axis = 0)))
+    
+    return X_inc, X_cum
 
 
 #%%

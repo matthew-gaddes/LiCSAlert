@@ -34,13 +34,13 @@ def crop_licsalert_results_in_time(processing_date, acq_dates, sources_tcs, resi
     reconstructions_crop = deepcopy(reconstructions)
     residuals_crop = deepcopy(residuals)
     
-    # crop the time course information in time
+    # crop the time course information in time, +1 to make inclusive
     processing_date = licsalert_date_obj(processing_date, acq_dates)
     for source_tc in sources_tcs_crop:
         for key in ['cumulative_tc', 'distances']:
-            source_tc[key] = source_tc[key][:processing_date.acq_n, ]
+            source_tc[key] = source_tc[key][:processing_date.acq_n+1, ]
         # as this is a list, need indexing without trailling ,
-        source_tc['lines'] = source_tc['lines'][:processing_date.acq_n]
+        source_tc['lines'] = source_tc['lines'][:processing_date.acq_n+1]
 
     # crop the residual information in time
     for residual_tc in residual_tcs_crop:

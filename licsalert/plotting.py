@@ -503,11 +503,11 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
             f.add_subplot(ax_ic)
             
             # plot the cumulative tc
-            ax_ctc = plt.Subplot(f, grid[source_n, 1:5])                                                # a thin but wide axes for all the thumbnail ifgs along the top to go in
-            ctc = np.concatenate((np.array([[0]]), sources_tcs[source_n]['cumulative_tc']), axis = 0)
-            ctc_smooth, valid = moving_average(ctc)                                                           # smooth it 
+            ax_ctc = plt.Subplot(f, grid[source_n, 1:5])                                                
+            ctc = sources_tcs[source_n]['cumulative_tc']
+            ctc_smooth, valid = moving_average(ctc)                                                           
             ax_ctc.scatter(baselines_cumulative, ctc, alpha = 0.4, marker = '.', s = 2) 
-            ax_ctc.plot(baselines_cumulative, ctc_smooth)                                   # and the smoothed one as a line
+            ax_ctc.plot(baselines_cumulative, ctc_smooth)                                   
             ax_ctc.axhline(0, c = 'k')
             ax_ctc.grid(True)
             ax_ctc.yaxis.tick_right()
@@ -691,24 +691,24 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     print(f"A LiCSAlert directory for {final_date_dir.parts[-1]} was found "
           f"so the interactive figure will be created up to this date.  ")
     
-    
-    
     crop = crop_licsalert_results_in_time(final_date_dir.parts[-1], tbaseline_info['acq_dates'],
                                           sources_tcs, residual_tcs,
                                           None, None, displacement_r2, tbaseline_info)
     
     sources_tcs, residual_tcs, _, _, displacement_r2, tbaseline_info = crop; del crop
     
-    
-
-    
     n_sources = len(sources_tcs)
     n_pixels = np.size(displacement_r2['incremental'], axis = 1)
     
-    cumulative_r2 = np.concatenate((np.zeros((1, n_pixels)), np.cumsum(displacement_r2['incremental'], axis = 0)), axis = 0)                                                 # calculate the cumulative displacments, 0 on first acquisition
-    cumulative_reco_r2 = np.concatenate((np.zeros((1, n_pixels)), reconstruct_ts([1 for i in range(n_sources)], sources_tcs, aux_data, displacement_r2)), axis = 0)          # reconstruct the data using all the sources, 0 on first acquisition
+    # convert incremenal to cumulative displacements, 0s on first acquisition. 
+    cumulative_r2 = np.concatenate((np.zeros((1, n_pixels)), 
+                                    np.cumsum(displacement_r2['incremental'], axis = 0)), axis = 0)
     cumulative_r3 = r2_to_r3(cumulative_r2, displacement_r2['mask'])                                                                                                         # conver to rank 3
     
+    # reconstruct cumulative data
+    _, cumulative_reco_r2 = reconstruct_ts([1 for i in range(n_sources)], 
+                                           sources_tcs, aux_data, displacement_r2)
+
     x, y, col = determine_abs_max_pixel(cumulative_r3, cumulative_r2)
     pixel = {'x' : x, 'y' : y}                                                                                                                                              
     del y, x, cumulative_r3, col
@@ -724,11 +724,10 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     grid = gridspec.GridSpec(n_rows, 20, wspace=0.2, hspace=0.2)                                            # 
     
     # create all the axes from the grid
-    #pdb.set_trace()
-    ax_cum   = plt.Subplot(f, grid[:int(n_sources/2)+1, 10:15])                                                # for the final cumulative ifg.  
-    ax_reco  = plt.Subplot(f, grid[int(n_sources/2)+1: , 10:15])                                             # for the reconstruction of the cumulative ifg.  
-    ax_dem   = plt.Subplot(f, grid[:int(n_sources/2)+1, 5:10])                                               # for the dem 
-    ax_resid = plt.Subplot(f, grid[int(n_sources/2)+1:, 5:10])                                               # for the residual
+    ax_cum   = plt.Subplot(f, grid[:int(n_sources/2), 10:15])                                                
+    ax_reco  = plt.Subplot(f, grid[int(n_sources/2): , 10:15])                                             # for the reconstruction of the cumulative ifg.  
+    ax_dem   = plt.Subplot(f, grid[:int(n_sources/2), 5:10])                                               # for the dem 
+    ax_resid = plt.Subplot(f, grid[int(n_sources/2):, 5:10])                                               # for the residual
     ax_ts = plt.subplot(grid[:5,15:])                                                                      # for the time series of a point in both original and reconstruted.  
     cax_ics = f.add_axes([0.125, 0.11, 0.03, 0.02])                                                        # ICs colorbar
     
@@ -760,6 +759,7 @@ def LiCSAlert_epoch_figures(processing_date, displacement_r2_current, reconstruc
     Also save the data from these figures as a pickle.  
     
     Inputs:
+        processing_date          | licsalert date | processing date currently on
         displacement_r2_current | dict | licsalert dict of ifgs
         reconstrutions          | r2 array | reconstructions as row vectors
         residuals               | r2 array | reconstructions as row vectors
@@ -778,34 +778,53 @@ def LiCSAlert_epoch_figures(processing_date, displacement_r2_current, reconstruc
     import matplotlib.pyplot as plt
     from licsalert.aux import col_to_ma
     import pickle
-    
-    pdb.set_trace()
-    
+       
     # 0 Check matplotlib backend is set correctly 
     if figure_type == 'png':
-        plt.switch_backend('Agg')                                                           #  works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
+        plt.switch_backend('Agg')                                                           
     else: 
-        if plt.get_backend() != 'Qt5Agg':                                                               # check what the backend is 
-            plt.switch_backend('Qt5Agg')                                                           #  and switch to interactive if it wasn't already.  
-        
-    inc_ifg_date = tbaseline_info['ifg_dates'][ifg_n-1]
-    cum_ifg_date = f"{tbaseline_info['ifg_dates'][0][:8]}_{tbaseline_info['ifg_dates'][ifg_n-1][-8:]}"
+        if plt.get_backend() != 'Qt5Agg':                                                               
+            plt.switch_backend('Qt5Agg')                                                           
+  
+    if processing_date.acq_n == 0:
+        # this is just the same date repeated as the first acquisition so no ifg
+        inc_ifg_date = f"{tbaseline_info['acq_dates'][0]}_{tbaseline_info['acq_dates'][processing_date.acq_n]}"
+    else:
+        # the date of the acquistiions before this one to the current one
+        inc_ifg_date = (f"{tbaseline_info['acq_dates'][processing_date.acq_n-1]}_"
+                       f"{tbaseline_info['acq_dates'][processing_date.acq_n]}")
+    # the first acquisition date to the current one.  
+    cum_ifg_date = f"{tbaseline_info['acq_dates'][0]}_{tbaseline_info['acq_dates'][processing_date.acq_n]}"
     
     # 1: do the plots
-    plot_1_image(np.sum(displacement_r2_current['incremental'], axis = 0), displacement_r2_current['mask'], f"01_cumulative_{cum_ifg_date}", 
+    cum_1 = np.sum(displacement_r2_current['incremental'][:processing_date.acq_n,], axis = 0)
+
+    # the first date is a special case as there is no data yet    
+    if processing_date.acq_n == 0:
+        zeros = np.zeros((1, displacement_r2_current['incremental'].shape[1]))
+        inc_1 = zeros
+        recon_1 = zeros
+        residual_1 = zeros
+    else:
+        inc_1 = displacement_r2_current['incremental'][processing_date.acq_n-1, :]
+        recon_1 = reconstructions[processing_date.acq_n-1,:]
+        residual_1 = residuals[processing_date.acq_n-1, :]
+        
+       
+    plot_1_image(cum_1, displacement_r2_current['mask'], f"01_cumulative_{cum_ifg_date}", 
+                 figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))    
+    plot_1_image(inc_1, displacement_r2_current['mask'], f"02_incremental_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
-    plot_1_image(displacement_r2_current['incremental'][-1, :], displacement_r2_current['mask'], f"02_incremental_{inc_ifg_date}",
+    plot_1_image(recon_1, displacement_r2_current['mask'], f"03_incremental_reconstruction_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
-    plot_1_image(reconstructions[-1,:], displacement_r2_current['mask'], f"03_reconstruction_{inc_ifg_date}",
-                 figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
-    plot_1_image(residuals[-1, :], displacement_r2_current['mask'], f"04_residual_{inc_ifg_date}",
+    plot_1_image(residual_1, displacement_r2_current['mask'], f"04_incremental_residual_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
 
     #  save the data that is plotted as png
-    epoch_images = {'cumulative'     : np.sum(displacement_r2_current['incremental'], axis = 0),
-                    'incremental'    : displacement_r2_current['incremental'][-1, :],
-                    'reconstruction' : reconstructions[:,-1],
-                    'residual'       : residuals[:,- 1],
+    epoch_images = {'cumulative'     : cum_1,
+                    'incremental'    : inc_1,
+                    'reconstruction' : recon_1,
+                    'residual'       : residual_1,
                     'mask'           : displacement_r2_current['mask']}
     with open(figure_out_dir / 'epoch_images_data.pkl', 'wb') as f:
         pickle.dump(epoch_images, f)

@@ -172,10 +172,9 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
                                                                                                           LiCSAlert_settings['downsample_plot'], verbose = False)
         
         # 4c: Loop through each monitoring date to run LiCSAlert
-        print(f"SHORTENING THE DATA TO PROCESS")
         processing_dates = []
-        # processing_dates.extend(LiCSAlert_status['dates_monitoring'].pending)
-        # processing_dates.extend(LiCSAlert_status['dates_monitoring'].processed_with_errors)
+        processing_dates.extend(LiCSAlert_status['dates_monitoring'].pending)
+        processing_dates.extend(LiCSAlert_status['dates_monitoring'].processed_with_errors)
         processing_dates.extend(LiCSAlert_status['dates_baseline'].pending)
         processing_dates.extend(LiCSAlert_status['dates_baseline'].processed_with_errors)
         
