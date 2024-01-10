@@ -528,7 +528,7 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     
     
     def plot_original_reconstruction_dem_resid(fig, ax_orig, ax_reco, ax_resid, ax_dem, 
-                                         cumulative_r2, cumulative_reco_r2, displacement_r2, pixel):
+                                               cumulative_r2, cumulative_reco_r2, displacement_r2, pixel):
         """ Make the three plots that show the raw signal (from the input time series) and the reconstruction using various 
         IC components, and the DEM.  
         
@@ -559,7 +559,6 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
             ax.clear()
             
             if  name in ['Original', 'Reconstruction']:
-
                 vmin = np.min(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
                 vmax = np.max(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
                 if name == 'Original':
@@ -640,25 +639,27 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         ax_ts.legend()
         
     
-    def replot_on_click(event): #, rax, check):
+    def replot_on_click(event): 
         """ When the selected pixel changes, replot the time series for that point and the three images with a point showing where was clicked.  
         """
-        if (event.inaxes is ax_reco) or (event.inaxes is ax_cum) or (event.inaxes is ax_dem) or (event.inaxes is ax_resid):                          # check we are in axes as otherwise there's no meaning to click position in data coords.  
-            figure_status['pixel']['x'] = int(event.xdata)                                                                               # get the data coords of where we clicked and update hte dict.  
+        # if the click is in one of the images axes, that changes the point plotted
+        if (event.inaxes is ax_reco) or (event.inaxes is ax_cum) or (event.inaxes is ax_dem) or (event.inaxes is ax_resid):                          
+            figure_status['pixel']['x'] = int(event.xdata)                                                                               
             figure_status['pixel']['y'] = int(event.ydata)
             replot()
             
-            
+        # if the click is in one of the ic axes, that turns them on and off
         for ic_n, ax in enumerate(figure_status['ic_axs']):
             if event.inaxes is ax:
+                # reverse that status of the ic clicked
                 figure_status['ic_status'][ic_n] = not figure_status['ic_status'][ic_n]                     # switch from on to off, or off to on.  
                 if figure_status['ic_status'][ic_n]:
                     ax.set_title(f"IC {ic_n}: On")
                 else:
                     ax.set_title(f"IC {ic_n}: Off")
                     
-                cumulative_reco_r2 = reconstruct_ts(figure_status['ic_status'], sources_tcs, aux_data, displacement_r2)                               # make the time series with those sources.
-                cumulative_reco_r2 = np.concatenate((np.zeros((1, n_pixels)), cumulative_reco_r2))                                     # add zero to first acquisition
+                # remake the time series using the ICs selected
+                _, cumulative_reco_r2 = reconstruct_ts(figure_status['ic_status'], sources_tcs, aux_data, displacement_r2)                               
                 figure_status['cumulative_reco_r2'] = cumulative_reco_r2                                                            # store in the mutable object
                 replot()
                 
@@ -717,19 +718,22 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     f = plt.figure(figsize = (fig_width, fig_width /  (2 * (1920 / 1080))))
     f.canvas.manager.set_window_title('LiCSAlert results visualiser')
     
+    # set the number of rows to always be even by adding one if needed
     if n_sources % 2 == 1:                                                                                  # number of rows is the smallest even number greater than or equal to the number of sources.  
         n_rows = n_sources + 1
     else:
         n_rows = n_sources
     grid = gridspec.GridSpec(n_rows, 20, wspace=0.2, hspace=0.2)                                            # 
     
-    # create all the axes from the grid
-    ax_cum   = plt.Subplot(f, grid[:int(n_sources/2), 10:15])                                                
-    ax_reco  = plt.Subplot(f, grid[int(n_sources/2): , 10:15])                                             # for the reconstruction of the cumulative ifg.  
-    ax_dem   = plt.Subplot(f, grid[:int(n_sources/2), 5:10])                                               # for the dem 
-    ax_resid = plt.Subplot(f, grid[int(n_sources/2):, 5:10])                                               # for the residual
-    ax_ts = plt.subplot(grid[:5,15:])                                                                      # for the time series of a point in both original and reconstruted.  
-    cax_ics = f.add_axes([0.125, 0.11, 0.03, 0.02])                                                        # ICs colorbar
+    
+    # create all the axes from the grid, top row first
+    ax_cum   = plt.Subplot(f, grid[:int(n_rows/2), 10:15])                                                
+    ax_dem   = plt.Subplot(f, grid[:int(n_rows/2), 5:10])
+    ax_reco  = plt.Subplot(f, grid[int(n_rows/2): , 10:15])
+    ax_resid = plt.Subplot(f, grid[int(n_rows/2):, 5:10])
+    # axes for the line graps (ax_ts) and the ICs colorbar
+    ax_ts = plt.subplot(grid[:5,15:])
+    cax_ics = f.add_axes([0.125, 0.11, 0.03, 0.02])
     
     # 3: start plotting.  
     plot_original_reconstruction_dem_resid(f, ax_cum, ax_reco, ax_resid, ax_dem, 
