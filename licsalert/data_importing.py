@@ -11,12 +11,66 @@ import pdb
 #%%
 
 
-def crop_licsalert_results_in_time(processing_date, acq_dates, sources_tcs, residual_tcs,
+def crop_ts_data_in_time(date_start, date_end,
+                         displacement_r2, tbaseline_info):
+    """ Crop time series of data (e.g. licsbas time series) in time.  
+    Inputs:
+        date_start | yyyymmdd | string, inclusive.  
+        date_end | yyyymmdd | string, inclusive.  
+        displacement_r2 | dict | time series info
+        tbaseline_info | dict | time series time info.  
+    Returns:
+        displacement_r2 | dict | time series info, cropped
+        tbaseline_info | dict | time series time info, cropped
+    History:
+        2024_01_11 | MEG  | Written
+    """
+    
+    from copy import deepcopy
+    from licsalert.licsalert import licsalert_date_obj
+    
+    # convert strings 
+    date_start = licsalert_date_obj(date_start, tbaseline_info['acq_dates'])
+    date_end = licsalert_date_obj(date_end, tbaseline_info['acq_dates'])
+    
+    displacement_r2_crop = deepcopy(displacement_r2)
+    tbaseline_info_crop = deepcopy(tbaseline_info)
+    
+    # crop the time series information in time, for products with n_acq -1 entries
+    for key in ['incremental', 'incremental_downsampled', 'incremental_mc_space', 'means_space', 
+                'incremental_mc_time', 'means_time', 'mixtures_mc', 'means']:
+        if key in displacement_r2.keys():
+            displacement_r2_crop[key] = displacement_r2_crop[key][date_start.acq_n : date_end.acq_n, ]
+            
+    # crop the time series information in time, for products with n_acq entries (so +1) 
+    for key in ['cumulative']:
+        if key in displacement_r2.keys():
+            displacement_r2_crop[key] = displacement_r2_crop[key][date_start.acq_n : date_end.acq_n+1, ]
+        
+    # crop time info, for products with n_acq -1 entries
+    for key in ['ifg_dates', 'baselines']:
+        tbaseline_info_crop[key] = tbaseline_info[key][date_start.acq_n : date_end.acq_n]
+    
+    # crop time info, for products with n_acq entries (so +1)
+    for key in ['acq_dates', 'baselines_cumulative']:
+        tbaseline_info_crop[key] = tbaseline_info[key][date_start.acq_n : date_end.acq_n+1]
+        
+    return displacement_r2_crop, tbaseline_info_crop
+
+
+
+#%%
+
+
+def crop_licsalert_results_in_time(processing_date,
+                                   acq_dates, sources_tcs, residual_tcs,
                                    reconstructions, residuals, 
                                    displacement_r2, tbaseline_info):
     """ Crop some licsalert products in time.  
     Inputs:
-        processing_date | string YYYYMMDD | Date to crop to. Must be an acquisition date.  
+        start_date | string YYYYMMDD | Date to crop to. Must be an acquisition date.  
+                                        Included!
+        end_date | string YYYYMMDD | As above, also included.  
         acq_dates | list of strings YYYYMMDD | Dates of acqusitions.  
     Returns:
         cropped in time deep copies.  
@@ -26,16 +80,21 @@ def crop_licsalert_results_in_time(processing_date, acq_dates, sources_tcs, resi
     from copy import deepcopy
     from licsalert.licsalert import licsalert_date_obj
     
+    # 
+    processing_date = licsalert_date_obj(processing_date, acq_dates)
+    
+    data = crop_ts_data_in_time(acq_dates[0], processing_date.date, displacement_r2, 
+                                tbaseline_info)
+    displacement_r2_crop, tbaseline_info_crop = data
+    
     # make deep copies that will become the cropped outputs.  
     sources_tcs_crop = deepcopy(sources_tcs)
     residual_tcs_crop = deepcopy(residual_tcs)
-    displacement_r2_crop = deepcopy(displacement_r2)
-    tbaseline_info_crop = deepcopy(tbaseline_info)
     reconstructions_crop = deepcopy(reconstructions)
     residuals_crop = deepcopy(residuals)
     
-    # crop the time course information in time, +1 to make inclusive
-    processing_date = licsalert_date_obj(processing_date, acq_dates)
+    # crop the time course information in time, +1 to make inclusive (as has 
+    # as many entries as there are acquisitions
     for source_tc in sources_tcs_crop:
         for key in ['cumulative_tc', 'distances']:
             source_tc[key] = source_tc[key][:processing_date.acq_n+1, ]
@@ -49,18 +108,7 @@ def crop_licsalert_results_in_time(processing_date, acq_dates, sources_tcs, resi
         # as this is a list, need indexing without trailling ,
         residual_tc['lines'] = residual_tc['lines'][:processing_date.acq_n]
             
-    # crop the time series information in time
-    for key in ['incremental', 'incremental_downsampled', 'incremental_mc_space', 'means_space', 
-                'incremental_mc_time', 'means_time', 'mixtures_mc', 'means']:
-        displacement_r2_crop[key] = displacement_r2_crop[key][:processing_date.acq_n, ]
-        
-    # croppping in time, note +1 to make upper index inclusive.  
-    for key in ['acq_dates', 'baselines_cumulative']:
-        tbaseline_info_crop[key] = tbaseline_info[key][:(processing_date.acq_n + 1)]
-    # but no +1 here as tehre is no baselines of 0 for ifg acq0_acq0
-    for key in ['ifg_dates', 'baselines']:
-        tbaseline_info_crop[key] = tbaseline_info[key][:(processing_date.acq_n)]
-        
+
     # optional ones to crop. 
     if reconstructions_crop is not None:
         reconstructions_crop = reconstructions_crop[:processing_date.acq_n]                    
@@ -202,8 +250,9 @@ class ifg_timeseries():
 
 
 
-def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, n_cols=5, crop_pixels = None, return_r3 = False, 
-                      ref_area = True, mask_type = 'dem'):
+def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
+                         n_cols=5, crop_pixels = None, mask_type = 'dem', 
+                         date_start = None, date_end = None):
     """ A function to prepare the outputs of LiCSBAS for use with LiCSALERT. Note that this includes the step of referencing the time series to the reference area selected by LiCSBAS.  
     LiCSBAS uses nans for masked areas - here these are converted to masked arrays.   Can also create three figures: 1) The Full LiCSBAS ifg, and the area
     that it has been cropped to 2) The cumulative displacement 3) The incremental displacement.  
@@ -211,13 +260,11 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
     Inputs:
         h5_file | string | path to h5 file.  e.g. cum_filt.h5
         figures | boolean | if True, make figures
-        n_cols  | int | number of columns for figures.  May want to lower if plotting a long time series
+        n_cols  | int | number of columns for figures.  May want to lower if 
+                        plotting a long time series
         crop_pixels | tuple | coords to crop images to.  x then y, 00 is top left.  e.g. (10, 500, 600, 900).  
                                 x_start, x_stop, y_start, y_stop, No checking that inputted values make sense.  
-                                Note, generally better to have cropped (cliped in LiCSBAS language) to the correct area in LiCSBAS_for_LiCSAlert
-        return_r3 | boolean | if True, the rank 3 data is also returns (n_ifgs x height x width).  Not used by ICASAR, so default is False
-        ref_area | boolean | If True, the reference area (in pixels, x then y) used by LiCSBAS is returned to the user.  
-                            ##### Regardless of how this is set, the reference area is always extractd to reference the time series.  #######
+
         mask_type | string | 'dem' or 'licsbas'  If dem, only the pixels masked in the DEM are masked (i.e. pretty much only water.  ).  Note that any pixels that are incoherent in the time series are also masked (ie if incoherent in one ifg, will be masked for all ifgs.  )
                                                 If licsbas, the pixels that licsbas thinks should be masked are masked (ie water + incoherent).  Note that the dem masked is added to the licsbas mask to ensure things are consistent, but there should be no change here (every pixel masked in the DEM is also masked in the licsbas mask)
 
@@ -388,6 +435,7 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
             data = np.fromfile(file, dtype=dtype).byteswap().reshape((length, width))
         return data
 
+
     # -1: Check for common argument errors:
     if not isinstance(LiCSBAS_out_folder, pathlib.PurePath):
         raise Exception(f"'LiCSBAS_out_folder' must be a pathlib Path, but instead is a {type(LiCSBAS_out_folder)}. Exiting.  ")
@@ -419,18 +467,19 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
 
 
     # 1: Open the h5 file with the incremental deformation in.  
-    displacement_r3 = {}                                                                                        # here each image will 1 x width x height stacked along first axis
+    # displacement_r3 = {}                                                                                        # here each image will 1 x width x height stacked along first axis
     displacement_r2 = {}                                                                                        # here each image will be a row vector 1 x pixels stacked along first axis
     tbaseline_info = {}
 
     if filtered:
+        print(f"Opening the LiCSBAS filtered results.  ")
         cumh5 = h5.File(LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'cum_filt.h5' ,'r')                       # either open the filtered file from LiCSBAS
     else:
+        print(f"Opening the LiCSBAS unfiltered results.  ")
         cumh5 = h5.File(LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'cum.h5' ,'r')                            # or the non filtered file from LiCSBAS
     tbaseline_info["acq_dates"] = cumh5['imdates'][()].astype(str).tolist()                                     # get the acquisition dates
     cumulative = cumh5['cum'][()]                                                                               # get cumulative displacements as a rank3 numpy array
     cumulative *= 0.001                                                                                         # LiCSBAS default is mm, convert to m
-
 
     # 2: Open the parameter file to get the number of pixels in width and height (though this should agree with above)   
     try:
@@ -456,15 +505,6 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
         print(f"Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  ")
     except:
         print(f"Failed to reference the LiCSBAS time series - use with caution!  ")
-        
-    #######
-    # print(f"DEBUG")
-    # f, ax = plt.subplots()
-    # ax.plot(cumh5['cum'][:,76, 122 ])
-    # ax.set_title('After referencing')
-    # pdb.set_trace()
-    ##############
-    
     
     
     #3: Open the mask and the DEM
@@ -480,28 +520,34 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
     
     if mask_type == 'dem':
         mask = np.logical_or(mask_dem, mask_cum)                                                        # if dem, mask water (from DEM), and anything that's nan in cumulative (mask_cum)
-    elif mask_type == 'mask_licsbas':
+    elif mask_type == 'licsbas':
         mask = np.logical_or(mask_licsbas, np.logical_or(mask_dem, mask_cum))
+    else:
+        raise Exception(f"'mask_type' can be either 'dem' or 'licsbas', but "
+                        f"not '{mask_type}'.  Exiting.  ")
         
-    mask_r3 = np.repeat(mask[np.newaxis,], cumulative.shape[0], 0)
+    # mask_r3 = np.repeat(mask[np.newaxis,], cumulative.shape[0], 0)
     dem_ma = ma.array(dem, mask = mask)
     displacement_r2['dem'] = dem_ma                                                                      # and added to the displacement dict in the same was as the lons and lats
-    displacement_r3['dem'] = dem_ma                                                                      # 
+    # displacement_r3['dem'] = dem_ma                                                                      # 
     
     
     # 3: Mask the data  
-    displacement_r3["cumulative"] = ma.array(cumulative, mask=mask_r3)                                   # rank 3 masked array of the cumulative displacement
-    displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], axis = 0)                           # displacement between each acquisition - ie incremental
-    if displacement_r3["incremental"].mask.shape == ():                                                         # in the case where no pixels are masked, the diff operation on the mask collapses it to nothing.  
-        displacement_r3["incremental"].mask = mask_r3[1:]                                                # in which case, we can recreate the mask from the rank3 mask, but dropping one from the first dimension as incremental is always one smaller than cumulative.  
-    n_im, length, width = displacement_r3["cumulative"].shape                                   
+    # displacement_r3["cumulative"] = ma.array(cumulative, mask=mask_r3)                                   # rank 3 masked array of the cumulative displacement
+    # displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], axis = 0)                           # displacement between each acquisition - ie incremental
+    # if displacement_r3["incremental"].mask.shape == ():                                                         # in the case where no pixels are masked, the diff operation on the mask collapses it to nothing.  
+    #     displacement_r3["incremental"].mask = mask_r3[1:]                                                # in which case, we can recreate the mask from the rank3 mask, but dropping one from the first dimension as incremental is always one smaller than cumulative.  
+    # n_im, length, width = displacement_r3["cumulative"].shape                                   
 
     # if figures:                                                 
     #     ts_quick_plot(displacement_r3["cumulative"], title = 'Cumulative displacements')
     #     ts_quick_plot(displacement_r3["incremental"], title = 'Incremental displacements')
 
-    displacement_r2['cumulative'], displacement_r2['mask'] = rank3_ma_to_rank2(displacement_r3['cumulative'])      # convert from rank 3 to rank 2 and a mask
-    displacement_r2['incremental'], _ = rank3_ma_to_rank2(displacement_r3['incremental'])                          # also convert incremental, no need to also get mask as should be same as above
+    # mask the images, consistent mask through time.  
+    cum_r3 = ma.array(cumulative, mask=np.repeat(mask[np.newaxis,], cumulative.shape[0], 0))
+
+    displacement_r2['cumulative'], displacement_r2['mask'] = rank3_ma_to_rank2(cum_r3)      
+    displacement_r2['incremental'] = np.diff(displacement_r2['cumulative'], axis = 0)
 
     # 4: work with the acquisiton dates to produces names of daisy chain ifgs, and baselines
     tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(tbaseline_info["acq_dates"])
@@ -511,18 +557,19 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
     
     # 5: get the lons and lats of each pixel in the ifgs
     geocode_info = create_lon_lat_meshgrids(cumh5['corner_lon'][()], cumh5['corner_lat'][()], 
-                                            cumh5['post_lon'][()], cumh5['post_lat'][()], displacement_r3['incremental'][0,:,:])             # create meshgrids of the lons and lats for each pixel
+                                            cumh5['post_lon'][()], cumh5['post_lat'][()], 
+                                            displacement_r2['mask'])
     displacement_r2['lons'] = geocode_info['lons_mg']                                                                                        # add to the displacement dict
     displacement_r2['lats'] = geocode_info['lats_mg']
-    displacement_r3['lons'] = geocode_info['lons_mg']                                                                                        # add to the displacement dict (rank 3 one)
-    displacement_r3['lats'] = geocode_info['lats_mg']
+    # displacement_r3['lons'] = geocode_info['lons_mg']                                                                                        # add to the displacement dict (rank 3 one)
+    # displacement_r3['lats'] = geocode_info['lats_mg']
 
     # 6: Get the E N U files (these are the components of the ground to satellite look vector in east north up directions.  )   
     try:
         for component in ['E', 'N', 'U']:
             look_vector_component = read_img(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / f"{component}.geo", length, width)
             displacement_r2[component] = look_vector_component
-            displacement_r3[component] = look_vector_component
+            # displacement_r3[component] = look_vector_component
     except:
         print(f"Failed to open the E N U files (look vector components), but trying to continue anyway.")
         
@@ -539,36 +586,55 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False, 
             ax.imshow(col_to_ma(displacement_r2['incremental'][ifg_n_plot,:], displacement_r2['mask']),
                                 interpolation='none', aspect='auto')                                            # plot the uncropped ifg
         
-        # loop through and crop, determing if r2 or r3 array.  
-        for product in displacement_r3:
-            if len(displacement_r3[product].shape) == 2:                                                                                  
-                resized_r2 = displacement_r3[product][crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]               
-                displacement_r2[product] = resized_r2
-                displacement_r3[product] = resized_r2
-            elif len(displacement_r3[product].shape) == 3:                                                                                
-                resized_r3 = displacement_r3[product][:, crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]            
-                displacement_r3[product] = resized_r3
-                displacement_r2[product], displacement_r2['mask'] = rank3_ma_to_rank2(resized_r3)      
-            else:
-                pass
-        
-    
+        # # loop through and crop, determing if r2 or r3 array.  
+        # for product in displacement_r3:
+        #     if len(displacement_r3[product].shape) == 2:                                                                                  
+        #         resized_r2 = displacement_r3[product][crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]               
+        #         displacement_r2[product] = resized_r2
+        #         displacement_r3[product] = resized_r2
+        #     elif len(displacement_r3[product].shape) == 3:                                                                                
+        #         resized_r3 = displacement_r3[product][:, crop_pixels[2]:crop_pixels[3], crop_pixels[0]:crop_pixels[1]]            
+        #         displacement_r3[product] = resized_r3
+        #         displacement_r2[product], displacement_r2['mask'] = rank3_ma_to_rank2(resized_r3)      
+        #     else:
+        #         pass
 
         if figures:
             add_square_plot(crop_pixels[0], crop_pixels[1], crop_pixels[2], crop_pixels[3], ax)                 # draw a box showing the cropped region    
-  
-   
 
-    if return_r3:
-        if ref_area:
-            return displacement_r3, displacement_r2, tbaseline_info, ref_xy
-        else:
-            return displacement_r3, displacement_r2, tbaseline_info
+    # 7: Crop in time
+    # if no values have been provided, set so that doesn't crop in time
+    if date_start is None:
+        date_start = tbaseline_info['acq_dates'][0]
     else:
-        if ref_area:
-            return displacement_r2, tbaseline_info, ref_xy
-        else:
-            return displacement_r2, tbaseline_info
+        print(f"Cropping the LiCSBAS time series to start on {date_start} (inclusive).  ")
+    if date_end is None:
+        date_end = tbaseline_info['acq_dates'][-1]
+    else:
+        print(f"Cropping the LiCSBAS time series to end on {date_end} (inclusive).  ")
+
+    # do the cropping
+    data = crop_ts_data_in_time(date_start, date_end, displacement_r2, 
+                                tbaseline_info)
+    
+    displacement_r2, tbaseline_info = data
+    
+    
+    
+    
+
+    # if return_r3:
+    #     if ref_area:
+    #         return displacement_r3, displacement_r2, tbaseline_info, ref_xy
+    #     else:
+    #         return displacement_r3, displacement_r2, tbaseline_info
+    # else:
+        
+    return displacement_r2, tbaseline_info
+        # if ref_area:
+        #     return displacement_r2, tbaseline_info, ref_xy
+        # else:
+            
 
 
 #%%

@@ -549,15 +549,12 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         #from matplotlib import ticker
         from licsalert.plotting import truncate_colormap
         
-        
-        #data = [displacement_r2["dem"], cumulative_r2[-1,], cumulative_reco_r2[-1,], (cumulative_r2 - cumulative_reco_r2)[-1,]]
         axs = [ax_dem, ax_orig, ax_reco, ax_resid]
         names = ['DEM', 'Original', 'Reconstruction', 'Residual']
         
         for ax, name in zip(axs, names):
-
             ax.clear()
-            
+            # these two share a colorar so work on min and max for both.  
             if  name in ['Original', 'Reconstruction']:
                 vmin = np.min(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
                 vmax = np.max(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
@@ -566,11 +563,15 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
                 else:
                     data_plotted = ax.matshow(col_to_ma(cumulative_reco_r2[-1,], displacement_r2['mask']), vmin = vmin, vmax = vmax)             # Plot the reconstructed last cumulative ifg.  
             elif name == 'DEM':
-                terrain_cmap = plt.get_cmap('terrain')                                                                                  # appropriate colours for a dem
-                terrain_cmap = truncate_colormap(terrain_cmap, 0.2, 1)                                                                  # but crop (truncate) the blue parts as we are only interested in land
-                data_plotted = ax_dem.matshow(displacement_r2["dem"], cmap = terrain_cmap)                                                   # plot the DEM
+                terrain_cmap = plt.get_cmap('terrain')                                                                                  
+                # get rid of the water colours at the bottom.  
+                terrain_cmap = truncate_colormap(terrain_cmap, 0.2, 1)                                                                  
+                data_plotted = ax_dem.matshow(displacement_r2["dem"], cmap = terrain_cmap)                                                
+            elif name == 'Residual':
+                data_plotted = ax.matshow(col_to_ma((cumulative_r2[-1,] - cumulative_reco_r2[-1,]), displacement_r2['mask']))             
             else:
-                data_plotted = ax.matshow(col_to_ma((cumulative_r2[-1,] - cumulative_reco_r2[-1,]), displacement_r2['mask']))             # Plot the reconstructed last cumulative ifg.  
+                raise Exception(f"An error has occured when iterating through "
+                                f"the four types of data that are plotted.  ")
 
             ax.scatter(pixel['x'], pixel['y'], s = 20, c = 'r', marker = 'x')
 

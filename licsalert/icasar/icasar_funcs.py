@@ -10,7 +10,7 @@ import pdb
 #%%
 
 def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window", 
-           sica_tica = 'sica', ifgs_format = 'all', max_n_all_ifgs = 1000,                                                     # this row of arguments are only needed with spatial data.  
+           sica_tica = 'sica', ifgs_format = 'cum', max_n_all_ifgs = 1000,                                                     # this row of arguments are only needed with spatial data.  
            bootstrapping_param = (200,0), ica_param = (1e-4, 150), tsne_param = (30,12), hdbscan_param = (35,10),
            out_folder = './ICASAR_results/', ica_verbose = 'long', inset_axes_side = {'x':0.1, 'y':0.1}, 
            load_fastICA_results = False, label_sources = False):

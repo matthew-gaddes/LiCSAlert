@@ -9,9 +9,10 @@ import pdb
 
 #%%
 
-def LiCSAlert_monitoring_mode(outdir, region, volcano,                                              # for naming out directory.  
-                              licsbas_dir = None, licsbas_jasmin_dir = None, data_as_arg = None,    # 3 possible ways to pass data to the function.      
-                              licsalert_settings = None, icasar_settings = None):                   # dicts of settings.  
+def LiCSAlert_monitoring_mode(outdir, region, volcano,                                              
+                              licsbas_dir = None, licsbas_jasmin_dir = None, data_as_arg = None,    
+                              licsalert_settings = None, icasar_settings = None, 
+                              licsbas_settings = None):                   
     """The main function for running LiCSAlert is monitoring mode.  It was designed to work with LiCSAR interferograms, but could be used with 
     any product that creates interfegorams that LiCSBAS can use (which is used for the time series calculation.  )
     
@@ -74,6 +75,16 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
                 #licsbas_dates_file.write(f"{datetime.strftime(licsbas_json_timestamp, '%Y-%m-%d %H:%M:%S')}\n")            # and write this first dummy date to it,
                 licsbas_dates_file.write(f"{licsbas_json_creation_time}\n")            # and write this first dummy date to it,
     
+    def check_remove_licsbas_settings(licsbas_settings):
+        """ Checks if licsbas_settings is None, and sets it to None if it's not.
+        """
+        if licsbas_settings is not None:
+            print(f"A dictionary of 'licsbas_settings' was provided, but these "
+                  f"are only used if a licsbas directory is provided.  "
+                  f"Setting it to 'None' and continuing.  ")
+            licsbas_settings = None
+        return licsbas_settings
+    
 
     import licsalert
     from licsalert.data_importing import LiCSBAS_to_LiCSAlert, LiCSBAS_json_to_LiCSAlert
@@ -114,9 +125,28 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
             for arg, arg_setting in icasar_settings.items():
                 ICASAR_settings[arg] = arg_setting
             del icasar_settings
-            ICASAR_settings['figures'] = LiCSAlert_settings['figure_type']                                                                          # alwyas the same as for LiCSAlert
         except:
             raise Exception(f"Failed to load the settings from arguments passed to the function.  Try checking licsalert_settings and icasar_settings.  Exiting.  ")
+    
+    # check that all the required inputs are there for licsalert
+    for required_input in ['t_recalculate', 'baseline_end', 'figure_intermediate',
+                           'figure_type', 'downsample_run', 'downsample_plot',
+                           'inset_ifgs_scaling']:
+        if not (required_input in LiCSAlert_settings.keys()):
+            raise Exception(f"'{required_input}' was not found in "
+                            f"'licsalert_settings', and it is not optional.  "
+                            f"Exiting.  ")
+    
+    # check that all the required inputs are there for icsasar        
+    for required_input in ['n_comp']:
+        if not (required_input in ICASAR_settings.keys()):
+            raise Exception(f"'{required_input}' was not found in "
+                            f"'icasar_settings', and it is not optional.  "
+                            f"Exiting.  ")
+    # set so that the icasar is always the same as licsalert
+    ICASAR_settings['figures'] = LiCSAlert_settings['figure_type']                                                                          
+
+            
 
     # 3: Open the the input data, which can be in various formats (3 so far), and deal with mean centering (either in time or space)
     if licsbas_jasmin_dir is not None:
@@ -124,15 +154,27 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,                          
         displacement_r2, _, tbaseline_info, ref_xy, licsbas_json_creation_time = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json")          # open the .json LiCSBAS data for this volcano 
         append_licsbas_date_to_file(outdir, region, volcano, licsbas_json_creation_time)                                                        # append licsbas .json file date to list of file dates used (in the text file for each volano)
         del licsbas_json_creation_time                                                                                                                  # delete for safety
+        check_remove_licsbas_settings(licsbas_settings)
         
     elif licsbas_dir is not None:
         print(f"LiCSAlert is opening a LiCSBAS directory.  ")
-        displacement_r2, tbaseline_info, _ = LiCSBAS_to_LiCSAlert(licsbas_dir, figures=True,  filtered = False, n_cols=5,                              # open various LiCSBAS products, spatial ones in displacement_r2, temporal ones in tbaseline_info
-                                                                  crop_pixels = None, return_r3 = False, ref_area = True, mask_type = 'dem')
+        # if there are no licsbas settings, set them to the default.  
+        if licsbas_settings == None:
+            licsbas_settings = {"filtered"              : False,
+                                "date_start"            : None,
+                                "date_end"              : None,
+                                'mask_type'             : 'licsbas',
+                                'crop_pixels'           : None}
+        ts = LiCSBAS_to_LiCSAlert(licsbas_dir, figures=True, n_cols=5,                              
+                                  **licsbas_settings)
+
+        displacement_r2, tbaseline_info = ts
+        del ts
     else:
         print(f"LiCSAlert is using data that was passed to the function as an argument  ")
         displacement_r2 = data_as_arg['displacement_r2']
         tbaseline_info = data_as_arg["tbaseline_info"]
+        check_remove_licsbas_settings(licsbas_settings)
         
     try:
         del displacement_r2['cumulative']                                                                                                                 #  this is not needed and is deleted for safety.
