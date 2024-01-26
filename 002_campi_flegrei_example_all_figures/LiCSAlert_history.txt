@@ -3,8 +3,7 @@
 
 
 
-LiCSAlert is being run for 002_campi_flegrei_example_all_figures at 11/01/2024 17:22:48
-Failed to open the config file for this volcano.  Trying to populate the LiCSAlert_settings and ICASAR_settings dictionaries with from the function input arguments 
+LiCSAlert is being run for 002_campi_flegrei_example_all_figures at 26/01/2024 15:13:28
 LiCSAlert is opening a LiCSBAS directory.  
 Opening the LiCSBAS unfiltered results.  
 Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
@@ -14,332 +13,332 @@ Interferogram were originally (181, 281) (31766 unmasked pixels), but have been 
 
 As the baseline_end date did not lie on an acquisition date, it has been updated so that it does.  Previously, it was 20170101, but it is now 20161231
 LiCSBAS date    Past baseline    LiCSAlert      
-20141031          no              pending (figure only)
-20141218          no              pending (figure only)
-20150111          no              pending (figure only)
-20150123          no              pending (figure only)
-20150216          no              pending (figure only)
-20150228          no              pending (figure only)
-20150312          no              pending (figure only)
-20150324          no              pending (figure only)
-20150405          no              pending (figure only)
-20150429          no              pending (figure only)
-20150511          no              pending (figure only)
-20150523          no              pending (figure only)
-20150604          no              pending (figure only)
-20150710          no              pending (figure only)
-20150722          no              pending (figure only)
-20150815          no              pending (figure only)
-20150920          no              pending (figure only)
-20151002          no              pending (figure only)
-20151014          no              pending (figure only)
-20151107          no              pending (figure only)
-20151119          no              pending (figure only)
-20151201          no              pending (figure only)
-20151213          no              pending (figure only)
-20151225          no              pending (figure only)
-20160106          no              pending (figure only)
-20160118          no              pending (figure only)
-20160211          no              pending (figure only)
-20160223          no              pending (figure only)
-20160306          no              pending (figure only)
-20160318          no              pending (figure only)
-20160330          no              pending (figure only)
-20160411          no              pending (figure only)
-20160505          no              pending (figure only)
-20160517          no              pending (figure only)
-20160529          no              pending (figure only)
-20160610          no              pending (figure only)
-20160704          no              pending (figure only)
-20160716          no              pending (figure only)
-20160728          no              pending (figure only)
-20160809          no              pending (figure only)
-20160821          no              pending (figure only)
-20160902          no              pending (figure only)
-20160914          no              pending (figure only)
-20160926          no              pending (figure only)
-20161002          no              pending (figure only)
-20161008          no              pending (figure only)
-20161014          no              pending (figure only)
-20161020          no              pending (figure only)
-20161026          no              pending (figure only)
-20161101          no              pending (figure only)
-20161107          no              pending (figure only)
-20161113          no              pending (figure only)
-20161119          no              pending (figure only)
-20161201          no              pending (figure only)
-20161207          no              pending (figure only)
-20161213          no              pending (figure only)
-20161219          no              pending (figure only)
-20161225          no              pending (figure only)
-20161231          no              pending (figure only)
-20170112          yes             pending 
-20170118          yes             pending 
-20170124          yes             pending 
-20170130          yes             pending 
-20170205          yes             pending 
-20170211          yes             pending 
-20170223          yes             pending 
-20170301          yes             pending 
-20170307          yes             pending 
-20170313          yes             pending 
-20170319          yes             pending 
-20170325          yes             pending 
-20170331          yes             pending 
-20170406          yes             pending 
-20170412          yes             pending 
-20170418          yes             pending 
-20170424          yes             pending 
-20170430          yes             pending 
-20170506          yes             pending 
-20170512          yes             pending 
-20170518          yes             pending 
-20170524          yes             pending 
-20170530          yes             pending 
-20170605          yes             pending 
-20170611          yes             pending 
-20170617          yes             pending 
-20170623          yes             pending 
-20170629          yes             pending 
-20170705          yes             pending 
-20170711          yes             pending 
-20170717          yes             pending 
-20170723          yes             pending 
-20170729          yes             pending 
-20170804          yes             pending 
-20170816          yes             pending 
-20170822          yes             pending 
-20170828          yes             pending 
-20170903          yes             pending 
-20170909          yes             pending 
-20170915          yes             pending 
-20170921          yes             pending 
-20170927          yes             pending 
-20171009          yes             pending 
-20171015          yes             pending 
-20171021          yes             pending 
-20171027          yes             pending 
-20171102          yes             pending 
-20171108          yes             pending 
-20171114          yes             pending 
-20171120          yes             pending 
-20171202          yes             pending 
-20171208          yes             pending 
-20171214          yes             pending 
-20171226          yes             pending 
-20180101          yes             pending 
-20180107          yes             pending 
-20180113          yes             pending 
-20180119          yes             pending 
-20180125          yes             pending 
-20180131          yes             pending 
-20180206          yes             pending 
-20180218          yes             pending 
-20180224          yes             pending 
-20180302          yes             pending 
-20180308          yes             pending 
-20180314          yes             pending 
-20180320          yes             pending 
-20180326          yes             pending 
-20180401          yes             pending 
-20180407          yes             pending 
-20180413          yes             pending 
-20180419          yes             pending 
-20180425          yes             pending 
-20180501          yes             pending 
-20180507          yes             pending 
-20180513          yes             pending 
-20180519          yes             pending 
-20180525          yes             pending 
-20180531          yes             pending 
-20180606          yes             pending 
-20180612          yes             pending 
-20180618          yes             pending 
-20180630          yes             pending 
-20180712          yes             pending 
-20180718          yes             pending 
-20180724          yes             pending 
-20180730          yes             pending 
-20180805          yes             pending 
-20180811          yes             pending 
-20180817          yes             pending 
-20180823          yes             pending 
-20180829          yes             pending 
-20180904          yes             pending 
-20180910          yes             pending 
-20180916          yes             pending 
-20180922          yes             pending 
-20180928          yes             pending 
-20181004          yes             pending 
-20181010          yes             pending 
-20181016          yes             pending 
-20181022          yes             pending 
-20181028          yes             pending 
-20181109          yes             pending 
-20181115          yes             pending 
-20181121          yes             pending 
-20181127          yes             pending 
-20181203          yes             pending 
-20181209          yes             pending 
-20181215          yes             pending 
-20181221          yes             pending 
-20181227          yes             pending 
-20190102          yes             pending 
-20190108          yes             pending 
-20190114          yes             pending 
-20190120          yes             pending 
-20190126          yes             pending 
-20190201          yes             pending 
-20190207          yes             pending 
-20190213          yes             pending 
-20190225          yes             pending 
-20190303          yes             pending 
-20190309          yes             pending 
-20190321          yes             pending 
-20190402          yes             pending 
-20190408          yes             pending 
-20190414          yes             pending 
-20190420          yes             pending 
-20190426          yes             pending 
-20190502          yes             pending 
-20190508          yes             pending 
-20190520          yes             pending 
-20190526          yes             pending 
-20190601          yes             pending 
-20190607          yes             pending 
-20190613          yes             pending 
-20190625          yes             pending 
-20190701          yes             pending 
-20190707          yes             pending 
-20190713          yes             pending 
-20190719          yes             pending 
-20190725          yes             pending 
-20190731          yes             pending 
-20190806          yes             pending 
-20190812          yes             pending 
-20190818          yes             pending 
-20190824          yes             pending 
-20190830          yes             pending 
-20190905          yes             pending 
-20190911          yes             pending 
-20190917          yes             pending 
-20190923          yes             pending 
-20191005          yes             pending 
-20191011          yes             pending 
-20191017          yes             pending 
-20191023          yes             pending 
-20191029          yes             pending 
-20191104          yes             pending 
-20191116          yes             pending 
-20191122          yes             pending 
-20191128          yes             pending 
-20191204          yes             pending 
-20191210          yes             pending 
-20191216          yes             pending 
-20191222          yes             pending 
-20191228          yes             pending 
-20200103          yes             pending 
-20200109          yes             pending 
-20200115          yes             pending 
-20200121          yes             pending 
-20200127          yes             pending 
-20200202          yes             pending 
-20200208          yes             pending 
-20200214          yes             pending 
-20200220          yes             pending 
-20200226          yes             pending 
-20200303          yes             pending 
-20200309          yes             pending 
-20200315          yes             pending 
-20200321          yes             pending 
-20200402          yes             pending 
-20200408          yes             pending 
-20200414          yes             pending 
-20200420          yes             pending 
-20200426          yes             pending 
-20200502          yes             pending 
-20200508          yes             pending 
-20200514          yes             pending 
-20200520          yes             pending 
-20200526          yes             pending 
-20200601          yes             pending 
-20200607          yes             pending 
-20200613          yes             pending 
-20200619          yes             pending 
-20200625          yes             pending 
-20200701          yes             pending 
-20200707          yes             pending 
-20200713          yes             pending 
-20200719          yes             pending 
-20200725          yes             pending 
-20200731          yes             pending 
-20200806          yes             pending 
-20200812          yes             pending 
-20200818          yes             pending 
-20200824          yes             pending 
-20200830          yes             pending 
-20200905          yes             pending 
-20200911          yes             pending 
-20200917          yes             pending 
-20200923          yes             pending 
-20200929          yes             pending 
-20201005          yes             pending 
-20201011          yes             pending 
-20201017          yes             pending 
-20201023          yes             pending 
-20201029          yes             pending 
-20201104          yes             pending 
-20201110          yes             pending 
-20201116          yes             pending 
-20201122          yes             pending 
-20201128          yes             pending 
-20201204          yes             pending 
-20201210          yes             pending 
-20201216          yes             pending 
-20201222          yes             pending 
-20201228          yes             pending 
-20210103          yes             pending 
-20210109          yes             pending 
-20210115          yes             pending 
-20210121          yes             pending 
-20210127          yes             pending 
-20210202          yes             pending 
-20210208          yes             pending 
-20210214          yes             pending 
-20210220          yes             pending 
-20210226          yes             pending 
-20210304          yes             pending 
-20210310          yes             pending 
-20210316          yes             pending 
-20210322          yes             pending 
-20210328          yes             pending 
-20210403          yes             pending 
-20210409          yes             pending 
-20210415          yes             pending 
-20210421          yes             pending 
-20210427          yes             pending 
-20210503          yes             pending 
-20210509          yes             pending 
-20210515          yes             pending 
-20210521          yes             pending 
-20210527          yes             pending 
-20210602          yes             pending 
-20210608          yes             pending 
-20210614          yes             pending 
-20210620          yes             pending 
-20210626          yes             pending 
-20210702          yes             pending 
-20210708          yes             pending 
-20210714          yes             pending 
-20210720          yes             pending 
-20210726          yes             pending 
-20210801          yes             pending 
-20210807          yes             pending 
-20210813          yes             pending 
-20210819          yes             pending 
-20210825          yes             pending 
-20210831          yes             pending 
-20210906          yes             pending 
+20141031          no              not requested
+20141218          no              not requested
+20150111          no              not requested
+20150123          no              not requested
+20150216          no              not requested
+20150228          no              not requested
+20150312          no              not requested
+20150324          no              not requested
+20150405          no              not requested
+20150429          no              not requested
+20150511          no              not requested
+20150523          no              not requested
+20150604          no              not requested
+20150710          no              not requested
+20150722          no              not requested
+20150815          no              not requested
+20150920          no              not requested
+20151002          no              not requested
+20151014          no              not requested
+20151107          no              not requested
+20151119          no              not requested
+20151201          no              not requested
+20151213          no              not requested
+20151225          no              not requested
+20160106          no              not requested
+20160118          no              not requested
+20160211          no              not requested
+20160223          no              not requested
+20160306          no              not requested
+20160318          no              not requested
+20160330          no              not requested
+20160411          no              not requested
+20160505          no              not requested
+20160517          no              not requested
+20160529          no              not requested
+20160610          no              not requested
+20160704          no              not requested
+20160716          no              not requested
+20160728          no              not requested
+20160809          no              not requested
+20160821          no              not requested
+20160902          no              not requested
+20160914          no              not requested
+20160926          no              not requested
+20161002          no              not requested
+20161008          no              not requested
+20161014          no              not requested
+20161020          no              not requested
+20161026          no              not requested
+20161101          no              not requested
+20161107          no              not requested
+20161113          no              not requested
+20161119          no              not requested
+20161201          no              not requested
+20161207          no              not requested
+20161213          no              not requested
+20161219          no              not requested
+20161225          no              not requested
+20161231          no              not requested
+20170112          yes             not requested
+20170118          yes             not requested
+20170124          yes             not requested
+20170130          yes             not requested
+20170205          yes             not requested
+20170211          yes             not requested
+20170223          yes             not requested
+20170301          yes             not requested
+20170307          yes             not requested
+20170313          yes             not requested
+20170319          yes             not requested
+20170325          yes             not requested
+20170331          yes             not requested
+20170406          yes             not requested
+20170412          yes             not requested
+20170418          yes             not requested
+20170424          yes             not requested
+20170430          yes             not requested
+20170506          yes             not requested
+20170512          yes             not requested
+20170518          yes             not requested
+20170524          yes             not requested
+20170530          yes             not requested
+20170605          yes             not requested
+20170611          yes             not requested
+20170617          yes             not requested
+20170623          yes             not requested
+20170629          yes             not requested
+20170705          yes             not requested
+20170711          yes             not requested
+20170717          yes             not requested
+20170723          yes             not requested
+20170729          yes             not requested
+20170804          yes             not requested
+20170816          yes             not requested
+20170822          yes             not requested
+20170828          yes             not requested
+20170903          yes             not requested
+20170909          yes             not requested
+20170915          yes             not requested
+20170921          yes             not requested
+20170927          yes             not requested
+20171009          yes             not requested
+20171015          yes             not requested
+20171021          yes             not requested
+20171027          yes             not requested
+20171102          yes             not requested
+20171108          yes             not requested
+20171114          yes             not requested
+20171120          yes             not requested
+20171202          yes             not requested
+20171208          yes             not requested
+20171214          yes             not requested
+20171226          yes             not requested
+20180101          yes             not requested
+20180107          yes             not requested
+20180113          yes             not requested
+20180119          yes             not requested
+20180125          yes             not requested
+20180131          yes             not requested
+20180206          yes             not requested
+20180218          yes             not requested
+20180224          yes             not requested
+20180302          yes             not requested
+20180308          yes             not requested
+20180314          yes             not requested
+20180320          yes             not requested
+20180326          yes             not requested
+20180401          yes             not requested
+20180407          yes             not requested
+20180413          yes             not requested
+20180419          yes             not requested
+20180425          yes             not requested
+20180501          yes             not requested
+20180507          yes             not requested
+20180513          yes             not requested
+20180519          yes             not requested
+20180525          yes             not requested
+20180531          yes             not requested
+20180606          yes             not requested
+20180612          yes             not requested
+20180618          yes             not requested
+20180630          yes             not requested
+20180712          yes             not requested
+20180718          yes             not requested
+20180724          yes             not requested
+20180730          yes             not requested
+20180805          yes             not requested
+20180811          yes             not requested
+20180817          yes             not requested
+20180823          yes             not requested
+20180829          yes             not requested
+20180904          yes             not requested
+20180910          yes             not requested
+20180916          yes             not requested
+20180922          yes             not requested
+20180928          yes             not requested
+20181004          yes             not requested
+20181010          yes             not requested
+20181016          yes             not requested
+20181022          yes             not requested
+20181028          yes             not requested
+20181109          yes             not requested
+20181115          yes             not requested
+20181121          yes             not requested
+20181127          yes             not requested
+20181203          yes             not requested
+20181209          yes             not requested
+20181215          yes             not requested
+20181221          yes             not requested
+20181227          yes             not requested
+20190102          yes             not requested
+20190108          yes             not requested
+20190114          yes             not requested
+20190120          yes             not requested
+20190126          yes             not requested
+20190201          yes             not requested
+20190207          yes             not requested
+20190213          yes             not requested
+20190225          yes             not requested
+20190303          yes             not requested
+20190309          yes             not requested
+20190321          yes             not requested
+20190402          yes             not requested
+20190408          yes             not requested
+20190414          yes             not requested
+20190420          yes             not requested
+20190426          yes             not requested
+20190502          yes             not requested
+20190508          yes             not requested
+20190520          yes             not requested
+20190526          yes             not requested
+20190601          yes             not requested
+20190607          yes             not requested
+20190613          yes             not requested
+20190625          yes             not requested
+20190701          yes             not requested
+20190707          yes             not requested
+20190713          yes             not requested
+20190719          yes             not requested
+20190725          yes             not requested
+20190731          yes             not requested
+20190806          yes             not requested
+20190812          yes             not requested
+20190818          yes             not requested
+20190824          yes             not requested
+20190830          yes             not requested
+20190905          yes             not requested
+20190911          yes             not requested
+20190917          yes             not requested
+20190923          yes             not requested
+20191005          yes             not requested
+20191011          yes             not requested
+20191017          yes             not requested
+20191023          yes             not requested
+20191029          yes             not requested
+20191104          yes             not requested
+20191116          yes             not requested
+20191122          yes             not requested
+20191128          yes             not requested
+20191204          yes             not requested
+20191210          yes             not requested
+20191216          yes             not requested
+20191222          yes             not requested
+20191228          yes             not requested
+20200103          yes             not requested
+20200109          yes             not requested
+20200115          yes             not requested
+20200121          yes             not requested
+20200127          yes             not requested
+20200202          yes             not requested
+20200208          yes             not requested
+20200214          yes             not requested
+20200220          yes             not requested
+20200226          yes             not requested
+20200303          yes             not requested
+20200309          yes             not requested
+20200315          yes             not requested
+20200321          yes             not requested
+20200402          yes             not requested
+20200408          yes             not requested
+20200414          yes             not requested
+20200420          yes             not requested
+20200426          yes             not requested
+20200502          yes             not requested
+20200508          yes             not requested
+20200514          yes             not requested
+20200520          yes             not requested
+20200526          yes             not requested
+20200601          yes             not requested
+20200607          yes             not requested
+20200613          yes             not requested
+20200619          yes             not requested
+20200625          yes             not requested
+20200701          yes             not requested
+20200707          yes             not requested
+20200713          yes             not requested
+20200719          yes             not requested
+20200725          yes             not requested
+20200731          yes             not requested
+20200806          yes             not requested
+20200812          yes             not requested
+20200818          yes             not requested
+20200824          yes             not requested
+20200830          yes             not requested
+20200905          yes             not requested
+20200911          yes             not requested
+20200917          yes             not requested
+20200923          yes             not requested
+20200929          yes             not requested
+20201005          yes             not requested
+20201011          yes             not requested
+20201017          yes             not requested
+20201023          yes             not requested
+20201029          yes             not requested
+20201104          yes             not requested
+20201110          yes             not requested
+20201116          yes             not requested
+20201122          yes             not requested
+20201128          yes             not requested
+20201204          yes             not requested
+20201210          yes             not requested
+20201216          yes             not requested
+20201222          yes             not requested
+20201228          yes             not requested
+20210103          yes             not requested
+20210109          yes             not requested
+20210115          yes             not requested
+20210121          yes             not requested
+20210127          yes             not requested
+20210202          yes             not requested
+20210208          yes             not requested
+20210214          yes             not requested
+20210220          yes             not requested
+20210226          yes             not requested
+20210304          yes             not requested
+20210310          yes             not requested
+20210316          yes             not requested
+20210322          yes             not requested
+20210328          yes             not requested
+20210403          yes             not requested
+20210409          yes             not requested
+20210415          yes             not requested
+20210421          yes             not requested
+20210427          yes             not requested
+20210503          yes             not requested
+20210509          yes             not requested
+20210515          yes             not requested
+20210521          yes             not requested
+20210527          yes             not requested
+20210602          yes             not requested
+20210608          yes             not requested
+20210614          yes             not requested
+20210620          yes             not requested
+20210626          yes             not requested
+20210702          yes             not requested
+20210708          yes             not requested
+20210714          yes             not requested
+20210720          yes             not requested
+20210726          yes             not requested
+20210801          yes             not requested
+20210807          yes             not requested
+20210813          yes             not requested
+20210819          yes             not requested
+20210825          yes             not requested
+20210831          yes             not requested
+20210906          yes             not requested
 20210912          yes             pending 
 LiCSAlert status:  1) Run ICASAR: True   2) Run LiCSAlert: True
 
@@ -353,240 +352,239 @@ This interferogram timeseries has 59 times and 7873 pixels.
 This interferogram timeseries has 1000 times and 7873 pixels.  
 This interferogram timeseries has 59 times and 7873 pixels.  
 Performing PCA to whiten the data....Starting to create the 02_PCA_sources_correlations figure:
-Updating masks and ICA sources.  Of the 7873 in the sources and 8278 in the current LiCSBAS time series, 7645 are in both and can be used in this iteration of LiCSAlert.  
+Updating the masks for the two sources.  Of the 7873 in data1 and 8278 in data2, 7645 are in both and can be used.  
     Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
 
     Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
 
 Done.  
 No results were found for the multiple ICA runs, so these will now be performed.  
-FastICA progress with bootstrapping: FastICA algorithm converged in 6 iterations.  
-0% FastICA algorithm converged in 96 iterations.  
-1% FastICA algorithm converged in 6 iterations.  
-1% FastICA algorithm converged in 13 iterations.  
+FastICA progress with bootstrapping: FastICA algorithm converged in 85 iterations.  
+0% FastICA algorithm converged in 9 iterations.  
+1% FastICA algorithm converged in 3 iterations.  
+1% FastICA algorithm converged in 9 iterations.  
+2% FastICA algorithm converged in 70 iterations.  
+2% FastICA algorithm didn't converge in 149 iterations.  
 2% FastICA algorithm converged in 5 iterations.  
-2% FastICA algorithm converged in 5 iterations.  
+3% FastICA algorithm converged in 7 iterations.  
 3% FastICA algorithm converged in 6 iterations.  
-3% FastICA algorithm converged in 6 iterations.  
-4% FastICA algorithm converged in 6 iterations.  
-4% FastICA algorithm converged in 10 iterations.  
-5% FastICA algorithm converged in 13 iterations.  
-5% FastICA algorithm converged in 6 iterations.  
-6% FastICA algorithm converged in 9 iterations.  
-6% FastICA algorithm converged in 4 iterations.  
+4% FastICA algorithm converged in 17 iterations.  
+4% FastICA algorithm converged in 9 iterations.  
+5% FastICA algorithm converged in 4 iterations.  
+5% FastICA algorithm converged in 110 iterations.  
+6% FastICA algorithm converged in 6 iterations.  
+6% FastICA algorithm converged in 5 iterations.  
+7% FastICA algorithm didn't converge in 149 iterations.  
 7% FastICA algorithm converged in 9 iterations.  
-7% FastICA algorithm converged in 17 iterations.  
-8% FastICA algorithm converged in 4 iterations.  
-8% FastICA algorithm converged in 35 iterations.  
-9% FastICA algorithm converged in 31 iterations.  
-9% FastICA algorithm converged in 4 iterations.  
-10% FastICA algorithm didn't converge in 149 iterations.  
-10% FastICA algorithm didn't converge in 149 iterations.  
-10% FastICA algorithm converged in 5 iterations.  
-10% FastICA algorithm converged in 8 iterations.  
+7% FastICA algorithm converged in 15 iterations.  
+8% FastICA algorithm converged in 6 iterations.  
+8% FastICA algorithm converged in 9 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+9% FastICA algorithm converged in 5 iterations.  
+10% FastICA algorithm converged in 14 iterations.  
+10% FastICA algorithm converged in 6 iterations.  
 11% FastICA algorithm converged in 7 iterations.  
-11% FastICA algorithm converged in 6 iterations.  
+11% FastICA algorithm converged in 10 iterations.  
 12% FastICA algorithm converged in 5 iterations.  
-12% FastICA algorithm converged in 5 iterations.  
-13% FastICA algorithm converged in 5 iterations.  
-13% FastICA algorithm converged in 4 iterations.  
-14% FastICA algorithm converged in 4 iterations.  
-14% FastICA algorithm converged in 6 iterations.  
+12% FastICA algorithm converged in 10 iterations.  
+13% FastICA algorithm converged in 15 iterations.  
+13% FastICA algorithm converged in 18 iterations.  
+14% FastICA algorithm converged in 10 iterations.  
+14% FastICA algorithm converged in 7 iterations.  
 15% FastICA algorithm converged in 5 iterations.  
 15% FastICA algorithm didn't converge in 149 iterations.  
-15% FastICA algorithm converged in 26 iterations.  
-16% FastICA algorithm converged in 7 iterations.  
-16% FastICA algorithm converged in 4 iterations.  
-17% FastICA algorithm converged in 7 iterations.  
-17% FastICA algorithm converged in 11 iterations.  
+15% FastICA algorithm converged in 4 iterations.  
+16% FastICA algorithm converged in 14 iterations.  
+16% FastICA algorithm converged in 5 iterations.  
+17% FastICA algorithm converged in 10 iterations.  
+17% FastICA algorithm converged in 6 iterations.  
 18% FastICA algorithm converged in 7 iterations.  
-18% FastICA algorithm converged in 4 iterations.  
-19% FastICA algorithm converged in 6 iterations.  
-19% FastICA algorithm converged in 5 iterations.  
-20% FastICA algorithm converged in 9 iterations.  
+18% FastICA algorithm converged in 6 iterations.  
+19% FastICA algorithm converged in 4 iterations.  
+19% FastICA algorithm converged in 3 iterations.  
 20% FastICA algorithm converged in 4 iterations.  
-21% FastICA algorithm converged in 143 iterations.  
-21% FastICA algorithm converged in 5 iterations.  
-22% FastICA algorithm converged in 18 iterations.  
-22% FastICA algorithm converged in 14 iterations.  
-23% FastICA algorithm converged in 3 iterations.  
-23% FastICA algorithm converged in 6 iterations.  
+20% FastICA algorithm converged in 10 iterations.  
+21% FastICA algorithm converged in 101 iterations.  
+21% FastICA algorithm converged in 6 iterations.  
+22% FastICA algorithm didn't converge in 149 iterations.  
+22% FastICA algorithm converged in 9 iterations.  
+22% FastICA algorithm didn't converge in 149 iterations.  
+22% FastICA algorithm didn't converge in 149 iterations.  
+22% FastICA algorithm converged in 6 iterations.  
+23% FastICA algorithm converged in 23 iterations.  
+23% FastICA algorithm converged in 27 iterations.  
 24% FastICA algorithm converged in 6 iterations.  
 24% FastICA algorithm converged in 7 iterations.  
-25% FastICA algorithm converged in 6 iterations.  
-25% FastICA algorithm converged in 6 iterations.  
-26% FastICA algorithm converged in 14 iterations.  
-26% FastICA algorithm converged in 13 iterations.  
-27% FastICA algorithm converged in 92 iterations.  
-27% FastICA algorithm converged in 24 iterations.  
-28% FastICA algorithm converged in 7 iterations.  
+25% FastICA algorithm converged in 17 iterations.  
+25% FastICA algorithm converged in 8 iterations.  
+26% FastICA algorithm converged in 7 iterations.  
+26% FastICA algorithm converged in 8 iterations.  
+27% FastICA algorithm converged in 9 iterations.  
+27% FastICA algorithm converged in 17 iterations.  
+28% FastICA algorithm converged in 4 iterations.  
 28% FastICA algorithm converged in 6 iterations.  
-28% FastICA algorithm converged in 23 iterations.  
-29% FastICA algorithm converged in 20 iterations.  
-30% FastICA algorithm converged in 4 iterations.  
-30% FastICA algorithm converged in 5 iterations.  
-31% FastICA algorithm converged in 6 iterations.  
-31% FastICA algorithm converged in 9 iterations.  
-32% FastICA algorithm converged in 4 iterations.  
-32% FastICA algorithm converged in 5 iterations.  
-33% FastICA algorithm converged in 7 iterations.  
-33% FastICA algorithm converged in 3 iterations.  
-34% FastICA algorithm didn't converge in 149 iterations.  
-34% FastICA algorithm converged in 128 iterations.  
-34% FastICA algorithm converged in 3 iterations.  
-35% FastICA algorithm converged in 9 iterations.  
-35% FastICA algorithm converged in 4 iterations.  
-36% FastICA algorithm converged in 7 iterations.  
-36% FastICA algorithm converged in 12 iterations.  
-37% FastICA algorithm didn't converge in 149 iterations.  
-37% FastICA algorithm converged in 27 iterations.  
-37% FastICA algorithm converged in 6 iterations.  
+28% FastICA algorithm converged in 6 iterations.  
+29% FastICA algorithm converged in 13 iterations.  
+30% FastICA algorithm didn't converge in 149 iterations.  
+30% FastICA algorithm converged in 6 iterations.  
+30% FastICA algorithm converged in 9 iterations.  
+31% FastICA algorithm converged in 5 iterations.  
+31% FastICA algorithm converged in 7 iterations.  
+32% FastICA algorithm converged in 16 iterations.  
+32% FastICA algorithm converged in 7 iterations.  
+33% FastICA algorithm converged in 12 iterations.  
+33% FastICA algorithm converged in 10 iterations.  
+34% FastICA algorithm converged in 15 iterations.  
+34% FastICA algorithm converged in 10 iterations.  
+35% FastICA algorithm converged in 5 iterations.  
+35% FastICA algorithm converged in 7 iterations.  
+36% FastICA algorithm converged in 4 iterations.  
+36% FastICA algorithm converged in 106 iterations.  
+37% FastICA algorithm converged in 12 iterations.  
+37% FastICA algorithm converged in 5 iterations.  
+38% FastICA algorithm converged in 18 iterations.  
 38% FastICA algorithm converged in 5 iterations.  
-38% FastICA algorithm converged in 4 iterations.  
-39% FastICA algorithm converged in 8 iterations.  
-39% FastICA algorithm didn't converge in 149 iterations.  
-39% FastICA algorithm converged in 6 iterations.  
-40% FastICA algorithm converged in 6 iterations.  
-40% FastICA algorithm converged in 4 iterations.  
-41% FastICA algorithm converged in 7 iterations.  
-41% FastICA algorithm converged in 6 iterations.  
-42% FastICA algorithm converged in 5 iterations.  
-42% FastICA algorithm converged in 6 iterations.  
-43% FastICA algorithm converged in 14 iterations.  
-43% FastICA algorithm converged in 4 iterations.  
-44% FastICA algorithm converged in 6 iterations.  
-44% FastICA algorithm converged in 10 iterations.  
+39% FastICA algorithm converged in 5 iterations.  
+39% FastICA algorithm converged in 11 iterations.  
+40% FastICA algorithm didn't converge in 149 iterations.  
+40% FastICA algorithm converged in 15 iterations.  
+40% FastICA algorithm converged in 3 iterations.  
+41% FastICA algorithm didn't converge in 149 iterations.  
+41% FastICA algorithm converged in 5 iterations.  
+41% FastICA algorithm converged in 20 iterations.  
+42% FastICA algorithm converged in 11 iterations.  
+42% FastICA algorithm converged in 10 iterations.  
+43% FastICA algorithm converged in 3 iterations.  
+43% FastICA algorithm converged in 7 iterations.  
+44% FastICA algorithm converged in 13 iterations.  
+44% FastICA algorithm converged in 4 iterations.  
 45% FastICA algorithm converged in 7 iterations.  
-45% FastICA algorithm converged in 42 iterations.  
+45% FastICA algorithm converged in 4 iterations.  
 46% FastICA algorithm converged in 4 iterations.  
-46% FastICA algorithm converged in 5 iterations.  
-47% FastICA algorithm converged in 30 iterations.  
+46% FastICA algorithm converged in 4 iterations.  
 47% FastICA algorithm converged in 5 iterations.  
-48% FastICA algorithm converged in 5 iterations.  
-48% FastICA algorithm converged in 28 iterations.  
-49% FastICA algorithm converged in 29 iterations.  
-49% FastICA algorithm converged in 4 iterations.  
-50% FastICA algorithm converged in 13 iterations.  
-50% FastICA algorithm converged in 82 iterations.  
-51% FastICA algorithm converged in 67 iterations.  
-51% FastICA algorithm converged in 72 iterations.  
-52% FastICA algorithm converged in 69 iterations.  
-52% FastICA algorithm converged in 6 iterations.  
-53% FastICA algorithm converged in 5 iterations.  
-53% FastICA algorithm didn't converge in 149 iterations.  
-53% FastICA algorithm converged in 9 iterations.  
-54% FastICA algorithm converged in 3 iterations.  
-54% FastICA algorithm converged in 4 iterations.  
+47% FastICA algorithm converged in 28 iterations.  
+48% FastICA algorithm converged in 4 iterations.  
+48% FastICA algorithm converged in 26 iterations.  
+49% FastICA algorithm converged in 7 iterations.  
+49% FastICA algorithm converged in 141 iterations.  
+50% FastICA algorithm converged in 5 iterations.  
+50% FastICA algorithm converged in 57 iterations.  
+51% FastICA algorithm converged in 4 iterations.  
+51% FastICA algorithm converged in 5 iterations.  
+52% FastICA algorithm converged in 4 iterations.  
+52% FastICA algorithm converged in 15 iterations.  
+53% FastICA algorithm converged in 11 iterations.  
+53% FastICA algorithm converged in 43 iterations.  
+54% FastICA algorithm converged in 5 iterations.  
+54% FastICA algorithm converged in 10 iterations.  
 55% FastICA algorithm converged in 6 iterations.  
-55% FastICA algorithm converged in 10 iterations.  
-56% FastICA algorithm converged in 6 iterations.  
-56% FastICA algorithm converged in 6 iterations.  
-56% FastICA algorithm didn't converge in 149 iterations.  
-56% FastICA algorithm converged in 6 iterations.  
-57% FastICA algorithm converged in 5 iterations.  
-57% FastICA algorithm didn't converge in 149 iterations.  
-57% FastICA algorithm converged in 73 iterations.  
-58% FastICA algorithm converged in 5 iterations.  
-59% FastICA algorithm converged in 9 iterations.  
-59% FastICA algorithm converged in 5 iterations.  
-60% FastICA algorithm converged in 4 iterations.  
-60% FastICA algorithm didn't converge in 149 iterations.  
-60% FastICA algorithm converged in 3 iterations.  
-61% FastICA algorithm converged in 6 iterations.  
-61% FastICA algorithm converged in 4 iterations.  
-62% FastICA algorithm converged in 17 iterations.  
+55% FastICA algorithm converged in 23 iterations.  
+56% FastICA algorithm converged in 10 iterations.  
+56% FastICA algorithm converged in 7 iterations.  
+56% FastICA algorithm converged in 4 iterations.  
+57% FastICA algorithm converged in 15 iterations.  
+57% FastICA algorithm converged in 6 iterations.  
+58% FastICA algorithm converged in 6 iterations.  
+59% FastICA algorithm converged in 10 iterations.  
+59% FastICA algorithm converged in 17 iterations.  
+60% FastICA algorithm converged in 9 iterations.  
+60% FastICA algorithm converged in 6 iterations.  
+61% FastICA algorithm converged in 16 iterations.  
+61% FastICA algorithm converged in 8 iterations.  
 62% FastICA algorithm converged in 7 iterations.  
-63% FastICA algorithm converged in 6 iterations.  
-63% FastICA algorithm converged in 7 iterations.  
-64% FastICA algorithm converged in 4 iterations.  
-64% FastICA algorithm converged in 8 iterations.  
-65% FastICA algorithm converged in 10 iterations.  
-65% FastICA algorithm didn't converge in 149 iterations.  
-65% FastICA algorithm converged in 12 iterations.  
+62% FastICA algorithm converged in 38 iterations.  
+63% FastICA algorithm converged in 4 iterations.  
+63% FastICA algorithm converged in 5 iterations.  
+64% FastICA algorithm converged in 41 iterations.  
+64% FastICA algorithm converged in 5 iterations.  
+65% FastICA algorithm converged in 9 iterations.  
+65% FastICA algorithm converged in 5 iterations.  
 66% FastICA algorithm converged in 6 iterations.  
-66% FastICA algorithm converged in 9 iterations.  
-67% FastICA algorithm didn't converge in 149 iterations.  
+66% FastICA algorithm converged in 5 iterations.  
+67% FastICA algorithm converged in 5 iterations.  
 67% FastICA algorithm converged in 8 iterations.  
-67% FastICA algorithm converged in 8 iterations.  
-68% FastICA algorithm converged in 7 iterations.  
 68% FastICA algorithm converged in 6 iterations.  
-69% FastICA algorithm converged in 8 iterations.  
-69% FastICA algorithm converged in 72 iterations.  
+68% FastICA algorithm converged in 5 iterations.  
+69% FastICA algorithm converged in 5 iterations.  
+69% FastICA algorithm converged in 6 iterations.  
 70% FastICA algorithm converged in 6 iterations.  
-70% FastICA algorithm converged in 4 iterations.  
-71% FastICA algorithm converged in 6 iterations.  
-71% FastICA algorithm didn't converge in 149 iterations.  
-71% FastICA algorithm converged in 5 iterations.  
+70% FastICA algorithm converged in 39 iterations.  
+71% FastICA algorithm converged in 3 iterations.  
+71% FastICA algorithm converged in 3 iterations.  
+72% FastICA algorithm converged in 5 iterations.  
+72% FastICA algorithm didn't converge in 149 iterations.  
 72% FastICA algorithm converged in 4 iterations.  
-72% FastICA algorithm converged in 22 iterations.  
-73% FastICA algorithm converged in 4 iterations.  
-73% FastICA algorithm converged in 5 iterations.  
-74% FastICA algorithm converged in 37 iterations.  
-74% FastICA algorithm converged in 5 iterations.  
-75% FastICA algorithm converged in 8 iterations.  
-75% FastICA algorithm converged in 6 iterations.  
-76% FastICA algorithm converged in 7 iterations.  
-76% FastICA algorithm didn't converge in 149 iterations.  
-76% FastICA algorithm converged in 9 iterations.  
+73% FastICA algorithm converged in 6 iterations.  
+73% FastICA algorithm converged in 8 iterations.  
+74% FastICA algorithm converged in 7 iterations.  
+74% FastICA algorithm converged in 19 iterations.  
+75% FastICA algorithm didn't converge in 149 iterations.  
+75% FastICA algorithm converged in 5 iterations.  
+75% FastICA algorithm converged in 3 iterations.  
+76% FastICA algorithm converged in 62 iterations.  
+76% FastICA algorithm converged in 5 iterations.  
 77% FastICA algorithm converged in 6 iterations.  
-77% FastICA algorithm converged in 16 iterations.  
-78% FastICA algorithm converged in 4 iterations.  
-78% FastICA algorithm converged in 12 iterations.  
-79% FastICA algorithm converged in 8 iterations.  
-79% FastICA algorithm converged in 9 iterations.  
+77% FastICA algorithm converged in 28 iterations.  
+78% FastICA algorithm converged in 3 iterations.  
+78% FastICA algorithm converged in 14 iterations.  
+79% FastICA algorithm converged in 7 iterations.  
+79% FastICA algorithm converged in 10 iterations.  
 80% FastICA algorithm converged in 4 iterations.  
-80% FastICA algorithm converged in 7 iterations.  
-81% FastICA algorithm converged in 68 iterations.  
+80% FastICA algorithm didn't converge in 149 iterations.  
+80% FastICA algorithm converged in 5 iterations.  
 81% FastICA algorithm converged in 4 iterations.  
-82% FastICA algorithm converged in 9 iterations.  
-82% FastICA algorithm converged in 9 iterations.  
-83% FastICA algorithm converged in 6 iterations.  
-83% FastICA algorithm converged in 5 iterations.  
+81% FastICA algorithm converged in 6 iterations.  
+82% FastICA algorithm converged in 7 iterations.  
+82% FastICA algorithm converged in 6 iterations.  
+83% FastICA algorithm converged in 10 iterations.  
+83% FastICA algorithm converged in 50 iterations.  
 84% FastICA algorithm converged in 6 iterations.  
-84% FastICA algorithm converged in 9 iterations.  
+84% FastICA algorithm converged in 8 iterations.  
+85% FastICA algorithm didn't converge in 149 iterations.  
+85% FastICA algorithm converged in 8 iterations.  
 85% FastICA algorithm converged in 5 iterations.  
-85% FastICA algorithm converged in 17 iterations.  
-86% FastICA algorithm converged in 88 iterations.  
+86% FastICA algorithm didn't converge in 149 iterations.  
+86% FastICA algorithm converged in 28 iterations.  
 86% FastICA algorithm converged in 4 iterations.  
-87% FastICA algorithm converged in 56 iterations.  
-87% FastICA algorithm converged in 4 iterations.  
-88% FastICA algorithm converged in 92 iterations.  
-88% FastICA algorithm converged in 25 iterations.  
-89% FastICA algorithm converged in 40 iterations.  
-89% FastICA algorithm converged in 4 iterations.  
-90% FastICA algorithm converged in 12 iterations.  
-90% FastICA algorithm converged in 5 iterations.  
-91% FastICA algorithm converged in 16 iterations.  
-91% FastICA algorithm converged in 7 iterations.  
+87% FastICA algorithm converged in 5 iterations.  
+87% FastICA algorithm converged in 7 iterations.  
+88% FastICA algorithm converged in 14 iterations.  
+88% FastICA algorithm converged in 5 iterations.  
+89% FastICA algorithm converged in 6 iterations.  
+89% FastICA algorithm didn't converge in 149 iterations.  
+89% FastICA algorithm converged in 17 iterations.  
+90% FastICA algorithm converged in 9 iterations.  
+90% FastICA algorithm converged in 8 iterations.  
+91% FastICA algorithm converged in 12 iterations.  
+91% FastICA algorithm converged in 6 iterations.  
+92% FastICA algorithm converged in 43 iterations.  
 92% FastICA algorithm converged in 7 iterations.  
-92% FastICA algorithm converged in 3 iterations.  
 93% FastICA algorithm converged in 5 iterations.  
-93% FastICA algorithm converged in 22 iterations.  
+93% FastICA algorithm converged in 5 iterations.  
 94% FastICA algorithm converged in 7 iterations.  
-94% FastICA algorithm converged in 4 iterations.  
-95% FastICA algorithm converged in 18 iterations.  
-95% FastICA algorithm converged in 12 iterations.  
-96% FastICA algorithm converged in 12 iterations.  
-96% FastICA algorithm converged in 13 iterations.  
-97% FastICA algorithm didn't converge in 149 iterations.  
-97% FastICA algorithm didn't converge in 149 iterations.  
-97% FastICA algorithm converged in 33 iterations.  
-97% FastICA algorithm converged in 5 iterations.  
-98% FastICA algorithm converged in 11 iterations.  
+94% FastICA algorithm converged in 5 iterations.  
+95% FastICA algorithm converged in 5 iterations.  
+95% FastICA algorithm converged in 31 iterations.  
+96% FastICA algorithm converged in 8 iterations.  
+96% FastICA algorithm converged in 9 iterations.  
+97% FastICA algorithm converged in 4 iterations.  
+97% FastICA algorithm converged in 8 iterations.  
 98% FastICA algorithm converged in 4 iterations.  
+98% FastICA algorithm didn't converge in 149 iterations.  
+98% FastICA algorithm converged in 14 iterations.  
 99% FastICA algorithm converged in 6 iterations.  
-99% FastICA algorithm didn't converge in 149 iterations.  
-99% FastICA algorithm converged in 3 iterations.  
+99% FastICA algorithm converged in 6 iterations.  
 100% 
 Starting to compute the pairwise distance matrices....Done!
 Starting to cluster the sources using HDBSCAN....Done!
 Starting to calculate the 2D manifold representation....Done!
 Calculating the centrotypes and associated time courses...Done!
 Starting to create the 03_ICA_sources_correlations figure:
-Updating masks and ICA sources.  Of the 7873 in the sources and 8278 in the current LiCSBAS time series, 7645 are in both and can be used in this iteration of LiCSAlert.  
-    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 
+Updating the masks for the two sources.  Of the 7873 in data1 and 8278 in data2, 7645 are in both and can be used.  
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
 
-    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
 
 Done.  
 Creating a Google Earth .kmz of the geocoded independent components... Done!
@@ -594,336 +592,11 @@ Creating a Google Earth .kmz of the geocoded independent components... Done!
 
 Source 0: deformation
 Source 1: turbulent_APS
-Source 2: turbulent_APS
-Source 3: topo_cor_APS
+Source 2: topo_cor_APS
+Source 3: turbulent_APS
+Source 4: turbulent_APS
 
 
 Saving the key results as a .pkl file... Done!
-Updating masks and ICA sources.  Of the 7873 in the sources and 7873 in the current LiCSBAS time series, 7873 are in both and can be used in this iteration of LiCSAlert.  
-Running LiCSAlert for 20170112 (acquisition # 59 of 326) : monitoring date
-Running LiCSAlert for 20170118 (acquisition # 60 of 326) : monitoring date
-Running LiCSAlert for 20170124 (acquisition # 61 of 326) : monitoring date
-Running LiCSAlert for 20170130 (acquisition # 62 of 326) : monitoring date
-Running LiCSAlert for 20170205 (acquisition # 63 of 326) : monitoring date
-Running LiCSAlert for 20170211 (acquisition # 64 of 326) : monitoring date
-Running LiCSAlert for 20170223 (acquisition # 65 of 326) : monitoring date
-Running LiCSAlert for 20170301 (acquisition # 66 of 326) : monitoring date
-Running LiCSAlert for 20170307 (acquisition # 67 of 326) : monitoring date
-Running LiCSAlert for 20170313 (acquisition # 68 of 326) : monitoring date
-Running LiCSAlert for 20170319 (acquisition # 69 of 326) : monitoring date
-Running LiCSAlert for 20170325 (acquisition # 70 of 326) : monitoring date
-Running LiCSAlert for 20170331 (acquisition # 71 of 326) : monitoring date
-Running LiCSAlert for 20170406 (acquisition # 72 of 326) : monitoring date
-Running LiCSAlert for 20170412 (acquisition # 73 of 326) : monitoring date
-Running LiCSAlert for 20170418 (acquisition # 74 of 326) : monitoring date
-Running LiCSAlert for 20170424 (acquisition # 75 of 326) : monitoring date
-Running LiCSAlert for 20170430 (acquisition # 76 of 326) : monitoring date
-Running LiCSAlert for 20170506 (acquisition # 77 of 326) : monitoring date
-Running LiCSAlert for 20170512 (acquisition # 78 of 326) : monitoring date
-Running LiCSAlert for 20170518 (acquisition # 79 of 326) : monitoring date
-Running LiCSAlert for 20170524 (acquisition # 80 of 326) : monitoring date
-Running LiCSAlert for 20170530 (acquisition # 81 of 326) : monitoring date
-Running LiCSAlert for 20170605 (acquisition # 82 of 326) : monitoring date
-Running LiCSAlert for 20170611 (acquisition # 83 of 326) : monitoring date
-Running LiCSAlert for 20170617 (acquisition # 84 of 326) : monitoring date
-Running LiCSAlert for 20170623 (acquisition # 85 of 326) : monitoring date
-Running LiCSAlert for 20170629 (acquisition # 86 of 326) : monitoring date
-Running LiCSAlert for 20170705 (acquisition # 87 of 326) : monitoring date
-Running LiCSAlert for 20170711 (acquisition # 88 of 326) : monitoring date
-Running LiCSAlert for 20170717 (acquisition # 89 of 326) : monitoring date
-Running LiCSAlert for 20170723 (acquisition # 90 of 326) : monitoring date
-Running LiCSAlert for 20170729 (acquisition # 91 of 326) : monitoring date
-Running LiCSAlert for 20170804 (acquisition # 92 of 326) : monitoring date
-Running LiCSAlert for 20170816 (acquisition # 93 of 326) : monitoring date
-Running LiCSAlert for 20170822 (acquisition # 94 of 326) : monitoring date
-Running LiCSAlert for 20170828 (acquisition # 95 of 326) : monitoring date
-Running LiCSAlert for 20170903 (acquisition # 96 of 326) : monitoring date
-Running LiCSAlert for 20170909 (acquisition # 97 of 326) : monitoring date
-Running LiCSAlert for 20170915 (acquisition # 98 of 326) : monitoring date
-Running LiCSAlert for 20170921 (acquisition # 99 of 326) : monitoring date
-Running LiCSAlert for 20170927 (acquisition # 100 of 326) : monitoring date
-Running LiCSAlert for 20171009 (acquisition # 101 of 326) : monitoring date
-Running LiCSAlert for 20171015 (acquisition # 102 of 326) : monitoring date
-Running LiCSAlert for 20171021 (acquisition # 103 of 326) : monitoring date
-Running LiCSAlert for 20171027 (acquisition # 104 of 326) : monitoring date
-Running LiCSAlert for 20171102 (acquisition # 105 of 326) : monitoring date
-Running LiCSAlert for 20171108 (acquisition # 106 of 326) : monitoring date
-Running LiCSAlert for 20171114 (acquisition # 107 of 326) : monitoring date
-Running LiCSAlert for 20171120 (acquisition # 108 of 326) : monitoring date
-Running LiCSAlert for 20171202 (acquisition # 109 of 326) : monitoring date
-Running LiCSAlert for 20171208 (acquisition # 110 of 326) : monitoring date
-Running LiCSAlert for 20171214 (acquisition # 111 of 326) : monitoring date
-Running LiCSAlert for 20171226 (acquisition # 112 of 326) : monitoring date
-Running LiCSAlert for 20180101 (acquisition # 113 of 326) : monitoring date
-Running LiCSAlert for 20180107 (acquisition # 114 of 326) : monitoring date
-Running LiCSAlert for 20180113 (acquisition # 115 of 326) : monitoring date
-Running LiCSAlert for 20180119 (acquisition # 116 of 326) : monitoring date
-Running LiCSAlert for 20180125 (acquisition # 117 of 326) : monitoring date
-Running LiCSAlert for 20180131 (acquisition # 118 of 326) : monitoring date
-Running LiCSAlert for 20180206 (acquisition # 119 of 326) : monitoring date
-Running LiCSAlert for 20180218 (acquisition # 120 of 326) : monitoring date
-Running LiCSAlert for 20180224 (acquisition # 121 of 326) : monitoring date
-Running LiCSAlert for 20180302 (acquisition # 122 of 326) : monitoring date
-Running LiCSAlert for 20180308 (acquisition # 123 of 326) : monitoring date
-Running LiCSAlert for 20180314 (acquisition # 124 of 326) : monitoring date
-Running LiCSAlert for 20180320 (acquisition # 125 of 326) : monitoring date
-Running LiCSAlert for 20180326 (acquisition # 126 of 326) : monitoring date
-Running LiCSAlert for 20180401 (acquisition # 127 of 326) : monitoring date
-Running LiCSAlert for 20180407 (acquisition # 128 of 326) : monitoring date
-Running LiCSAlert for 20180413 (acquisition # 129 of 326) : monitoring date
-Running LiCSAlert for 20180419 (acquisition # 130 of 326) : monitoring date
-Running LiCSAlert for 20180425 (acquisition # 131 of 326) : monitoring date
-Running LiCSAlert for 20180501 (acquisition # 132 of 326) : monitoring date
-Running LiCSAlert for 20180507 (acquisition # 133 of 326) : monitoring date
-Running LiCSAlert for 20180513 (acquisition # 134 of 326) : monitoring date
-Running LiCSAlert for 20180519 (acquisition # 135 of 326) : monitoring date
-Running LiCSAlert for 20180525 (acquisition # 136 of 326) : monitoring date
-Running LiCSAlert for 20180531 (acquisition # 137 of 326) : monitoring date
-Running LiCSAlert for 20180606 (acquisition # 138 of 326) : monitoring date
-Running LiCSAlert for 20180612 (acquisition # 139 of 326) : monitoring date
-Running LiCSAlert for 20180618 (acquisition # 140 of 326) : monitoring date
-Running LiCSAlert for 20180630 (acquisition # 141 of 326) : monitoring date
-Running LiCSAlert for 20180712 (acquisition # 142 of 326) : monitoring date
-Running LiCSAlert for 20180718 (acquisition # 143 of 326) : monitoring date
-Running LiCSAlert for 20180724 (acquisition # 144 of 326) : monitoring date
-Running LiCSAlert for 20180730 (acquisition # 145 of 326) : monitoring date
-Running LiCSAlert for 20180805 (acquisition # 146 of 326) : monitoring date
-Running LiCSAlert for 20180811 (acquisition # 147 of 326) : monitoring date
-Running LiCSAlert for 20180817 (acquisition # 148 of 326) : monitoring date
-Running LiCSAlert for 20180823 (acquisition # 149 of 326) : monitoring date
-Running LiCSAlert for 20180829 (acquisition # 150 of 326) : monitoring date
-Running LiCSAlert for 20180904 (acquisition # 151 of 326) : monitoring date
-Running LiCSAlert for 20180910 (acquisition # 152 of 326) : monitoring date
-Running LiCSAlert for 20180916 (acquisition # 153 of 326) : monitoring date
-Running LiCSAlert for 20180922 (acquisition # 154 of 326) : monitoring date
-Running LiCSAlert for 20180928 (acquisition # 155 of 326) : monitoring date
-Running LiCSAlert for 20181004 (acquisition # 156 of 326) : monitoring date
-Running LiCSAlert for 20181010 (acquisition # 157 of 326) : monitoring date
-Running LiCSAlert for 20181016 (acquisition # 158 of 326) : monitoring date
-Running LiCSAlert for 20181022 (acquisition # 159 of 326) : monitoring date
-Running LiCSAlert for 20181028 (acquisition # 160 of 326) : monitoring date
-Running LiCSAlert for 20181109 (acquisition # 161 of 326) : monitoring date
-Running LiCSAlert for 20181115 (acquisition # 162 of 326) : monitoring date
-Running LiCSAlert for 20181121 (acquisition # 163 of 326) : monitoring date
-Running LiCSAlert for 20181127 (acquisition # 164 of 326) : monitoring date
-Running LiCSAlert for 20181203 (acquisition # 165 of 326) : monitoring date
-Running LiCSAlert for 20181209 (acquisition # 166 of 326) : monitoring date
-Running LiCSAlert for 20181215 (acquisition # 167 of 326) : monitoring date
-Running LiCSAlert for 20181221 (acquisition # 168 of 326) : monitoring date
-Running LiCSAlert for 20181227 (acquisition # 169 of 326) : monitoring date
-Running LiCSAlert for 20190102 (acquisition # 170 of 326) : monitoring date
-Running LiCSAlert for 20190108 (acquisition # 171 of 326) : monitoring date
-Running LiCSAlert for 20190114 (acquisition # 172 of 326) : monitoring date
-Running LiCSAlert for 20190120 (acquisition # 173 of 326) : monitoring date
-Running LiCSAlert for 20190126 (acquisition # 174 of 326) : monitoring date
-Running LiCSAlert for 20190201 (acquisition # 175 of 326) : monitoring date
-Running LiCSAlert for 20190207 (acquisition # 176 of 326) : monitoring date
-Running LiCSAlert for 20190213 (acquisition # 177 of 326) : monitoring date
-Running LiCSAlert for 20190225 (acquisition # 178 of 326) : monitoring date
-Running LiCSAlert for 20190303 (acquisition # 179 of 326) : monitoring date
-Running LiCSAlert for 20190309 (acquisition # 180 of 326) : monitoring date
-Running LiCSAlert for 20190321 (acquisition # 181 of 326) : monitoring date
-Running LiCSAlert for 20190402 (acquisition # 182 of 326) : monitoring date
-Running LiCSAlert for 20190408 (acquisition # 183 of 326) : monitoring date
-Running LiCSAlert for 20190414 (acquisition # 184 of 326) : monitoring date
-Running LiCSAlert for 20190420 (acquisition # 185 of 326) : monitoring date
-Running LiCSAlert for 20190426 (acquisition # 186 of 326) : monitoring date
-Running LiCSAlert for 20190502 (acquisition # 187 of 326) : monitoring date
-Running LiCSAlert for 20190508 (acquisition # 188 of 326) : monitoring date
-Running LiCSAlert for 20190520 (acquisition # 189 of 326) : monitoring date
-Running LiCSAlert for 20190526 (acquisition # 190 of 326) : monitoring date
-Running LiCSAlert for 20190601 (acquisition # 191 of 326) : monitoring date
-Running LiCSAlert for 20190607 (acquisition # 192 of 326) : monitoring date
-Running LiCSAlert for 20190613 (acquisition # 193 of 326) : monitoring date
-Running LiCSAlert for 20190625 (acquisition # 194 of 326) : monitoring date
-Running LiCSAlert for 20190701 (acquisition # 195 of 326) : monitoring date
-Running LiCSAlert for 20190707 (acquisition # 196 of 326) : monitoring date
-Running LiCSAlert for 20190713 (acquisition # 197 of 326) : monitoring date
-Running LiCSAlert for 20190719 (acquisition # 198 of 326) : monitoring date
-Running LiCSAlert for 20190725 (acquisition # 199 of 326) : monitoring date
-Running LiCSAlert for 20190731 (acquisition # 200 of 326) : monitoring date
-Running LiCSAlert for 20190806 (acquisition # 201 of 326) : monitoring date
-Running LiCSAlert for 20190812 (acquisition # 202 of 326) : monitoring date
-Running LiCSAlert for 20190818 (acquisition # 203 of 326) : monitoring date
-Running LiCSAlert for 20190824 (acquisition # 204 of 326) : monitoring date
-Running LiCSAlert for 20190830 (acquisition # 205 of 326) : monitoring date
-Running LiCSAlert for 20190905 (acquisition # 206 of 326) : monitoring date
-Running LiCSAlert for 20190911 (acquisition # 207 of 326) : monitoring date
-Running LiCSAlert for 20190917 (acquisition # 208 of 326) : monitoring date
-Running LiCSAlert for 20190923 (acquisition # 209 of 326) : monitoring date
-Running LiCSAlert for 20191005 (acquisition # 210 of 326) : monitoring date
-Running LiCSAlert for 20191011 (acquisition # 211 of 326) : monitoring date
-Running LiCSAlert for 20191017 (acquisition # 212 of 326) : monitoring date
-Running LiCSAlert for 20191023 (acquisition # 213 of 326) : monitoring date
-Running LiCSAlert for 20191029 (acquisition # 214 of 326) : monitoring date
-Running LiCSAlert for 20191104 (acquisition # 215 of 326) : monitoring date
-Running LiCSAlert for 20191116 (acquisition # 216 of 326) : monitoring date
-Running LiCSAlert for 20191122 (acquisition # 217 of 326) : monitoring date
-Running LiCSAlert for 20191128 (acquisition # 218 of 326) : monitoring date
-Running LiCSAlert for 20191204 (acquisition # 219 of 326) : monitoring date
-Running LiCSAlert for 20191210 (acquisition # 220 of 326) : monitoring date
-Running LiCSAlert for 20191216 (acquisition # 221 of 326) : monitoring date
-Running LiCSAlert for 20191222 (acquisition # 222 of 326) : monitoring date
-Running LiCSAlert for 20191228 (acquisition # 223 of 326) : monitoring date
-Running LiCSAlert for 20200103 (acquisition # 224 of 326) : monitoring date
-Running LiCSAlert for 20200109 (acquisition # 225 of 326) : monitoring date
-Running LiCSAlert for 20200115 (acquisition # 226 of 326) : monitoring date
-Running LiCSAlert for 20200121 (acquisition # 227 of 326) : monitoring date
-Running LiCSAlert for 20200127 (acquisition # 228 of 326) : monitoring date
-Running LiCSAlert for 20200202 (acquisition # 229 of 326) : monitoring date
-Running LiCSAlert for 20200208 (acquisition # 230 of 326) : monitoring date
-Running LiCSAlert for 20200214 (acquisition # 231 of 326) : monitoring date
-Running LiCSAlert for 20200220 (acquisition # 232 of 326) : monitoring date
-Running LiCSAlert for 20200226 (acquisition # 233 of 326) : monitoring date
-Running LiCSAlert for 20200303 (acquisition # 234 of 326) : monitoring date
-Running LiCSAlert for 20200309 (acquisition # 235 of 326) : monitoring date
-Running LiCSAlert for 20200315 (acquisition # 236 of 326) : monitoring date
-Running LiCSAlert for 20200321 (acquisition # 237 of 326) : monitoring date
-Running LiCSAlert for 20200402 (acquisition # 238 of 326) : monitoring date
-Running LiCSAlert for 20200408 (acquisition # 239 of 326) : monitoring date
-Running LiCSAlert for 20200414 (acquisition # 240 of 326) : monitoring date
-Running LiCSAlert for 20200420 (acquisition # 241 of 326) : monitoring date
-Running LiCSAlert for 20200426 (acquisition # 242 of 326) : monitoring date
-Running LiCSAlert for 20200502 (acquisition # 243 of 326) : monitoring date
-Running LiCSAlert for 20200508 (acquisition # 244 of 326) : monitoring date
-Running LiCSAlert for 20200514 (acquisition # 245 of 326) : monitoring date
-Running LiCSAlert for 20200520 (acquisition # 246 of 326) : monitoring date
-Running LiCSAlert for 20200526 (acquisition # 247 of 326) : monitoring date
-Running LiCSAlert for 20200601 (acquisition # 248 of 326) : monitoring date
-Running LiCSAlert for 20200607 (acquisition # 249 of 326) : monitoring date
-Running LiCSAlert for 20200613 (acquisition # 250 of 326) : monitoring date
-Running LiCSAlert for 20200619 (acquisition # 251 of 326) : monitoring date
-Running LiCSAlert for 20200625 (acquisition # 252 of 326) : monitoring date
-Running LiCSAlert for 20200701 (acquisition # 253 of 326) : monitoring date
-Running LiCSAlert for 20200707 (acquisition # 254 of 326) : monitoring date
-Running LiCSAlert for 20200713 (acquisition # 255 of 326) : monitoring date
-Running LiCSAlert for 20200719 (acquisition # 256 of 326) : monitoring date
-Running LiCSAlert for 20200725 (acquisition # 257 of 326) : monitoring date
-Running LiCSAlert for 20200731 (acquisition # 258 of 326) : monitoring date
-Running LiCSAlert for 20200806 (acquisition # 259 of 326) : monitoring date
-Running LiCSAlert for 20200812 (acquisition # 260 of 326) : monitoring date
-Running LiCSAlert for 20200818 (acquisition # 261 of 326) : monitoring date
-Running LiCSAlert for 20200824 (acquisition # 262 of 326) : monitoring date
-Running LiCSAlert for 20200830 (acquisition # 263 of 326) : monitoring date
-Running LiCSAlert for 20200905 (acquisition # 264 of 326) : monitoring date
-Running LiCSAlert for 20200911 (acquisition # 265 of 326) : monitoring date
-Running LiCSAlert for 20200917 (acquisition # 266 of 326) : monitoring date
-Running LiCSAlert for 20200923 (acquisition # 267 of 326) : monitoring date
-Running LiCSAlert for 20200929 (acquisition # 268 of 326) : monitoring date
-Running LiCSAlert for 20201005 (acquisition # 269 of 326) : monitoring date
-Running LiCSAlert for 20201011 (acquisition # 270 of 326) : monitoring date
-Running LiCSAlert for 20201017 (acquisition # 271 of 326) : monitoring date
-Running LiCSAlert for 20201023 (acquisition # 272 of 326) : monitoring date
-Running LiCSAlert for 20201029 (acquisition # 273 of 326) : monitoring date
-Running LiCSAlert for 20201104 (acquisition # 274 of 326) : monitoring date
-Running LiCSAlert for 20201110 (acquisition # 275 of 326) : monitoring date
-Running LiCSAlert for 20201116 (acquisition # 276 of 326) : monitoring date
-Running LiCSAlert for 20201122 (acquisition # 277 of 326) : monitoring date
-Running LiCSAlert for 20201128 (acquisition # 278 of 326) : monitoring date
-Running LiCSAlert for 20201204 (acquisition # 279 of 326) : monitoring date
-Running LiCSAlert for 20201210 (acquisition # 280 of 326) : monitoring date
-Running LiCSAlert for 20201216 (acquisition # 281 of 326) : monitoring date
-Running LiCSAlert for 20201222 (acquisition # 282 of 326) : monitoring date
-Running LiCSAlert for 20201228 (acquisition # 283 of 326) : monitoring date
-Running LiCSAlert for 20210103 (acquisition # 284 of 326) : monitoring date
-Running LiCSAlert for 20210109 (acquisition # 285 of 326) : monitoring date
-Running LiCSAlert for 20210115 (acquisition # 286 of 326) : monitoring date
-Running LiCSAlert for 20210121 (acquisition # 287 of 326) : monitoring date
-Running LiCSAlert for 20210127 (acquisition # 288 of 326) : monitoring date
-Running LiCSAlert for 20210202 (acquisition # 289 of 326) : monitoring date
-Running LiCSAlert for 20210208 (acquisition # 290 of 326) : monitoring date
-Running LiCSAlert for 20210214 (acquisition # 291 of 326) : monitoring date
-Running LiCSAlert for 20210220 (acquisition # 292 of 326) : monitoring date
-Running LiCSAlert for 20210226 (acquisition # 293 of 326) : monitoring date
-Running LiCSAlert for 20210304 (acquisition # 294 of 326) : monitoring date
-Running LiCSAlert for 20210310 (acquisition # 295 of 326) : monitoring date
-Running LiCSAlert for 20210316 (acquisition # 296 of 326) : monitoring date
-Running LiCSAlert for 20210322 (acquisition # 297 of 326) : monitoring date
-Running LiCSAlert for 20210328 (acquisition # 298 of 326) : monitoring date
-Running LiCSAlert for 20210403 (acquisition # 299 of 326) : monitoring date
-Running LiCSAlert for 20210409 (acquisition # 300 of 326) : monitoring date
-Running LiCSAlert for 20210415 (acquisition # 301 of 326) : monitoring date
-Running LiCSAlert for 20210421 (acquisition # 302 of 326) : monitoring date
-Running LiCSAlert for 20210427 (acquisition # 303 of 326) : monitoring date
-Running LiCSAlert for 20210503 (acquisition # 304 of 326) : monitoring date
-Running LiCSAlert for 20210509 (acquisition # 305 of 326) : monitoring date
-Running LiCSAlert for 20210515 (acquisition # 306 of 326) : monitoring date
-Running LiCSAlert for 20210521 (acquisition # 307 of 326) : monitoring date
-Running LiCSAlert for 20210527 (acquisition # 308 of 326) : monitoring date
-Running LiCSAlert for 20210602 (acquisition # 309 of 326) : monitoring date
-Running LiCSAlert for 20210608 (acquisition # 310 of 326) : monitoring date
-Running LiCSAlert for 20210614 (acquisition # 311 of 326) : monitoring date
-Running LiCSAlert for 20210620 (acquisition # 312 of 326) : monitoring date
-Running LiCSAlert for 20210626 (acquisition # 313 of 326) : monitoring date
-Running LiCSAlert for 20210702 (acquisition # 314 of 326) : monitoring date
-Running LiCSAlert for 20210708 (acquisition # 315 of 326) : monitoring date
-Running LiCSAlert for 20210714 (acquisition # 316 of 326) : monitoring date
-Running LiCSAlert for 20210720 (acquisition # 317 of 326) : monitoring date
-Running LiCSAlert for 20210726 (acquisition # 318 of 326) : monitoring date
-Running LiCSAlert for 20210801 (acquisition # 319 of 326) : monitoring date
-Running LiCSAlert for 20210807 (acquisition # 320 of 326) : monitoring date
-Running LiCSAlert for 20210813 (acquisition # 321 of 326) : monitoring date
-Running LiCSAlert for 20210819 (acquisition # 322 of 326) : monitoring date
-Running LiCSAlert for 20210825 (acquisition # 323 of 326) : monitoring date
-Running LiCSAlert for 20210831 (acquisition # 324 of 326) : monitoring date
-Running LiCSAlert for 20210906 (acquisition # 325 of 326) : monitoring date
+Updating the masks for the two sources.  Of the 7873 in data1 and 7873 in data2, 7873 are in both and can be used.  
 Running LiCSAlert for 20210912 (acquisition # 326 of 326) : monitoring date
-Running LiCSAlert for 20141031 (acquisition # 0 of 326) : baseline date
-Running LiCSAlert for 20141218 (acquisition # 1 of 326) : baseline date
-Running LiCSAlert for 20150111 (acquisition # 2 of 326) : baseline date
-Running LiCSAlert for 20150123 (acquisition # 3 of 326) : baseline date
-Running LiCSAlert for 20150216 (acquisition # 4 of 326) : baseline date
-Running LiCSAlert for 20150228 (acquisition # 5 of 326) : baseline date
-Running LiCSAlert for 20150312 (acquisition # 6 of 326) : baseline date
-Running LiCSAlert for 20150324 (acquisition # 7 of 326) : baseline date
-Running LiCSAlert for 20150405 (acquisition # 8 of 326) : baseline date
-Running LiCSAlert for 20150429 (acquisition # 9 of 326) : baseline date
-Running LiCSAlert for 20150511 (acquisition # 10 of 326) : baseline date
-Running LiCSAlert for 20150523 (acquisition # 11 of 326) : baseline date
-Running LiCSAlert for 20150604 (acquisition # 12 of 326) : baseline date
-Running LiCSAlert for 20150710 (acquisition # 13 of 326) : baseline date
-Running LiCSAlert for 20150722 (acquisition # 14 of 326) : baseline date
-Running LiCSAlert for 20150815 (acquisition # 15 of 326) : baseline date
-Running LiCSAlert for 20150920 (acquisition # 16 of 326) : baseline date
-Running LiCSAlert for 20151002 (acquisition # 17 of 326) : baseline date
-Running LiCSAlert for 20151014 (acquisition # 18 of 326) : baseline date
-Running LiCSAlert for 20151107 (acquisition # 19 of 326) : baseline date
-Running LiCSAlert for 20151119 (acquisition # 20 of 326) : baseline date
-Running LiCSAlert for 20151201 (acquisition # 21 of 326) : baseline date
-Running LiCSAlert for 20151213 (acquisition # 22 of 326) : baseline date
-Running LiCSAlert for 20151225 (acquisition # 23 of 326) : baseline date
-Running LiCSAlert for 20160106 (acquisition # 24 of 326) : baseline date
-Running LiCSAlert for 20160118 (acquisition # 25 of 326) : baseline date
-Running LiCSAlert for 20160211 (acquisition # 26 of 326) : baseline date
-Running LiCSAlert for 20160223 (acquisition # 27 of 326) : baseline date
-Running LiCSAlert for 20160306 (acquisition # 28 of 326) : baseline date
-Running LiCSAlert for 20160318 (acquisition # 29 of 326) : baseline date
-Running LiCSAlert for 20160330 (acquisition # 30 of 326) : baseline date
-Running LiCSAlert for 20160411 (acquisition # 31 of 326) : baseline date
-Running LiCSAlert for 20160505 (acquisition # 32 of 326) : baseline date
-Running LiCSAlert for 20160517 (acquisition # 33 of 326) : baseline date
-Running LiCSAlert for 20160529 (acquisition # 34 of 326) : baseline date
-Running LiCSAlert for 20160610 (acquisition # 35 of 326) : baseline date
-Running LiCSAlert for 20160704 (acquisition # 36 of 326) : baseline date
-Running LiCSAlert for 20160716 (acquisition # 37 of 326) : baseline date
-Running LiCSAlert for 20160728 (acquisition # 38 of 326) : baseline date
-Running LiCSAlert for 20160809 (acquisition # 39 of 326) : baseline date
-Running LiCSAlert for 20160821 (acquisition # 40 of 326) : baseline date
-Running LiCSAlert for 20160902 (acquisition # 41 of 326) : baseline date
-Running LiCSAlert for 20160914 (acquisition # 42 of 326) : baseline date
-Running LiCSAlert for 20160926 (acquisition # 43 of 326) : baseline date
-Running LiCSAlert for 20161002 (acquisition # 44 of 326) : baseline date
-Running LiCSAlert for 20161008 (acquisition # 45 of 326) : baseline date
-Running LiCSAlert for 20161014 (acquisition # 46 of 326) : baseline date
-Running LiCSAlert for 20161020 (acquisition # 47 of 326) : baseline date
-Running LiCSAlert for 20161026 (acquisition # 48 of 326) : baseline date
-Running LiCSAlert for 20161101 (acquisition # 49 of 326) : baseline date
-Running LiCSAlert for 20161107 (acquisition # 50 of 326) : baseline date
-Running LiCSAlert for 20161113 (acquisition # 51 of 326) : baseline date
-Running LiCSAlert for 20161119 (acquisition # 52 of 326) : baseline date
-Running LiCSAlert for 20161201 (acquisition # 53 of 326) : baseline date
-Running LiCSAlert for 20161207 (acquisition # 54 of 326) : baseline date
-Running LiCSAlert for 20161213 (acquisition # 55 of 326) : baseline date
-Running LiCSAlert for 20161219 (acquisition # 56 of 326) : baseline date
-Running LiCSAlert for 20161225 (acquisition # 57 of 326) : baseline date
-Running LiCSAlert for 20161231 (acquisition # 58 of 326) : baseline date

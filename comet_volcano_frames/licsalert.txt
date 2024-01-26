@@ -1,0 +1,15 @@
+africa
+atlantic_island
+central_america
+eastern_asia
+europe
+iceland
+indian_island
+middle_east
+north_america
+northern_asia
+oceania
+ocean_island
+pacific_island
+south_america
+southeast_asia

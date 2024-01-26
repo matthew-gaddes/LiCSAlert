@@ -7,14 +7,8 @@ Created on Sun Mar  8 10:55:48 2020
 
 
 To do:
-    - Vesuvius bug?
     - update colorbar ticks in results explorer
     - check results explorere works with even number of sources.  
-    - rerun with new t recalclate
-    - Need to add LiCSBAS options dict.  
-        - LiCSBAS filtered on not-filtered.  
-        - LiCSBAS mask?  
-        - crop in time?  
     - colour of labels (blakc, orange, purple).  
 """
 
@@ -33,43 +27,6 @@ from licsalert.licsalert import reconstruct_ts_from_dir
 
 
 
-
-# thinkpad
-LiCSAlert_pkg_dir = Path("/home/matthew/university_work/crucial_1000gb/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub")          # path to LiCSAlert.  Could also be this directory.  
-debug_scripts = "/home/matthew/university_work/python_stuff/python_scripts"
-
-# bright
-#LiCSAlert_pkg_dir = Path("/home/matthew/university_work/crucial_1000gb/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub")          # path to LiCSAlert.  Could also be this directory.  
-#debug_scripts = "/home/matthew/university_work/crucial_1000gb/python_stuff/python_scripts"
-
-
-
-import sys
-if debug_scripts not in sys.path:                                                                             # check if already on path
-    sys.path.append(debug_scripts)
-from small_plot_functions import matrix_show, quick_linegraph
-
-#%%
-
-# from licsalert.aux import col_to_ma
-
-
-
-# path = "/home/matthew/university_work/crucial_1000gb/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/campi_flegrei_example/20210912/epoch_images_data.pkl"
-# with open(path, 'rb') as f:
-#     test = pickle.load(f)
-# matrix_show([col_to_ma(test['cumulative'], test['mask'])])        
-# matrix_show([col_to_ma(test['incremental'], test['mask'])])        
-# matrix_show([col_to_ma(test['reconstruction'], test['mask'])])        
-# matrix_show([col_to_ma(test['residual'], test['mask'])])        
-    
-
-# path = "/home/matthew/university_work/crucial_1000gb/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/campi_flegrei_example/aux_figures/aux_images_data.pkl"
-
-# with open(path, 'rb') as f:
-#     test = pickle.load(f)
-# matrix_show([col_to_ma(test['icasar_sources'][0,:], test['mask'])])        
-# matrix_show([col_to_ma(test['dem'], test['mask'])])        
 
 
 
@@ -108,23 +65,52 @@ licsbas_dir = Path("./022D_04826_121209_campi_flegrei")                         
 
 LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
                           licsbas_dir = licsbas_dir,
-                          licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
+                          licsalert_settings = licsalert_settings, 
+                          icasar_settings = icasar_settings,
+                          licsbas_settings = licsbas_settings)
 
 licsalert_out_dir = outdir / volcano
 
 #licsalert_results_explorer(outdir / volcano, fig_width = 18)                                                 # use this function to explore the results
 
 
-
-# ics_one_hot = [1, 1, 1, 1]                                                                   # One hot encoding of which sources to use in the reconstruction.  1 means used, 0 means not.  list must be the same length as the number of ICs.  
-# X_inc_r3, X_cum_r3 = reconstruct_ts_from_dir(ics_one_hot, outdir / volcano)                               # return the cumualtive interferograms reconstrutced using the ICs selected above.  All mean centering has been removed.  
+#ics_one_hot = [1, 1, 1, 1]                                                                   # One hot encoding of which sources to use in the reconstruction.  1 means used, 0 means not.  list must be the same length as the number of ICs.  
+#X_inc_r3, X_cum_r3 = reconstruct_ts_from_dir(ics_one_hot, outdir / volcano)                               # return the cumualtive interferograms reconstrutced using the ICs selected above.  All mean centering has been removed.  
 
 
 
 
 #%% Example 2: make all intermediate figures
 
-licsalert_settings["figure_intermediate"] = True                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
+
+print(f"FIGURES SET TO FALSE WHEN SHOULD BE TRUE")
+
+licsalert_settings = {"baseline_end"        : "20170101",                               # end baseline stage at YYYYMMDD, need to be before the last acquisition of LiCSAlert will never monitoring anyhting.  
+                      ### change here
+                      "figure_intermediate" : False,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
+                      ### end change
+                      "figure_type"         : 'png',                             # either 'window' or 'png' (to save as pngs), or 'both'
+                      "downsample_run"      : 0.5,                                     # data can be downsampled to speed things up
+                      "downsample_plot"     : 0.5,                               # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
+                      "residual_type"       : 'cumulative',                      # controls the type of residual used in the lower plot.  Either cumulative or window   
+                      "t_recalculate"       : 40,                               # Number of acquisitions that the lines of best fit are calcualted over.  Larger value makes the algorithm more sensitive
+                      'inset_ifgs_scaling'  : 15}                               # scales the size of the incremental and cumulative ifgs in the top row of the figure.  Smaller values gives a bigger figures.  
+
+
+icasar_settings = {"n_comp"                  : 5,                                                  # number of components to recover with ICA (ie the number of PCA sources to keep)
+                   "bootstrapping_param"    : (200, 0),                              # (number of runs with bootstrapping, number of runs without bootstrapping)                    "hdbscan_param" : (35, 10),                        # (min_cluster_size, min_samples)
+                    "tsne_param"             : (30, 12),                                       # (perplexity, early_exaggeration)
+                    "ica_param"              : (1e-2, 150),                                     # (tolerance, max iterations)
+                    "hdbscan_param"          : (100,10),                                    # (min_cluster_size, min_samples) Discussed in more detail in Mcinnes et al. (2017). min_cluster_size sets the smallest collection of points that can be considered a cluster. min_samples sets how conservative the clustering is. With larger values, more points will be considered noise. 
+                    "ifgs_format"            : 'cum',                                  # can be 'all', 'inc' (incremental - short temporal baselines), or 'cum' (cumulative - relative to first acquisition)
+                    "sica_tica"              : 'sica' }
+
+licsbas_settings = {"filtered"               : False,
+                    "date_start"            : None,
+                    "date_end"              : None,
+                    'mask_type'             : 'licsbas',
+                    'crop_pixels'           : None}
+
 
 outdir = Path("./")
 volcano = '002_campi_flegrei_example_all_figures'                                                 # outdir final                                                                                                                      
@@ -133,7 +119,9 @@ licsbas_dir = Path("./022D_04826_121209_campi_flegrei")                         
 
 LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
                           licsbas_dir = licsbas_dir,
-                          licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
+                          licsalert_settings = licsalert_settings, 
+                          icasar_settings = icasar_settings,
+                          licsbas_settings = licsbas_settings)
 
 
     
@@ -159,6 +147,7 @@ icasar_settings = {"n_comp"                 : 5,                                
                     "ica_param"             : (1e-2, 150),                                     # (tolerance, max iterations)
                     "hdbscan_param"         : (100,10),                                    # (min_cluster_size, min_samples) Discussed in more detail in Mcinnes et al. (2017). min_cluster_size sets the smallest collection of points that can be considered a cluster. min_samples sets how conservative the clustering is. With larger values, more points will be considered noise. 
                     #"ifgs_format"        : 'cum',                                  # ifg format is redundant when using tICA as cumulative signals must be considered when working temporally.  
+                    ### Note set to tica here for temporal:
                     "sica_tica"             : 'tica' }
 
 licsbas_settings = {"filtered"               : False,
@@ -184,12 +173,41 @@ outdir = Path("./")
 volcano = '004_vesuvius_example_sica'                                                 
 licsbas_dir = Path("./022D_04826_121209_vesuvius_crop_rationalized")                                         # input data
 
-icasar_settings["sica_tica"] = 'sica' 
+
+
+licsalert_settings = {"baseline_end"        : "20170101",                               # end baseline stage at YYYYMMDD, need to be before the last acquisition of LiCSAlert will never monitoring anyhting.  
+                      "figure_intermediate" : False,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
+                      "figure_type"         : 'png',                             # either 'window' or 'png' (to save as pngs), or 'both'
+                      "downsample_run"      : 0.5,                                     # data can be downsampled to speed things up
+                      "downsample_plot"     : 0.5,                               # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
+                      "t_recalculate"       : 40,                                   # Number of acquisitions that the lines of best fit are calcualted over.  Larger value makes the algorithm more sensitive
+                      "residual_type"       : 'cumulative',                      # controls the type of residual used in the lower plot.  Either cumulative or window   
+                      'inset_ifgs_scaling'  : 15}                               # scales the size of the incremental and cumulative ifgs in the top row of the figure.  Smaller values gives a bigger figures.  
+
+icasar_settings = {"n_comp"                 : 5,                                                  # number of components to recover with ICA (ie the number of PCA sources to keep)
+                    "bootstrapping_param"   : (200, 0),                              # (number of runs with bootstrapping, number of runs without bootstrapping)                    "hdbscan_param" : (35, 10),                        # (min_cluster_size, min_samples)
+                    "tsne_param"            : (30, 12),                                       # (perplexity, early_exaggeration)
+                    "ica_param"             : (1e-2, 150),                                     # (tolerance, max iterations)
+                    "hdbscan_param"         : (100,10),                                    # (min_cluster_size, min_samples) Discussed in more detail in Mcinnes et al. (2017). min_cluster_size sets the smallest collection of points that can be considered a cluster. min_samples sets how conservative the clustering is. With larger values, more points will be considered noise. 
+                    ### begin change from example 3
+                    "ifgs_format"        : 'cum',                                  # ifg format is redundant when using tICA as cumulative signals must be considered when working temporally.  
+                    "sica_tica"             : 'sica' }
+                    ### end change from example 3
+
+licsbas_settings = {"filtered"               : False,
+                    "date_start"            : '20141218',
+                    "date_end"              : '20211217',
+                    'mask_type'             : 'licsbas',
+                    'crop_pixels'           : None}
+
+
 
 
 LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
                           licsbas_dir = licsbas_dir,
-                          licsalert_settings = licsalert_settings, icasar_settings = icasar_settings)
+                          licsalert_settings = licsalert_settings, 
+                          icasar_settings = icasar_settings,
+                          licsbas_settings = licsbas_settings)
 
 
 licsalert_results_explorer(outdir / volcano, fig_width = 18)                                                 # use this function to explore the results

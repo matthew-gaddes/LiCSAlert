@@ -12,7 +12,7 @@ import pdb
 def LiCSAlert_monitoring_mode(outdir, region, volcano,                                              
                               licsbas_dir = None, licsbas_jasmin_dir = None, data_as_arg = None,    
                               licsalert_settings = None, icasar_settings = None, 
-                              licsbas_settings = None):                   
+                              licsbas_settings = None, licsalert_pkg_dir = None):                   
     """The main function for running LiCSAlert is monitoring mode.  It was designed to work with LiCSAR interferograms, but could be used with 
     any product that creates interfegorams that LiCSBAS can use (which is used for the time series calculation.  )
     
@@ -75,26 +75,25 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
                 #licsbas_dates_file.write(f"{datetime.strftime(licsbas_json_timestamp, '%Y-%m-%d %H:%M:%S')}\n")            # and write this first dummy date to it,
                 licsbas_dates_file.write(f"{licsbas_json_creation_time}\n")            # and write this first dummy date to it,
     
-    def check_remove_licsbas_settings(licsbas_settings):
-        """ Checks if licsbas_settings is None, and sets it to None if it's not.
-        """
-        if licsbas_settings is not None:
-            print(f"A dictionary of 'licsbas_settings' was provided, but these "
-                  f"are only used if a licsbas directory is provided.  "
-                  f"Setting it to 'None' and continuing.  ")
-            licsbas_settings = None
-        return licsbas_settings
+
     
+    # if a directory for the package has been provided, assume not on path.
+    # possibly only needed for Jasmin?  
+    if licsalert_pkg_dir is not None:
+        sys.path.append(str(licsalert_pkg_dir))                            
+        
 
     import licsalert
     from licsalert.data_importing import LiCSBAS_to_LiCSAlert, LiCSBAS_json_to_LiCSAlert
-    #from licsalert.data_importing import crop_licsalert_results_in_time
+    from licsalert.data_importing import check_required_args
     from licsalert.data_exporting import save_licsalert_aux_data
-    from licsalert.licsalert import LiCSAlert_preprocessing, LiCSAlert, shorten_LiCSAlert_data, write_volcano_status, load_or_create_ICASAR_results
+    from licsalert.licsalert import LiCSAlert_preprocessing, LiCSAlert#, shorten_LiCSAlert_data
+    from licsalert.licsalert import write_volcano_status, load_or_create_ICASAR_results
     from licsalert.licsalert import licsalert_date_obj
-    from licsalert.aux import compare_two_dates, Tee, find_nearest_date
+    from licsalert.aux import Tee, find_nearest_date
     from licsalert.downsample_ifgs import downsample_ifgs
-    from licsalert.plotting import LiCSAlert_figure, LiCSAlert_epoch_figures, LiCSAlert_aux_figures, LiCSAlert_mask_figure
+    from licsalert.plotting import LiCSAlert_figure, LiCSAlert_epoch_figures
+    from licsalert.plotting import LiCSAlert_aux_figures, LiCSAlert_mask_figure
     
     # 1: Log all outputs to a file for that volcano:
     if region == None:
@@ -107,102 +106,98 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     original = sys.stdout
     sys.stdout = Tee(sys.stdout, f_run_log)
 
-    print(f"\n\n\n\n\nLiCSAlert is being run for {volcano} at {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")                              # record the current time in the LiCSAlert history file
-        
-    # 2: get settings for this volcano
-    try:
-        LiCSAlert_settings, ICASAR_settings = read_config_file(volcano_dir / "LiCSAlert_settings.txt")                                          # read various settings from the volcano's config file
-    except:
-        print(f"Failed to open the config file for this volcano.  Trying to populate the LiCSAlert_settings and ICASAR_settings dictionaries with from the "
-              "function input arguments ")
-        try:
-            LiCSAlert_settings = {}
-            for arg, arg_setting in licsalert_settings.items():                                                                 # loop through them
-                LiCSAlert_settings[arg] = arg_setting                                                                                       # and apply
-            del licsalert_settings
-                
-            ICASAR_settings = {}
-            for arg, arg_setting in icasar_settings.items():
-                ICASAR_settings[arg] = arg_setting
-            del icasar_settings
-        except:
-            raise Exception(f"Failed to load the settings from arguments passed to the function.  Try checking licsalert_settings and icasar_settings.  Exiting.  ")
-    
-    # check that all the required inputs are there for licsalert
-    for required_input in ['t_recalculate', 'baseline_end', 'figure_intermediate',
-                           'figure_type', 'downsample_run', 'downsample_plot',
-                           'inset_ifgs_scaling']:
-        if not (required_input in LiCSAlert_settings.keys()):
-            raise Exception(f"'{required_input}' was not found in "
-                            f"'licsalert_settings', and it is not optional.  "
-                            f"Exiting.  ")
-    
-    # check that all the required inputs are there for icsasar        
-    for required_input in ['n_comp']:
-        if not (required_input in ICASAR_settings.keys()):
-            raise Exception(f"'{required_input}' was not found in "
-                            f"'icasar_settings', and it is not optional.  "
-                            f"Exiting.  ")
-    # set so that the icasar is always the same as licsalert
-    ICASAR_settings['figures'] = LiCSAlert_settings['figure_type']                                                                          
+    print(f"\n\n\n\n\nLiCSAlert is being run for {volcano} at "
+          f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")                              
 
-            
-
-    # 3: Open the the input data, which can be in various formats (3 so far), and deal with mean centering (either in time or space)
+    # 3: Open the the input data, which can be in various formats (3 so far), 
+    #    And and input settings for that type of data
+    
+    # 3.1: a JASMIN dir and associated text file of settings.  
     if licsbas_jasmin_dir is not None:
         print(f"LiCSAlert is opening a JASMIN COMET Volcano Portal timeseries json file.  ")
-        displacement_r2, _, tbaseline_info, ref_xy, licsbas_json_creation_time = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json")          # open the .json LiCSBAS data for this volcano 
-        append_licsbas_date_to_file(outdir, region, volcano, licsbas_json_creation_time)                                                        # append licsbas .json file date to list of file dates used (in the text file for each volano)
+        products = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json")          
+        (displacement_r2, _, tbaseline_info, ref_xy, licsbas_json_creation_time) = products
+        # append licsbas .json file date to list of file dates used (in the text file for each volano)
+        append_licsbas_date_to_file(outdir, region, volcano, licsbas_json_creation_time)                                                        
         del licsbas_json_creation_time                                                                                                                  # delete for safety
-        check_remove_licsbas_settings(licsbas_settings)
         
-    elif licsbas_dir is not None:
-        print(f"LiCSAlert is opening a LiCSBAS directory.  ")
-        # if there are no licsbas settings, set them to the default.  
-        if licsbas_settings == None:
-            licsbas_settings = {"filtered"              : False,
-                                "date_start"            : None,
-                                "date_end"              : None,
-                                'mask_type'             : 'licsbas',
-                                'crop_pixels'           : None}
-        ts = LiCSBAS_to_LiCSAlert(licsbas_dir, figures=True, n_cols=5,                              
-                                  **licsbas_settings)
-
-        displacement_r2, tbaseline_info = ts
-        del ts
+        # read various settings from the volcano's config file
+        outputs = read_config_file(volcano_dir / "LiCSAlert_settings.txt")                                          
+        (licsalert_settings, icasar_settings) = outputs; del outputs
+        
+    # remaining two ways to pass data to function.  
     else:
-        print(f"LiCSAlert is using data that was passed to the function as an argument  ")
-        displacement_r2 = data_as_arg['displacement_r2']
-        tbaseline_info = data_as_arg["tbaseline_info"]
-        check_remove_licsbas_settings(licsbas_settings)
-        
+        # check user has provided inputs.  
+        check_required_args(licsalert_settings, ['t_recalculate', 'baseline_end', 
+                             'figure_intermediate',  'figure_type', 'downsample_run', 
+                             'downsample_plot', 'inset_ifgs_scaling'],
+                            'licsalert_settings')
+        check_required_args(icasar_settings, ['n_comp'], 'icasar_settings')
+
+        # 3.2: As a LiCSBAS direcotry
+        if licsbas_dir is not None:
+            # check licsbas_settings are provided.  
+            check_required_args(licsbas_settings, ['mask_type', 'filtered'],
+                                'licsbas_settings')
+            print(f"LiCSAlert is opening a LiCSBAS directory.  ")
+            # if there are no licsbas settings, set them to the default.  
+            if licsbas_settings == None:
+                licsbas_settings = {"filtered"              : False,
+                                    "date_start"            : None,
+                                    "date_end"              : None,
+                                    'mask_type'             : 'licsbas',
+                                    'crop_pixels'           : None}
+            ts = LiCSBAS_to_LiCSAlert(licsbas_dir, figures=True, n_cols=5,                              
+                                      **licsbas_settings)
+            displacement_r2, tbaseline_info = ts
+            del ts
+
+        # 3.3: Data processed with users own approach/software.  
+        else:
+            print(f"LiCSAlert is using data that was passed to the function as an argument  ")
+            displacement_r2 = data_as_arg['displacement_r2']
+            tbaseline_info = data_as_arg["tbaseline_info"]
+            if licsbas_settings is not None:
+                print(f"'licsbas_settings' can only be provided if a "
+                      f"licsbas_dir is provided as the input data.  As data "
+                      f"is being passed to LiCSAlert in a different way, "
+                      f"licsbas_settings will be removed.  ")
+                del licsbas_settings
+                
+    # however data is used, these two arguments must agree.  
+    icasar_settings['figures'] = licsalert_settings['figure_type']   
+            
     try:
         del displacement_r2['cumulative']                                                                                                                 #  this is not needed and is deleted for safety.
-        print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  ")
+        print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects "
+              f"only the incremental displacements.  ")
     except:
         pass
 
-
-    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, tbaseline_info, ICASAR_settings['sica_tica'],                                                    #  mean centre in space (sica) or time (tica) and downsize the data.  
-                                              LiCSAlert_settings['downsample_run'], LiCSAlert_settings['downsample_plot'])                                      # mixtures_mc and means contains the daisy chain of ifgs mean centered either in space or time, depending on whther sica or tica
+    # mixtures_mc and means contains the daisy chain of ifgs mean centered either 
+    # in space or time, depending on whther sica or tica
+    displacement_r2 = LiCSAlert_preprocessing(displacement_r2, tbaseline_info, 
+                                              icasar_settings['sica_tica'],                                                    
+                                              licsalert_settings['downsample_run'], 
+                                              licsalert_settings['downsample_plot'])                                      
     
     # 3b determine if the date provided happens to be an acquisition date (the easy case)
-    updated_date = find_nearest_date(LiCSAlert_settings['baseline_end'], tbaseline_info['acq_dates'])
-    if updated_date != LiCSAlert_settings['baseline_end']:
+    updated_date = find_nearest_date(licsalert_settings['baseline_end'], tbaseline_info['acq_dates'])
+    if updated_date != licsalert_settings['baseline_end']:
         print(f"\nAs the baseline_end date did not lie on an acquisition date, "
               f"it has been updated so that it does.  Previously, it was "
-              f"{LiCSAlert_settings['baseline_end']}, but it is now {updated_date}")
-    LiCSAlert_settings['baseline_end'] = licsalert_date_obj(updated_date, tbaseline_info['acq_dates'])
+              f"{licsalert_settings['baseline_end']}, but it is now {updated_date}")
+    licsalert_settings['baseline_end'] = licsalert_date_obj(updated_date, tbaseline_info['acq_dates'])
 
     # 4: possible run licsalert
-    LiCSAlert_status = run_LiCSAlert_status(tbaseline_info['acq_dates'], volcano_dir, LiCSAlert_settings['baseline_end'].date, LiCSAlert_settings['figure_intermediate'])                       # NOTE volcano_dir used to be licsalert_dir / region / volcano.   determine the LiCSAlert status for this volcano (ie do we need to run ICASAR, is the time series up to date etc.  )
+    LiCSAlert_status = run_LiCSAlert_status(tbaseline_info['acq_dates'], volcano_dir, licsalert_settings['baseline_end'].date, licsalert_settings['figure_intermediate'])                       # NOTE volcano_dir used to be licsalert_dir / region / volcano.   determine the LiCSAlert status for this volcano (ie do we need to run ICASAR, is the time series up to date etc.  )
     print(f"LiCSAlert status:  1) Run ICASAR: {LiCSAlert_status['run_ICASAR']}   2) Run LiCSAlert: {LiCSAlert_status['run_LiCSAlert']}")
     
 
     if LiCSAlert_status['run_LiCSAlert']:                                                                                       # if LiCSAlert will be run...
     
         icasar_sources, icasar_mask, ics_labels = load_or_create_ICASAR_results(LiCSAlert_status['run_ICASAR'], displacement_r2, tbaseline_info,                             # either load or create the ICASAR sources.  
-                                                                                LiCSAlert_settings['baseline_end'],  volcano_dir / "ICASAR_results", ICASAR_settings)        # Note that this uses mixtures_mc, which are mean centered in space or time already depending on if sica or tica is being used.  
+                                                                                licsalert_settings['baseline_end'],  volcano_dir / "ICASAR_results", icasar_settings)        # Note that this uses mixtures_mc, which are mean centered in space or time already depending on if sica or tica is being used.  
 
         # 4b: Deal with changes to the mask of pixels 
         licsbas_mask = displacement_r2['mask']                                                                                                                              # make a copy of the licsbas mask before it gets overwritten with the new combined mask
@@ -211,7 +206,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
                                                                                                            displacement_r2['mask'], displacement_r2['incremental'])          # the new mask overwrites the mask in displacement_r2
         
         displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],           # create the downsampled plotting ones.  Note that these are also downsampled
-                                                                                                          LiCSAlert_settings['downsample_plot'], verbose = False)
+                                                                                                          licsalert_settings['downsample_plot'], verbose = False)
         
         # 4c: Loop through each monitoring date to run LiCSAlert
         processing_dates = []
@@ -227,33 +222,33 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             # -1 from length to make more intuative for user (eg if 10 dates, 9 of 9 is last)
             print(f"Running LiCSAlert for {processing_date.date} (acquisition # {processing_date.acq_n} "
                   f"of {len(tbaseline_info['acq_dates']) - 1})", end = '')                                                 
-            if processing_date.dt > LiCSAlert_settings['baseline_end'].dt:
+            if processing_date.dt > licsalert_settings['baseline_end'].dt:
                 print(f" : monitoring date")
             else:
                 print(f" : baseline date")
             
             create_licsalert_outdir(volcano_dir / processing_date.date)                                                                                                 # Create a folder (YYYYMMDD) for the outputs.  
             LiCSAlert_mask_figure(icasar_mask, licsbas_mask, displacement_r2['mask'], tbaseline_info['acq_dates'][-1], 
-                                  volcano_dir / processing_date.date, figure_type = LiCSAlert_settings['figure_type'])                                                                                   # create a figure showing the masks (licsbas, icasar, and combined)
+                                  volcano_dir / processing_date.date, figure_type = licsalert_settings['figure_type'])                                                                                   # create a figure showing the masks (licsbas, icasar, and combined)
             
             
             # compare datetimes to see if we are passed baseline stage.  
-            if processing_date.dt > LiCSAlert_settings['baseline_end'].dt:
+            if processing_date.dt > licsalert_settings['baseline_end'].dt:
                 # if not in baseline, run LiCSAlert
                 licsalert_result = LiCSAlert(icasar_sources, tbaseline_info['baselines_cumulative'][:processing_date.acq_n+1],                                               
-                                             ifgs_baseline = displacement_r2['incremental_mc_space'][:(LiCSAlert_settings['baseline_end'].acq_n),],                             
-                                             ifgs_monitoring = displacement_r2['incremental_mc_space'][(LiCSAlert_settings['baseline_end'].acq_n):processing_date.acq_n,], 
+                                             ifgs_baseline = displacement_r2['incremental_mc_space'][:(licsalert_settings['baseline_end'].acq_n),],                             
+                                             ifgs_monitoring = displacement_r2['incremental_mc_space'][(licsalert_settings['baseline_end'].acq_n):processing_date.acq_n,], 
                                              mask = displacement_r2['mask'],
-                                             t_recalculate=LiCSAlert_settings['t_recalculate'], verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
+                                             t_recalculate=licsalert_settings['t_recalculate'], verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
                 sources_tcs, residual_tcs, reconstructions, residuals  = licsalert_result; del licsalert_result
             else:
                 # if in baseline, check if LiCSAlert has been run, and run if not  
                 if 'sources_tcs' not in locals().keys():
                     licsalert_result = LiCSAlert(icasar_sources, tbaseline_info['baselines_cumulative'],                                               
-                                                 ifgs_baseline = displacement_r2['incremental_mc_space'][:(LiCSAlert_settings['baseline_end'].acq_n),],                             
-                                                 ifgs_monitoring = displacement_r2['incremental_mc_space'][(LiCSAlert_settings['baseline_end'].acq_n):,], 
+                                                 ifgs_baseline = displacement_r2['incremental_mc_space'][:(licsalert_settings['baseline_end'].acq_n),],                             
+                                                 ifgs_monitoring = displacement_r2['incremental_mc_space'][(licsalert_settings['baseline_end'].acq_n):,], 
                                                  mask = displacement_r2['mask'],
-                                                 t_recalculate=LiCSAlert_settings['t_recalculate'], verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
+                                                 t_recalculate=licsalert_settings['t_recalculate'], verbose=False)                                                                                 # recalculate lines of best fit every 10 acquisitions
                     sources_tcs, residual_tcs, reconstructions, residuals  = licsalert_result; del licsalert_result
                     
 
@@ -262,15 +257,15 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
 
             LiCSAlert_figure(sources_tcs, residual_tcs, icasar_sources, displacement_r2,                                                  # the main licsalert figure
                              figure_date = processing_date, acq_dates = tbaseline_info['acq_dates'], baselines_cs = tbaseline_info['baselines_cumulative'],
-                             baseline_end_date = LiCSAlert_settings['baseline_end'],  dayend_date = dayend_date,
-                             #baseline_end_date = LiCSAlert_settings['baseline_end'],  dayend_date = None,
+                             baseline_end_date = licsalert_settings['baseline_end'],  dayend_date = dayend_date,
+                             #baseline_end_date = licsalert_settings['baseline_end'],  dayend_date = None,
                              
-                             figure_type = LiCSAlert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date.date,
-                             ifg_xpos_scaler = LiCSAlert_settings['inset_ifgs_scaling'])    
+                             figure_type = licsalert_settings['figure_type'], figure_out_dir = volcano_dir / processing_date.date,
+                             ifg_xpos_scaler = licsalert_settings['inset_ifgs_scaling'])    
             
             
             LiCSAlert_epoch_figures(processing_date, displacement_r2, reconstructions, 
-                                    residuals, tbaseline_info, figure_type = LiCSAlert_settings['figure_type'], 
+                                    residuals, tbaseline_info, figure_type = licsalert_settings['figure_type'], 
                                     figure_out_dir = volcano_dir / processing_date.date)                                                                              
             save_epoch_data(sources_tcs, residual_tcs, volcano_dir / processing_date.date)                                                             # save info about the time courses
             write_volcano_status(sources_tcs, residual_tcs, ics_labels, volcano_dir / processing_date.date)                                           # write the change in def  / new def text file.  
@@ -285,20 +280,28 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
 
 #%%
 
-def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, licsbas_json_type = 'unfiltered'):
-    """ Given a dir of licsbas products and a dir of licsalert time series, determine which licsalert time series need to be updated.  
-    This is done by comparing the modified dates of the licsbas .json files, and the date
-    of the licsbas file last used by licsalert which is stored as a .txt file in the directory 
-    for each volcano.  
+def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
+                                 licsbas_json_type = 'unfiltered'):
+    """ Given a dir of licsbas products and a dir of licsalert time series, 
+    determine which licsalert time series need to be updated.  
+    This is done by comparing the modified dates of the licsbas .json files, 
+    and the date of the licsbas file last used by licsalert which is stored as 
+    a .txt file in the directory  for each volcano.  
+    
     Inputs:
         licsbas_dir | path | location of directory containing the region directories.  
-        licsalert_dir | path | location of directory containing the licsalert region directories.  
-        template_file_dir | path | location of template files that are copied in to each volcano's licsalert directory if it doesn't already exist.  
+        licsalert_dir | path | location of directory containing the licsalert 
+                                region directories.  
+        template_file_dir | path | location of template files that are copied 
+                                    in to each volcano's licsalert directory 
+                                    if it doesn't already exist.  
         licsbas_json_type | string | 'filtered', 'unfiltered', or 'both'
         
     Returns:
-        volc_names_current | list of dicts | name and region of each volcano that is up to date (ie) curent.  
-        volc_names_to_update | list of dicts | names and region of each volcano that need to be updated (ie. LiCSAlert run).  
+        volc_names_current | list of dicts | name and region of each volcano 
+                                             that is up to date (ie) curent.  
+        volc_names_to_update | list of dicts | names and region of each volcano 
+                                               that need to be updated (ie. LiCSAlert run).  
     History:
         2021_10_01 | MEG | Written
     
@@ -365,33 +368,47 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
                
         os.makedirs(licsalert_dir / region / volc)                                                              # make the volcanoes directory
         template_files = glob.glob(str(template_file_dir / "*"))                                                # get the paths to each template file
+        
+        if len(template_files) == 0:
+            raise Exception(f"No template files were found to copy into the "
+                            f"volcano directory.  Perhaps the path to these "
+                            f"is wrong?  Exiting.  ")
+        
         for template_file in template_files:                                                                    # loop through them
             filename = list(Path(template_file).parts)[-1]                                                      # get jut the name
             copyfile(template_file, licsalert_dir / region / volc / filename)                                   # copy them to the new dir
             
-        with open(licsalert_dir / "all_volcs_products" / "licsalert_all_volcs_log.txt", "a") as all_volcs_log:
+
+        with open(licsalert_dir / "licsalert_all_volcs_log.txt", "a") as all_volcs_log:
             message = f"A licsbas .json was found for {volc} but no licsalert directory.  The directory has now been created, and the template files copied in.  "
             print(message)
             all_volcs_log.write(message + '\n')
 
 
 
-    # 1: get all the licsbas volcanoes (either filt or not), and loop through seeing how they compare to the files used by licsalert for that volcano    
-    licsbas_volc_paths = get_required_licsbas_jsons(licsbas_dir, licsbas_json_type)                                           # get a list of the full paths to all required .json files (filtered and non filtered, but no web)
+    # 1: get all the licsbas volcanoes (either filt or not), and loop through 
+    # seeing how they compare to the files used by licsalert for that volcano    
+    
+    # get a list of the full paths to all required .json files (filtered and non filtered, but no web)
+    licsbas_volc_paths = get_required_licsbas_jsons(licsbas_dir, licsbas_json_type)                                           
     
     volc_names_current = []
     volc_names_to_update = []
     
-    for licsbas_volc_path in licsbas_volc_paths:                                                            # loop through each volcano to get the times
+    # iterate over all volcano paths from the previous step.  
+    for licsbas_volc_path in licsbas_volc_paths:                                                            
         region = licsbas_volc_path.parts[-2]
-        volc_name = licsbas_volc_path.parts[-1].split('.')[0]                                               # last part of the path is the file name, and drop the .json bit.  
+        volc_name = licsbas_volc_path.parts[-1].split('.')[0]                                               
 
-        if os.path.isdir(licsalert_dir / region / volc_name) == False:                                      # if the directory for that volcano doesn't exist
-            initiate_licsalert_volcano(licsalert_dir, region, volc_name, template_file_dir)                 # make it and copy in the template files, then update the all_volcs log 
+        # if the directory for that volcano doesn't exist, make and fill with template
+        if os.path.isdir(licsalert_dir / region / volc_name) == False:                                      
+            initiate_licsalert_volcano(licsalert_dir, region, volc_name, template_file_dir)                 
 
-        licsbas_json_time = datetime.fromtimestamp(os.path.getmtime(licsbas_volc_path))                     # and determine when the .json file was modified
-        licsbas_json_time = licsbas_json_time.replace(microsecond = 0)                                      # incuding micro seconds just makes it more complicated
+        # determine when the .json file was modified, and remove microsecods   
+        licsbas_json_time = datetime.fromtimestamp(os.path.getmtime(licsbas_volc_path))                      
+        licsbas_json_time = licsbas_json_time.replace(microsecond = 0)                                      
 
+        # 
         f = open(licsalert_dir / region / volc_name / 'licsbas_dates.txt', "r")                             # open the file
         lines = f.readlines()                                                                               # lines of the file to a list                                                                               
         licsbas_time_used_by_licsalert = datetime.strptime(lines[-1][:-1],  '%Y-%m-%d %H:%M:%S')                   # last line is the date of the .json file last usedd, -1 at the end as \n (linebreak) counts as one character.   
@@ -411,7 +428,7 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
     for volc_name_to_update in volc_names_to_update:
         message += f"        {volc_name_to_update['name']}\n"
     print(message)
-    with open(licsalert_dir / "all_volcs_products" / "licsalert_all_volcs_log.txt", "a") as all_volcs_log:
+    with open(licsalert_dir / "licsalert_all_volcs_log.txt", "a") as all_volcs_log:
         all_volcs_log.write(message)
 
 
@@ -790,24 +807,30 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
             variable_outputs = ['LiCSAlert_figure_on*.png',
                                 '01_cumulative*.png',
                                 '02_incremental*.png',
-                                '03_reconstruction*.png',
-                                '04_residual*.png']
+                                '03_incremental_reconstruction*.png',
+                                '04_incremental_residual*.png']
 
             
             self.processed_with_errors = []
             self.processed_succesfully = []
             
             for processed_date in self.processed:
-                date_dir = self.licsalert_dir / processed_date                                     # join to make a path to the current LiCSAlert_date folder
-                date_dir_files = sorted([f.name for f in os.scandir(date_dir)])                  # get names of the files in this folder (no paths)
+                
+                # create a path to the current directory                
+                date_dir = self.licsalert_dir / processed_date                                     
+                # get names of the files in this folder (no paths)
+                date_dir_files = sorted([f.name for f in os.scandir(date_dir)])                  
                 all_products_complete = True                                                                                 # initiate as True
                 
-                for constant_output in constant_outputs:                                                                     # loop through the outputs that can't change name
-                    all_products_complete = (all_products_complete) and (constant_output in date_dir_files)            # update boolean 
                 
-                for variable_output in variable_outputs:                                                                     # loop through the outputs that can change name
-                    output = fnmatch.filter(date_dir_files, variable_output)                                                # check for file with wildcard for changing name
-                    all_products_complete = (all_products_complete) and (len(output) > 0)                                    # empty list if file doesn't exit, use to update boolean
+                for constant_output in constant_outputs:                                                                     
+                    all_products_complete = (all_products_complete) and (constant_output in date_dir_files)            
+                
+                # loop through the outputs that can change name and update boolean
+                for variable_output in variable_outputs:                                                                    
+                    output = fnmatch.filter(date_dir_files, variable_output)                                                
+                    # output is empty list if file doesn't exit, use to update boolean
+                    all_products_complete = (all_products_complete) and (len(output) > 0)                                    
                     
                 if all_products_complete:
                     self.processed_succesfully.append(processed_date)
@@ -815,7 +838,6 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
                     self.processed_with_errors.append(processed_date)
 
     
-
 
     # 1: Determine if we can run LiCSAlert yet (ie past the baseline stage)
     licsbas_last_acq = licsbas_dates[-1]
@@ -838,14 +860,15 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
     if not figure_intermediate:
         baseline_monitoring_dates = {'baseline'   : [],                                                         # no figures required for the baseline dates
                                      'monitoring' : [sorted(baseline_monitoring_dates['monitoring'])[-1]]}        # figure and processing only required on last date.  
-        
-    dates_baseline  = licsalert_dates(existing_licsalert_dirs , baseline_monitoring_dates['baseline'],
-                                         volcano_path, baseline_dates = True)                                       # get the status for all the dates in the baseline stage (i.e. do we need to make a figure for them)
-
-
     
+    # create a licsalert status for all dates in the baseline stage
+    dates_baseline  = licsalert_dates(existing_licsalert_dirs , baseline_monitoring_dates['baseline'],
+                                      volcano_path, baseline_dates = True)                                       
+
+
+    # create a licsalert status for all dates in the monitoring stage
     dates_monitoring  = licsalert_dates(existing_licsalert_dirs , baseline_monitoring_dates['monitoring'],
-                                         volcano_path, baseline_dates = False)                                      # get the status for all the dates in the monitoring stage (i.e. do we need to run LiCSALert and make a figure for them)
+                                        volcano_path, baseline_dates = False)                                      
 
     # determine if there are any dates that need licsalert or the licsalert figure
     if ((len(dates_monitoring.processed_with_errors) > 0) or 
@@ -898,84 +921,94 @@ def read_config_file(config_file):
         config_file | string | .txt file to open
     Returns:
         LiCSAR_settings | dict | 
-        LiCSBAS_settings | dict | as per used by map_profile_wrapper
-        ICASAR_settings | dict | as per used by map_profile_wrapper
+        licsbas_settings | dict | as per used by map_profile_wrapper
+        icasar_settings | dict | as per used by map_profile_wrapper
        
     History:
         2020/05/29 | MEG | Written
         2020/06/29 | MEG | Modified for use with LiCSAlert
         2020/06/30 | MEG | Add LiCSAlert settings
-        2020/11/17 | MEG | Add the argument baseline_end to LiCSAlert_settings
+        2020/11/17 | MEG | Add the argument baseline_end to licsalert_settings
         2021/10_04 | MEG | Remove LiCSAlert and LiCBAS settings as not needed in new version.  
         2021_10_05 | MEG |Also get the create_all_ifgs_flag
     """
     import configparser    
    
-    LiCSAlert_settings = {}
-    ICASAR_settings = {}
+    licsalert_settings = {}
+    icasar_settings = {}
+    # licsbas_settings = {}
    
     config = configparser.ConfigParser()                                                       # read the config file
     config.read_file(open(config_file))
     
-    LiCSAlert_settings['downsample_run'] = float(config.get('LiCSAlert', 'downsample_run'))       # 3 LiCSAlert settings
-    LiCSAlert_settings['downsample_plot'] = float(config.get('LiCSAlert', 'downsample_plot'))                 
-    LiCSAlert_settings['baseline_end'] = str(config.get('LiCSAlert', 'baseline_end'))                 
+    # LiCSAlert settings
+    licsalert_settings['downsample_run'] = float(config.get('LiCSAlert', 'downsample_run'))       
+    licsalert_settings['downsample_plot'] = float(config.get('LiCSAlert', 'downsample_plot'))                 
+    licsalert_settings['baseline_end'] = str(config.get('LiCSAlert', 'baseline_end'))                 
     status_string =  config.get('LiCSAlert', 'figure_intermediate')            
     if status_string == 'True':
-        LiCSAlert_settings['figure_intermediate'] = True
+        licsalert_settings['figure_intermediate'] = True
     elif status_string == ' False':
-        LiCSAlert_settings['figure_intermediate'] = True
+        licsalert_settings['figure_intermediate'] = True
     else:
         print(f"The LiCSAlert setting figure_intermediate was not understood in the config file, so setting it to True.  ")
-        LiCSAlert_settings['figure_intermediate'] = True
-    LiCSAlert_settings['figure_type'] =  config.get('LiCSAlert', 'figure_type')            
+        licsalert_settings['figure_intermediate'] = True
+    licsalert_settings['figure_type'] =  config.get('LiCSAlert', 'figure_type')            
+    licsalert_settings['t_recalculate'] =  int(config.get('LiCSAlert', 't_recalculate'))
+    licsalert_settings['inset_ifgs_scaling'] =  int(config.get('LiCSAlert', 'inset_ifgs_scaling'))
     
     
-    ICASAR_settings['n_comp'] = int(config.get('ICASAR', 'n_comp'))                             # 4: ICASAR settings
+    # ICASAR settings
+    icasar_settings['n_comp'] = int(config.get('ICASAR', 'n_comp'))                             
     n_bootstrapped =  int(config.get('ICASAR', 'n_bootstrapped'))                 
     n_not_bootstrapped =  int(config.get('ICASAR', 'n_not_bootstrapped'))                 
-    ICASAR_settings['bootstrapping_param'] = (n_bootstrapped, n_not_bootstrapped)
+    icasar_settings['bootstrapping_param'] = (n_bootstrapped, n_not_bootstrapped)
     
     HDBSCAN_min_cluster_size =  int(config.get('ICASAR', 'HDBSCAN_min_cluster_size'))                 
     HDBSCAN_min_samples =  int(config.get('ICASAR', 'HDBSCAN_min_samples'))                 
-    ICASAR_settings['hdbscan_param'] = (HDBSCAN_min_cluster_size, HDBSCAN_min_samples)
+    icasar_settings['hdbscan_param'] = (HDBSCAN_min_cluster_size, HDBSCAN_min_samples)
     
     tsne_perplexity = int(config.get('ICASAR', 'tsne_perplexity'))                 
     tsne_early_exaggeration = int(config.get('ICASAR', 'tsne_early_exaggeration'))                 
-    ICASAR_settings['tsne_param'] = (tsne_perplexity, tsne_early_exaggeration)
+    icasar_settings['tsne_param'] = (tsne_perplexity, tsne_early_exaggeration)
     
     ica_tolerance = float(config.get('ICASAR', 'ica_tolerance'))                 
     ica_max_iterations = int(config.get('ICASAR', 'ica_max_iterations'))                 
-    ICASAR_settings['ica_param'] = (ica_tolerance, ica_max_iterations)
+    icasar_settings['ica_param'] = (ica_tolerance, ica_max_iterations)
     
-    ICASAR_settings['ifgs_format'] =  config.get('ICASAR', 'ifgs_format')            
+    icasar_settings['ifgs_format'] =  config.get('ICASAR', 'ifgs_format')            
+    icasar_settings['sica_tica'] =  config.get('ICASAR', 'sica_tica')            
     
+    
+    # LiCSBAS settings
+    # licsbas_settings['date_start'] = str(config.get('LiCSBAS', 'date_start'))       
+    # licsbas_settings['date_end'] = str(config.get('LiCSBAS', 'date_end'))       
 
     
-    return LiCSAlert_settings, ICASAR_settings
+    return licsalert_settings, icasar_settings# , licsbas_settings
+
 
 
 #%%
 
-
-
-#%%
-
-def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
-    """ Given two masks of pixels, create a mask of pixels that are valid for both.  Also return the two sets of data with the new masks applied.  
+def update_mask_sources_ifgs(mask_data1, data1, mask_data2, data2, verbose = True):
+    """ Given two masks of pixels, create a mask of pixels that are valid for both.  
+    Also return the two sets of data with the new masks applied.  
     Inputs:
-        mask_sources | boolean rank 2| original mask
-        sources  | r2 array | sources as row vectors
-        mask_ifgs | boolean rank 2| new mask
-        ifgs  | r2 array | ifgs as row vectors
+        mask_data1 | boolean rank 2| original mask
+        data1  | r2 array | data1 as row vectors
+        mask_data2 | boolean rank 2| new mask
+        data2  | r2 array | data2 as row vectors
+        verbose | boolean | controls messages to terminal.  
     Returns:
-        ifgs_new_mask
-        sources_new_mask
+        data2_new_mask
+        data1_new_mask
         mask_both | boolean rank 2| original mask
     History:
         2020/02/19 | MEG |  Written      
         2020/06/26 | MEG | Major rewrite.  
-        2021_04_20 | MEG | Add check that sources and ifgs are both rank 2 (use row vectors if only one source, but it must be rank2 and not rank 1)
+        2021_04_20 | MEG | Add check that data1 and data2 are both rank 2 (use row vectors if only one source, but it must be rank2 and not rank 1)
+        2024_01_26 | MEG | Update naming and reformat to 80 characters.  
     """
     import numpy as np
     import numpy.ma as ma
@@ -983,41 +1016,56 @@ def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
 
         
     
-    def apply_new_mask(ifgs, mask_old, mask_new):
-        """Apply a new mask to a collection of ifgs (or sources) that are stored as row vectors with an accompanying mask.  
+    def apply_new_mask(data, mask_old, mask_new):
+        """Apply a new mask to a collection of data2 (or data1) that are stored 
+        as row vectors with an accompanying mask.  
         Inputs:
-            ifgs | r2 array | ifgs as row vectors
-            mask_old | r2 array | mask to convert a row of ifg into a rank 2 masked array
-            mask_new | r2 array | the new mask to be applied.  Note that it must not unmask any pixels that are already masked.  
+            data | r2 array | data as row vectors
+            mask_old | r2 array | mask to convert a row of ifg into a rank 2 
+                                  masked array
+            mask_new | r2 array | the new mask to be applied.  Note that it 
+                                  must not unmask any pixels that are already 
+                                  masked.  
         Returns:
-            ifgs_new_mask | r2 array | as per ifgs, but with a new mask.  
+            data_new_mask | r2 array | as per data2, but with a new mask.  
         History:
             2020/06/26 | MEG | Written
         """
         n_pixs_new = len(np.argwhere(mask_new == False))                                        
-        ifgs_new_mask = np.zeros((ifgs.shape[0], n_pixs_new))                        # initiate an array to store the modified sources as row vectors    
-        for ifg_n, ifg in enumerate(ifgs):                                 # Loop through each source
-            ifg_r2 = col_to_ma(ifg, mask_old)                             # turn it from a row vector into a rank 2 masked array        
-            ifg_r2_new_mask = ma.array(ifg_r2, mask = mask_new)              # apply the new mask   
-            ifgs_new_mask[ifg_n, :] = ma.compressed(ifg_r2_new_mask)       # convert to row vector and places in rank 2 array of modified sources
-        return ifgs_new_mask
+        # initiate an array to store the modified data as row vectors    
+        data_new_mask = np.zeros((data.shape[0], n_pixs_new))                        
+        
+        for ifg_n, ifg in enumerate(data):                                 
+            # turn it from a row vector into a rank 2 masked array        
+            ifg_r2 = col_to_ma(ifg, mask_old)                             
+            # apply the new mask   
+            ifg_r2_new_mask = ma.array(ifg_r2, mask = mask_new)              
+            # convert to row vector and places in rank 2 array of modified data1
+            data_new_mask[ifg_n, :] = ma.compressed(ifg_r2_new_mask)       
+        return data_new_mask
     
     
     # check some inputs.  Not exhuastive!
-    if (len(sources.shape) != 2) or (len(ifgs.shape) != 2):
-        raise Exception(f"Both 'sources' and 'ifgs' must be rank 2 arrays (even if they are only a single source).  Exiting. ")
+    if (len(data1.shape) != 2) or (len(data2.shape) != 2):
+        raise Exception(f"Both 'data1' and 'data2' must be rank 2 arrays (even "
+                        f"if they are only a single source).  Exiting. ")
     
-    mask_both = ~np.logical_and(~mask_sources, ~mask_ifgs)                                       # make a new mask for pixels that are in the sources AND in the current time series
-    n_pixs_sources = len(np.argwhere(mask_sources == False))                                  # masked pixels are 1s, so invert with 1- bit so that non-masked are 1s, then sum to get number of pixels
-    n_pixs_new = len(np.argwhere(mask_ifgs == False))                                          # ditto for new mask
-    n_pixs_both = len(np.argwhere(mask_both == False))                                        # ditto for the mutual mask
-    print(f"Updating masks and ICA sources.  Of the {n_pixs_sources} in the sources and {n_pixs_new} in the current LiCSBAS time series, "
-          f"{n_pixs_both} are in both and can be used in this iteration of LiCSAlert.  ")
+    # combine the masks and determine number of pixels
+    mask_both = ~np.logical_and(~mask_data1, ~mask_data2)                                       
+    # masked pixels are 1s, so want number of pixels not masked
+    n_pixs_data1 = len(np.argwhere(mask_data1 == False))                                  
+    n_pixs_data2 = len(np.argwhere(mask_data2 == False))                                          
+    n_pixs_combined = len(np.argwhere(mask_both == False))                                        
+    if verbose:
+        print(f"Updating the masks for the two sources.  Of the {n_pixs_data1} in "
+              f"data1 and {n_pixs_data2} in data2, {n_pixs_combined} are in both "
+              f"and can be used.  ")
     
-    ifgs_new_mask = apply_new_mask(ifgs, mask_ifgs, mask_both)                                  # apply the new mask to the old ifgs and return the non-masked elemts as row vectors.  
-    sources_new_mask = apply_new_mask(sources, mask_sources, mask_both)                         # ditto for the sources.  
+    data1_new_mask = apply_new_mask(data1, mask_data1, mask_both)                         
+    data2_new_mask = apply_new_mask(data2, mask_data2, mask_both)                                  
     
-    return ifgs_new_mask, sources_new_mask, mask_both
+    
+    return data2_new_mask, data1_new_mask, mask_both
 
 
 

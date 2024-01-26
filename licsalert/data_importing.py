@@ -8,6 +8,33 @@ Created on Fri Oct 20 09:59:48 2023
 
 import pdb
 
+
+
+#%%
+
+def check_required_args(settings_dict, required_inputs, settings_name):
+    """ Check that input dictionary contains the required keys.  
+    Inputs:
+        settings_dict | dict | contains keys and values of the setting.  
+        required_inputs | list | keys that must be in dict. 
+        settings_name | str | name of dict, to make error messages clearer
+    Returns:
+        exception if required is missing.  
+    History:
+        2024_01_26 | MEG | Written.  
+    """
+    
+   
+    if settings_dict is None:
+        raise Exception(f"'{settings_name}' is None, but should be a dictionary "
+                        f"of settings (see the examples).  Exiting.  ")
+    
+    for required_input in required_inputs:
+        if not (required_input in settings_dict.keys()):
+            raise Exception(f"'{required_input}' was not found in "
+                            f"'{settings_name}', and it is not optional.  "
+                            f"Exiting.  ")
+
 #%%
 
 
@@ -849,7 +876,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(tbaseline_info["acq_dates"])                                                # get teh dates of the incremental ifgs
     tbaseline_info["baselines"] = baseline_from_names(tbaseline_info["ifg_dates"])                                                          # and their temporal baselines
     # make cumulative baselines, and ensure that 0 at the start.  
-    tbaseline_info["baselines_cumulative"] = np.concatenate((np.zeros((1,1)), np.cumsum(tbaseline_info["baselines"])), axis = 0)                                                            
+    tbaseline_info["baselines_cumulative"] = np.concatenate((np.zeros((1)), np.cumsum(tbaseline_info["baselines"])), axis = 0)                                                            
     
     # 5: Try to get the DEM
     try:

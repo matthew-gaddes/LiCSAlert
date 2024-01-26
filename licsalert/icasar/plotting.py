@@ -37,8 +37,12 @@ def two_spatial_signals_plot(images, mask, dem, tcs_dc, tcs_all, t_baselines_dc,
     """
     
     # 1: First figure is just sources and their cumulative time courses
-    plot_spatial_signals(images.T, mask, tcs_dc.T, mask.shape, title = f"{title}_time",                                     # note that uses incremental (daisy chain) time courses and coverts these to cumulative.  
-                         temporal_baselines = t_baselines_dc, ifg_dates_dc = ifg_dates_dc, **fig_kwargs)                      # 
+    try:
+        plot_spatial_signals(images.T, mask, tcs_dc.T, mask.shape, title = f"{title}_time",                                     # note that uses incremental (daisy chain) time courses and coverts these to cumulative.  
+                             temporal_baselines = t_baselines_dc, ifg_dates_dc = ifg_dates_dc, **fig_kwargs)                      # 
+    except:
+        print(f"Failed to plot the signals and their cumualive time courses.  "
+              f"Continuing.")
 
     # 2: Second figure may have access to all interfergram time courses and temporal baselines, but may also not.          
     if t_baselines_all is not None:
@@ -48,7 +52,11 @@ def two_spatial_signals_plot(images, mask, dem, tcs_dc, tcs_all, t_baselines_dc,
         temporal_data = {'tcs'                : tcs_dc,
                          'temporal_baselines' : t_baselines_dc}
         
+    # try:
     dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons = dem_and_temporal_source_figure(images, mask, fig_kwargs, dem, temporal_data, fig_title = f"{title}_correlations")        # also compare the sources to the DEM, and the correlation between their time courses and the temporal baseline of each interferogram.                                                                                                              # 
+    # except:
+    #     raise Exception(f"Failed to plot the signals and their correlations "
+    #                     "with the DEM and in time.  Exiting.  ")
                                                                                                                                                                                             # also note that it now returns information abou the sources and correlatiosn (comparison to the DEM, and how they're used in time.  )
     return dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons
 
