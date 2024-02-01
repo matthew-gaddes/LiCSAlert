@@ -37,14 +37,17 @@ def two_spatial_signals_plot(images, mask, dem, tcs_dc, tcs_all, t_baselines_dc,
     """
     
     # 1: First figure is just sources and their cumulative time courses
+    # note that this uses incremental (daisy chain) time courses and integrates them
     try:
-        plot_spatial_signals(images.T, mask, tcs_dc.T, mask.shape, title = f"{title}_time",                                     # note that uses incremental (daisy chain) time courses and coverts these to cumulative.  
-                             temporal_baselines = t_baselines_dc, ifg_dates_dc = ifg_dates_dc, **fig_kwargs)                      # 
+        plot_spatial_signals(images.T, mask, tcs_dc.T, mask.shape, 
+                             title = f"{title}_time", temporal_baselines = t_baselines_dc,                                     
+                              ifg_dates_dc = ifg_dates_dc, **fig_kwargs)                      
     except:
         print(f"Failed to plot the signals and their cumualive time courses.  "
               f"Continuing.")
 
-    # 2: Second figure may have access to all interfergram time courses and temporal baselines, but may also not.          
+    # 2: Second figure may have access to all interfergram time courses and 
+    #     temporal baselines, but may also not.          
     if t_baselines_all is not None:
         temporal_data = {'tcs'                : tcs_all,
                          'temporal_baselines' : t_baselines_all}
@@ -52,11 +55,15 @@ def two_spatial_signals_plot(images, mask, dem, tcs_dc, tcs_all, t_baselines_dc,
         temporal_data = {'tcs'                : tcs_dc,
                          'temporal_baselines' : t_baselines_dc}
         
-    # try:
-    dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons = dem_and_temporal_source_figure(images, mask, fig_kwargs, dem, temporal_data, fig_title = f"{title}_correlations")        # also compare the sources to the DEM, and the correlation between their time courses and the temporal baseline of each interferogram.                                                                                                              # 
-    # except:
-    #     raise Exception(f"Failed to plot the signals and their correlations "
-    #                     "with the DEM and in time.  Exiting.  ")
+    try:
+    # figure of IC to DEM correlations, and cumulative time courses 
+        outputs  = dem_and_temporal_source_figure(images, mask, fig_kwargs, dem, 
+                                                  temporal_data, 
+                                                  fig_title = f"{title}_correlations")        
+        (dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons) = outputs
+    except:
+        raise Exception(f"Failed to plot the signals and their correlations "
+                        "with the DEM and in time.  Exiting.  ")
                                                                                                                                                                                             # also note that it now returns information abou the sources and correlatiosn (comparison to the DEM, and how they're used in time.  )
     return dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons
 
@@ -291,8 +298,11 @@ def dem_and_temporal_source_figure(sources, sources_mask, fig_kwargs, dem = None
     
     if dem is not None:
         dem_ma = ma.masked_invalid(dem)                                                                                                             # LiCSBAS dem uses nans, but lets switch to a masked array (with nans masked)
-        dem_new_mask, sources_new_mask, mask_both = update_mask_sources_ifgs(sources_mask, sources,                             # this takes mask and data as row vectors for one set of masked pixels (the sources from pca) 
-                                                                             ma.getmask(dem_ma), ma.compressed(dem_ma)[np.newaxis,:])            # and the mask and data as row vectors from the other set of masked pixels (the DEM, hence why it's being turned into a row vector)
+        # find the pixels in commom between the ICs and the DEM
+        outputs = update_mask_sources_ifgs(sources_mask, sources,                             
+                                          ma.getmask(dem_ma), 
+                                          ma.compressed(dem_ma)[np.newaxis,:])            
+        (dem_new_mask, sources_new_mask, mask_both) = outputs
         
         [sources_new_mask, dem_new_mask] = reduce_n_pixs([sources_new_mask, dem_new_mask], max_pixels)                                                          # possibly reduce the number of pixels to speed things up (kernel density estimate is slow)
         dem_to_sources_comparisons = signals_to_master_signal_comparison(sources_new_mask, dem_new_mask, density = True)                                        # And then we can do kernel density plots for each IC and the DEM

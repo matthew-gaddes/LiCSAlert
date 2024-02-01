@@ -176,6 +176,36 @@ def pngs_to_gif(input_folder, output_file, image_duration = 1000):
     print('Done!')
 
 
+# def find_directories_with_more_than_n_subdirectories(root_dir, n=2):
+#     # List to store directories with more than n subdirectories
+#     result_directories = []
+
+#     # Walk through the directory tree
+#     for root, dirs, files in os.walk(root_dir):
+#         # Count the number of subdirectories in the current directory
+#         num_subdirectories = len(dirs)
+        
+#         # If the number of subdirectories exceeds n, add the directory to the result list
+#         if num_subdirectories > n:
+#             result_directories.append(root)
+
+#     return result_directories
+
+# # Example usage:
+# directory_to_search = '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/05_jasmin_clones/02_2024_01_19_cov_only/'
+
+# # Call the function
+# directories_with_more_than_2_subdirectories = find_directories_with_more_than_n_subdirectories(directory_to_search, n=2)
+
+# directories_with_more_than_2_subdirectories = sorted(directories_with_more_than_2_subdirectories)
+
+# # Write the result to a text file
+# with open('directories_with_more_than_2_subdirectories.txt', 'w') as f:
+#     for directory in directories_with_more_than_2_subdirectories:
+#         f.write(directory + '\n')
+    
+
+
 #%%
 
 
@@ -202,12 +232,60 @@ from licsalert.plotting import status_fig_one_volc, status_fig_all_volcs
 
 ################## jasmin outputs 2024 (for Cities on Volcanoes)
 
+# option 1: volcanoes on public portal  
+# cov_volc_names = ['Antisana',
+#                  'Cerro Overo',
+#                  'Cordon del Azufre',
+#                  'Cotopaxi',
+#                  'Domuyo',
+#                  'Fernandina',
+#                  #'Guagua Pichinca',                    # volcano portal spelling
+#                  'Guagua Pichincha',                     # licsbas spelling
+#                  'Laguna del Maule',
+#                  'Masaya',
+#                  'Nevados de Chillan',
+#                  'Planchón-Peteroa',                    # 
+#                  'Sabancaya',
+#                  'San Miguel',
+#                  'San Salvador',
+#                  'Sangay',
+#                  'Santa Ana',
+#                  'Sierra Negra',
+#                  'Tungurahua',
+#                  'Turrialba',
+#                  'Villarrica']
+
+# option 2: Camila deforming volcanoes list
+cov_volc_names = [ # camilla deforming list
+                  "Cordon Caulle",
+                  "Wolf",
+                  "Sabancaya",
+                  "Laguna del Maule",
+                  "Cordon del Azufre",
+                  "Sangay",
+                  "Domuyo",
+                  "Alcedo",
+                  "Mevados de Chillan",
+                  "Cerro Azul",
+                  "Fernandina",
+                  "Sierra Negra",
+                  # below are Visible on portal, def observed, central america
+                  "Masaya",                 
+                  "San Miguel",
+                  "Santa Ana",
+                  "Turrialba"]
+
 licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/05_jasmin_clones/02_2024_01_19_cov_only")
 out_dir = Path("./status_outputs/cov")
-d_start = "20150101"
+d_start = "20200101"                # LiCSAlert baseline ends at end of 2019?  
 d_stop = "20230901"
 test_volcano = 'sabancaya*'
 regions = True
+
+volcs_omit = ["guagua_pichincha_121A_08908_131313",  # no coherence
+              "planchon-peteroa_018A_12472_131313",  # single pixels of large value
+              ]
+
 ################## end jasmin outputs 2024 (for Cities on Volcanoes)
 
 
@@ -233,10 +311,45 @@ regions = True
 ################# end local test volcs            
 
 
-#%% ?
+
+
+#%% Step 01: Generate bash file to copy selected data from Jasmin
+
+from licsalert.jasmin_tools import open_comet_frame_files, volcano_name_to_comet_frames
+from licsalert.jasmin_tools import write_jasmin_download_shell_script
+
+comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
+
+
+jasmin_dir = Path('mgaddes@xfer1.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/projects/LiCS/volc-portal/processing_output/licsalert')
+local_dir = Path('./licsalert_sync/')
+bash_sync_fle = "jasmin_sync_script.sh"
+
+# open the info on COMET volcano frames and what region they're in.  
+comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir)
+
+# get the frames for the volcanoes of interest.  
+cov_volcs = volcano_name_to_comet_frames(cov_volc_names, comet_volcano_frame_index)    
+        
+# write a shell script to download them.  
+write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
+                                   cov_volcs, omit_json = True)
+
+
+
+#%% Step 02:
+    
+# run jasmin sync file on FOE-linux
+# copy from FOE-linux to local.  
+
+sys.exit()
+#%% Step 03: Compile licalert status for all frames at all times.  
+
 
 # get path to outputs for each volcanoes, and their names (snake case)
-volc_frame_dirs, volc_frame_names = get_all_volcano_dirs(licsalert_dir, regions)                                               
+volc_frame_dirs, volc_frame_names = get_all_volcano_dirs(licsalert_dir, volcs_omit,
+                                                         regions)                                               
+
 
 # simple list of datetime for each status day
 day_list = create_day_list(d_start, d_stop)
@@ -246,7 +359,7 @@ day_list = create_day_list(d_start, d_stop)
 output = extract_licsalert_status(volc_frame_dirs, volc_frame_names, day_list)           
 (licsalert_status, volc_frame_names, volc_frame_dirs) = output; del output
 
-#%% figure for one volcano at all times.  
+#%% Step 04: figure for one volcano at all times.  
 
 name_and_indexes = find_volcano(volc_frame_names, test_volcano)
 
@@ -267,13 +380,15 @@ status_fig_one_volc(name_and_indexes[-1], licsalert_status, day_list,
 
 
 
-#%% figure for all volcs
+#%% Step 05: figure for all volcs
 
 status_fig_all_volcs(licsalert_status, volc_frame_names, day_list,  
                      out_dir = out_dir / "all_volcs", 
                      figsize = (20, 12), plot_frequency = 6, label_fs = 16)
 
-pngs_to_gif(out_dir / "all_volcs", out_dir / "all_volcs" / "animation.gif", image_duration = 250)                                                 # convert all times into a gif
+# convert the directory of pngs to a single gif
+pngs_to_gif(out_dir / "all_volcs", out_dir / "all_volcs" / "animation.gif",
+            image_duration = 250)                                                 
 
 
 #%%

@@ -5,6 +5,7 @@ Created on Fri Jan 19 11:35:43 2024
 
 @author: matthew
 """
+import pdb
 from glob import glob
 from pathlib import Path
 
@@ -88,7 +89,7 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
         
         
     volc_frames = []
-    for volc_name in volc_names:
+    for volc_name in sorted(volc_names):
         volc = comet_volcano(volc_name)
         
         # loop through each region
@@ -109,8 +110,8 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
 
 
 #%%
-def write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
-                                       volc_frames, omit_json = True):
+def write_jasmin_download_shell_script(jasmin_dir, local_dir, out_file,
+                                       volcs, omit_json = True):
     """ Given a dictionary of volcano frames, create a shell script to download
     the LiCSAlert directories for each one.  
     Inputs:
@@ -119,7 +120,8 @@ def write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
                             projects/LiCS/volc-portal/processing_output/licsalert'
                             
         local_dir | Path | directory that shell script will sync into
-        volc_frames | list | list of comet_volcano objects.  
+        volc | list | list of comet_volcano objects.  One item for each volcano,
+                        .frames returns all the frames for that volcano.  
         bash_sync_file | str | name of shell script 
     Returns:
         shell script
@@ -133,7 +135,7 @@ def write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
     else:
         json_section = f" "
     
-    with open(bash_sync_fle, "w") as script_file:
+    with open(out_file, "w") as script_file:
         # Write shebang (optional, depends on your use case)
         script_file.write("#!/bin/bash\n\n")
         # Add a warning to the user about how to use the shell script
@@ -144,7 +146,7 @@ def write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
                           
 
         # iterate over each volcano
-        for volc in cov_volcs:
+        for volc in volcs:
             # and the grames for that volcano
             for frame in volc.frames:
                 # build the command for that frame        
