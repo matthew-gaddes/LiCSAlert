@@ -71,23 +71,22 @@ LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
 
 licsalert_out_dir = outdir / volcano
 
-#licsalert_results_explorer(outdir / volcano, fig_width = 18)                                                 # use this function to explore the results
+licsalert_results_explorer(outdir / volcano, fig_width = 18)                                                 # use this function to explore the results
 
 
 #ics_one_hot = [1, 1, 1, 1]                                                                   # One hot encoding of which sources to use in the reconstruction.  1 means used, 0 means not.  list must be the same length as the number of ICs.  
 #X_inc_r3, X_cum_r3 = reconstruct_ts_from_dir(ics_one_hot, outdir / volcano)                               # return the cumualtive interferograms reconstrutced using the ICs selected above.  All mean centering has been removed.  
 
-sys.exit()
+
 
 
 #%% Example 2: make all intermediate figures
 
 
-print(f"FIGURES SET TO FALSE WHEN SHOULD BE TRUE")
 
 licsalert_settings = {"baseline_end"        : "20170101",                               # end baseline stage at YYYYMMDD, need to be before the last acquisition of LiCSAlert will never monitoring anyhting.  
-                      ### change here
-                      "figure_intermediate" : False,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
+                      ### changed here
+                      "figure_intermediate" : True,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
                       ### end change
                       "figure_type"         : 'png',                             # either 'window' or 'png' (to save as pngs), or 'both'
                       "downsample_run"      : 0.5,                                     # data can be downsampled to speed things up

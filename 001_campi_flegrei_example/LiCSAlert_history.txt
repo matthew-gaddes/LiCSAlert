@@ -3,7 +3,7 @@
 
 
 
-LiCSAlert is being run for 001_campi_flegrei_example at 29/02/2024 17:07:18
+LiCSAlert is being run for 001_campi_flegrei_example at 01/03/2024 11:40:48
 LiCSAlert is opening a LiCSBAS directory.  
 Opening the LiCSBAS unfiltered results.  
 Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
@@ -359,311 +359,305 @@ Updating the masks for the two sources.  Of the 7873 in data1 and 8278 in data2,
 
 Done.  
 No results were found for the multiple ICA runs, so these will now be performed.  
-FastICA progress with bootstrapping: FastICA algorithm converged in 5 iterations.  
-0% FastICA algorithm converged in 8 iterations.  
-1% FastICA algorithm converged in 5 iterations.  
-1% FastICA algorithm converged in 5 iterations.  
+FastICA progress with bootstrapping: FastICA algorithm converged in 4 iterations.  
+0% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+1% FastICA algorithm converged in 11 iterations.  
+1% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 9 iterations.  
 2% FastICA algorithm converged in 5 iterations.  
-2% FastICA algorithm converged in 5 iterations.  
+2% FastICA algorithm converged in 8 iterations.  
+3% FastICA algorithm converged in 3 iterations.  
 3% FastICA algorithm converged in 8 iterations.  
-3% FastICA algorithm converged in 4 iterations.  
-4% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 59 iterations.  
-4% FastICA algorithm converged in 6 iterations.  
-5% FastICA algorithm converged in 6 iterations.  
+4% FastICA algorithm converged in 8 iterations.  
+4% FastICA algorithm converged in 3 iterations.  
 5% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
+5% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
 6% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-6% FastICA algorithm converged in 3 iterations.  
-7% FastICA algorithm converged in 3 iterations.  
-7% FastICA algorithm didn't converge in 149 iterations.  
+FastICA algorithm converged in 3 iterations.  
+6% FastICA algorithm converged in 5 iterations.  
 7% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-8% FastICA algorithm converged in 24 iterations.  
+FastICA algorithm converged in 5 iterations.  
+7% FastICA algorithm converged in 5 iterations.  
 8% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
-9% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 10 iterations.  
-9% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+8% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 4 iterations.  
-10% FastICA algorithm converged in 4 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+9% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
 10% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-11% FastICA algorithm converged in 9 iterations.  
+FastICA algorithm converged in 4 iterations.  
+10% FastICA algorithm converged in 3 iterations.  
 11% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
+FastICA algorithm converged in 5 iterations.  
+11% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 15 iterations.  
 12% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-12% FastICA algorithm converged in 5 iterations.  
-13% FastICA algorithm converged in 8 iterations.  
+FastICA algorithm converged in 5 iterations.  
+12% FastICA algorithm converged in 4 iterations.  
+13% FastICA algorithm converged in 4 iterations.  
 13% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-14% FastICA algorithm converged in 8 iterations.  
+FastICA algorithm converged in 7 iterations.  
 14% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
+FastICA algorithm converged in 5 iterations.  
+14% FastICA algorithm converged in 5 iterations.  
 15% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
-15% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
+15% FastICA algorithm converged in 6 iterations.  
 16% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-16% FastICA algorithm converged in 10 iterations.  
-17% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 6 iterations.  
+16% FastICA algorithm converged in 4 iterations.  
+17% FastICA algorithm converged in 4 iterations.  
 17% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-18% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 7 iterations.  
+FastICA algorithm converged in 4 iterations.  
 18% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 9 iterations.  
-19% FastICA algorithm converged in 4 iterations.  
-19% FastICA algorithm converged in 4 iterations.  
-20% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-20% FastICA algorithm converged in 5 iterations.  
-21% FastICA algorithm converged in 3 iterations.  
-21% FastICA algorithm converged in 5 iterations.  
-22% FastICA algorithm converged in 15 iterations.  
-22% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 13 iterations.  
-23% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+18% FastICA algorithm converged in 5 iterations.  
+19% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 3 iterations.  
+19% FastICA algorithm converged in 8 iterations.  
+20% FastICA algorithm converged in 5 iterations.  
+20% FastICA algorithm converged in 3 iterations.  
+21% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
+21% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+22% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+22% FastICA algorithm converged in 8 iterations.  
+23% FastICA algorithm converged in 9 iterations.  
 23% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 7 iterations.  
-24% FastICA algorithm converged in 3 iterations.  
-24% FastICA algorithm converged in 12 iterations.  
-25% FastICA algorithm converged in 5 iterations.  
-25% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 7 iterations.  
-26% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 7 iterations.  
-26% FastICA algorithm converged in 5 iterations.  
+FastICA algorithm converged in 6 iterations.  
+24% FastICA algorithm converged in 7 iterations.  
+24% FastICA algorithm converged in 6 iterations.  
+25% FastICA algorithm converged in 4 iterations.  
+25% FastICA algorithm converged in 7 iterations.  
+26% FastICA algorithm converged in 3 iterations.  
+26% FastICA algorithm converged in 6 iterations.  
+27% FastICA algorithm converged in 7 iterations.  
 27% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+28% FastICA algorithm converged in 5 iterations.  
+28% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 9 iterations.  
-27% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-28% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 10 iterations.  
-28% FastICA algorithm converged in 18 iterations.  
-28% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
+28% FastICA algorithm converged in 4 iterations.  
 29% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 3 iterations.  
-30% FastICA algorithm converged in 4 iterations.  
 30% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
+FastICA algorithm converged in 5 iterations.  
+30% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+31% FastICA algorithm converged in 8 iterations.  
 31% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
-31% FastICA algorithm converged in 7 iterations.  
 32% FastICA algorithm converged in 11 iterations.  
-32% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
+32% FastICA algorithm converged in 6 iterations.  
 33% FastICA algorithm converged in 25 iterations.  
-33% FastICA algorithm converged in 9 iterations.  
+33% FastICA algorithm converged in 6 iterations.  
+34% FastICA algorithm converged in 5 iterations.  
 34% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-34% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-35% FastICA algorithm converged in 13 iterations.  
-35% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-36% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-36% FastICA algorithm converged in 6 iterations.  
-37% FastICA algorithm converged in 4 iterations.  
-37% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 8 iterations.  
-38% FastICA algorithm converged in 6 iterations.  
-38% FastICA algorithm converged in 3 iterations.  
-39% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-39% FastICA algorithm converged in 7 iterations.  
-40% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 10 iterations.  
-40% FastICA algorithm converged in 6 iterations.  
-41% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-41% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+35% FastICA algorithm converged in 33 iterations.  
+35% FastICA algorithm converged in 5 iterations.  
+36% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 12 iterations.  
+36% FastICA algorithm converged in 5 iterations.  
+37% FastICA algorithm converged in 5 iterations.  
+37% FastICA algorithm converged in 4 iterations.  
+38% FastICA algorithm converged in 8 iterations.  
+38% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 4 iterations.  
-42% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+39% FastICA algorithm converged in 40 iterations.  
+39% FastICA algorithm converged in 3 iterations.  
+40% FastICA algorithm converged in 6 iterations.  
+40% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
+41% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 6 iterations.  
-42% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
+41% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+42% FastICA algorithm converged in 7 iterations.  
+42% FastICA algorithm converged in 6 iterations.  
 43% FastICA algorithm converged in 4 iterations.  
-43% FastICA algorithm converged in 6 iterations.  
-44% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-44% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
+43% FastICA algorithm converged in 7 iterations.  
+44% FastICA algorithm converged in 7 iterations.  
+44% FastICA algorithm converged in 9 iterations.  
 45% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-45% FastICA algorithm converged in 12 iterations.  
-46% FastICA algorithm converged in 4 iterations.  
-46% FastICA algorithm converged in 6 iterations.  
+FastICA algorithm converged in 8 iterations.  
+45% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+46% FastICA algorithm converged in 9 iterations.  
+46% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 8 iterations.  
 47% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
-47% FastICA algorithm converged in 76 iterations.  
+47% FastICA algorithm converged in 5 iterations.  
 48% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-48% FastICA algorithm converged in 5 iterations.  
-49% FastICA algorithm converged in 7 iterations.  
-49% FastICA algorithm converged in 11 iterations.  
-50% FastICA algorithm converged in 5 iterations.  
-50% FastICA algorithm converged in 7 iterations.  
-51% FastICA algorithm converged in 5 iterations.  
-51% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 11 iterations.  
-52% FastICA algorithm converged in 6 iterations.  
-52% FastICA algorithm converged in 7 iterations.  
-53% FastICA algorithm converged in 6 iterations.  
-53% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-54% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+48% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+49% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
-54% FastICA algorithm converged in 5 iterations.  
-55% FastICA algorithm converged in 5 iterations.  
+49% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 13 iterations.  
+50% FastICA algorithm converged in 5 iterations.  
+50% FastICA algorithm converged in 8 iterations.  
+51% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+51% FastICA algorithm converged in 11 iterations.  
+52% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+52% FastICA algorithm converged in 7 iterations.  
+53% FastICA algorithm converged in 5 iterations.  
+53% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 12 iterations.  
+54% FastICA algorithm converged in 12 iterations.  
+54% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
 55% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 14 iterations.  
+55% FastICA algorithm converged in 5 iterations.  
+56% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 7 iterations.  
 56% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-56% FastICA algorithm converged in 5 iterations.  
-56% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-57% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-57% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 6 iterations.  
-58% FastICA algorithm converged in 4 iterations.  
+56% FastICA algorithm converged in 3 iterations.  
+57% FastICA algorithm converged in 6 iterations.  
+57% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+58% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
 59% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
-59% FastICA algorithm converged in 6 iterations.  
-60% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 9 iterations.  
-60% FastICA algorithm converged in 11 iterations.  
-61% FastICA algorithm converged in 8 iterations.  
-61% FastICA algorithm didn't converge in 149 iterations.  
+59% FastICA algorithm converged in 3 iterations.  
+60% FastICA algorithm converged in 4 iterations.  
+60% FastICA algorithm converged in 3 iterations.  
 61% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 7 iterations.  
+FastICA algorithm converged in 8 iterations.  
+61% FastICA algorithm converged in 5 iterations.  
 62% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
 62% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 4 iterations.  
+63% FastICA algorithm converged in 6 iterations.  
 63% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-63% FastICA algorithm converged in 10 iterations.  
+FastICA algorithm converged in 5 iterations.  
+64% FastICA algorithm converged in 3 iterations.  
 64% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm didn't converge in 149 iterations.  
-64% FastICA algorithm converged in 5 iterations.  
-64% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-65% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
 65% FastICA algorithm converged in 6 iterations.  
+65% FastICA algorithm converged in 4 iterations.  
 66% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 11 iterations.  
-66% FastICA algorithm converged in 7 iterations.  
-67% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 6 iterations.  
+66% FastICA algorithm converged in 3 iterations.  
 67% FastICA algorithm converged in 6 iterations.  
-68% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+67% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
 68% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 3 iterations.  
+FastICA algorithm converged in 6 iterations.  
+68% FastICA algorithm converged in 5 iterations.  
 69% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-69% FastICA algorithm converged in 6 iterations.  
-70% FastICA algorithm converged in 8 iterations.  
-70% FastICA algorithm converged in 5 iterations.  
-71% FastICA algorithm converged in 5 iterations.  
-71% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 4 iterations.  
-72% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 8 iterations.  
-72% FastICA algorithm converged in 5 iterations.  
-73% FastICA algorithm converged in 4 iterations.  
-73% FastICA algorithm converged in 5 iterations.  
-74% FastICA algorithm converged in 6 iterations.  
-74% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+69% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 4 iterations.  
-75% FastICA algorithm converged in 9 iterations.  
-75% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 32 iterations.  
-76% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm didn't converge in 149 iterations.  
-76% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-76% FastICA algorithm converged in 7 iterations.  
-77% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-77% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-78% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-78% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-79% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-79% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+70% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 9 iterations.  
-80% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-80% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
+70% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+71% FastICA algorithm converged in 5 iterations.  
+71% FastICA algorithm converged in 6 iterations.  
+72% FastICA algorithm converged in 5 iterations.  
+72% FastICA algorithm converged in 10 iterations.  
+73% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+73% FastICA algorithm converged in 8 iterations.  
+74% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+74% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 9 iterations.  
+75% FastICA algorithm converged in 6 iterations.  
+75% FastICA algorithm converged in 6 iterations.  
+76% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+76% FastICA algorithm converged in 4 iterations.  
+77% FastICA algorithm converged in 4 iterations.  
+77% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+78% FastICA algorithm converged in 10 iterations.  
+78% FastICA algorithm converged in 5 iterations.  
+79% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 11 iterations.  
+79% FastICA algorithm converged in 5 iterations.  
+80% FastICA algorithm converged in 7 iterations.  
+80% FastICA algorithm converged in 3 iterations.  
 81% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-81% FastICA algorithm converged in 6 iterations.  
-82% FastICA algorithm converged in 7 iterations.  
-82% FastICA algorithm converged in 4 iterations.  
-83% FastICA algorithm converged in 5 iterations.  
-83% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 3 iterations.  
-84% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-84% FastICA algorithm converged in 6 iterations.  
-85% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+81% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+82% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 7 iterations.  
+82% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
+83% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+83% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
+84% FastICA algorithm converged in 3 iterations.  
+84% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
 85% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 12 iterations.  
+FastICA algorithm converged in 6 iterations.  
+85% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 4 iterations.  
 86% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 3 iterations.  
-86% FastICA algorithm converged in 7 iterations.  
-87% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+86% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 6 iterations.  
 87% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 8 iterations.  
-88% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 4 iterations.  
+87% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+88% FastICA algorithm converged in 7 iterations.  
 88% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 5 iterations.  
-89% FastICA algorithm converged in 4 iterations.  
+FastICA algorithm converged in 17 iterations.  
+89% FastICA algorithm converged in 8 iterations.  
 89% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 10 iterations.  
-90% FastICA algorithm converged in 7 iterations.  
-90% FastICA algorithm converged in 4 iterations.  
+FastICA algorithm converged in 4 iterations.  
+90% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+90% FastICA algorithm converged in 5 iterations.  
 91% FastICA algorithm converged in 7 iterations.  
 91% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
-92% FastICA algorithm converged in 8 iterations.  
 92% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 4 iterations.  
-93% FastICA algorithm converged in 8 iterations.  
-93% FastICA algorithm converged in 24 iterations.  
-94% FastICA algorithm converged in 7 iterations.  
-94% FastICA algorithm converged in 5 iterations.  
-95% FastICA algorithm converged in 5 iterations.  
-95% FastICA algorithm converged in 6 iterations.  
-96% FastICA algorithm converged in 5 iterations.  
-96% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 6 iterations.  
-97% FastICA algorithm converged in 6 iterations.  
-97% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
-FastICA algorithm converged in 40 iterations.  
-98% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
 FastICA algorithm converged in 5 iterations.  
-98% FastICA algorithm converged in 7 iterations.  
-99% FastICA algorithm converged in 6 iterations.  
-99% FastICA algorithm converged in 5 iterations.  
+92% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 12 iterations.  
+93% FastICA algorithm converged in 47 iterations.  
+93% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 11 iterations.  
+94% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+94% FastICA algorithm converged in 10 iterations.  
+95% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 3 iterations.  
+95% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 9 iterations.  
+96% FastICA algorithm converged in 4 iterations.  
+96% FastICA algorithm converged in 11 iterations.  
+97% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 5 iterations.  
+97% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+98% FastICA algorithm converged in 4 iterations.  
+98% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 6 iterations.  
+99% There are negative values in the eigenvalues.  This is a tricky problem, but is usually only caused by poor approximations to zero by floating point arithmetic.  Trying to set these to a better approxiation of zero to contiue.  
+FastICA algorithm converged in 9 iterations.  
+99% FastICA algorithm converged in 10 iterations.  
 100% 
 Starting to compute the pairwise distance matrices....Done!
 Starting to cluster the sources using HDBSCAN....Done!
@@ -687,9 +681,9 @@ Source 4: turbulent_APS
 
 
 Saving the key results as a .pkl file... Done!
-Means for each row of sources (these should be images): [ 1.80501140e-18 -9.02505698e-19  9.02505698e-19  5.64066061e-20
- -1.80501140e-18]
-Means for each column of the tcs (these should be time courses): [ 6.11563531e-18 -1.41130046e-18 -9.40866970e-19 -1.22312706e-17
-  1.64651720e-18]
+Means for each row of sources (these should be images): [-9.02505698e-19 -6.76879273e-19  1.01531891e-18  1.69219818e-19
+ -4.51252849e-19]
+Means for each column of the tcs (these should be time courses): [ 0.00000000e+00 -1.05847534e-17  0.00000000e+00 -2.58738417e-18
+  7.52693576e-18]
 Updating the masks for the two sources.  Of the 7873 in data1 and 7873 in data2, 7873 are in both and can be used.  
 Running LiCSAlert for 20210912 (acquisition # 326 of 326) : monitoring date
