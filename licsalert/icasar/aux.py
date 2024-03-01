@@ -14,7 +14,8 @@ Created on Tue Dec 17 18:19:37 2019
 def maps_tcs_rescale(maps, tcs):
     """
     A function to rescale spaital maps to have unit range and rescale each's time cource (tc)
-    so that there is no change to the product of the two matrices
+    so that there is no change to the product of the two matrices.  
+    
     
     input:
         maps | array | spatial maps as rows (e.g. 2x1775)
@@ -24,6 +25,7 @@ def maps_tcs_rescale(maps, tcs):
         tcs_scaled | array | TCs scaled so that new maps x new tcs equals maps x tcs
     
     2017/05/15 | written
+    2024_02_29 | MEG | Checked that no change to product of two matrices.  
     
     """
     import numpy as np
@@ -41,11 +43,15 @@ def maps_tcs_rescale(maps, tcs):
         """
         import numpy as np
         
-        signals_rescale = np.ones(signals.shape)                                    # initiate rescaled array
-        signals_factor = np.ones((np.size(signals, axis=0) , 1))                    # initiate array to record scaling factor for each row
+        # initiate outputs
+        signals_rescale = np.ones(signals.shape)                                    
+        signals_factor = np.ones((np.size(signals, axis=0) , 1))                    
            
+        # iterate over each signal
         for i in np.arange(np.size(signals, axis = 0)):
+            # get the range of the signal
             signals_factor[i,0] = (np.max(signals[i,:])-np.min(signals[i,:]))
+            # divide by range, so it's now 1 for the signal.  
             signals_rescale[i,:] = signals[i,:]/signals_factor[i,0]
             
         return signals_rescale, signals_factor

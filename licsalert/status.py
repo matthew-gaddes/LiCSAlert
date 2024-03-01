@@ -6,6 +6,7 @@ Created on Fri Jan 19 14:15:16 2024
 @author: matthew
 """
 
+import pdb
 
 #%%
 
@@ -132,32 +133,55 @@ def remove_dates_with_no_status(volcano_status, day_list):
 
 
 
-def get_all_volcano_dirs(licsalert_dir, regions = True):
+def get_all_volcano_dirs(licsalert_dir, omits = None, regions = True):
     """ Get the paths to all the licsalert volcano dirs that are split across regions.  
     Inputs:
-        licsalert_dir | pathlib Path | directory LiCSAlert outputs, possibly containing a subdirectory of regions.  
-        regions | boolean | If True, volcanoes are separated into region directories, as per the COMET Volcano portal
+        licsalert_dir | pathlib Path | directory LiCSAlert outputs, 
+                                        possibly containing a subdirectory of regions.  
+        omit | list or None | List of volcanoes to remove.  
+        regions | boolean | If True, volcanoes are separated into region 
+                            directories, as per the COMET Volcano portal
     Returns:
-        volc_dirs | list of pathlib Paths | list of each volcano's licsalert directory
-        volc_names | 
+        volc_dirs | list of pathlib Paths | list of each volcano frame's licsalert directory
+        volc_names | list | each volcano frames name
     """
     from glob import glob
     from pathlib import Path
     
+    # get hte paths to each frame licsalert resykts
     volc_dirs = []
-    
     if regions:
         region_dirs = sorted(glob(str(licsalert_dir / '*')))
         for region_dir in region_dirs:
             volc_dirs.extend(sorted(glob(str(Path(region_dir) / '*'))))
     else:
         volc_dirs = sorted(glob(str(licsalert_dir / '*')))
+    
+    if len(volc_dirs) == 0:
+        raise Exception(f"No licsalert directories were found for any volcanoes.  "
+                        f"Perhaps 'licsalert_dir' is set incorrectly?  It is "
+                        f"currently set to: {licsalert_dir} \n"
+                        f"Exiting.  ")
         
+    # possibly remove some volcanoes
+    if omits is not None:
+        for omit in omits:
+            for volc_dir in volc_dirs:
+                # get the frame name from the full path
+                if Path(volc_dir).parts[-1] == omit:
+                    # and remove it in the omit list
+                    volc_dirs.remove(volc_dir)
+        
+    # get just the volcano name
     volc_names = []
     for volc_dir in volc_dirs:
         volc_names.append(Path(volc_dir).parts[-1])
         
+    
+
     return volc_dirs, volc_names
+
+
     
 
 

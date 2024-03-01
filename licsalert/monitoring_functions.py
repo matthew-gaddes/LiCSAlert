@@ -114,17 +114,19 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     
     # 3.1: a JASMIN dir and associated text file of settings.  
     if licsbas_jasmin_dir is not None:
+        # read various settings from the volcano's config file
+        outputs = read_config_file(volcano_dir / "LiCSAlert_settings.txt")                                          
+        (licsalert_settings, icasar_settings, licsbas_settings) = outputs; del outputs
+        
         print(f"LiCSAlert is opening a JASMIN COMET Volcano Portal timeseries json file.  ")
-        products = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json")          
+        products = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json",
+                                             licsbas_settings['crop_side_length'])          
         (displacement_r2, _, tbaseline_info, ref_xy, licsbas_json_creation_time) = products
         # append licsbas .json file date to list of file dates used (in the text file for each volano)
         append_licsbas_date_to_file(outdir, region, volcano, licsbas_json_creation_time)                                                        
         del licsbas_json_creation_time                                                                                                                  # delete for safety
         
-        # read various settings from the volcano's config file
-        outputs = read_config_file(volcano_dir / "LiCSAlert_settings.txt")                                          
-        (licsalert_settings, icasar_settings) = outputs; del outputs
-        
+
     # remaining two ways to pass data to function.  
     else:
         # check user has provided inputs.  
@@ -190,8 +192,11 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     licsalert_settings['baseline_end'] = licsalert_date_obj(updated_date, tbaseline_info['acq_dates'])
 
     # 4: possible run licsalert
-    LiCSAlert_status = run_LiCSAlert_status(tbaseline_info['acq_dates'], volcano_dir, licsalert_settings['baseline_end'].date, licsalert_settings['figure_intermediate'])                       # NOTE volcano_dir used to be licsalert_dir / region / volcano.   determine the LiCSAlert status for this volcano (ie do we need to run ICASAR, is the time series up to date etc.  )
-    print(f"LiCSAlert status:  1) Run ICASAR: {LiCSAlert_status['run_ICASAR']}   2) Run LiCSAlert: {LiCSAlert_status['run_LiCSAlert']}")
+    LiCSAlert_status = run_LiCSAlert_status(tbaseline_info['acq_dates'], volcano_dir, 
+                                            licsalert_settings['baseline_end'].date, 
+                                            licsalert_settings['figure_intermediate'])                       
+    print(f"LiCSAlert status:  1) Run ICASAR: {LiCSAlert_status['run_ICASAR']} "
+          f"  2) Run LiCSAlert: {LiCSAlert_status['run_LiCSAlert']}")
     
 
     if LiCSAlert_status['run_LiCSAlert']:                                                                                       # if LiCSAlert will be run...
@@ -936,7 +941,7 @@ def read_config_file(config_file):
    
     licsalert_settings = {}
     icasar_settings = {}
-    # licsbas_settings = {}
+    licsbas_settings = {}
    
     config = configparser.ConfigParser()                                                       # read the config file
     config.read_file(open(config_file))
@@ -983,9 +988,10 @@ def read_config_file(config_file):
     # LiCSBAS settings
     # licsbas_settings['date_start'] = str(config.get('LiCSBAS', 'date_start'))       
     # licsbas_settings['date_end'] = str(config.get('LiCSBAS', 'date_end'))       
+    licsbas_settings['crop_side_length'] = int(config.get('LiCSBAS', 'crop_side_length'))       
 
     
-    return licsalert_settings, icasar_settings# , licsbas_settings
+    return licsalert_settings, icasar_settings, licsbas_settings
 
 
 

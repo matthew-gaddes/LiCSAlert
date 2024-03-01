@@ -49,7 +49,7 @@ icasar_settings = {"n_comp"                  : 5,                               
                     "ica_param"              : (1e-2, 150),                                     # (tolerance, max iterations)
                     "hdbscan_param"          : (100,10),                                    # (min_cluster_size, min_samples) Discussed in more detail in Mcinnes et al. (2017). min_cluster_size sets the smallest collection of points that can be considered a cluster. min_samples sets how conservative the clustering is. With larger values, more points will be considered noise. 
                     "ifgs_format"            : 'cum',                                  # can be 'all', 'inc' (incremental - short temporal baselines), or 'cum' (cumulative - relative to first acquisition)
-                    "sica_tica"              : 'sica' }
+                    "sica_tica"              : 'tica' }
 
 licsbas_settings = {"filtered"               : False,
                     "date_start"            : None,
@@ -77,7 +77,7 @@ licsalert_out_dir = outdir / volcano
 #ics_one_hot = [1, 1, 1, 1]                                                                   # One hot encoding of which sources to use in the reconstruction.  1 means used, 0 means not.  list must be the same length as the number of ICs.  
 #X_inc_r3, X_cum_r3 = reconstruct_ts_from_dir(ics_one_hot, outdir / volcano)                               # return the cumualtive interferograms reconstrutced using the ICs selected above.  All mean centering has been removed.  
 
-
+sys.exit()
 
 
 #%% Example 2: make all intermediate figures

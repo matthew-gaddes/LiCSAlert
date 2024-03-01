@@ -296,9 +296,14 @@ def PCA_meg2(X, verbose = False, return_dewhiten = True):
     if not return_dewhiten:
         print('Will not return the dewhitening matrix.  ')
     dims, samples = X.shape
-    X = X - X.mean(axis=1)[:,np.newaxis]                # mean center each row (ie dimension)
-
-    if samples < dims and dims > 100:                   # do PCA using the compact trick (i.e. if there are more dimensions than samples, there will only ever be sample -1 PC [imagine a 3D space with 2 points.  There is a vector joining the points, one orthogonal to that, but then there isn't a third one])
+    # mean center each row (ie dimension)
+    X = X - X.mean(axis=1)[:,np.newaxis]                
+    
+    # do PCA using the compact trick (i.e. if there are more dimensions than 
+    # samples, there will only ever be sample -1 PC [imagine a 3D space with 
+    # 2 points.  There is a vector joining the points, one orthogonal to that,
+    # but then there isn't a third one])
+    if samples < dims and dims > 100:                   
         if verbose:
             print('There are more samples than dimensions and more than 100 dimension so using the compact trick.')
         M = (1/samples) * X.T @ X                                        # maximum liklehood covariance matrix.  See blog post for details on (samples) or (samples -1): https://lazyprogrammer.me/covariance-matrix-divide-by-n-or-n-1/
@@ -324,21 +329,43 @@ def PCA_meg2(X, verbose = False, return_dewhiten = True):
         if return_dewhiten:
             dewhiten_mat = np.linalg.pinv(whiten_mat)                           # as always loose a dimension with compact trick, have to use pseudoinverse
 
-    else:                                                                       # or do PCA normally
-        cov_mat = np.cov(X)                                                     # dims by dims covariance matrix
-        vals_noOrder, vecs_noOrder = np.linalg.eigh(cov_mat)                    # vectors (vecs) are columns, not not ordered
-        order = np.argsort(vals_noOrder)[::-1]                                  # get order of eigenvalues descending
-        vals = vals_noOrder[order]                                              # reorder eigenvalues
-        vals = np.abs(vals)                                                        # do to floatint point arithmetic some tiny ones can be nagative which is problematic with the later square rooting
-        vecs = vecs_noOrder[:,order]                                            # reorder eigenvectors
-        vals_sqrt_mat = np.diag(np.reciprocal(np.sqrt(vals)))          # square roots of eigenvalues on diagonal of square matrix
-        whiten_mat = vals_sqrt_mat @ vecs.T                            # eigenvectors scaled by 1/values to make variance same in all directions
+    # or do PCA normally
+    else:                                                                       
+        # dims by dims covariance matrix
+        cov_mat = np.cov(X)                                                     
+        
+        # vectors (vecs) are columns, not not ordered
+        vals_noOrder, vecs_noOrder = np.linalg.eigh(cov_mat)                    
+        
+        # get order of eigenvalues descending
+        order = np.argsort(vals_noOrder)[::-1]                                  
+        
+        # reorder eigenvalues
+        vals = vals_noOrder[order]                                              
+        
+        # ensure no negatives as some approximations of 0 are negative
+        # e.g. -1*10-24
+        vals = np.abs(vals)                                                     
+        
+        # reorder eigenvectors
+        vecs = vecs_noOrder[:,order]                                            
+        
+        # square roots of eigenvalues on diagonal of square matrix
+        vals_sqrt_mat = np.diag(np.reciprocal(np.sqrt(vals)))          
+        
+        # eigenvectors scaled by 1/values to make variance same in all directions
+        whiten_mat = vals_sqrt_mat @ vecs.T                            
         if return_dewhiten:
             dewhiten_mat = np.linalg.inv(whiten_mat)
     # use the vectors and values to decorrelate and whiten
-    x_mc = np.copy(X)                       # data mean centered
-    x_decorrelate =  vecs.T @ X             # data decorrelated
-    x_white = whiten_mat @ X                # data whitened
+    # X is already mean centered.  
+    x_mc = np.copy(X)                       
+    
+    # data decorrelated (X is mean cenetered)
+    x_decorrelate =  vecs.T @ X             
+    
+    # data whitened (X is mean centered)
+    x_white = whiten_mat @ X                
   
     if return_dewhiten:
         return vecs, vals, whiten_mat, dewhiten_mat, x_mc, x_decorrelate, x_white

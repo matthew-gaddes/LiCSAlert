@@ -491,30 +491,6 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
             elif sica_tica == 'tica':
                 pickle.dump(S_ica_dc.T, f)                                                  # time courses are sources and in S.  Note that because these are incremental, they are no longer mean centered.  
 
-            # ##
-        
-            # # S_ica_cum = S_ica                                                                                                                                     # if temporal, sources are time courses, and are for the cumulative ifgs (as the transpose of these was given to the ICA function).  Note that these each have a mean of 0
-            # # S_ica_dc = np.diff(S_ica_cum, axis = 1, prepend = 0)                                                                                                  # the diff of the cumluative time courses is the incremnetal (daisy chain) time course.  Prepend a 0 to make it thesame size as the original diays chain (ie. the capture the difference between 0 and first value).  Note that these are no longer each mean centered
-            # # del S_ica           
-            
-            # d = np.mean(S_ica_cum, axis = 1)                    # means are 0 (within floating point accuracy)
-            # a = np.diff(S_ica_cum, axis = 1)                                                                                                  # the diff of the cumluative time courses is the incremnetal (daisy chain) time course.  Prepend a 0 to make it thesame size as the original diays chain (ie. the capture the difference between 0 and first value).  Note that these are no longer each mean centered
-            # b = np.cumsum(a, axis = 0)
-            # c = np.mean(b, axis = 1)
-        
-            # a = np.arange(1, 10)
-            # a = a- np.mean(a)
-            # b = np.diff(a)
-            # c = np.cumsum(b)
-
-        
-            # S_ica_c = np.cumsum(S_ica_dc, axis = 0)
-            # means = np.mean(S_ica_c, axis = 1)
-            
-            # means_c = np.mean(S_ica_cum, axis = 1)
-
-            # # end debug
-
             pickle.dump(source_residuals, f)
             pickle.dump(Iq_sorted, f)
             pickle.dump(n_clusters, f)
@@ -523,6 +499,26 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
             if label_sources:
                 pickle.dump(label_sources_output, f)
         f.close()
+        
+        
+        # save the PCA outputs.  
+        with open(out_folder / 'pca_results.pkl', 'wb') as f:
+            if sica_tica == 'sica':
+                # spatial maps as rows
+                pickle.dump(S_pca, f)                                                      
+            elif sica_tica == 'tica':
+                # spatial sources are columns of A
+                pickle.dump(A_pca.T, f)                                                       
+            if sica_tica == 'sica':                             
+                # time courses as columns
+                pickle.dump(A_pca, f)                                                    
+            elif sica_tica == 'tica':
+                # time courses for daisy chain ifgs
+                pickle.dump(S_pca_dc.T, f)                                                  
+                # time courses for cumulative ifgs
+                pickle.dump(S_pca_cum.T, f)                                                  
+        f.close()
+        
         print("Done!")
         
 
@@ -548,6 +544,12 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
             pickle.dump(xy_tsne, f)
             pickle.dump(labels_hdbscan, f)
         f.close()
+        
+        with open(out_folder / 'pca_results.pkl', 'wb') as f:
+            pickle.dump(S_pca, f)
+            pickle.dump(A_pca, f)
+        f.close()
+        
         print("Done!")
         return S_ica, A_ica, source_residuals, Iq_sorted, n_clusters, S_all_info, X_mean
 

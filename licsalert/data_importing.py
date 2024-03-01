@@ -665,11 +665,13 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
 
 
 #%%
-def LiCSBAS_json_to_LiCSAlert(json_file):
+def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length):
     """Given a licsbas .json file (as produced by the processing on Jasmin), extract all the information in it
     in a form that is compatible with LiCSAlert (and ICASAR).  
     Inputs:
         json_file | path | path to file, including extnesion.  
+        crop_side_length | None or int | Possibly crop imakes to square of this
+                                        side length in km.  
     Returns:
         displacment_r3 | dict | Keys: cumulative, incremental.  Stored as masked arrays.  Mask should be consistent through time/interferograms
                                 Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
@@ -690,6 +692,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     import numpy.ma as ma
     from datetime import datetime
     import os
+
     
     def nested_lists_to_numpy(nested_list):
         """when opened, .json files have the data as as nested lists.  This function converts
@@ -808,8 +811,6 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
 
     
     ########## Begin
-    
-    displacement_r2 = {}
     displacement_r3 = {}
     tbaseline_info = {}
     ref_xy = []
@@ -817,12 +818,15 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     with open(json_file, 'r') as json_data:
         licsbas_data = json.load(json_data)
     
-    #import pdb; pdb.set_trace()
-    licsbas_json_timestamp = licsbas_data['timestamp']                                                  # this is usually made 10-15 seconds beforet the files final write to disk time
-    licsbas_json_creation_time = datetime.fromtimestamp(os.path.getmtime(json_file))                     # which is this time
+    # this is usually made 10-15 seconds beforet the files final write to disk time
+    licsbas_json_timestamp = licsbas_data['timestamp']                                                  
+    # which is this time
+    licsbas_json_creation_time = datetime.fromtimestamp(os.path.getmtime(json_file))                     
+    # remove the miliseconds part
     licsbas_json_creation_time = licsbas_json_creation_time.replace(microsecond = 0)
     
-    print(f"Opening the LiCSBAS .json file with timestamp {licsbas_json_timestamp} and system creation time {licsbas_json_creation_time}.  ")
+    print(f"Opening the LiCSBAS .json file with timestamp {licsbas_json_timestamp} "
+          f"and system creation time {licsbas_json_creation_time}.  ")
     
     # 0: Get the reference area.  
     ref_list = licsbas_data['refarea'] 
@@ -835,8 +839,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     lons_mg, lats_mg = np.meshgrid(licsbas_data['x'], licsbas_data['y'])    
     if lats_mg[0,0] < lats_mg[-1,0]:                                                                            # if top left latitude is less than bottom left latitude
         lats_mg = np.flipud(lats_mg)                                                                            # flip the lats
-    displacement_r2['lons'] = lons_mg
-    displacement_r2['lats'] = lats_mg
+
     displacement_r3['lons'] = lons_mg
     displacement_r3['lats'] = lats_mg
     
@@ -855,7 +858,9 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     mask_coh_water_r3 = np.repeat(mask_coh_water[np.newaxis,], n_im, axis = 0)                         # new version that has expanded to be the same size as the cumulative ifgs
     
     # 3a: Reference the time series
-    ifg_offsets = np.nanmean(cumulative_r3[:, ref_xy['y_start']: ref_xy['y_stop'], ref_xy['x_start']: ref_xy['x_stop']], axis = (1,2))                                          # get the offset between the reference pixel/area and 0 for each time
+    ifg_offsets = np.nanmean(cumulative_r3[:, ref_xy['y_start']: ref_xy['y_stop'],
+                                           ref_xy['x_start']: ref_xy['x_stop']], 
+                             axis = (1,2))                                          # get the offset between the reference pixel/area and 0 for each time
     cumulative_r3 = cumulative_r3 - np.repeat(np.repeat(ifg_offsets[:,np.newaxis, np.newaxis], cumulative_r3.shape[1],  axis = 1), cumulative_r3.shape[2], axis = 2)         # do the correction (first make ifg_offsets teh same size as cumulative).      
     
     # 3b: Deal with masking etc.
@@ -868,8 +873,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     if displacement_r3["incremental"].mask.shape == ():                                                 # in the case where no pixels are masked, the mask can disappear
         displacement_r3["incremental"].mask = mask_coh_water_r3[1:]                                        # add a new mask, note that we omit the first one (1:) as we have one less ifg when handling incremental
         
-    displacement_r2['cumulative'], displacement_r2['mask'] = rank3_ma_to_rank2(displacement_r3['cumulative'])      # convert from rank 3 to rank 2 and a mask
-    displacement_r2['incremental'], _ = rank3_ma_to_rank2(displacement_r3['incremental'])                          # also convert incremental, no need to also get mask as should be same as above
+
     
     # 4: Get the acquisition dates, then calcualet ifg_names, temporal baselines, and cumulative temporal baselines
     tbaseline_info["acq_dates"] = sorted([''.join(date_hyphen_format.split('-')) for date_hyphen_format in licsbas_data['dates'] ])         # convert from yyy-mm-dd to yyyymmdd
@@ -881,10 +885,23 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     # 5: Try to get the DEM
     try:
         dem = nested_lists_to_numpy(licsbas_data['elev'])                                                 # 
-        displacement_r2['dem'] = dem                                                                      # and added to the displacement dict in the same was as the lons and lats
         displacement_r3['dem'] = dem                                                                      # 
     except:
         print(f"Failed to open the DEM from the hgt file for this volcano, but trying to continue anyway.")
+        
+    # 6: Possibly crop in space
+    if crop_side_length != None:
+        displacement_r3 =square_crop_r3_data_in_space (displacement_r3, 
+                                                       crop_side_length)
+
+    # 7: make r2 data from r3 data.          
+    displacement_r2 = {}
+    displacement_r2['lons'] = displacement_r3['lons']
+    displacement_r2['lats'] = displacement_r3['lats']
+    displacement_r2['dem'] = displacement_r3['dem']
+    output = rank3_ma_to_rank2(displacement_r3['cumulative'])      
+    (displacement_r2['cumulative'], displacement_r2['mask']) = output; del output
+    displacement_r2['incremental'], _ = rank3_ma_to_rank2(displacement_r3['incremental'])                          
 
     # #################### Debuging Sierra Negra
     # print(f"Lon min: {np.min(lons_mg)} Lon max: {np.max(lons_mg)}")
@@ -894,3 +911,80 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     # r2_arrays_to_googleEarth(displacement_r3['incremental'][10:11,], lons_mg, lats_mg, layer_name_prefix = 'layer', kmz_filename = 'ifg', out_folder = './')
     # import pdb; pdb.set_trace()
     return displacement_r2, displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
+
+#%%
+
+def square_crop_r3_data_in_space(displacement_r3, crop_side_length = 20000):
+    """ Given r3 data, crop it to be square with a given side length.  
+    Not tested if the crop_side_length is larger than the image.  
+    
+    Inputs:
+        displacement_r3 | dict | lons, lats, dem, cumualtive, incremental
+        crop_side_length | int | new image size in m
+    Returns:
+        displacement_r3_crop | dict | as above, but cropped in space
+    History:
+        2024_02_01 | MEG | Written
+        
+    """
+    import numpy as np
+    from geopy import distance
+    
+    print(f"Cropping the LiCSBAS .json data to be a square of side length "
+          f"{crop_side_length} m.  ")
+    
+    # size of current image in pixels
+    ny, nx = displacement_r3['lons'].shape
+    
+    # get the size of the image in metres.  
+    image_size = {}
+    # size in metres from bottom left to bottom right
+    image_size['x'] = int(distance.distance((displacement_r3['lats'][-1,0], 
+                                             displacement_r3['lons'][-1,0]),
+                                            (displacement_r3['lats'][-1,-1],
+                                             displacement_r3['lons'][-1,-1])).meters )      
+    
+    # and from bottom left to top left
+    image_size['y'] = int(distance.distance((displacement_r3['lats'][-1,0],
+                                             displacement_r3['lons'][-1,0]),
+                                            (displacement_r3['lats'][0,0], 
+                                             displacement_r3['lons'][0,0])).meters)              
+    
+    if (((image_size['x']) < crop_side_length) or 
+        (((image_size['y']) < crop_side_length))):
+        
+         print(f"The crop_side_length ({crop_side_length}) is larger than  "
+               f"the image size in either x or y.  Setting it to the smaller "
+               f" of the two to continue.  ")
+         crop_side_length = np.min([image_size['x'], image_size['y']])
+                
+    # get the size of a pixel in metres.  
+    pixel_size = {}
+    pixel_size['x'] = image_size['x'] / displacement_r3['lons'].shape[1]
+    pixel_size['y'] = image_size['y'] / displacement_r3['lats'].shape[0]
+    
+    # determine how many pixels new image will be.          
+    ny_new = int((crop_side_length) / pixel_size['y'])
+    nx_new = int((crop_side_length) / pixel_size['x'])
+    
+    # find what the start and stop pixels will be to do the cropping
+    y_start = int((ny/2) - (ny_new/2))
+    y_stop = int((ny/2) + (ny_new/2))
+    
+    x_start = int((nx/2) - (nx_new/2))
+    x_stop = int((nx/2) + (nx_new/2))
+
+    # crop each item in space
+    displacement_r3_crop = {}
+    displacement_r3_crop['lons'] = displacement_r3['lons'][y_start:y_stop,
+                                                           x_start:x_stop]
+    displacement_r3_crop['lats'] = displacement_r3['lats'][y_start:y_stop,
+                                                           x_start:x_stop]
+    displacement_r3_crop['dem'] = displacement_r3['dem'][y_start:y_stop,
+                                                           x_start:x_stop]
+    displacement_r3_crop['cumulative'] = displacement_r3['cumulative'][:, y_start:y_stop,
+                                                                           x_start:x_stop]
+    displacement_r3_crop['incremental'] = displacement_r3['incremental'][:, y_start:y_stop,
+                                                                            x_start:x_stop]
+    
+    return displacement_r3_crop

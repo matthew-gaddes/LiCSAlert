@@ -899,14 +899,20 @@ def reconstruct_ts_from_dir(ics_one_hot, licsalert_out_dir):
 #%%
 
 def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
-    """ Reconstruct a LiCSAlert cumulative time series form the ICs and cumulative time course using a choice of components.
+    """ Reconstruct a LiCSAlert cumulative time series form the ICs and 
+    cumulative time course using a choice of components.
     Automatically detects if sICA or tICA was run and handles mean centering accordingly.  
     
     Inputs:
-        ics_one_hot | list | 1 if IC to be used, 0 if not.  Must be same length as number of ICS  e.g. [1,0,0,0]
-        sources_tcs | list of dicts | one item in list for each IC.  Contains cumulative time course and associated data.  
+        ics_one_hot | list | 1 if IC to be used, 0 if not.  Must be same length
+                            as number of ICS  e.g. [1,0,0,0]
+        sources_tcs | list of dicts | one item in list for each IC.  Contains 
+                                        cumulative time course and associated data.  
         aux_data | dict | dict_keys(['icasar_sources', 'dem', 'mask'])
-        displacement_r2 | dict | dict_keys(['dem', 'mask', 'lons', 'lats', 'E', 'N', 'U', 'incremental', 'means', 'incremental_downsampled', 'mask_downsampled'])
+        displacement_r2 | dict | dict_keys(['dem', 'mask', 'lons', 'lats', 'E',
+                                            'N', 'U', 'incremental', 'means', 
+                                            'incremental_downsampled', 
+                                            'mask_downsampled'])
     Returns:
         X_inc | r2 array | incremental (short temporal baseline) ifgs as rows,
         mean centering has been removed.  
@@ -929,11 +935,12 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
     # make the cumulative time courses
     A_cum = np.zeros((n_acqs, n_sources))                                                                                                      
     for n_source in range(n_sources):
-        A_cum[:, n_source] = np.ravel(ics_one_hot[n_source] *  sources_tcs[n_source]['cumulative_tc'])                                          # multiply by 1 or 0 to include or not, and then put as column in matrix.  
+        # multiply by 1 or 0 to include or not, and then put as column in matrix.  
+        A_cum[:, n_source] = np.ravel(ics_one_hot[n_source] *  sources_tcs[n_source]['cumulative_tc'])                                          
+        
     # the daisy chain ifgs are just the different between each succesive cumulative ifgs.  
     A_inc = np.diff(A_cum, axis = 0)    
     S = aux_data['icasar_sources']
-    
     
     # mean for each incremental ifg (n_acq - 1) means sICA was run
     if displacement_r2['means'].shape[0] == n_acqs-1:                                   
@@ -1016,9 +1023,13 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, b
         if ICASAR_settings['figures'] == 'both':
             ICASAR_settings['figures'] = 'png+window'                                                                                  # update licsalert name to ICASAR name.  
             
-        sources, tcs, residual, Iq, n_clusters, S_all_info, r2_ifg_means, ics_labels  = ICASAR(spatial_data = spatial_ICASAR_data,                                      # Run ICASAR (slow))
-                                                                                               out_folder = out_dir, **ICASAR_settings,
-                                                                                               ica_verbose = 'short', label_sources = True)                     # note that tcs are incremental (i.e. no cumulative)
+        outputs = ICASAR(spatial_data = spatial_ICASAR_data,                                      # Run ICASAR (slow))
+                        out_folder = out_dir, **ICASAR_settings,
+                        ica_verbose = 'short', label_sources = True)                     # note that tcs are incremental (i.e. no cumulative)
+        
+        (sources, tcs, residual, Iq, n_clusters, S_all_info, r2_ifg_means, 
+        ics_labels ) = outputs; del outputs
+        
         mask_sources = displacement_r2['mask']                                                                                                              # rename a copy of the mask
 
         if ICASAR_settings['sica_tica'] == 'tica':                                                                                                         # possibly deal with mean centering which is problematic with tica 
