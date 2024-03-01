@@ -7,3 +7,5 @@ licsalert/__pycache__/*
 004_vesuvius_example_sica/ICASAR_outputs/FastICA_results.pkl
 
 status_outputs/
+
+issue_testing/
