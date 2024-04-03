@@ -78,7 +78,7 @@ licsalert_results_explorer(outdir / volcano, fig_width = 18)                    
 #X_inc_r3, X_cum_r3 = reconstruct_ts_from_dir(ics_one_hot, outdir / volcano)                               # return the cumualtive interferograms reconstrutced using the ICs selected above.  All mean centering has been removed.  
 
 
-
+sys.exit()
 
 #%% Example 2: make all intermediate figures
 

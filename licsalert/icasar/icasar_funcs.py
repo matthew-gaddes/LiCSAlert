@@ -263,6 +263,7 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
         
         if sica_tica == 'sica':
             X_mean = ifgs_dc.means_space                                                                                                # daisy chain ifgs are supplied, so only interested in returning daisy chain means.  
+            # get the mean centered signals, depending on which of the 3 ifg formats
             if ifgs_format == 'all':
                 X_mc = ifgs_all.mixtures_mc_space                                                                                       # the mixtures (used by PCA and ICA) can be all possible ifgs...
             elif ifgs_format == 'inc':
@@ -284,7 +285,9 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
     count = 0
     while (success == False) and (count < 10):
         try:
-            PC_vecs, PC_vals, PC_whiten_mat, PC_dewhiten_mat, x_mc, x_decorrelate, x_white = PCA_meg2(X_mc, verbose = False)                    # do PCA on the mean centered mixtures
+            outputs = PCA_meg2(X_mc, verbose = False)                    
+            (PC_vecs, PC_vals, PC_whiten_mat, PC_dewhiten_mat, x_mc,
+             x_decorrelate, x_white) = outputs; del outputs
             success = True
         except:
             success = False

@@ -101,8 +101,9 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     else:
         volcano_dir = outdir / region / volcano
     volcano_dir.mkdir(parents=True, exist_ok=True)                                   
-        
-    f_run_log = open(volcano_dir / "LiCSAlert_history.txt", 'a')                                                                           # append to the single txt file for that volcano                             
+    
+    # append to the single txt file for that volcano                                 
+    f_run_log = open(volcano_dir / "LiCSAlert_history.txt", 'a')                                                                          
     original = sys.stdout
     sys.stdout = Tee(sys.stdout, f_run_log)
 
@@ -124,7 +125,8 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         (displacement_r2, _, tbaseline_info, ref_xy, licsbas_json_creation_time) = products
         # append licsbas .json file date to list of file dates used (in the text file for each volano)
         append_licsbas_date_to_file(outdir, region, volcano, licsbas_json_creation_time)                                                        
-        del licsbas_json_creation_time                                                                                                                  # delete for safety
+        # delete for safety
+        del licsbas_json_creation_time                                                                                                                  
         
 
     # remaining two ways to pass data to function.  
@@ -220,6 +222,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         processing_dates.extend(LiCSAlert_status['dates_baseline'].pending)
         processing_dates.extend(LiCSAlert_status['dates_baseline'].processed_with_errors)
         
+        pdb.set_trace()
                             
         for processing_date in processing_dates:
 
@@ -953,8 +956,8 @@ def read_config_file(config_file):
     status_string =  config.get('LiCSAlert', 'figure_intermediate')            
     if status_string == 'True':
         licsalert_settings['figure_intermediate'] = True
-    elif status_string == ' False':
-        licsalert_settings['figure_intermediate'] = True
+    elif status_string == 'False':
+        licsalert_settings['figure_intermediate'] = False
     else:
         print(f"The LiCSAlert setting figure_intermediate was not understood in the config file, so setting it to True.  ")
         licsalert_settings['figure_intermediate'] = True

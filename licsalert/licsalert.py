@@ -150,7 +150,8 @@ def LiCSAlert(sources, baselines_cs, ifgs_baseline, mask, ifgs_monitoring = None
 
 #%%
 
-def residual_for_pixels(sources, sources_tcs, ifgs, mask, n_pix_window = 20, residual_type = 'cumulative', n_skip=None):
+def residual_for_pixels(sources, sources_tcs, ifgs, mask, n_pix_window = 20, 
+                        residual_type = 'cumulative', n_skip=None):
     """
     Given spatial sources and their time courses, reconstruct the entire time series and calcualte:
         - RMS of the residual between each reconstructed and real ifg
@@ -968,7 +969,8 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
 
 
 
-def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, baseline_end, out_dir, ICASAR_settings):
+def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, 
+                                  baseline_end, out_dir, ICASAR_settings):
     """
     ICASAR results are always required by LiCSAlert, and these need either to be computed (usually only once at the start),
     or loaded (more common).  
