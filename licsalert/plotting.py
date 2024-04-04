@@ -143,7 +143,10 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
         #ic_colours = plt.get_cmap('coolwarm')
         ic_colours = cmap
         cmap_mid = 1 - ics_max/(ics_max + abs(ics_min))                                     # get the ratio of the data that 0 lies at (eg if data is -15 to 5, ratio is 0.75)
-        ic_colours_cent = remappedColorMap(ic_colours, start=0.0, midpoint=cmap_mid, stop=1, name='ic_colours_cent')                    # make the colours for plotting the ICs
+        
+        # make the colours for plotting the ICs, 0 data is middle (grey) in colour
+        ic_colours_cent = remappedColorMap(ic_colours, start=0.0, midpoint=cmap_mid,
+                                           stop=1, name='ic_colours_cent')                    
         return ic_colours_cent
     
     def sigma_bar_plotter(ax_tc, xvals, yvals, sigma_cmap):
@@ -527,8 +530,10 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         return ax_ics
     
     
-    def plot_original_reconstruction_dem_resid(fig, ax_orig, ax_reco, ax_resid, ax_dem, 
-                                               cumulative_r2, cumulative_reco_r2, displacement_r2, pixel):
+    def plot_original_reconstruction_dem_resid(fig, ax_orig, ax_reco, ax_resid,
+                                               ax_dem, cumulative_r2, 
+                                               cumulative_reco_r2, displacement_r2,
+                                               pixel, initialise = False):
         """ Make the three plots that show the raw signal (from the input time series) and the reconstruction using various 
         IC components, and the DEM.  
         
@@ -558,17 +563,44 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
             if  name in ['Original', 'Reconstruction']:
                 vmin = np.min(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
                 vmax = np.max(np.concatenate([cumulative_r2[-1,], cumulative_reco_r2[-1]]))
+                
+                # make a colormap where 0 is grey.  
+                cmap_mid = 1 - vmax/(vmax + abs(vmin))
+                orig_reco_colours = remappedColorMap(plt.get_cmap('coolwarm'), 
+                                                     start=0.0, midpoint=cmap_mid,
+                                                     stop=1, name='orig_reco_colours')                    
+
                 if name == 'Original':
-                    data_plotted = ax.matshow(col_to_ma(cumulative_r2[-1,], displacement_r2['mask']), vmin = vmin, vmax = vmax)             # Plot the reconstructed last cumulative ifg.  
+                    data_plotted = ax.matshow(col_to_ma(cumulative_r2[-1,], 
+                                                        displacement_r2['mask']),
+                                              vmin = vmin, vmax = vmax, 
+                                              cmap = orig_reco_colours)             
                 else:
-                    data_plotted = ax.matshow(col_to_ma(cumulative_reco_r2[-1,], displacement_r2['mask']), vmin = vmin, vmax = vmax)             # Plot the reconstructed last cumulative ifg.  
+                    data_plotted = ax.matshow(col_to_ma(cumulative_reco_r2[-1,],
+                                                        displacement_r2['mask']),
+                                              vmin = vmin, vmax = vmax,
+                                              cmap = orig_reco_colours)             
             elif name == 'DEM':
                 terrain_cmap = plt.get_cmap('terrain')                                                                                  
                 # get rid of the water colours at the bottom.  
                 terrain_cmap = truncate_colormap(terrain_cmap, 0.2, 1)                                                                  
-                data_plotted = ax_dem.matshow(displacement_r2["dem"], cmap = terrain_cmap)                                                
+                data_plotted = ax_dem.matshow(displacement_r2["dem"], 
+                                              cmap = terrain_cmap)                                                
             elif name == 'Residual':
-                data_plotted = ax.matshow(col_to_ma((cumulative_r2[-1,] - cumulative_reco_r2[-1,]), displacement_r2['mask']))             
+                
+                # make a colormap where 0 is grey.  
+                residual_r1 = cumulative_r2[-1,] - cumulative_reco_r2[-1,]
+                vmax = np.max(residual_r1)
+                vmin = np.min(residual_r1)                
+                cmap_mid = 1 - vmax/(vmax + abs(vmin))
+                resid_colours = remappedColorMap(plt.get_cmap('coolwarm'), 
+                                                 start=0.0, midpoint=cmap_mid,
+                                                 stop=1, name='resid_colours')                    
+                
+                # plot the reisudal
+                data_plotted = ax.matshow(col_to_ma(residual_r1,
+                                                    displacement_r2['mask']), 
+                                          cmap = resid_colours)             
             else:
                 raise Exception(f"An error has occured when iterating through "
                                 f"the four types of data that are plotted.  ")
@@ -579,8 +611,10 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
             cax = ax.inset_axes([0.25, 0.0, 0.5 ,0.05]) 
             fig.colorbar(data_plotted, cax=cax, orientation='horizontal')
             cax.xaxis.set_ticks_position('top')
-            f.text(0.01, 0.99, name, ha='left', va='top',
-                   transform = ax.transAxes, color  = 'tab:orange')
+            # text in top left, can get messy if redrawn so only do once.  
+            if initialise:
+                f.text(0.01, 0.99, name, ha='left', va='top',
+                       transform = ax.transAxes, color  = 'tab:orange')
             
             ax.set_xticks([])
             ax.set_yticks([])
@@ -669,12 +703,20 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     def replot():
         """ When an update to the figure is required, replot the images and the time series for a pixel.  
         """
-        plot_original_reconstruction_dem_resid(f, ax_cum, ax_reco, ax_resid, ax_dem, 
-                                          cumulative_r2, figure_status['cumulative_reco_r2'], 
-                                          displacement_r2, figure_status['pixel'])                            # plot the images with the new reconsrution.   
-        ax_ts.clear()                                                                                                          # clear the time series plot ready for new plot
+        for ax in ax_cum, ax_reco, ax_resid, ax_dem:
+            ax.clear()
+        
+        # plot original, DEM, reconstruction, residual
+        plot_original_reconstruction_dem_resid(f, ax_cum, ax_reco, ax_resid, 
+                                               ax_dem,  cumulative_r2, 
+                                               figure_status['cumulative_reco_r2'], 
+                                               displacement_r2, figure_status['pixel'])                            
+        # clear the time series plot ready for new plot
+        ax_ts.clear()                                                                                                          
+        
+        # replot the time series using the new reconstruction.  
         plot_ts(f, ax_ts, cumulative_r2, figure_status['cumulative_reco_r2'],    
-                displacement_r2['mask'], tbaseline_info, figure_status['pixel'])                                                                 # replot the time series using the new reconstruction.  
+                displacement_r2['mask'], tbaseline_info, figure_status['pixel'])                                                                 
     
         plt.draw()
     
@@ -737,8 +779,10 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     cax_ics = f.add_axes([0.125, 0.11, 0.03, 0.02])
     
     # 3: start plotting.  
+    # plot DEM, original, residual, reconstruction.  
     plot_original_reconstruction_dem_resid(f, ax_cum, ax_reco, ax_resid, ax_dem, 
-                                      cumulative_r2, cumulative_reco_r2, displacement_r2, pixel)     # plot the cumulative, reconscructcion, and DEM.   
+                                           cumulative_r2, cumulative_reco_r2, 
+                                           displacement_r2, pixel, True)     
     
     plot_ts(f, ax_ts, cumulative_r2, cumulative_reco_r2, displacement_r2['mask'], tbaseline_info, pixel)    # plot the time series for the point of interest in the two ways.  
     

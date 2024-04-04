@@ -222,8 +222,6 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         processing_dates.extend(LiCSAlert_status['dates_baseline'].pending)
         processing_dates.extend(LiCSAlert_status['dates_baseline'].processed_with_errors)
         
-        pdb.set_trace()
-                            
         for processing_date in processing_dates:
 
             processing_date = licsalert_date_obj(processing_date, tbaseline_info['acq_dates'])
