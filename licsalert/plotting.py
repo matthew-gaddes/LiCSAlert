@@ -613,6 +613,9 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
             cax.xaxis.set_ticks_position('top')
             # text in top left, can get messy if redrawn so only do once.  
             if initialise:
+                # update the name to be explicit about how residual calculated
+                if name == 'Residual':
+                    name = "Residual (Orig. - Reco.)"
                 f.text(0.01, 0.99, name, ha='left', va='top',
                        transform = ax.transAxes, color  = 'tab:orange')
             
@@ -623,7 +626,8 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
 
     
     
-    def plot_ts(fig, ax_ts, cumulative_r2, cumulative_reco_r2, mask, tbaseline_info, pixel):
+    def plot_ts(fig, ax_ts, cumulative_r2, cumulative_reco_r2, mask, 
+                tbaseline_info, pixel):
         """
         Plot the time series for a pixel in two different datasets.  
         
@@ -633,8 +637,10 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
             cumulative_r2 | r2 array | cumulative ifgs as row vectors.  
             cumulative_reco_r2 | r2 array | reconstrcution of cumultaive data.  
             mask | r2 boolean | true where maskd.  
-            tbaseline_info | dict | must contain baselines_cumulative (i.e. 0,6,12,18 for 6 day acquisitions)
-            pixel | dict | if None, pixel with maximum deformation is plotted.  Or can be dict contiing 'x' and 'y' to choose pixel.  
+            tbaseline_info | dict | must contain baselines_cumulative (i.e. 0,6,
+                                                                       12,18 for 6 day acquisitions)
+            pixel | dict | if None, pixel with maximum deformation is plotted.
+                            Or can be dict contiing 'x' and 'y' to choose pixel.  
         Returns:
             Plot in axes
         History:
@@ -664,18 +670,21 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         ax_ts.axhline(0, c = 'k')
         ax_ts.grid(True)
         ax_ts.yaxis.tick_right()
-        fig.add_subplot(ax_ts)                                                                   # add to figure
+        fig.add_subplot(ax_ts)                                                                   
         ax_ts.yaxis.set_label_position("right")
         ax_ts.set_ylabel("LOS displacemnt (m)")
         
-        xticks_every_nmonths(ax_ts, tbaseline_info['acq_dates'][0], tbaseline_info['baselines_cumulative'], include_tick_labels = True, 
+        xticks_every_nmonths(ax_ts, tbaseline_info['acq_dates'][0], 
+                             tbaseline_info['baselines_cumulative'], 
+                             include_tick_labels = True, 
                               major_ticks_n_months = 12, minor_ticks_n_months = 1)
     
-        ax_ts.legend()
+        ax_ts.legend(markerscale=5)
         
     
     def replot_on_click(event): 
-        """ When the selected pixel changes, replot the time series for that point and the three images with a point showing where was clicked.  
+        """ When the selected pixel changes, replot the time series for that 
+        point and the three images with a point showing where was clicked.  
         """
         # if the click is in one of the images axes, that changes the point plotted
         if (event.inaxes is ax_reco) or (event.inaxes is ax_cum) or (event.inaxes is ax_dem) or (event.inaxes is ax_resid):                          
