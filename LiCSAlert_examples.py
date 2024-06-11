@@ -49,7 +49,7 @@ icasar_settings = {"n_comp"                  : 5,                               
                     "ica_param"              : (1e-2, 150),                                     # (tolerance, max iterations)
                     "hdbscan_param"          : (100,10),                                    # (min_cluster_size, min_samples) Discussed in more detail in Mcinnes et al. (2017). min_cluster_size sets the smallest collection of points that can be considered a cluster. min_samples sets how conservative the clustering is. With larger values, more points will be considered noise. 
                     "ifgs_format"            : 'cum',                                  # can be 'all', 'inc' (incremental - short temporal baselines), or 'cum' (cumulative - relative to first acquisition)
-                    "sica_tica"              : 'tica' }
+                    "sica_tica"              : 'sica' }
 
 licsbas_settings = {"filtered"               : False,
                     "date_start"            : None,

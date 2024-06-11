@@ -322,7 +322,17 @@ volcs_omit = []
 
 ################# end local test volcs            
 
+#%% Step 00: volcano names:
+    
+# all volcanoes?
+# portal public from licsas
+# other list
 
+# how to convert volcano name to lon lat of centre.  
+
+# get the names of the COMET portal public volcanoes
+from licsalert.volcano_portal_tools import get_portal_public_volcanoes
+volc_names = get_portal_public_volcanoes()
 
 
 #%% Step 01: Generate bash file to copy selected data from Jasmin
@@ -338,22 +348,23 @@ local_dir = Path('./licsalert_sync/')
 bash_sync_fle = "jasmin_sync_script.sh"
 
 # open the info on COMET volcano frames and what region they're in.  
+# region is a key, and each value isa list of comet frames in that region
 comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir)
 
 # get the frames for the volcanoes of interest.  
-cov_volcs = volcano_name_to_comet_frames(cov_volc_names, comet_volcano_frame_index)    
+volcs = volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index)    
         
-# write a shell script to download them.  
+# write a shell script to download the LiCSAlert data from jasmin for those frames.    
 write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
-                                   cov_volcs, exclude_json_gz = True,
-                                   exclude_original_ts = True,
+                                   volcs, exclude_json_gz = True,
+                                   exclude_original_ts = False,
                                    exclude_fastica = True)
 
-
+sys.exit()
 
 #%% Step 02:
     
-# run jasmin sync file on FOE-linux
+# run jasmin sync file on FOE-linux (to copy data from jasmin to school server)
 # copy from FOE-linux to local.  
 
 #%% Step 03: Compile licalert status for all frames at all times.  
@@ -362,6 +373,17 @@ write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
 volc_frame_dirs, volc_frame_names = get_all_volcano_dirs(licsalert_dir, volcs_omit,
                                                          regions)                                               
 
+
+pdb.set_trace()
+
+
+
+#%%
+
+
+
+
+#%%
 
 # simple list of datetime for each status day
 day_list = create_day_list(d_start, d_stop)

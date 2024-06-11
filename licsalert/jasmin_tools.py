@@ -122,9 +122,19 @@ def write_jasmin_download_shell_script(jasmin_dir, local_dir, out_file,
                             projects/LiCS/volc-portal/processing_output/licsalert'
                             
         local_dir | Path | directory that shell script will sync into
+        out_file | Path | path to outfile (i.e. includes name)
         volc | list | list of comet_volcano objects.  One item for each volcano,
                         .frames returns all the frames for that volcano.  
-        bash_sync_file | str | name of shell script 
+        exclude_json_gz | Boolean | if True, all the .json.gz files that the 
+                                    web portal uses are not added to the download
+                                    script.  
+        exclude_original_ts | Boolean | if True, aux_data_figs/original_ts_data.pkl
+                                        is not added to the download script for
+                                        each frame.  
+        exclude_fastica | Boolean | if True, ICASAR_results/FastICA_results.pkl
+                                    is not added to the download script for each
+                                    frame
+        
     Returns:
         shell script
     History:
