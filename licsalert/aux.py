@@ -8,6 +8,43 @@ Created on Sun Mar  8 18:10:21 2020
 
 import pdb
 
+#%%
+
+def get_licsalert_date_dirs(parent_dir):
+    """Get the paths to only the LiCSAlert date directories
+    (i.e. not the ones like ICASAR_results)
+    
+    Inputs:
+        parent_dir | str (or maybe Path?) | licsalert frame directory
+    Returns:
+        licsalert_date_dirs | list of strings | names of date dirs.  Not full paths.  
+    History:
+        2024_06_14 | MEG | Written.  
+    """
+    import re
+    from glob import glob
+    import os
+    from pathlib import Path
+    
+    # Regular expression for eight digits
+    pattern = re.compile(r'^\d{8}$')
+
+    licsalert_date_dirs = []
+
+    # get all the dirs
+    child_dirs = [d for d in glob(str(Path(parent_dir) / '*')) if os.path.isdir(d)]
+
+    # loop through and check if they fit the YYYYMMDD form
+    for child_dir in child_dirs:
+        # Extract the directory name
+        dir_name = os.path.basename(child_dir)
+        if pattern.match(dir_name):
+            licsalert_date_dirs.append(dir_name)
+    licsalert_date_dirs = sorted(licsalert_date_dirs)
+        
+    return licsalert_date_dirs
+
+
 
 #%%
 

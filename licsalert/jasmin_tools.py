@@ -9,6 +9,120 @@ import pdb
 from glob import glob
 from pathlib import Path
 
+#%%
+
+
+def get_lon_lat_of_volcs(volcs):
+    """ Given a list of volcs, add the lon and lat of the centre of the 
+    LiCSBAS data (averaged across all the frames)
+    
+    Inputs:
+        volcs | list of comet volcs |
+    Returns:
+        volcs | list of comet volcs | now with lon_lat attribute
+    History:
+        2024_06_12 | MEG | Written
+        
+    """
+    import numpy as np
+    
+    from licsalert.data_importing import open_aux_data
+    
+    print(f"Finding the lon and lat of the centre of each volcano.  ")
+    
+    for volc in volcs:
+        lons = []
+        lats = []
+        for frame in volc.frame_status:
+            try:
+                # open the time series 
+                displacement_r2, tbaseline_info, aux_data = open_aux_data(Path(frame))
+                # get the shape of the images
+                ny, nx = displacement_r2['lons'].shape
+                # get the lon and lat of the centre pixel
+                lons.append(displacement_r2['lons'][int(ny/2), int(nx/2)])
+                lats.append(displacement_r2['lats'][int(ny/2), int(nx/2)])
+            except:
+                pass
+                
+        # average across the frames for that volcano
+        if (len(lons) > 0) and (len(lats) > 0):
+            volc.lon_lat = (sum(lons)/ len(lons), sum(lats) / len(lats))
+        else:
+            volc.lon_lat = (np.nan, np.nan)
+    
+    return volcs
+    
+
+#%%
+
+
+def update_volcs_with_data(volcs, volc_frame_dirs, volc_frame_names,
+                           verbose = False):
+    """ Given the LiCSAlert volcs list (list of comet volcano items),
+    update to contain only ones that actually have data.  
+    
+    Inputs:
+        volcs | list | one item for each volcano
+        volc_frame_dirs | list | each item is path to directory of licsalert results
+        volc_frame_names | list | names of frames in above list.  Must be the 
+                                same length
+                                
+    Returns:
+        volcs | list | one item for each volcano, volcanoes with no data removed.  
+                        frame_status attribute now has path to data, if it exists
+                        and NA if it doesn't 
+                        
+    History:
+        2024_06_12 | MEG | Written
+    
+    """
+    
+    def contains_only_na(lst):
+        for item in lst:
+            if item != "NA":
+                return False
+        return True
+    
+    del_indexes = []
+    # loop through each volcano
+    for volc_n, volc in enumerate(volcs):
+        
+        frame_status = []
+        # and each frame that that volcanoe has
+        for frame in volc.frames:
+            
+            # to see if there is licsalert data for that frame
+            if  frame in volc_frame_names:
+                # get the index of the frame
+                index = volc_frame_names.index(frame)
+                frame_status.append(volc_frame_dirs[index])
+            else:
+                frame_status.append('NA')
+        volc.frame_status = frame_status
+        
+        # check if we should remove the volcano as there's no data
+        if contains_only_na(frame_status):
+            del_indexes.append(volc_n)
+
+    # Sort the indexes in descending order to avoid shifting issues, then delete
+    for index in sorted(del_indexes, reverse=True):
+        del volcs[index]
+        
+    # possibly update user on terminal
+    if verbose:
+        for volc in volcs:
+            print(volc.name)
+            print(volc.frames)
+            print(volc.frame_status)
+            print('\n')
+        
+        
+    return volcs
+    
+
+#%%
+
 def open_comet_frame_files(comet_volcano_frame_index_dir):
     """ Given a directory that contains files of the name of each COMET
     volcano frame and which region it's in, turn these into a dictionary of 
@@ -63,6 +177,9 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
         
     History:
         2024_01_18 | MEG | Written
+        2024_06_12 | MEG | Fix bug that if volcan name was within other name, 
+                           that would be returned (e.g. if volcano is abc, abcdef
+                           would also be returned. )     
     """
     
     
@@ -72,11 +189,11 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
             """ 
             """
             self.name = name
-            self.computer_name = self.create_simple_name()
+            self.computer_name = self.create_computer_name()
             self.frames = []
             
             
-        def create_simple_name(self):
+        def create_computer_name(self):
             """
             """
             from unidecode import unidecode
@@ -100,7 +217,9 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
             
             # loop through the frames to see if the volcano name is in the frame name
             for frame in frames:
-                if volc.computer_name in frame:
+                # the last 18 digits of a frame are the track / burst etc.  
+                # before that is the volcano name in snake_case
+                if volc.computer_name == frame[:-18]:
                     volc.region = region
                     volc.frames.append(frame)
         volc_frames.append(volc)

@@ -8,6 +8,371 @@ Created on Mon Apr  3 15:57:28 2023
 
 import pdb
 import matplotlib.pyplot as plt
+
+#%%
+
+
+def offset_volc_lls(volcs, threshold = 0.1, offset = 0.2, attempts = 10,
+                    verbose = False):
+    """ Given the lis of all volcs, update the lons and lats so that
+    when plotted, they do not lie on top of each other.  
+    """
+    from copy import deepcopy
+    from licsalert.plotting import update_overlapping_points
+    
+    def volc_ll_to_array(volcs):
+        """ Extract the lon lats of each volcano from the volc list of objects.  
+        """
+        import math
+        
+        lls = []
+        indexes = []
+        for volc_n, volc in enumerate(volcs):
+            if (not math.isnan(volc.lon_lat[0])) and (not math.isnan(volc.lon_lat[1])):
+                lls.append(volc.lon_lat)
+                indexes.append(volc_n)
+        # convert from list of tuples to list of lists
+        lls = [list(ll) for ll in lls]
+        return lls, indexes
+
+    # extract the lon lats of all the volcs    
+    lls_original, indexes = volc_ll_to_array(volcs)
+
+    # repeatdely try to move overlapping points
+    attempt = 0
+    finished = False   
+    lls = deepcopy(lls_original)
+    while (finished == False) and (attempt < attempts):
+        if verbose:
+            print(f"Attempt: {attempt}")
+        lls, finished = update_overlapping_points(lls, threshold = threshold,
+                                                  offset = offset, verbose = verbose)
+        attempt +=1 
+    
+    # updat the volcs list
+    for index_n, index in enumerate(indexes):
+        setattr(volcs[index], 'lon_lat_offset', tuple(lls[index_n]))
+    
+#%%
+
+
+def update_overlapping_points(shifted_points, threshold = 0.01,
+                              offset = 0.02, verbose = False):
+    """ When plotting scatter points, multiple close volcanoes can plot on
+    top of each other.  Calculate new lons and lats for them that intelligently 
+    displace them from their true location.  
+    Inputs:
+        shifted_points | list of lists | [[lon, lat], [lon, lat]] Points will be
+                                        updated so they don't overlap
+        threshold | float | points within this distance of each other will be
+                            moved.  
+        offset | float | how much they will be moved.  
+        
+    Returns:
+        shifted_points | list of lists | as above, but updated.  
+        
+    History:
+        2024_06_21 | MEG | Written
+    """
+    
+    import numpy as np
+        
+    def move_point(x, y, offset, angle_degrees):
+        """
+        Move a point (x, y) by a given distance (offset) at a given angle (angle_degrees).
+    
+        Parameters:
+        - x, y: Original coordinates of the point
+        - offset: Distance to move the point
+        - angle_degrees: Angle at which to move the point, where 0 is up the page
+    
+        Returns:
+        - new_x, new_y: New coordinates of the point
+        """
+        import math
+        angle_radians = math.radians(angle_degrees)  # Convert angle to radians
+        new_x = x + offset * math.sin(angle_radians)  # Calculate new x position
+        new_y = y + offset * math.cos(angle_radians)  # Calculate new y position
+        return new_x, new_y
+    
+    
+    
+    def calculate_bearing(lat1, lon1, lat2, lon2):
+        """
+        Calculate the bearing between two points.
+    
+        Parameters:
+        lat1, lon1 : float
+            Latitude and longitude of the first point in degrees.
+        lat2, lon2 : float
+            Latitude and longitude of the second point in degrees.
+    
+        Returns:
+        float
+            Bearing from the first point to the second point in degrees.
+        """
+        import math
+        
+        # Convert latitude and longitude from degrees to radians
+        lat1 = math.radians(lat1)
+        lon1 = math.radians(lon1)
+        lat2 = math.radians(lat2)
+        lon2 = math.radians(lon2)
+    
+        # Difference in longitudes
+        delta_lon = lon2 - lon1
+    
+        # Calculate the bearing
+        x = math.sin(delta_lon) * math.cos(lat2)
+        y = math.cos(lat1) * math.sin(lat2) - (math.sin(lat1) * math.cos(lat2) * math.cos(delta_lon))
+    
+        initial_bearing = math.atan2(x, y)
+    
+        # Convert bearing from radians to degrees
+        initial_bearing = math.degrees(initial_bearing)
+    
+        # Normalize the bearing to 0°-360°
+        compass_bearing = (initial_bearing + 360) % 360
+    
+        return compass_bearing
+    
+    
+    # start main function    
+    for point_n1, point1 in enumerate(shifted_points):
+        
+        # calculate distance from that point to all others.  
+        distances = np.zeros(len(shifted_points))
+        for point_n2, point2 in enumerate(shifted_points):
+            distances[point_n2] = np.linalg.norm(np.array(point1) - np.array(point2))
+        
+        # the numbers of the points that overlap
+        overlap_args = np.argwhere(distances < threshold)[:,0]
+        
+        # get the number of points that overlap
+        n_overlap = len(overlap_args)
+        
+
+        # there is always an "overlap" of 0 as its the point to itself
+        if n_overlap > 1:
+            
+            # get the mean of the overlapping points
+            overlapping_points = []
+            overlapping_xs = []
+            overlapping_ys = []
+            for overlap_arg in overlap_args:
+                overlapping_points.append(shifted_points[overlap_arg])
+                overlapping_xs.append(shifted_points[overlap_arg][0])
+                overlapping_ys.append(shifted_points[overlap_arg][1])
+            mean_x = np.mean(overlapping_xs)
+            mean_y = np.mean(overlapping_ys)
+            
+            # find the bearing from the mean to each point.  
+            bearings = []
+            for overlap_arg in overlap_args:
+                # lat then lon
+                bearings.append(calculate_bearing(mean_y, mean_x,
+                                                  shifted_points[overlap_arg][1], 
+                                                  shifted_points[overlap_arg][0]))
+                
+            # get what order the bearings are in
+            indices = list(range(len(bearings)))
+            indices = sorted(indices, key=lambda i: bearings[i])
+                
+            # debug check
+            # f, ax = plt.subplots()
+            # for point_n, point in enumerate(overlapping_points):
+            #     ax.scatter(point[0], point[1])
+            #     ax.text(point[0], point[1], bearings[point_n])
+            # ax.scatter(mean_x, mean_y, marker = '*')
+               
+            # points move evenly spaced around a circle from original point
+            degrees = 360 / n_overlap
+            # iterate through the overlapping points and move (note that 
+            # iterate in the order given by bearins so that points don't overlap)
+            for n, overlap_arg in enumerate(overlap_args[indices]):
+                
+                if n == 0:
+                    original_x = shifted_points[overlap_arg][0]
+                    original_y = shifted_points[overlap_arg][1]
+                
+                new_x, new_y = move_point(shifted_points[overlap_arg][0],
+                                          shifted_points[overlap_arg][1],
+                                          offset, degrees * n)
+                
+                shifted_points[overlap_arg][0] = new_x
+                shifted_points[overlap_arg][1] = new_y
+            if verbose:    
+                print(f"{n_overlap} overlapping points at ({original_x}, {original_y}) "
+                      f"were dispersed by {offset}   ")
+            finished = False
+            return shifted_points, finished
+                
+            
+        else:
+            # move to the next point to see if it overlaps with anything
+            pass
+    # never have distances below threshold so finished
+    finished = True
+    if verbose:
+        print(f"No overlapping points (below 'threshold') were found, so exiting.  ")
+    return shifted_points, finished
+
+
+#%%
+
+
+def licsalert_status_map(volcs, outdir, sig_max = 10,
+                         plot_frequency = "monthly",  backend ="agg"):
+    """ Plot multiple volcano statuses on the worldmap.  Colour indicates
+    status.  
+    
+    Inputs:
+        volcs | list of comet_volcanos | contains info such as lon_lat, 
+                                         lon_lat_offset (as above, but shifted
+                                         so points don't lie on top of each other)
+         outdir | Path | ouput png files, if backed is 'agg'
+         sig_max | int or float | maximum number of sigmas for colourscale 
+                                 i.e. if set to 10, any signal that is 10 sigmas
+                                     or more will plot as maximum colour (yellow)
+         plot_frequency | string | daily / monthly / yearly 
+         backend | string | 'agg' if exporting pngs, 'qt5agg' for interactive. 
+     Returns:
+         Figure
+         
+     History:
+         2024_06_21 | MEG | Written.  
+         
+    """
+    
+    import matplotlib.pyplot as plt
+    import cartopy.crs as ccrs
+    import datetime as dt
+    import math
+    import warnings
+    from copy import deepcopy
+
+    if plt.get_backend() != backend:                                                               
+        plt.switch_backend(backend)
+        
+    
+    # all volcanoes should shre the same day list (list of datetimes, 1 epr day)
+    day_list = volcs[0].combined_status['dates']
+    
+    # 1 figure for each day.
+    for day_n, day in enumerate(day_list):
+        
+        # check if we should plot this one
+        if plot_frequency == "daily":
+            plot_today = True
+        elif plot_frequency == 'monthly':
+            plot_today = day.day == 1
+        elif plot_frequency == 'yearly':
+            plot_today = (day.day == 1) and (day.month == 1)
+        
+        if plot_today :
+            fig = plt.figure(figsize=(20, 11))
+            ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
+            
+            # Make the map global
+            ax.set_global()
+            ax.stock_img()
+            ax.coastlines()
+        
+            scatter_objects = []
+            for volc_n, volc in enumerate(volcs):
+        
+                dayn_index = volc.combined_status['dates'].index(day)
+                existing_def = volc.combined_status['existing_defs'][dayn_index]
+                new_def = volc.combined_status['new_defs'][dayn_index]
+        
+                # check not nans
+                if (not math.isnan(volc.lon_lat[0])) and (not math.isnan(volc.lon_lat[1])):
+                
+                    # if we do, plot it
+                    sc = ax.scatter(volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
+                                    c=max(existing_def, new_def), 
+                                    s=50, transform=ccrs.PlateCarree(), vmin = 0, vmax = sig_max)
+                    scatter_objects.append((sc, volc.name))
+                    
+                    # also plot the lines from the shifted points to their true point.  
+                    ax.plot([volc.lon_lat_offset[0], volc.lon_lat[0]],
+                            [volc.lon_lat_offset[1], volc.lon_lat[1]],
+                            c = 'k',  transform=ccrs.PlateCarree())
+                
+            
+            #colorbar
+            cbar_ax = fig.add_axes([0.35, 0.15, 0.3, 0.01])  
+            cbar = fig.colorbar(sc, cax=cbar_ax, orientation='horizontal', 
+                                label='# sigma from background')
+            #manually ensure max goes to max for all points (and not just last one)
+            sc.set_clim(0, sig_max)  
+            
+            # title
+            date_str = dt.datetime.strftime(volc.combined_status['dates'][dayn_index], 
+                                            "%Y/%m/%d")
+            fig.suptitle(date_str)
+            
+    
+            # save as a png and close the figure.          
+            filename = dt.datetime.strftime(volc.combined_status['dates'][dayn_index], 
+                                            "%Y%m%d")
+            
+            # Suppress warnings for tight_layout
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                plt.tight_layout()
+            
+            if backend == 'Qt5agg':
+                # Create an annotation object
+                annot = ax.annotate("", xy=(0,0), xytext=(10,10),
+                                    textcoords="offset points",
+                                    bbox=dict(boxstyle="round", fc="w"),
+                                    arrowprops=dict(arrowstyle="->"),
+                                    transform=ccrs.PlateCarree())
+                annot.set_visible(False)
+                
+                # Function to update the annotation
+                def update_annot(ind, scatter_obj, label):
+                    pos = scatter_obj.get_offsets()[ind["ind"][0]]
+                    annot.xy = pos
+                    annot.set_text(label)
+                    annot.get_bbox_patch().set_alpha(0.4)
+                
+                # Function to check if mouse is over a scatter point
+                def hover(event):
+                    vis = annot.get_visible()
+                    if event.inaxes == ax:
+                        for scatter_obj, label in scatter_objects:
+                            cont, ind = scatter_obj.contains(event)
+                            if cont:
+                                update_annot(ind, scatter_obj, label)
+                                annot.set_visible(True)
+                                fig.canvas.draw_idle()
+                                return
+                    if vis:
+                        annot.set_visible(False)
+                        fig.canvas.draw_idle()
+                
+                # Connect the hover event to the hover function
+                fig.canvas.mpl_connect("motion_notify_event", hover)
+
+                
+            
+            if backend == 'agg':
+                fig.savefig(outdir / f"{filename}.png")
+                plt.close(fig)
+                print(f"Saved the LiCSAlert status map for {filename}")
+            
+        else:
+            pass
+        
+        
+
+
+#%%
+
+
+
 #%%
 
 

@@ -607,3 +607,14 @@ Source 4: turbulent_APS
 Saving the key results as a .pkl file... Done!
 Updating the masks for the two sources.  Of the 7873 in data1 and 7873 in data2, 7873 are in both and can be used.  
 Running LiCSAlert for 20210912 (acquisition # 326 of 326) : monitoring date
+
+
+
+
+
+LiCSAlert is being run for 001_campi_flegrei_example at 12/06/2024 14:41:38
+LiCSAlert is opening a LiCSBAS directory.  
+Opening the LiCSBAS unfiltered results.  
+Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
+[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.licsalert, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.downsample_ifgs, licsalert.icasar, licsalert.icasar.aux[0m
+Succesfully started the script.  

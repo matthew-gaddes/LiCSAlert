@@ -36,6 +36,8 @@ Created on Wed Aug 30 10:28:07 2023
 
 """
 
+print("Succesfully started the script.  ")
+
 import numpy as np
 import matplotlib.pyplot as plt 
 from pathlib import Path
@@ -281,15 +283,19 @@ cov_volc_names = [ # camilla deforming list
 # licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
 #                      "06_LiCSAlert/05_jasmin_clones/02_2024_01_19_cov_only")
 
-# COV volcanoes
+# current clone of Jasmin data
 licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
-                      "06_LiCSAlert/05_jasmin_clones/2024_02_08_cov")
+                      "06_LiCSAlert/05_jasmin_clones/2024_06_11_comet_talk")
+
+# print(f"USING THE TEMPORARY TEST DIRECTORY")
+# licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
+#                       "06_LiCSAlert/05_jasmin_clones/test")
 
 
 out_dir = Path("./status_outputs/cov")
 # d_start = "20200101"                # LiCSAlert baseline ends at end of 2019?  
 d_start = "20180101"                # LiCSAlert baseline ends at end of 2019?  
-d_stop = "20230901"
+d_stop = "20240621"
 test_volcano = 'sabancaya*'
 regions = True
 
@@ -339,6 +345,7 @@ volc_names = get_portal_public_volcanoes()
 
 from licsalert.jasmin_tools import open_comet_frame_files, volcano_name_to_comet_frames
 from licsalert.jasmin_tools import write_jasmin_download_shell_script
+from licsalert.jasmin_tools import update_volcs_with_data, get_lon_lat_of_volcs
 
 comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
 
@@ -360,7 +367,7 @@ write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
                                    exclude_original_ts = False,
                                    exclude_fastica = True)
 
-sys.exit()
+
 
 #%% Step 02:
     
@@ -369,29 +376,26 @@ sys.exit()
 
 #%% Step 03: Compile licalert status for all frames at all times.  
 
-# get path to outputs for each volcanoes, and their names (snake case)
-volc_frame_dirs, volc_frame_names = get_all_volcano_dirs(licsalert_dir, volcs_omit,
+# get path to licsalert outputs for each volcanoes, and their names (snake case)
+volc_frames, volc_frame_names = get_all_volcano_dirs(licsalert_dir, volcs_omit,
                                                          regions)                                               
 
+# update volcs so it only contains volcanoes we have data for.  
+volcs = update_volcs_with_data(volcs, volc_frames, volc_frame_names,
+                               verbose = False)
 
-pdb.set_trace()
-
-
-
-#%%
-
-
-
-
-#%%
+# add the lon lat info for each volcano
+volcs = get_lon_lat_of_volcs(volcs)
 
 # simple list of datetime for each status day
 day_list = create_day_list(d_start, d_stop)
 
-# get the licsalert status for each volcano frame, 
-# also remove dates where no statuses change.  
-output = extract_licsalert_status(volc_frame_dirs, volc_frame_names, day_list)           
-(licsalert_status, volc_frame_names, volc_frame_dirs) = output; del output
+# get the licsalert status for each volcano frame (update volcs)
+extract_licsalert_status(volcs, day_list)           
+
+
+
+
 
 #%% Step 04: figure for one volcano at all times.  
 
@@ -416,18 +420,28 @@ output = extract_licsalert_status(volc_frame_dirs, volc_frame_names, day_list)
 
 #%% Step 05: figure for all volcs at all times.  
 
-status_fig_all_volcs(licsalert_status, volc_frame_names, day_list,  
-                     out_dir = out_dir / "all_volcs", 
-                     figsize = (20, 12), plot_frequency = 6, label_fs = 16)
+# status_fig_all_volcs(licsalert_status, volc_frame_names, day_list,  
+#                      out_dir = out_dir / "all_volcs", 
+#                      figsize = (20, 12), plot_frequency = 6, label_fs = 16)
 
-# convert the directory of pngs to a single gif
-pngs_to_gif(out_dir / "all_volcs", out_dir / "all_volcs" / "animation.gif",
-            image_duration = 250)                                                 
-
-
-#%%
+# # convert the directory of pngs to a single gif
+# pngs_to_gif(out_dir / "all_volcs", out_dir / "all_volcs" / "animation.gif",
+#             image_duration = 250)                                                 
 
     
+#%% Step 06: New worldmap figure
+
+from licsalert.plotting import offset_volc_lls
+
+# adjust the lon lats of the volcanoes so when plotted they don't overlap
+offset_volc_lls(volcs,  threshold = 2., offset = 2.1, attempts = 200)
+    
+    
+from licsalert.plotting import licsalert_status_map
+    
+licsalert_status_map(volcs, outdir = Path("./status_outputs/03_comet/"),
+                     backend = 'qt5agg')
+
     
     
     
