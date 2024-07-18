@@ -1025,9 +1025,10 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info,
         if ICASAR_settings['figures'] == 'both':
             ICASAR_settings['figures'] = 'png+window'                                                                                  # update licsalert name to ICASAR name.  
             
-        outputs = ICASAR(spatial_data = spatial_ICASAR_data,                                      # Run ICASAR (slow))
+        # Run ICASAR (slow). # note that tcs are incremental (i.e. not cumulative)
+        outputs = ICASAR(spatial_data = spatial_ICASAR_data,
                         out_folder = out_dir, **ICASAR_settings,
-                        ica_verbose = 'short', label_sources = True)                     # note that tcs are incremental (i.e. no cumulative)
+                        ica_verbose = 'short', label_sources = True)                     
         
         (sources, tcs, residual, Iq, n_clusters, S_all_info, r2_ifg_means, 
         ics_labels ) = outputs; del outputs

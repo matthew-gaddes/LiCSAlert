@@ -117,7 +117,12 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     if licsbas_jasmin_dir is not None:
         # read various settings from the volcano's config file
         outputs = read_config_file(volcano_dir / "LiCSAlert_settings.txt")                                          
+        
+        print(f"SETTINGS READER HAS NOT BEEN UPDATED SINCE ICASAR ARGS CHANGED")
+        
         (licsalert_settings, icasar_settings, licsbas_settings) = outputs; del outputs
+        
+        
         
         print(f"LiCSAlert is opening a JASMIN COMET Volcano Portal timeseries json file.  ")
         products = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json",
@@ -136,7 +141,8 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
                              'figure_intermediate',  'figure_type', 'downsample_run', 
                              'downsample_plot', 'inset_ifgs_scaling'],
                             'licsalert_settings')
-        check_required_args(icasar_settings, ['n_comp'], 'icasar_settings')
+        check_required_args(icasar_settings, ['n_pca_comp_start', 'n_pca_comp_stop'],
+                            'icasar_settings')
 
         # 3.2: As a LiCSBAS direcotry
         if licsbas_dir is not None:
@@ -201,10 +207,15 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
           f"  2) Run LiCSAlert: {LiCSAlert_status['run_LiCSAlert']}")
     
 
-    if LiCSAlert_status['run_LiCSAlert']:                                                                                       # if LiCSAlert will be run...
-    
-        icasar_sources, icasar_mask, ics_labels = load_or_create_ICASAR_results(LiCSAlert_status['run_ICASAR'], displacement_r2, tbaseline_info,                             # either load or create the ICASAR sources.  
-                                                                                licsalert_settings['baseline_end'],  volcano_dir / "ICASAR_results", icasar_settings)        # Note that this uses mixtures_mc, which are mean centered in space or time already depending on if sica or tica is being used.  
+    if LiCSAlert_status['run_LiCSAlert']:                                                                                       
+
+        # either load ICA from previous run, or compute it.  
+        outputs = load_or_create_ICASAR_results(LiCSAlert_status['run_ICASAR'], 
+                                                displacement_r2, tbaseline_info,                             
+                                                licsalert_settings['baseline_end'],
+                                                volcano_dir / "ICASAR_results", 
+                                                icasar_settings)        
+        (icasar_sources, icasar_mask, ics_labels) = outputs; del outputs
 
         # 4b: Deal with changes to the mask of pixels 
         licsbas_mask = displacement_r2['mask']                                                                                                                              # make a copy of the licsbas mask before it gets overwritten with the new combined mask

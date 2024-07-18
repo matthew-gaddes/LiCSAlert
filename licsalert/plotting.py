@@ -221,8 +221,8 @@ def update_overlapping_points(shifted_points, threshold = 0.01,
 #%%
 
 
-def licsalert_status_map(volcs, outdir, sig_max = 10,
-                         plot_frequency = "monthly",  backend ="agg"):
+def licsalert_status_map(volcs, outdir, day_list, sig_max = 10, 
+                         plot_frequency = "monthly",  figure_type = 'window'):
     """ Plot multiple volcano statuses on the worldmap.  Colour indicates
     status.  
     
@@ -231,6 +231,7 @@ def licsalert_status_map(volcs, outdir, sig_max = 10,
                                          lon_lat_offset (as above, but shifted
                                          so points don't lie on top of each other)
          outdir | Path | ouput png files, if backed is 'agg'
+         day_list | list of datetimes | 
          sig_max | int or float | maximum number of sigmas for colourscale 
                                  i.e. if set to 10, any signal that is 10 sigmas
                                      or more will plot as maximum colour (yellow)
@@ -251,12 +252,21 @@ def licsalert_status_map(volcs, outdir, sig_max = 10,
     import warnings
     from copy import deepcopy
 
-    if plt.get_backend() != backend:                                                               
-        plt.switch_backend(backend)
-        
+    # if plt.get_backend() != backend:   
+    #     print(f"The matplotlib backend was previously {plt.get_backend()}, "
+    #           f"but has been switched to ", end = '')
+    #     plt.switch_backend(backend)
+    #     print(f"{plt.get_backend()}")
     
-    # all volcanoes should shre the same day list (list of datetimes, 1 epr day)
-    day_list = volcs[0].combined_status['dates']
+    # Check matplotlib backend is set correctly 
+    if figure_type == 'png':
+        plt.switch_backend('Agg')                                                           
+    else: 
+        if plt.get_backend() != 'Qt5Agg':                                                               
+            plt.switch_backend('Qt5Agg')                                                           
+    
+    # # all volcanoes should shre the same day list (list of datetimes, 1 epr day)
+    # day_list = volcs[0].combined_status['dates']
     
     # 1 figure for each day.
     for day_n, day in enumerate(day_list):
@@ -269,7 +279,7 @@ def licsalert_status_map(volcs, outdir, sig_max = 10,
         elif plot_frequency == 'yearly':
             plot_today = (day.day == 1) and (day.month == 1)
         
-        if plot_today :
+        if plot_today:
             fig = plt.figure(figsize=(20, 11))
             ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
             
@@ -322,7 +332,8 @@ def licsalert_status_map(volcs, outdir, sig_max = 10,
                 warnings.simplefilter("ignore")
                 plt.tight_layout()
             
-            if backend == 'Qt5agg':
+            # start the interactive part of the figure
+            if (figure_type == 'window') or (figure_type == 'both'):
                 # Create an annotation object
                 annot = ax.annotate("", xy=(0,0), xytext=(10,10),
                                     textcoords="offset points",
@@ -356,11 +367,9 @@ def licsalert_status_map(volcs, outdir, sig_max = 10,
                 # Connect the hover event to the hover function
                 fig.canvas.mpl_connect("motion_notify_event", hover)
 
-                
-            
-            if backend == 'agg':
+            # 8: Possible save output
+            if (figure_type == 'png') or (figure_type == 'both'):
                 fig.savefig(outdir / f"{filename}.png")
-                plt.close(fig)
                 print(f"Saved the LiCSAlert status map for {filename}")
             
         else:
@@ -650,7 +659,7 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
     # 2 Initiate the figure    
     fig1 = plt.figure(figsize=(18,10))
     fig1.canvas.manager.set_window_title(figtitle)
-    grid = gridspec.GridSpec((n_ics + 3), 11, wspace=0.3, hspace=0.1)                        # divide into 2 sections, 1/5 for ifgs and 4/5 for components
+    grid = gridspec.GridSpec((n_ics + 3), 11, wspace=0.3, hspace=0.1)                        
 
     
     # 3: Plot the ifgs along the top
@@ -1157,17 +1166,23 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
     plot_original_reconstruction_dem_resid(f, ax_cum, ax_reco, ax_resid, ax_dem, 
                                            cumulative_r2, cumulative_reco_r2, 
                                            displacement_r2, pixel, True)     
+
+    # plot the time series for the point of interest in the two ways.      
+    plot_ts(f, ax_ts, cumulative_r2, cumulative_reco_r2, displacement_r2['mask'], 
+            tbaseline_info, pixel)    
     
-    plot_ts(f, ax_ts, cumulative_r2, cumulative_reco_r2, displacement_r2['mask'], tbaseline_info, pixel)    # plot the time series for the point of interest in the two ways.  
-    
-    ax_ics = plot_ics_ctcs(f, grid, cax_ics, aux_data['icasar_sources'], displacement_r2['mask'], 
-                            sources_tcs, tbaseline_info['acq_dates'], tbaseline_info['baselines_cumulative'])
+    ax_ics = plot_ics_ctcs(f, grid, cax_ics, aux_data['icasar_sources'], 
+                           displacement_r2['mask'],  sources_tcs, 
+                           tbaseline_info['acq_dates'], 
+                           tbaseline_info['baselines_cumulative'])
     
     # 3:  start the interactive bit
-    figure_status = {'pixel' : pixel,                                                                               # mutable object that is mutated by the interactive functions.  get current pixel that time series is plotted for.  
-                      "cumulative_reco_r2" : cumulative_reco_r2,                                                    # reconsruction using selected ICs (assumed all at first.)
-                      "ic_axs"              : ax_ics,
-                      "ic_status"                 : [True for i in range(n_sources)]}                           # all ICs on at the start
+    # mutable object that is mutated by the interactive functions.  
+    # get current pixel that time series is plotted for.  
+    figure_status = {'pixel'                : pixel,                                                                               
+                     "cumulative_reco_r2"   : cumulative_reco_r2,                                                    
+                     "ic_axs"               : ax_ics,
+                     "ic_status"            : [True for i in range(n_sources)]}                           
     
     cid = f.canvas.mpl_connect('button_press_event', replot_on_click)                   # click on point to plot it.  
 

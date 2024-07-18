@@ -6,6 +6,8 @@ Created on Wed Dec 18 11:59:13 2019
 @author: matthew
 """
 
+import pdb
+
 #%%
     
 
@@ -13,7 +15,13 @@ Created on Wed Dec 18 11:59:13 2019
 def fastica_MEG(X, n_comp=None,
             algorithm="parallel", whiten=True, fun="logcosh", fun_prime='', 
             fun_args={}, maxit=200, tol=1e-04, w_init=None, verbose = True):
-    """Perform Fast Independent Component Analysis.
+    """Perform Fast Independent Component Analysis. 
+    
+    
+    #######################
+    MODIFIED from Hyvarinen's Matlab implementation.  
+    #######################
+    
     Parameters
     ----------
     X : (p, n) array
@@ -48,6 +56,7 @@ def fastica_MEG(X, n_comp=None,
     w_init : (n_comp,n_comp) array
              Initial un-mixing array of dimension (n.comp,n.comp).
              If None (default) then an array of normal r.v.'s is used
+     Verbose | Boolean | If Ture, update to terminal 
  
     Results
     -------
@@ -337,23 +346,40 @@ def PCA_meg2(X, verbose = False, return_dewhiten = True):
         # vectors (vecs) are columns, not not ordered
         vals_noOrder, vecs_noOrder = np.linalg.eigh(cov_mat)                    
         
-        # get order of eigenvalues descending
-        order = np.argsort(vals_noOrder)[::-1]                                  
+        # get order of eigenvalues descending (ie. biggest first!)
+        order = np.argsort(vals_noOrder)[::-1]                         
         
         # reorder eigenvalues
+        # edited on 
         vals = vals_noOrder[order]                                              
         
         # ensure no negatives as some approximations of 0 are negative
         # e.g. -1*10-24
-        vals = np.abs(vals)                                                     
+        vals = np.abs(vals)        
+
+        # # debug plot
+        # import matplotlib.pyplot as plt
+        # f, axes = plt.subplots(1,2)
+        # axes[0].bar(np.arange(vals.shape[0]), vals_noOrder)                                            
+        # axes[1].bar(np.arange(vals.shape[0]), vals)                                            
+        # # end
         
         # reorder eigenvectors
         vecs = vecs_noOrder[:,order]                                            
         
-        # square roots of eigenvalues on diagonal of square matrix
+        # square roots of eigenvalues on diagonal of square matrix (also 1/?)
         vals_sqrt_mat = np.diag(np.reciprocal(np.sqrt(vals)))          
         
         # eigenvectors scaled by 1/values to make variance same in all directions
+        
+        
+        ######### start debugging
+        # import matplotlib.pyplot as plt
+        # f, ax = plt.subplots(1); ax.matshow(vals_sqrt_mat)  # last value of this is inf
+        # f, ax = plt.subplots(1); ax.matshow(whiten_mat)
+        # # last row of whiten mat is currently nans
+        ######### end debugging
+        
         whiten_mat = vals_sqrt_mat @ vecs.T                            
         if return_dewhiten:
             dewhiten_mat = np.linalg.inv(whiten_mat)

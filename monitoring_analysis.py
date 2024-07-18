@@ -292,7 +292,7 @@ licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algor
 #                       "06_LiCSAlert/05_jasmin_clones/test")
 
 
-out_dir = Path("./status_outputs/cov")
+out_dir = Path("./status_outputs/03_comet")
 # d_start = "20200101"                # LiCSAlert baseline ends at end of 2019?  
 d_start = "20180101"                # LiCSAlert baseline ends at end of 2019?  
 d_stop = "20240621"
@@ -439,10 +439,12 @@ offset_volc_lls(volcs,  threshold = 2., offset = 2.1, attempts = 200)
     
 from licsalert.plotting import licsalert_status_map
     
-licsalert_status_map(volcs, outdir = Path("./status_outputs/03_comet/"),
-                     backend = 'qt5agg')
+licsalert_status_map(volcs, day_list = day_list[-2:-1], 
+                     outdir = Path("./status_outputs/03_comet/"),
+                     figure_type = 'window', plot_frequency = 'daily')
 
-    
+pngs_to_gif(out_dir / "short_status_map", out_dir / "status_map" / "status_map_animation.gif",
+            image_duration = 750)                                                 
     
     
     

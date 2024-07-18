@@ -6,6 +6,7 @@ Created on Fri Oct 20 11:41:16 2023
 @author: matthew
 """
 
+import pdb
 
 #%%
 
@@ -528,10 +529,14 @@ def visualise_ICASAR_inversion(interferograms, sources, time_courses, mask, n_da
 #%%
 
 
-def plot_2d_interactive_fig(xy, colours, spatial_data = None, temporal_data = None,
-                        inset_axes_side = {'x':0.1, 'y':0.1}, arrow_length = 0.1, figsize = (10,6), 
-                        labels = None, legend = None, markers = None, 
-                        figures = 'window', png_path = './', fig_filename = '2d_interactive_plot'):
+def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica, 
+                            hdbscan_param, tsne_param, 
+                            n_converge_bootstrapping, n_converge_no_bootstrapping,
+                            inset_axes_side = {'x':0.1, 'y':0.1}, 
+                            arrow_length = 10., figsize = (19,10), 
+                            labels = None, legend = None, markers = None, 
+                            figures = 'window', png_path = './', 
+                            fig_filename = '2d_interactive_plot'):
     """ Data are plotted in a 2D space, and when hovering over a point, further information about it (e.g. what image it is)  appears in an inset axes.  
     Inputs:
         xy | rank 2 array | e.g. 2x100, the x and y positions of each data
@@ -571,9 +576,14 @@ def plot_2d_interactive_fig(xy, colours, spatial_data = None, temporal_data = No
         """
         # 1: try and remove any axes except the primary one
         try:
-            fig.axes[1].remove()                
+            for ax_n, ax in enumerate(fig.axes):
+                if (ax_n > 0) and (ax not in slider_axes):
+                    ax.remove()                
         except:
             pass
+        # for ax in fig.axes[1:]:  # Only remove additional axes, not primary axes and sliders
+        #     if 'inset_axes' in ax.get_gid():
+        #         ax.remove()
         
         # 2: try and remove any annotation arrows
         for art in axes1.get_children():
@@ -584,7 +594,7 @@ def plot_2d_interactive_fig(xy, colours, spatial_data = None, temporal_data = No
                     continue
             else:
                 continue
-        fig.canvas.draw_idle()                                          # update the figure
+        fig.canvas.draw_idle()                                          
     
     
     def axes_data_to_fig_percent(axes_lims, fig_lims, point):
@@ -606,13 +616,15 @@ def plot_2d_interactive_fig(xy, colours, spatial_data = None, temporal_data = No
     
     def calculate_insetaxes_offset(lims, points, offset_length):
         """
-        The offsets between the inset axes and the point are different depending on which quadrant of the graph the point is in.  
+        The offsets between the inset axes and the point are different depending 
+        on which quadrant of the graph the point is in.  
         Inputs:
             lims | list | length is equal to the number of dimensions.  Filled with tuples of the axes limits.  
             point | list | length is equal to the number of diemsions. Filled with points.  
             offset_length | float | length of the arrow.  
         Returns:
-            offsets | list | length is equal to the number of dimensions.  Length of offset for inset axes in each dimension.  
+            offsets | list | length is equal to the number of dimensions.  
+                            Length of offset for inset axes in each dimension.  
         History:
             2020/09/08 | MEG | Written
         """
@@ -620,81 +632,185 @@ def plot_2d_interactive_fig(xy, colours, spatial_data = None, temporal_data = No
         offsets = []
         for dim_n in range(len(lims)):                                        # loop through each dimension.  
             dim_centre = np.mean(lims[dim_n])
+            # determine which side of centre point is.  
             if points[dim_n] < dim_centre:
                 offsets.append(-offset_length)
             else:
                 offsets.append(offset_length)
         return offsets
+        
+    import matplotlib.pyplot as plt
+    import matplotlib
+    import numpy as np
+    from matplotlib.widgets import Slider
+    from licsalert.icasar.icasar_funcs import tsne_and_cluster
     
     def hover(event):
         if event.inaxes == axes1:                                                       # determine if the mouse is in the axes
-            cont, ind = sc.contains(event)                                              # cont is a boolean of if hoving on point, ind is a dictionary about the point being hovered over.  Note that two or more points can be in this.  
+            cont, ind = sc_container['sc'].contains(event)                                              # cont is a boolean of if hovering on point, ind is a dictionary about the point being hovered over.  Note that two or more points can be in this.  
             if cont:                                                                    # if on point
-                remove_axes2_and_arrow(fig)                                             # remove the axes and arrow created when hovering on the point (incase cursor moves from one point to next without going off a point)
+                remove_axes2_and_arrow(fig)                                             # remove the axes and arrow created when hovering on the point (in case cursor moves from one point to next without going off a point)
                 point_n = ind['ind'][0]                                                 # get the index of which data point we're hovering on in a simpler form.      
                 
-                # 1: Add the annotation arrow (from inset axes to data point)
-                arrow_lengths = calculate_insetaxes_offset([axes1.get_xlim(), axes1.get_ylim()], 
-                                                          [xy[0,point_n], xy[1,point_n]], arrow_length)                               # calculate the length of the arrow, which depends which quadrant we're in (as the arrow always go away from the plot)
-                axes1.arrow(xy[0,point_n] + arrow_lengths[0], xy[1,point_n] + arrow_lengths[1],                                       # add the arrow.  Notation is all a bit backward as head is fixed at end, so it has to be drawn backwards.  
-                            -arrow_lengths[0], -arrow_lengths[1], clip_on = False, zorder = 999)                                # clip_on makes sure it's visible, even if it goes off the edge of the axes.  
-
-                # 2: Add the inset axes                
-                fig_x = axes_data_to_fig_percent(axes1.get_xlim(), (0.1, 0.9), xy[0,point_n] + arrow_lengths[0])                   # convert position on axes to position in figure, ready to add the inset axes
-                fig_y = axes_data_to_fig_percent(axes1.get_ylim(), (0.1, 0.9), xy[1,point_n] + arrow_lengths[1])                   # ditto for y dimension
-                if arrow_lengths[0] > 0 and arrow_lengths[1] > 0:                                                          # top right quadrant
-                    inset_axes = fig.add_axes([fig_x, fig_y,                                                               # create the inset axes, simple case, anochored to lower left forner
-                                               inset_axes_side['x'], inset_axes_side['y']], anchor = 'SW')               
-                elif arrow_lengths[0] < 0 and arrow_lengths[1] > 0:                                                        # top left quadrant
-                    inset_axes = fig.add_axes([fig_x - inset_axes_side['x'], fig_y,                                        # create the inset axes, nudged in x direction, anchored to lower right corner
-                                               inset_axes_side['x'], inset_axes_side['y']], anchor = 'SE')     
-                elif arrow_lengths[0] > 0 and arrow_lengths[1] < 0:                                                        # lower right quadrant
-                    inset_axes = fig.add_axes([fig_x, fig_y - inset_axes_side['y'],                                        # create the inset axes, nudged in y direction
-                                               inset_axes_side['x'], inset_axes_side['y']], anchor = 'NW')                 
-                else:                                                                                                      # lower left quadrant
-                    inset_axes = fig.add_axes([fig_x - inset_axes_side['x'], fig_y - inset_axes_side['y'],                 # create the inset axes, nudged in both x and y
-                                               inset_axes_side['x'], inset_axes_side['y']], anchor = 'NE')                
+                # record the limits so we can reset them
+                xlim_orig = axes1.get_xlim()
+                ylim_orig = axes1.get_ylim()
                 
-                # 3: Plot on the inset axes
-                if temporal_data is not None:
-                    inset_axes.plot(temporal_data['xvals'], temporal_data['tcs_r2'][point_n,])                            # draw the inset axes time course graph
+                # 1: Add the annotation arrow (from inset axes to data point)
+                # calculate the length of the arrow, which depends on which quadrant 
+                # we're in (as the arrow always goes away from the plot)
+                arrow_lengths = calculate_insetaxes_offset([axes1.get_xlim(), 
+                                                            axes1.get_ylim()], 
+                                                          [xy_tsne[0][0,point_n], 
+                                                           xy_tsne[0][1,point_n]], 
+                                                          arrow_length)                               
+                # add the arrow.  Notation is all a bit backward as head is 
+                # fixed at end, so it has to be drawn backwards.  
+                # clip_on makes sure it's visible, even if it goes off the edge of the axes.  
+                axes1.arrow(xy_tsne[0][0,point_n] + arrow_lengths[0], 
+                            xy_tsne[0][1,point_n] + arrow_lengths[1],                                       
+                            -arrow_lengths[0], -arrow_lengths[1], 
+                            clip_on = True, zorder = 999)
+    
+                # get the start of the arrow (not on the data point)
+                x_data = xy_tsne[0][0,point_n] + arrow_lengths[0]
+                y_data = xy_tsne[0][1,point_n] + arrow_lengths[1]
+                
+                # and conver to position in figure in ragne [0 ,1]
+                x_fig, y_fig = axes1.transData.transform((x_data, y_data))
+                fig_width, fig_height = fig.get_size_inches() * fig.dpi
+                x_normalized = x_fig / fig_width
+                y_normalized = y_fig / fig_height
+
+
+                # inset_axes = fig.add_axes([x_normalized, y_normalized,                                                               # create the inset axes, simple case, anchored to lower left corner
+                #                            inset_axes_side['x'], 
+                #                            inset_axes_side['y']], anchor = 'SW')               
+        
+    
+                # 2: Add the inset axes                
+                # convert position on axes to position in figure, ready to add the inset axes
+                # old way (fails when axes doesn't fill figure)
+                # fig_x = axes_data_to_fig_percent(axes1.get_xlim(), (0.1, 0.9), 
+                #                                   xy_tsne[0][0,point_n] + arrow_lengths[0])                   
+                # fig_y = axes_data_to_fig_percent(axes1.get_ylim(), (0.1, 0.9), 
+                #                                   xy_tsne[0][1,point_n] + arrow_lengths[1])                   
+                
+                # four possible quadrants for the inset axes.  Note they are 
+                # shifted so they don't lie on top of the arrow.  
+                if arrow_lengths[0] > 0 and arrow_lengths[1] > 0:                                                          
+                    inset_axes = fig.add_axes([x_normalized, y_normalized,                                                               
+                                                inset_axes_side['x'], 
+                                                inset_axes_side['y']], anchor = 'SW')               
+                elif arrow_lengths[0] < 0 and arrow_lengths[1] > 0:                                                        
+                    inset_axes = fig.add_axes([x_normalized - inset_axes_side['x'], 
+                                               y_normalized,                                        
+                                                inset_axes_side['x'], 
+                                                inset_axes_side['y']], anchor = 'SE')     
+                elif arrow_lengths[0] > 0 and arrow_lengths[1] < 0:                                                        
+                    inset_axes = fig.add_axes([x_normalized, 
+                                               y_normalized - inset_axes_side['y'],                                        
+                                                inset_axes_side['x'], 
+                                                inset_axes_side['y']], anchor = 'NW')                 
+                else:                                                                                                      
+                    inset_axes = fig.add_axes([x_normalized - inset_axes_side['x'],
+                                               y_normalized - inset_axes_side['y'],                 
+                                                inset_axes_side['x'], 
+                                                inset_axes_side['y']], anchor = 'NE')                
+                    
+                # 3: Plot data on the inset axes
+                if sica_tica == 'sica':
+                    inset_axes.matshow(S_all_r3[0][point_n,])
+                else:
+                    raise Exception(f"Not tested yet.  ")
+                    #inset_axes.plot(temporal_data['xvals'], temporal_data['tcs_r2'][point_n,])                            # draw the inset axes time course graph
                     inset_axes.axhline(0)
-                if spatial_data is not None:
-                    inset_axes.matshow(spatial_data['images_r3'][point_n,])                                                      # or draw the inset axes image
+                    
                 inset_axes.set_xticks([])                                                                                       # and remove ticks (and so labels too) from x
                 inset_axes.set_yticks([])                                                                                       # and from y
+                
+                # and reset the limits
+                axes1.set_xlim(xlim_orig)
+                axes1.set_ylim(ylim_orig)
+
+                
                 fig.canvas.draw_idle()                                                                                          # update the figure.  
             else:                                                                       # else not on a point
                 remove_axes2_and_arrow(fig)                                             # remove the axes and arrow created when hovering on the point                       
         else:                                                                           # else not in the axes
-            remove_axes2_and_arrow(fig)                                                 # remove the axes and arrow created when hovering on the point (incase cursor moves from one point to next without going off a point)
+            remove_axes2_and_arrow(fig)                                                 # remove the axes and arrow created when hovering on the point (in case cursor moves from one point to next without going off a point)
     
-    import matplotlib.pyplot as plt
-    import matplotlib
-    import numpy as np
-
-    # 1: Check some inputs:
-    if temporal_data is None and spatial_data is None:                                                                  # check inputs
-        raise Exception("One of either spatial or temporal data must be supplied.  Exiting.  ")
-    if temporal_data is not None and spatial_data is not None:
-        raise Exception("Only either spatial or temporal data can be supplied, but not both.  Exiting.  ")
-
-    # 2: Draw the figure
-    fig = plt.figure(figsize = figsize)                                                                # create the figure, size set in function args.  
-    axes1 = fig.add_axes([0.1, 0.1, 0.8, 0.8])                                                         # main axes
-    if markers is None:                                                                                # if a dictionary about different markers is not supplied... 
-        sc = axes1.scatter(xy[0,],xy[1,],c=colours, s=100)                                             # draw the scatter plot, just draw them all with the default marker
-    else:                                                                                                                                     # but if we do have a dictionary of markers.  
-        n_markers = len(markers['styles'])                                                                                                    # get the number of unique markers
-        for n_marker in range(n_markers):                                                                                                     # loop through each marker style
-            point_args = np.ravel(np.argwhere(markers['labels'] == n_marker))                                                                 # get which points have that marker style
-            try:
-                sc = axes1.scatter(xy[0,point_args], xy[1,point_args], c=colours[point_args], s=100, marker = markers['styles'][n_marker])        # draw the scatter plot with different marker styles
-            except:
-                pass
-        sc = axes1.scatter(xy[0,],xy[1,],c=colours, s=100, alpha = 0.0)                                                                       # draw the scatter plot again with all the points (regardless of marker style), but with invisble markers.  As the last to be drawn, these are the ones that are hovered over, and indexing works as all the points are draw this time.  
-
-    # 3: Try and add various labels from the labels dict
+    def update(val, update_tsne = True):
+        """
+        Inputs:
+            val : 
+        """
+        # remove points from previous run
+        axes1.clear()
+        
+        # get the slider values
+        n_pca = slider_a.val
+        hdbscan_param = (slider_d.val, slider_e.val)
+        tsne_param = (slider_b.val, slider_c.val)
+            
+        # determine with multiple ICA runs we're using. 
+        S_index = n_pca_comps.index(n_pca)
+        outputs = tsne_and_cluster(S_hists[S_index], mask, spatial, sica_tica, 
+                                   n_pca, hdbscan_param, tsne_param,
+                                   n_converge_bootstrapping, 
+                                   n_converge_no_bootstrapping, 
+                                   update_tsne)
+        (sources_all_r3, S_ica, labels_hdbscan, xy_tsne_new, marker_dict, 
+         legend_dict, labels_colours) = outputs
+        S_all_r3[0] = sources_all_r3
+        # if tsne was not updated, previous function returns None
+        if xy_tsne_new is None:
+            pass
+        else:
+            # update the mutable list
+            xy_tsne[0] = xy_tsne_new.T
+    
+        # do the plotting
+        if markers is None:      
+            sc_container['sc'] = axes1.scatter(xy_tsne[0][0,:], xy_tsne[0][1,:], 
+                               c=labels_colours, s=100)                                             # draw the scatter plot, just draw them all with the default marker
+        else:                                                                                                                                     # but if we do have a dictionary of markers.  
+            n_markers = len(markers['styles'])                                                                                                    # get the number of unique markers
+            for n_marker in range(n_markers):                                                                                                     # loop through each marker style
+                point_args = np.ravel(np.argwhere(markers['labels'] == n_marker))                                                                 # get which points have that marker style
+                try:
+                    sc_container['sc'] = axes1.scatter(xy_tsne[0][0,:][point_args], 
+                                       xy_tsne[0][1,:][point_args], 
+                                       c=labels_colours[point_args], s=100, 
+                                       marker = markers['styles'][n_marker])        
+                except:
+                    pass
+            sc_container['sc'] = axes1.scatter(xy_tsne[0][0,:], xy_tsne[0][1,:], 
+                               c=labels_colours, s=100,  alpha = 0.0)                                                                       # draw the scatter plot again with all the points (regardless of marker style), but with invisible markers.  As the last to be drawn, these are the ones that are hovered over, and indexing works as all the points are draw this time.  
+    
+        # 4: Possibly add a legend, using the legend dict.  
+        if legend is not None:
+            axes1.legend(handles = legend['elements'], labels = legend['labels'], 
+                         bbox_to_anchor=(1., 0.5), loc = 'center right',
+                         bbox_transform=plt.gcf().transFigure) 
+        fig.canvas.draw_idle()
+    
+        
+    # mutable container to store the scatter plot object
+    sc_container = {}
+    # mutable list to store the 2d array of xy coords. for 
+    xy_tsne = [None]
+    # sources container (used to plot a point when hovered over)
+    S_all_r3 = [None]
+    
+    # get the number of PCs for each run
+    n_pca_comps = [i[0].shape[0] for i in  S_hists]
+    
+    # Draw the figure
+    fig = plt.figure(figsize = figsize)                                                                
+    axes1 = fig.add_axes([0.2, 0.25, 0.6, 0.6])                                                        
+    
+    # Try and add various labels from the labels dict
     try:
         fig.canvas.manager.set_window_title(labels['title'])
         fig.suptitle(labels['title'])
@@ -709,12 +825,62 @@ def plot_2d_interactive_fig(xy, colours, spatial_data = None, temporal_data = No
     except:
         pass
     
-    # 4: Possibly add a legend, using the legend dict.  
-    if legend is not None:
-        axes1.legend(handles = legend['elements'], labels = legend['labels'], 
-                     bbox_to_anchor=(1., 0.5), loc = 'center right', bbox_transform=plt.gcf().transFigure)                           # Put a legend to the right of the current axis.  bbox is specified in figure coordinates.  
+    # Add sliders
+    axcolor = 'lightgoldenrodyellow'
+    # Slider for n_pca_comp
+    ax_a = plt.axes([0.25, 0.9, 0.65, 0.03], facecolor=axcolor)
+    slider_a = Slider(ax_a, '# PCA components', n_pca_comps[0], n_pca_comps[-1], 
+                      valinit=int(np.average(n_pca_comps)), valstep = 1)
+    # Slider for tsne perplexity
+    ax_b = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
+    slider_b = Slider(ax_b, 'tsne: perplexity', 5, 50, 
+                      valinit=tsne_param[0], valstep = 1)
+    # Slider for tsne early exageration
+    ax_c = plt.axes([0.25, 0.15, 0.65, 0.03], facecolor=axcolor)
+    slider_c = Slider(ax_c, 'tsne: early exageration', 0, 20, 
+                      valinit=tsne_param[1], valstep = 1)
+    # Slider for hdbscan min_cluster_size
+    ax_d = plt.axes([0.05, 0.25, 0.0225, 0.63], facecolor=axcolor)
+    slider_d = Slider(ax_d, 'HDBSCAN: min_cluster_size', 0, 200, 
+                      valinit=hdbscan_param[0], valstep = 1, 
+                      orientation='vertical')
+    slider_d.label.set_rotation(90)
+    slider_d.label.set_verticalalignment('center')
+    slider_d.label.set_position((0.0, 0.5))
+
+    
+    # Slider for hdbscan min_samples
+    ax_e = plt.axes([0.1, 0.25, 0.0225, 0.63], facecolor=axcolor)
+    slider_e = Slider(ax_e, 'HDBACAN: min_samples', 0, 50, 
+                      valinit=hdbscan_param[1], valstep = 1,
+                      orientation='vertical')
+    slider_e.label.set_rotation(90)
+    slider_e.label.set_verticalalignment('center')
+    slider_e.label.set_position((0.08, 0.5))
+    
+    slider_axes = [ax_a, ax_b, ax_c, ax_d, ax_e]
+    # Put a legend to the right of the current axis.  bbox is specified in figure coordinates.  
               
-    fig.canvas.mpl_connect("motion_notify_event", hover)                                # connect the figure and the function.  
+    # call the function that highlights a source if you hover on it.  
+    fig.canvas.mpl_connect("motion_notify_event", hover)                                
+
+    # mutable list to store the 2d array of xy coords. for 
+    xy_tsne = [None]
+    # call the slider function to plot the points during 1st plot initialisation
+    update(None, update_tsne = True)
+
+    # Call update function when slider value changes
+    # pca slider, so update tsne
+    slider_a.on_changed(lambda val: update(val, update_tsne = True))
+    # tsne sliders, so update tsne
+    slider_b.on_changed(lambda val: update(val, update_tsne = True))
+    slider_c.on_changed(lambda val: update(val, update_tsne = True))
+    #hdbscan sliders, so don't update tsne
+    slider_d.on_changed(lambda val: update(val, update_tsne = False))
+    slider_e.on_changed(lambda val: update(val, update_tsne = False))
+
+
+    
     
     if figures == 'window':
         pass
@@ -725,7 +891,8 @@ def plot_2d_interactive_fig(xy, colours, spatial_data = None, temporal_data = No
         fig.savefig(f"{png_path}/{fig_filename}.png")
     else:
         pass
-
+    
+    pdb.set_trace() 
 
 #%%
 

@@ -9,10 +9,13 @@ import pdb
 
 #%%
 
-def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window", 
+def ICASAR(n_pca_comp_start, n_pca_comp_stop, 
+           spatial_data = None, temporal_data = None, figures = "window", 
            sica_tica = 'sica', ifgs_format = 'cum', max_n_all_ifgs = 1000,                                                     # this row of arguments are only needed with spatial data.  
-           bootstrapping_param = (200,0), ica_param = (1e-4, 150), tsne_param = (30,12), hdbscan_param = (35,10),
-           out_folder = './ICASAR_results/', ica_verbose = 'long', inset_axes_side = {'x':0.1, 'y':0.1}, 
+           bootstrapping_param = (200,0), ica_param = (1e-4, 150), 
+           tsne_param = (30,12), hdbscan_param = (35,10),
+           out_folder = './ICASAR_results/', ica_verbose = 'long', 
+           inset_axes_side = {'x':0.1, 'y':0.1}, 
            load_fastICA_results = False, label_sources = False):
     """
     Perform ICASAR, which is a robust way of applying sICA to data.  As PCA is also performed as part of this,
@@ -25,7 +28,10 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
         the mean centered time series.  If you wish to work 
     
     Inputs:
-        n_comp | int | Number of ocmponents that are retained from PCA and used as the input for ICA.  
+        n_pca_comp_start | int | PCA is run for dimensionality reduction, start
+                                 with this number of components.  
+        n_pca_comp_stop | int | and stop running it for every number of components
+                                until this value is reached.  
         spatial_data | dict or None | Required: 
                                          ifgs_dc | rank 2 array | row vectors of the daisy chain (i.e incremental) ifgs
                                          mask  | rank 2 array | mask to conver the row vectors to rank 2 masked arrays.  
@@ -127,10 +133,12 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
     # internal functions
     from licsalert.data_importing import ifg_timeseries
     from licsalert.icasar.blind_signal_separation import PCA_meg2
-    from licsalert.icasar.aux import  bss_components_inversion, maps_tcs_rescale, r2_to_r3, baseline_from_names, create_all_ifgs, create_cumulative_ifgs, signals_to_master_signal_comparison
+    from licsalert.icasar.aux import  bss_components_inversion, maps_tcs_rescale
+    from licsalert.icasar.aux import r2_to_r3, create_all_ifgs, create_cumulative_ifgs
     from licsalert.icasar.plotting import r2_arrays_to_googleEarth
-    from licsalert.icasar.plotting import plot_pca_variance_line, plot_temporal_signals, two_spatial_signals_plot, plot_2d_interactive_fig
-    from licsalert.icasar.plotting import prepare_point_colours_for_2d, prepare_legends_for_2d, plot_source_tc_correlations
+    from licsalert.icasar.plotting import plot_pca_variance_line, plot_temporal_signals
+    from licsalert.icasar.plotting import two_spatial_signals_plot, plot_2d_interactive_fig
+    
     
     
     # -5 Check inputs, unpack either spatial or temporal data, and check for nans
@@ -293,118 +301,151 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
             success = False
             count += 1 
     if not success:
-        raise Exception(f"PCA failed after {count} attempts.  This is most common with tICA when the number of observations are lower than the "
-                        f"number of variables and the compact trick is being used.  ")
-    A_pca = PC_vecs                                                                                                                     # time courses 
-    S_pca = x_decorrelate                                                                                                               # sources
+        raise Exception(f"PCA failed after {count} attempts.  This is most "
+                        "common with tICA when the number of observations are "
+                        "lower than the number of variables and the compact "
+                        "trick is being used.  ")
+    A_pca = PC_vecs                                                                                                                     
+    S_pca = x_decorrelate     
+
+    # rescale the signals 
     if spatial:
         if sica_tica == 'sica':
-            S_pca, A_pca = maps_tcs_rescale(S_pca[:n_comp,:], A_pca[:,:n_comp])                                                         # rescale to new desicred range, and truncate to desired number of components.  A_pca could be for either all ifgs, incremental ifgs, or cumulative ifgs
+            S_pca, A_pca = maps_tcs_rescale(S_pca, A_pca)                                                        
         elif sica_tica == 'tica':
-            A_pca, S_pca_cum = maps_tcs_rescale(A_pca[:, :n_comp].T, S_pca[:n_comp, :].T)                                               # rescale to new desicred range, NB.  spatial patterns are in A, time courses are in S
-            S_pca_cum = S_pca_cum.T                                                                                                     # these are the cumulative time courses, should still be mean centered (have checked this)  
+            # spatial patterns are in A, time courses are in S
+            A_pca, S_pca_cum = maps_tcs_rescale(A_pca.T, S_pca.T)                                               
+            # these are the cumulative time courses, should still be mean centered (have checked this)  
+            S_pca_cum = S_pca_cum.T                                                                                                     
             A_pca = A_pca.T
             del S_pca
     else:
-        S_pca = S_pca[:n_comp,:]                                                                                                        # truncate to desired number of components
-        A_pca =  A_pca[:,:n_comp]
+        S_pca = S_pca                                                                                                       # truncate to desired number of components
+        A_pca =  A_pca
         
+    
+    # check that these have been set within limits
+    if n_pca_comp_start > n_pca_comp_stop:
+        raise Exception(f"The starting number of PCA components must be "
+                        "larger than the stopping number, but they are "
+                        f"{n_pca_comp_start} and {n_pca_comp_stop}.  Exiting.  ")
+
+    # plot the PCA figures 
     if fig_kwargs['figures'] != "none":
         plot_pca_variance_line(PC_vals, title = '01_PCA_variance_line', **fig_kwargs)
+        
+            
         if spatial:
             if sica_tica == 'sica':
-                inversion_results = bss_components_inversion(S_pca, [ifgs_dc.mixtures_mc_space, ifgs_all.mixtures_mc_space])            # invert to fit the incremetal ifgs and all ifgs
-                source_residuals = inversion_results[0]['residual']                                                                     # residual for just the daisy chain ifgs.         
-                A_pca_dc = inversion_results[0]['tcs'].T                                                                                # in sICA, time courses are in A
-                A_pca_all = inversion_results[1]['tcs'].T                                                                               # and time courses for all possible ifgs.             
-                two_spatial_signals_plot(S_pca, spatial_data['mask'], spatial_data['dem'], 
-                                         A_pca_dc, A_pca_all, ifgs_dc.t_baselines, ifgs_all.t_baselines,                                # contains both the normal time courses (A_pca_dc , ifgs_dc.t_baselines), and for all interferograms (A_pca_all, ifgs_all.t_baselines)
-                                         "02_PCA_sources", spatial_data['ifg_dates_dc'], fig_kwargs)
+                S_pca = S_pca[:n_pca_comp_stop,:]
+                A_pca = A_pca[:,:n_pca_comp_stop]
+                inversion_results = bss_components_inversion(S_pca, 
+                                                             [ifgs_dc.mixtures_mc_space,
+                                                              ifgs_all.mixtures_mc_space])            
+                source_residuals = inversion_results[0]['residual']                                                                     
+                A_pca_dc = inversion_results[0]['tcs'].T                                                                                
+                A_pca_all = inversion_results[1]['tcs'].T                                                                               
+                two_spatial_signals_plot(S_pca, spatial_data['mask'], 
+                                         spatial_data['dem'], 
+                                         A_pca_dc, A_pca_all, 
+                                         ifgs_dc.t_baselines, 
+                                         ifgs_all.t_baselines,
+                                         f"02_PCA_{n_pca_comp_stop}_components", 
+                                         spatial_data['ifg_dates_dc'], 
+                                         fig_kwargs)
             elif sica_tica == 'tica':
-                S_pca_dc = np.diff(S_pca_cum, axis = 1, prepend = 0)                                                                    # the diff of the cumluative time courses is the incremnetal (daisy chain) time course.  Prepend a 0 to make it thesame size as the original diays chain (ie. the capture the difference between 0 and first value).  
-                two_spatial_signals_plot(A_pca.T, spatial_data['mask'], spatial_data['dem'], 
-                                         S_pca_dc.T, S_pca_cum.T, ifgs_dc.t_baselines, ifgs_cum.t_baselines,                            # first set of are time courses and times for daisy chain, second is for cumulative
-                                         "02_PCA_sources", spatial_data['ifg_dates_dc'], fig_kwargs)                    
+                A_pca = A_pca[:, :n_pca_comp_stop]
+                S_pca_cum = S_pca_cum[:n_pca_comp_stop, :]
+                S_pca_dc = np.diff(S_pca_cum, axis = 1, prepend = 0)                                                                    
+                two_spatial_signals_plot(A_pca.T, spatial_data['mask'], 
+                                         spatial_data['dem'], 
+                                         S_pca_dc.T, S_pca_cum.T, 
+                                         ifgs_dc.t_baselines, 
+                                         ifgs_cum.t_baselines,                            
+                                         f"02_PCA_{n_pca_comp_stop}_components", 
+                                         spatial_data['ifg_dates_dc'], 
+                                         fig_kwargs)                    
         else:
+            
+            S_pca = S_pca[:n_pca_comp_stop, ]
             plot_temporal_signals(S_pca, '02_PCA_sources', **fig_kwargs)
     
-
     # 2: Make or load the results of the multiple ICA runs.  
     if load_fastICA_results:
         print(f"Loading the results of multiple FastICA runs.  ")
         try:
             with open(out_folder / 'FastICA_results.pkl', 'rb') as f:
-                S_hist = pickle.load(f)   
-                A_hist = pickle.load(f)
+                S_hists = pickle.load(f)   
+                A_hists = pickle.load(f)
         except:
-            print(f"Failed to open the results from the previous runs of FastICA.  Switching 'load_fastICA_results' to False and trying to continue anyway.  ")
+            print(f"Failed to open the results from the previous runs of FastICA. "
+                  f"Switching 'load_fastICA_results' to False and trying to "
+                  "continue anyway.  ")
             load_fastICA_results = False
     if not load_fastICA_results:
        print(f"No results were found for the multiple ICA runs, so these will now be performed.  ")
-       S_hist, A_hist = perform_multiple_ICA_runs(n_comp, X_mc, bootstrapping_param, ica_param,
-                                                  x_white, PC_dewhiten_mat, ica_verbose)                                                    # slow part that runs FastICA multiple times.  
+       # initiliase to store
+       S_hists = []
+       A_hists = []
+       #  +1 to make upper limit inclusive
+       for n_comp in np.arange(n_pca_comp_start, n_pca_comp_stop + 1):
+           print(f"\n\nStarting the multiple ICA runs with {n_comp} "
+                 "principal components")
+           S_hist, A_hist = perform_multiple_ICA_runs(n_comp, X_mc,
+                                                      bootstrapping_param, 
+                                                      ica_param, x_white, 
+                                                      PC_dewhiten_mat, ica_verbose)                                                    
+           S_hists.append(S_hist)
+           A_hists.append(A_hist)
+           
+           # # debug (should be n_pca_comp_start to n_pca_comp_stop)
+           # for S_hist in S_hists:
+           #     print(f"Number of dimensions used: {S_hist[0].shape[0]}")
+           
        with open(out_folder / 'FastICA_results.pkl', 'wb') as f:
-            pickle.dump(S_hist, f)
-            pickle.dump(A_hist, f)
-         
-    if spatial:                                                                                                                        # if we have spatial data, it's worth checking that at this point (after we may have loaded sources) they are still the correct size.  
+           pickle.dump(S_hists, f)
+           pickle.dump(A_hists, f)
+            
+    if spatial:                                                                                                                        
         if sica_tica == 'sica':
-            n_pixels_loaded = S_hist[0].shape[1]                                                                    # if we're doing sica with spatial data, sources are ifgs as row vectors
+            # if it's spatial, images are rows in S
+            n_pixels_loaded = S_hists[0][0].shape[1]
         elif sica_tica == 'tica':
-            n_pixels_loaded = A_hist[0].shape[0]                                                                # but if it's temporal, the ifgs are column vectors in A (ie. what would be hte time courses for sica)
-        
+            # if it's temporal, images are columns in A
+            n_pixels_loaded = A_hist[0].shape[0]                                                                
+        # check that the number of pixels in an image is correct
+        # (often get errors here as data could be loaded after settings were chnaged
         if n_pixels_loaded != np.sum(1-spatial_data['mask']):
             raise Exception(f"There are {S_hist[0].shape[1]} pixels in the ICASAR sources that have been loaded, but"
                             f" {np.sum(1-spatial_data['mask'])} pixels in the current mask.  This normally happens when the"
                             f" FastICA results that are being loaded are from a different set of data.  If not, something "
                             f" is inconsitent with the mask and the coherent pixels.  Exiting.  ")
 
-    # 3: Convert the sources from lists from each run to a single matrix.  
-    if spatial:
-        if sica_tica == 'sica':                                                               # if its spatial dat and sica, sources are images
-            sources_all_r2, sources_all_r3 = sources_list_to_r2_r3(S_hist, mask)                            # convert to more useful format.  r2 one is (n_components x n_runs) x n_pixels, r3 one is (n_components x n_runs) x ny x nx, and a masked array
-        elif sica_tica == 'tica':
-            sources_all_r2 = S_hist[0]                                                                      # get the sources recovered by the first run.  Note that these are 1d displacments for a pixel through time.  
-            for S_hist_one in S_hist[1:]:                                                                   # and then loop through the rest
-                sources_all_r2 = np.vstack((sources_all_r2, S_hist_one))                                    # stacking them vertically onto the original array.  
-    else:                                                                                               # else they're time courses.  
-        sources_all_r2 = S_hist[0]                                                                      # get the sources recovered by the first run
-        for S_hist_one in S_hist[1:]:                                                                   # and then loop through the rest
-            sources_all_r2 = np.vstack((sources_all_r2, S_hist_one))                                    # stacking them vertically.  
-                        
-       
-    # 4: Do clustering and 2d manifold representation, plus get centrotypes of clusters, and make an interactive plot.   
-    S_ica, labels_hdbscan, xy_tsne, clusters_by_max_Iq_no_noise, Iq  = bootstrapped_sources_to_centrotypes(sources_all_r2, hdbscan_param, tsne_param)        # do the clustering and project to a 2d plane.  clusters_by_max_Iq_no_noise is an array of which cluster number is best (ie has the highest Iq)
-    Iq_sorted = np.sort(Iq)[::-1]               
-    n_clusters = S_ica.shape[0]                                                                     # the number of sources/centrotypes is equal to the number of clusters    
-    labels_colours = prepare_point_colours_for_2d(labels_hdbscan, clusters_by_max_Iq_no_noise)                                                                # make a list of colours so that each point with the same label has the same colour, and all noise points are grey
-    legend_dict = prepare_legends_for_2d(clusters_by_max_Iq_no_noise, Iq)    
-    marker_dict = {'labels' : np.ravel(np.hstack((np.zeros((1, n_comp*n_converge_bootstrapping)), np.ones((1, n_comp*n_converge_no_bootstrapping)))))}        # boostrapped are labelled as 0, and non bootstrapped as 1
-    marker_dict['styles'] = ['o', 'x']                                                                                                                        # bootstrapped are 'o's, and non-bootstrapped are 'x's
-       
     plot_2d_labels = {'title' : '04_clustering_and_manifold_results',
                       'xlabel' : 'TSNE dimension 1',
                       'ylabel' : 'TSNE dimension 2'}
         
     if spatial:
-        if sica_tica == 'sica':
-            plot_2d_labels['title']
-            spatial_data_S_all = {'images_r3' : sources_all_r3}                                                                                            # spatial data stored in rank 3 format (ie n_imaces x height x width)
-            plot_2d_interactive_fig(xy_tsne.T, colours = labels_colours, spatial_data = spatial_data_S_all,                                                # make the 2d interactive plot
-                                    labels = plot_2d_labels, legend = legend_dict, markers = marker_dict, inset_axes_side = inset_axes_side,
-                                    fig_filename = plot_2d_labels['title'], **fig_kwargs)
-        elif sica_tica == 'tica':
-            temporal_data_S_all = {'tcs_r2' : sources_all_r2,
-                                   'xvals'  : np.cumsum(ifgs_dc.t_baselines) }                                                                               # make a dictionary of the sources recovered from each run
-            plot_2d_interactive_fig(xy_tsne.T, colours = labels_colours, temporal_data = temporal_data_S_all,                                        # make the 2d interactive plot
-                                labels = plot_2d_labels, legend = legend_dict, markers = marker_dict, inset_axes_side = inset_axes_side,
-                                fig_filename = plot_2d_labels['title'], **fig_kwargs)
+        plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica, 
+                                hdbscan_param, tsne_param,
+                                n_converge_bootstrapping, 
+                                n_converge_no_bootstrapping,
+                                inset_axes_side = inset_axes_side,
+                                fig_filename = plot_2d_labels['title'], 
+                                **fig_kwargs)
+        pdb.set_trace()
+
     else:
-        temporal_data_S_all = {'tcs_r2' : sources_all_r2,
-                               'xvals'  : temporal_data['xvals'] }                                                                               # make a dictionary of the sources recovered from each run
-        plot_2d_interactive_fig(xy_tsne.T, colours = labels_colours, temporal_data = temporal_data_S_all,                                        # make the 2d interactive plot
-                                labels = plot_2d_labels, legend = legend_dict, markers = marker_dict, inset_axes_side = inset_axes_side,
-                                fig_filename = plot_2d_labels['title'], **fig_kwargs)
+        raise Exception(f"Fucntion removed. ")
+        # temporal_data_S_all = {'tcs_r2' : sources_all_r2,
+        #                        'xvals'  : temporal_data['xvals'] }                                                                               # make a dictionary of the sources recovered from each run
+        # plot_2d_interactive_fig(xy_tsne.T, colours = labels_colours, 
+        #                         temporal_data = temporal_data_S_all,                                        # make the 2d interactive plot
+        #                         labels = plot_2d_labels, legend = legend_dict, 
+        #                         markers = marker_dict, 
+        #                         inset_axes_side = inset_axes_side,
+        #                         fig_filename = plot_2d_labels['title'], 
+        #                         **fig_kwargs)
 
 
     
@@ -558,7 +599,90 @@ def ICASAR(n_comp, spatial_data = None, temporal_data = None, figures = "window"
 
 
     
+
+#%%
+
+def tsne_and_cluster(S_hist, mask, spatial, sica_tica, n_comp,
+                     hdbscan_param, tsne_param,
+                     n_converge_bootstrapping, n_converge_no_bootstrapping,
+                     update_tsne = True):
+    """ Given the results of multiple ICA runs, do the representation in 2D 
+    space, and the clustering. 
     
+    
+    Inputs:
+        S_hist | list | results of multiople ICA runs (one item in list for each run.  )
+                        each item would be e.g. (6,1264).  
+        mask | r2 array | to convert a row vector to rank 2 (image)
+        spatial | boolean | True if data is spatial (e.g. ifgs)
+        sica_tics | str | either sica or tica, for spatial or temporal. 
+        n_comp | int | number of PCA components retained.  
+        hdbscan_param | tuple | min cluster size, min samples
+        tsne_param | tuple | perplexity, early exageration.  
+        n_converge_bootstrapping | int | number of runs with bootstrapping
+        n_converge_no_bootstrapping | int | number of runs without bootstrapping
+        update_tsne | boolean | if True, TSNE is rerun.  
+        
+    Returns: (for e.g. 200 runs with 6 PCs)
+        sources_all_r3 | r3 |x all sources recovered during runs (e.g. 1200, 200, 150)
+        S_ica | r2 | ICA sources as row vectors (e.g. (6, 1264))
+        labels_hdbscan | r1 | cluster label for each source (e.g. (1200,))
+        xy_tsne | r2  | xy coords for each point in new 2D space (e.g. 1200 x 2)
+        marker_dict  | dict | labels and styles, (0 for 'o', 1 for 'x')
+        legend_dict | dict | elemetns and labels, colours for points (and their name)
+        labels_colours | list | one colour as string for each point.  e.g. 1200 long,
+                                array(['#d62728', '#ff7f0e', '#2ca02c'], dtype='<U7')
+                                
+    Histoy:
+        2024_07_17 | MEG | Written
+    """
+    
+    import numpy as np
+    from licsalert.icasar.plotting import prepare_point_colours_for_2d
+    from licsalert.icasar.plotting import prepare_legends_for_2d
+    
+
+    # 1: Convert the sources from lists from each run to a single matrix.  
+    if spatial:
+        # if its spatial dat and sica, sources are images
+        if sica_tica == 'sica':                                                               
+            # r2 one is (n_components x n_runs) x n_pixels, r3 one is (n_components x n_runs) x ny x nx,
+            sources_all_r2, sources_all_r3 = sources_list_to_r2_r3(S_hist, mask)                            
+        elif sica_tica == 'tica':
+            #  that these are 1d displacments for a pixel through time.  
+            sources_all_r2 = S_hist[0]                                                                      
+            for S_hist_one in S_hist[1:]:                                                                   
+                sources_all_r2 = np.vstack((sources_all_r2, S_hist_one))                                    
+    else:             
+        # time signals                                                                                   
+        sources_all_r2 = S_hist[0]                                                                      
+        for S_hist_one in S_hist[1:]:                                                                   
+            sources_all_r2 = np.vstack((sources_all_r2, S_hist_one))                                    
+                        
+   
+    # 2: Do clustering and 2d manifold representation, plus get centrotypes of 
+    # clusters, and make an interactive plot.   
+    # do the clustering and project to a 2d plane.  clusters_by_max_Iq_no_noise 
+    # is an array of which cluster number is best (ie has the highest Iq)
+    outputs  = bootstrapped_sources_to_centrotypes(sources_all_r2, hdbscan_param, 
+                                                   tsne_param, update_tsne)        
+    (S_ica, labels_hdbscan, xy_tsne, clusters_by_max_Iq_no_noise, Iq) = outputs
+    Iq_sorted = np.sort(Iq)[::-1]               
+    n_clusters = S_ica.shape[0]                                                                     
+    # make a list of colours so that each point with the same label has the 
+    # same colour, and all noise points are grey
+    # e.g. array(['#d62728', '#ff7f0e', '#2ca02c', ..., '#d62728', '#ff7f0e', '#9467bd']
+    labels_colours = prepare_point_colours_for_2d(labels_hdbscan, 
+                                                  clusters_by_max_Iq_no_noise)                                                                
+       
+    # legend with colours for each cluster, and names for each cluster.  
+    legend_dict = prepare_legends_for_2d(clusters_by_max_Iq_no_noise, Iq)    
+    # boostrapped are labelled as 0, and non bootstrapped as 1
+    marker_dict = {'labels' : np.ravel(np.hstack((np.zeros((1, n_comp*n_converge_bootstrapping)), 
+                                                  np.ones((1, n_comp*n_converge_no_bootstrapping)))))}        
+    marker_dict['styles'] = ['o', 'x']
+    
+    return sources_all_r3, S_ica, labels_hdbscan, xy_tsne, marker_dict, legend_dict, labels_colours    
    
 
 
@@ -628,39 +752,49 @@ def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
 
 #%%
 
-def bootstrapped_sources_to_centrotypes(sources_r2, hdbscan_param, tsne_param):
-    """ Given the products of the bootstrapping, run the 2d manifold and clustering algorithms to create centrotypes.  
+def bootstrapped_sources_to_centrotypes(sources_r2, hdbscan_param, tsne_param,
+                                        update_tsne):
+    """ Given the products of the bootstrapping, run the 2d manifold and
+    clustering algorithms to create centrotypes.  
     Inputs:
-        sources_r2      | rank 2 array | all the sources recovered after bootstrapping.  If 5 components and 100 bootstrapped runs, this will be 500 x n_pixels (or n_times)
+        sources_r2      | rank 2 array | all the sources recovered after 
+                                        bootstrapping.  If 5 components and 100
+                                        bootstrapped runs, this will be 500 x n_pixels
+                                        (or n_times)
         hdbscan_param  | tuple | Used to control the clustering (min_cluster_size, min_samples)
-        tsne_param     | tuple | Used to control the 2d manifold learning  (perplexity, early_exaggeration)
+        tsne_param     | tuple | Used to control the 2d manifold learning  
+                                (perplexity, early_exaggeration)
     Returns:
         S_best | rank 2 array | the recovered sources as row vectors (e.g. 5 x 1230)
-        labels_hdbscan | rank 2 array | the cluster number for each of the sources in sources_all_r2 e.g 1000,
-        xy_tsne | rank 2 array | the x and y coordinates of where each space is in the 2D space.  e.g. 1000x2
-        clusters_by_max_Iq_no_noise | rank 1 array | clusters ranked by quality index (Iq).  e.g. 3,0,1,4,2
-        Iq | list | cluster quality index for each cluster.  Entry 0 is Iq (cluster quality index) for the first cluster
+        labels_hdbscan | rank 2 array | the cluster number for each of the 
+                                        sources in sources_all_r2 e.g 1000,
+        xy_tsne | rank 2 array | the x and y coordinates of where each space is 
+                                 in the 2D space.  e.g. 1000x2
+        clusters_by_max_Iq_no_noise | rank 1 array | clusters ranked by quality
+                                                      index (Iq).  e.g. 3,0,1,4,2
+        Iq | list | cluster quality index for each cluster.  Entry 0 is Iq 
+                    (cluster quality index) for the first cluster
 
     History:
         2020/08/26 | MEG | Created from a script.  
         2021_04_16 | MEG | Remove unused figure arguments.  
     """
     import numpy as np
-    import hdbscan                                                               # used for clustering
-    from sklearn.manifold import TSNE                                            # t-distributed stochastic neighbour embedding
+    import hdbscan                                                               
+    from sklearn.manifold import TSNE                                            
 
-    
-    perplexity = tsne_param[0]                                                   # unpack tuples
+    # unpack tuples
+    perplexity = tsne_param[0]                                                   
     early_exaggeration = tsne_param[1]
     min_cluster_size = hdbscan_param[0]                                              
     min_samples = hdbscan_param[1] 
 
-    
-
     # 1: Create the pairwise comparison matrix
     print('\nStarting to compute the pairwise distance matrices....', end = '')
-    D, S = pairwise_comparison(sources_r2)                                              # each row is a source, is column is a pixel.  There ar n_comp * n_bootstrapping sources.  
-    print('Done!')                                                                      # D are distances, S are similiarities (so just 1 - each other).  n_sources * n_sources (so square).  
+    # each row of sources_r2 is a source, is column is a pixel.  There are
+    # n_comp * n_bootstrapping sources, D are distances, S are similiarities 
+    D, S = pairwise_comparison(sources_r2)                                              
+    print('Done!')                                                                    
 
 
     #  2: Clustering with all the recovered sources   
@@ -676,12 +810,15 @@ def bootstrapped_sources_to_centrotypes(sources_r2, hdbscan_param, tsne_param):
     print('Done!')
 
 
-    # 3:  2d manifold with all the recovered sources
-    print('Starting to calculate the 2D manifold representation....', end = "")
-    manifold_tsne = TSNE(n_components = 2, metric = 'precomputed', perplexity = perplexity, early_exaggeration = early_exaggeration,
-                         init = 'random', learning_rate = 200.0)# , square_distances=True)                                                                               # default will change to pca in 1.2.  May be worth experimenting with.  
-    xy_tsne = manifold_tsne.fit(D).embedding_
-    print('Done!' )
+    # 3:  2d manifold with all the recovered source (if required)
+    if update_tsne:
+        print('Starting to calculate the 2D manifold representation....', end = "")
+        manifold_tsne = TSNE(n_components = 2, metric = 'precomputed', perplexity = perplexity, early_exaggeration = early_exaggeration,
+                             init = 'random', learning_rate = 200.0)# , square_distances=True)                                                                               # default will change to pca in 1.2.  May be worth experimenting with.  
+        xy_tsne = manifold_tsne.fit(D).embedding_
+        print('Done!' )
+    else:
+        xy_tsne = None
     
 # testing.      
 #     def test_tsne(n_comp, D, perplexity, early_exaggeration):
@@ -773,11 +910,14 @@ def perform_multiple_ICA_runs(n_comp, mixtures_mc, bootstrapping_param, ica_para
     if ica_verbose == 'short' and n_converge_bootstrapping > 0:                                 # if we're only doing short version of verbose, and will be doing bootstrapping
         print(f"FastICA progress with bootstrapping: ", end = '')
     while n_ica_converge < n_converge_bootstrapping:
-        S, A, ica_converged = bootstrap_ICA(mixtures_mc, n_comp, bootstrap = True, ica_param = ica_param, verbose = ica_verbose)                # note that this will perform PCA on the bootstrapped samples, so can be slow.  
+        # this can be slow as PCA is run each time
+        S, A, ica_converged = bootstrap_ICA(mixtures_mc, n_comp, bootstrap = True, 
+                                            ica_param = ica_param, verbose = ica_verbose)                
         if ica_converged:
             n_ica_converge += 1
-            A_hist_BS.append(A)                                     # record results
-            S_hist_BS.append(S)                                     # record results
+            # record results
+            A_hist_BS.append(A)                                     
+            S_hist_BS.append(S)                                     
         else:
             n_ica_fail += 1
         if ica_verbose == 'long':
@@ -793,13 +933,18 @@ def perform_multiple_ICA_runs(n_comp, mixtures_mc, bootstrapping_param, ica_para
     if ica_verbose == 'short' and n_converge_no_bootstrapping > 0:                           # if we're only doing short version of verbose, and are actually doing ICA with no bootstrapping
         print(f"FastICA progress without bootstrapping: ", end = '')
     while n_ica_converge < n_converge_no_bootstrapping:
-        S, A, ica_converged = bootstrap_ICA(mixtures_mc, n_comp, bootstrap = False, ica_param = ica_param,
-                                            X_whitened = mixtures_white, dewhiten_matrix = dewhiten_matrix, verbose = ica_verbose)               # no bootstrapping, so PCA doesn't need to be run each time and we can pass it the whitened data.  
+        # fast as PCA is not run each time.  
+        S, A, ica_converged = bootstrap_ICA(mixtures_mc, n_comp, bootstrap = False,
+                                            ica_param = ica_param,
+                                            X_whitened = mixtures_white, 
+                                            dewhiten_matrix = dewhiten_matrix, 
+                                            verbose = ica_verbose)               
         
         if ica_converged:
             n_ica_converge += 1
-            A_hist_no_BS.append(A)                                     # record results
-            S_hist_no_BS.append(S)                                     # record results
+            # record results
+            A_hist_no_BS.append(A)                                     
+            S_hist_no_BS.append(S)                                     
         else:
             n_ica_fail += 1
         if ica_verbose == 'long':
@@ -886,12 +1031,16 @@ def bootstrap_ICA(X, n_comp, bootstrap = True, ica_param = (1e-4, 150),
             pca_success = False
     else:
         pca_success = True
-            
-    if pca_success:                                                                                         # If PCA was a success, do ICA (note, if not neeed, success is set to True)
+    
+    # If PCA was a success, do ICA (note, if not neeed, success is set to True)        
+    if pca_success:                                                                                         
         X_whitened = X_whitened[:n_comp,]                                                                                                       # reduce dimensionality ready for ICA
         try:                                                                                                                                    # try ICA, as it can occasionaly fail (nans etc)
-            W, S, A_white, _, _, ica_success = fastica_MEG(X_whitened, n_comp=n_comp,  algorithm="parallel",        
-                                                           whiten=False, maxit=ica_param[1], tol = ica_param[0], verbose = verbose)         # do ICA
+            W, S, A_white, _, _, ica_success = fastica_MEG(X_whitened, n_comp=n_comp,  
+                                                           algorithm="parallel",        
+                                                           whiten=False, maxit=ica_param[1],
+                                                           tol = ica_param[0], 
+                                                           verbose = verbose)         
             A = dewhiten_matrix[:,0:n_comp] @ A_white                                                                                       # turn ICA mixing matrix back into a time courses (ie dewhiten/ undo dimensonality reduction)
             S, A = maps_tcs_rescale(S, A)                                                                                                   # rescale so spatial maps have a range or 1 (so easy to compare)
         except:

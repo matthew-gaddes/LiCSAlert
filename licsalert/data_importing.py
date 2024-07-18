@@ -34,6 +34,7 @@ def check_required_args(settings_dict, required_inputs, settings_name):
             raise Exception(f"'{required_input}' was not found in "
                             f"'{settings_name}', and it is not optional.  "
                             f"Exiting.  ")
+    print(f"All the required arguments were found in the dictionary.  ")
 
 #%%
 
