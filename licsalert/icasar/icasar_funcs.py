@@ -426,7 +426,7 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
                       'ylabel' : 'TSNE dimension 2'}
         
     if spatial:
-        plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica, 
+        plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica, 
                                 hdbscan_param, tsne_param,
                                 n_converge_bootstrapping, 
                                 n_converge_no_bootstrapping,

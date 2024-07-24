@@ -529,7 +529,7 @@ def visualise_ICASAR_inversion(interferograms, sources, time_courses, mask, n_da
 #%%
 
 
-def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica, 
+def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica, 
                             hdbscan_param, tsne_param, 
                             n_converge_bootstrapping, n_converge_no_bootstrapping,
                             inset_axes_side = {'x':0.1, 'y':0.1}, 
@@ -574,16 +574,13 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
         History:
             2020/09/08 | MEG | Written
         """
-        # 1: try and remove any axes except the primary one
+        # 1: try and remove any axes except the primary one and the slider ones
         try:
             for ax_n, ax in enumerate(fig.axes):
-                if (ax_n > 0) and (ax not in slider_axes):
+                if (ax_n > 0) and (ax not in slider_axes) and (ax not in source_axes):
                     ax.remove()                
         except:
             pass
-        # for ax in fig.axes[1:]:  # Only remove additional axes, not primary axes and sliders
-        #     if 'inset_axes' in ax.get_gid():
-        #         ax.remove()
         
         # 2: try and remove any annotation arrows
         for art in axes1.get_children():
@@ -596,23 +593,7 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
                 continue
         fig.canvas.draw_idle()                                          
     
-    
-    def axes_data_to_fig_percent(axes_lims, fig_lims, point):
-        """ Given a data point, find where on the figure it plots (ie convert from axes coordinates to figure coordinates) 
-        Inputs:
-            axes_xlims | tuple | usually just the return of something like: axes1.get_ylim()
-            fig_lims | tuple | the limits of the axes in the figure.  usuall (0.1, 0.9)  for an axes made with something like this: axes1 = fig.add_axes([0.1, 0.1, 0.8, 0.8])                  # main axes
-            point |float | point in data coordinates
-        Returns:
-            fig_position | float | where the data point is in the figure.  (0,0) would be the lower left corner.  
-        History:
-            2020/09/08 | MEG | Written
-            
-        """
-        gradient = (fig_lims[1] - fig_lims[0])/(axes_lims[1] - axes_lims[0])
-        y_intercept = fig_lims[0] - (gradient * axes_lims[0])
-        fig_position = (gradient * point) + y_intercept
-        return fig_position
+
     
     def calculate_insetaxes_offset(lims, points, offset_length):
         """
@@ -644,6 +625,7 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
     import numpy as np
     from matplotlib.widgets import Slider
     from licsalert.icasar.icasar_funcs import tsne_and_cluster
+    from licsalert.aux import col_to_ma
     
     def hover(event):
         if event.inaxes == axes1:                                                       # determine if the mouse is in the axes
@@ -682,20 +664,7 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
                 x_normalized = x_fig / fig_width
                 y_normalized = y_fig / fig_height
 
-
-                # inset_axes = fig.add_axes([x_normalized, y_normalized,                                                               # create the inset axes, simple case, anchored to lower left corner
-                #                            inset_axes_side['x'], 
-                #                            inset_axes_side['y']], anchor = 'SW')               
-        
-    
                 # 2: Add the inset axes                
-                # convert position on axes to position in figure, ready to add the inset axes
-                # old way (fails when axes doesn't fill figure)
-                # fig_x = axes_data_to_fig_percent(axes1.get_xlim(), (0.1, 0.9), 
-                #                                   xy_tsne[0][0,point_n] + arrow_lengths[0])                   
-                # fig_y = axes_data_to_fig_percent(axes1.get_ylim(), (0.1, 0.9), 
-                #                                   xy_tsne[0][1,point_n] + arrow_lengths[1])                   
-                
                 # four possible quadrants for the inset axes.  Note they are 
                 # shifted so they don't lie on top of the arrow.  
                 if arrow_lengths[0] > 0 and arrow_lengths[1] > 0:                                                          
@@ -772,12 +741,14 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
     
         # do the plotting
         if markers is None:      
+            # either plot all the points
             sc_container['sc'] = axes1.scatter(xy_tsne[0][0,:], xy_tsne[0][1,:], 
-                               c=labels_colours, s=100)                                             # draw the scatter plot, just draw them all with the default marker
-        else:                                                                                                                                     # but if we do have a dictionary of markers.  
-            n_markers = len(markers['styles'])                                                                                                    # get the number of unique markers
-            for n_marker in range(n_markers):                                                                                                     # loop through each marker style
-                point_args = np.ravel(np.argwhere(markers['labels'] == n_marker))                                                                 # get which points have that marker style
+                                               c=labels_colours, s=100)                                             
+        else:                                                                                                                                     
+            # or plot them based on the different markers 
+            n_markers = len(markers['styles'])                                                                                                    
+            for n_marker in range(n_markers):                                                                                                     
+                point_args = np.ravel(np.argwhere(markers['labels'] == n_marker))                                                                 
                 try:
                     sc_container['sc'] = axes1.scatter(xy_tsne[0][0,:][point_args], 
                                        xy_tsne[0][1,:][point_args], 
@@ -785,14 +756,102 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
                                        marker = markers['styles'][n_marker])        
                 except:
                     pass
+            # draw the scatter plot again with all the points (regardless of 
+            # marker style), but with invisible markers.  As the last to be drawn, 
+            # these are the ones that are hovered over, and indexing works as 
+            # all the points are draw this time.  
             sc_container['sc'] = axes1.scatter(xy_tsne[0][0,:], xy_tsne[0][1,:], 
-                               c=labels_colours, s=100,  alpha = 0.0)                                                                       # draw the scatter plot again with all the points (regardless of marker style), but with invisible markers.  As the last to be drawn, these are the ones that are hovered over, and indexing works as all the points are draw this time.  
-    
+                                               c=labels_colours, s=100,  
+                                               alpha = 0.0)                                                                       
+        axes1.set_aspect('equal')
+        
         # 4: Possibly add a legend, using the legend dict.  
         if legend is not None:
             axes1.legend(handles = legend['elements'], labels = legend['labels'], 
                          bbox_to_anchor=(1., 0.5), loc = 'center right',
                          bbox_transform=plt.gcf().transFigure) 
+            
+        # Plot the sources
+        def plot_signals(r2_signals, mask, x_start, x_stop, y_start, y_stop,
+                         title, legend_dict = None, obscure = None):
+            """
+            """
+            from matplotlib.lines import Line2D                                  
+            
+            n = r2_signals.shape[0]
+            
+            if n <= 0:
+                raise ValueError("Number of subplots must be greater than 0.")
+            if not (0 <= x_start <= 1) or not (0 <= x_stop <= 1):
+                raise ValueError("x_start and x_stop must be between 0 and 1.")
+            if not (0 <= y_start <= 1) or not (0 <= y_stop <= 1):
+                raise ValueError("y_start and y_stop must be between 0 and 1.")
+            if x_start >= x_stop:
+                raise ValueError("x_stop must be greater than x_start.")
+            if y_start >= y_stop:
+                raise ValueError("y_stop must be greater than y_start.")
+            
+            fig_width = x_stop - x_start  
+            fig_height = y_stop - y_start  
+
+            # Number of columns for each row
+            ncols = (n + 1) // 2
+
+            # Width and height of each subplot
+            width = fig_width / ncols
+            height = fig_height / 2
+
+            for i in range(n):
+                # determine if it should have low opacity:
+                opacity = 1.
+                if obscure is not None:
+                    if i >= obscure:
+                        opacity = 0.5
+                
+                row = i // ncols
+                col = i % ncols
+                left = x_start + col * width
+                bottom = y_start + (1 - (row + 1) / 2) * fig_height  
+
+                ax = fig.add_axes([left, bottom, width, height])
+                if ax not in source_axes:
+                    source_axes.append(ax)
+                    
+                #ax.set_title(f'Subplot {i+1}')
+                mat = ax.matshow(col_to_ma(r2_signals[i, :], mask),
+                                 alpha = opacity)
+                ax.set_xticks([])
+                ax.set_yticks([])
+                
+                ax.text(0.05, 0.95, f"   {title}{i}", transform=ax.transAxes, 
+                        fontsize=12, verticalalignment='top', 
+                        bbox=dict(boxstyle="round,pad=0.3", edgecolor='black', 
+                                  facecolor='white'))
+                
+                
+                # Possibly add dot showing which cluster source came from
+                if legend_dict is not None:
+                    cluster_col = legend_dict['elements'][i].get_markerfacecolor()
+                    line = Line2D([4], [3], marker='o', color=cluster_col, 
+                                  markersize=10, zorder = 999)
+                    ax.add_line(line)
+                    
+
+        # why is this needed?
+        for ax in source_axes:
+            try:
+                ax.remove()
+            except:
+                pass
+
+
+        # Plot the PCs
+        plot_signals(S_pca, mask, 0.5, 0.95, 0.5, 1., title = 'PC', 
+                     legend_dict = None, obscure = n_pca)
+        
+        # Plot the ICs
+        plot_signals(S_ica, mask, 0.5, 0.95, 0., 0.5, title = 'IC',
+                     legend_dict = legend_dict, obscure = None)
         fig.canvas.draw_idle()
     
         
@@ -802,13 +861,17 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
     xy_tsne = [None]
     # sources container (used to plot a point when hovered over)
     S_all_r3 = [None]
+    # source axes
+    source_axes = [None]
+    
+    
     
     # get the number of PCs for each run
     n_pca_comps = [i[0].shape[0] for i in  S_hists]
     
     # Draw the figure
     fig = plt.figure(figsize = figsize)                                                                
-    axes1 = fig.add_axes([0.2, 0.25, 0.6, 0.6])                                                        
+    axes1 = fig.add_axes([0.1, 0.25, 0.35, 0.6])                                                        
     
     # Try and add various labels from the labels dict
     try:
@@ -827,20 +890,21 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
     
     # Add sliders
     axcolor = 'lightgoldenrodyellow'
+    horizontal_slider_dx = 0.3
     # Slider for n_pca_comp
-    ax_a = plt.axes([0.25, 0.9, 0.65, 0.03], facecolor=axcolor)
+    ax_a = plt.axes([0.15, 0.9, horizontal_slider_dx, 0.03], facecolor=axcolor)
     slider_a = Slider(ax_a, '# PCA components', n_pca_comps[0], n_pca_comps[-1], 
                       valinit=int(np.average(n_pca_comps)), valstep = 1)
     # Slider for tsne perplexity
-    ax_b = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
+    ax_b = plt.axes([0.15, 0.1, horizontal_slider_dx, 0.03], facecolor=axcolor)
     slider_b = Slider(ax_b, 'tsne: perplexity', 5, 50, 
                       valinit=tsne_param[0], valstep = 1)
     # Slider for tsne early exageration
-    ax_c = plt.axes([0.25, 0.15, 0.65, 0.03], facecolor=axcolor)
+    ax_c = plt.axes([0.15, 0.15, horizontal_slider_dx, 0.03], facecolor=axcolor)
     slider_c = Slider(ax_c, 'tsne: early exageration', 0, 20, 
                       valinit=tsne_param[1], valstep = 1)
     # Slider for hdbscan min_cluster_size
-    ax_d = plt.axes([0.05, 0.25, 0.0225, 0.63], facecolor=axcolor)
+    ax_d = plt.axes([0.015, 0.25, 0.0225, 0.63], facecolor=axcolor)
     slider_d = Slider(ax_d, 'HDBSCAN: min_cluster_size', 0, 200, 
                       valinit=hdbscan_param[0], valstep = 1, 
                       orientation='vertical')
@@ -848,9 +912,8 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
     slider_d.label.set_verticalalignment('center')
     slider_d.label.set_position((0.0, 0.5))
 
-    
     # Slider for hdbscan min_samples
-    ax_e = plt.axes([0.1, 0.25, 0.0225, 0.63], facecolor=axcolor)
+    ax_e = plt.axes([0.04, 0.25, 0.0225, 0.63], facecolor=axcolor)
     slider_e = Slider(ax_e, 'HDBACAN: min_samples', 0, 50, 
                       valinit=hdbscan_param[1], valstep = 1,
                       orientation='vertical')
@@ -881,6 +944,8 @@ def plot_2d_interactive_fig(S_hists, mask, spatial, sica_tica,
 
 
     
+
+
     
     if figures == 'window':
         pass
