@@ -54,6 +54,7 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
     import matplotlib
     import numpy as np
     from matplotlib.widgets import Slider, Button
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     from licsalert.aux import col_to_ma
     
     
@@ -64,14 +65,22 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
     xy_tsne = [None]
     # mutable sources container (used to plot a point when hovered over)
     S_all_r3 = [None]
-    # mutable source axes
+    # mutable source axes (for PCs and ICs)
     source_axes = [None]
     # mutable list to store the 2d array of xy coords. 
     xy_tsne = [None]
+    # mutable to store the S_ica (ica sources)
+    S_ica = [None]
+    # mutable to store other less useful outputs
+    source_outputs = {}
     
+    
+    button_clicked = [False]
     
     # get the number of PCs for each run
     n_pca_comps = [i[0].shape[0] for i in  S_hists]
+    
+    
     
     # Draw the figure
     fig = plt.figure(figsize = figsize)                                                                
@@ -126,7 +135,12 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
     slider_e.label.set_position((0.08, 0.5))
     
     slider_axes = [ax_a, ax_b, ax_c, ax_d, ax_e]
-    # Put a legend to the right of the current axis.  bbox is specified in figure coordinates.  
+
+    # button to advance when user has configured
+    button_dx = 0.1
+    ax_button = plt.axes([(0.15 + horizontal_slider_dx/2 + button_dx/2 ), 
+                          0.025, button_dx, 0.04])
+    button_axes = [ax_button]
               
     # call the function that highlights a source if you hover on it.  
     fig.canvas.mpl_connect("motion_notify_event", lambda val: hover(val, axes1,
@@ -138,7 +152,10 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
                                                                     sica_tica,
                                                                     S_all_r3,
                                                                     slider_axes,
-                                                                    source_axes))
+                                                                    source_axes,
+                                                                    button_axes))
+
+
 
     # arguemnts required by update function.  
     params = {'fig': fig,
@@ -161,7 +178,9 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
             'sc_container': sc_container,
             'legend': legend,
             'source_axes': source_axes,
-            'S_pca': S_pca }
+            'S_pca': S_pca,
+            'S_ica' : S_ica,
+            'source_outputs' : source_outputs}
 
 
     # call the slider function to plot the points during 1st plot initialisation
@@ -178,14 +197,31 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
     slider_e.on_changed(lambda val: update(val, update_tsne = False, **params))
 
 
-    # button to advance when user has configured
-    # button_dx = 0.1
-    # ax_button = plt.axes([(0.15 + horizontal_slider_dx/2 + button_dx/2 ), 
-    #                       0.025, button_dx, 0.04])
-    # button = Button(ax_button, 'Continue')
+
+    # Initialize the user_data variable (mutable?)
+    chosen_settings = {}
+
+    # Initialize a flag to indicate when the button has been clicked
+    
+    button = Button(ax_button, 'Continue')
         
+    # Set the callback function for the button
+    button.on_clicked(lambda val: on_button_click(val, slider_a, slider_b,
+                                                  slider_c, slider_d,
+                                                  slider_e, button_clicked))
+    
+    # Display the interactive figure
+    plt.show()#block=False)
 
 
+    # # Wait for user input (v1)
+    while not button_clicked[0]:
+        plt.pause(1.)
+        print("Waiting for the user to select the ICA sources using the "
+              "interactive window.  ")
+    
+    print(f"{S_ica[0].shape[0]} ICA sources have been chosen by the user. "
+          "Continuing")
     
     if figures == 'window':
         pass
@@ -197,12 +233,16 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
     else:
         pass
     
-    pdb.set_trace() 
+    # return the ICA sources from the mutable they are stored in 
+    return S_ica[0], source_outputs
+    
+    
 
 #%%
 
 def hover(event, axes1, sc_container, fig, xy_tsne, arrow_length, 
-          inset_axes_side, sica_tica, S_all_r3, slider_axes, source_axes):
+          inset_axes_side, sica_tica, S_all_r3, slider_axes, source_axes,
+          button_axes):
     """ 
     """
     # determine if the mouse is in the axes
@@ -214,7 +254,7 @@ def hover(event, axes1, sc_container, fig, xy_tsne, arrow_length,
         if cont:                                                                    
             # remove the axes and arrow created when hovering on the point 
             # (in case cursor moves from one point to next without going off a point)
-            remove_axes2_and_arrow(fig, axes1, slider_axes, source_axes)                                             
+            remove_axes2_and_arrow(fig, axes1, slider_axes, source_axes, button_axes)                                             
             
             # get the index of which data point we're hovering on in a simpler form.      
             point_n = ind['ind'][0]                                                 
@@ -288,21 +328,21 @@ def hover(event, axes1, sc_container, fig, xy_tsne, arrow_length,
             axes1.set_ylim(ylim_orig)
 
             
-            fig.canvas.draw_idle()                                                                                          # update the figure.  
+            fig.canvas.draw_idle()                                                                                          
         else:                                                                       # else not on a point
-            remove_axes2_and_arrow(fig, axes1, slider_axes, source_axes)                                             # remove the axes and arrow created when hovering on the point                       
+            remove_axes2_and_arrow(fig, axes1, slider_axes, source_axes, button_axes)                                             # remove the axes and arrow created when hovering on the point                       
     else:                                                                           # else not in the axes
-        remove_axes2_and_arrow(fig, axes1, slider_axes, source_axes)                                                 # remove the axes and arrow created when hovering on the point (in case cursor moves from one point to next without going off a point)
+        remove_axes2_and_arrow(fig, axes1, slider_axes, source_axes, button_axes)                                                 # remove the axes and arrow created when hovering on the point (in case cursor moves from one point to next without going off a point)
 
 
 
 #%%
 
 def update(val, fig, axes1, slider_a, slider_b, slider_c, slider_d, slider_e, 
-            n_pca_comps, S_hists, mask, spatial, sica_tica, 
-            n_converge_bootstrapping, n_converge_no_bootstrapping, 
-            S_all_r3, xy_tsne, markers, sc_container, legend, source_axes, 
-            S_pca, update_tsne = True):
+           n_pca_comps, S_hists, mask, spatial, sica_tica, 
+           n_converge_bootstrapping, n_converge_no_bootstrapping, 
+           S_all_r3, xy_tsne, markers, sc_container, legend, source_axes, 
+           S_pca, S_ica, source_outputs,  update_tsne = True):
     
     """
     """
@@ -311,6 +351,7 @@ def update(val, fig, axes1, slider_a, slider_b, slider_c, slider_d, slider_e,
     import matplotlib.pyplot as plt 
     
     from licsalert.icasar.icasar_funcs import tsne_and_cluster
+    from licsalert.icasar.icasar_funcs import sources_list_to_r2_r3
     
     # remove points from previous run
     axes1.clear()
@@ -327,8 +368,8 @@ def update(val, fig, axes1, slider_a, slider_b, slider_c, slider_d, slider_e,
                                n_converge_bootstrapping, 
                                n_converge_no_bootstrapping, 
                                update_tsne)
-    (sources_all_r3, S_ica, labels_hdbscan, xy_tsne_new, marker_dict, 
-     legend_dict, labels_colours) = outputs
+    (sources_all_r3, S_ica[0], labels_hdbscan, xy_tsne_new, marker_dict, 
+     legend_dict, labels_colours, Iq_sorted, n_clusters) = outputs
     S_all_r3[0] = sources_all_r3
     # if tsne was not updated, previous function returns None
     if xy_tsne_new is None:
@@ -363,48 +404,53 @@ def update(val, fig, axes1, slider_a, slider_b, slider_c, slider_d, slider_e,
                                            alpha = 0.0)                                                                       
     axes1.set_aspect('equal')
     
-    # 4: Possibly add a legend, using the legend dict.  
-    if legend is not None:
-        axes1.legend(handles = legend['elements'], labels = legend['labels'], 
-                     bbox_to_anchor=(1., 0.5), loc = 'center right',
-                     bbox_transform=plt.gcf().transFigure) 
-        
-    # Plot the sources
-    
-                
+    # add things to the mutable
+    source_outputs['xy'] = xy_tsne[0]
+    source_outputs['labels'] = labels_hdbscan
+    source_outputs['Iq_sorted'] = Iq_sorted
+    source_outputs['n_clusters'] = n_clusters
+    # get all the sources for the 2d points (depends on n_pca) as row vectors
+    sources_all_r2, _ = sources_list_to_r2_r3(S_hists[S_index], mask)           
+    source_outputs['sources_all_r2'] = sources_all_r2
 
-    # why is this needed?
+
+    # Remove any previous PCs and ICs (ready to plot updated ones)
     for ax in source_axes:
         try:
             ax.remove()
         except:
             pass
-
-
+        
     # Plot the PCs
     plot_signals(fig, source_axes, S_pca, mask, 0.5, 0.95, 0.5, 1., title = 'PC', 
                  legend_dict = None, obscure = n_pca)
     
     # Plot the ICs
-    plot_signals(fig, source_axes, S_ica, mask, 0.5, 0.95, 0., 0.5, title = 'IC',
+    plot_signals(fig, source_axes, S_ica[0], mask, 0.5, 0.95, 0., 0.5, title = 'IC',
                  legend_dict = legend_dict, obscure = None)
     fig.canvas.draw_idle()
     
 
 #%%
 
-# def on_button_click(event):
-#     # global user_data, button_clicked
-#     global button_clicked
-#     # Get the values set by the user in the interactive figure
-
-#     # get the current settings        
-#     n_pca = slider_a.val
-#     hdbscan_param = (slider_d.val, slider_e.val)
-#     tsne_param = (slider_b.val, slider_c.val)
+def on_button_click(event, slider_a, slider_b, slider_c, slider_d, slider_e,
+                    button_clicked):
+    """
+    """
     
-#     button_clicked = True           # Set the flag to True
-#     plt.close()                     # Close the figure to continue the script
+    import matplotlib.pyplot as plt
+
+    # assign the current settings to the mutable in the parent function.  
+    chosen_settings = {
+        'n_pca': slider_a.val,
+        'hdbscan_param' : (slider_d.val, slider_e.val),
+        'tsne_param' : (slider_b.val, slider_c.val)
+    }
+    
+    # Set the flag to True
+    button_clicked[0] = True           
+
+    plt.close()                     
     
     
 #%%
@@ -478,7 +524,7 @@ def plot_signals(fig, source_axes, r2_signals, mask, x_start, x_stop, y_start, y
 
 #%%
 
-def remove_axes2_and_arrow(fig, axes1, slider_axes, source_axes):
+def remove_axes2_and_arrow(fig, axes1, slider_axes, source_axes, button_axes):
     """ Given a figure that has a second axes and an annotation arrow due to a 
     point having been hovered on, remove this axes and annotation arrow.  
     Inputs:
@@ -493,7 +539,10 @@ def remove_axes2_and_arrow(fig, axes1, slider_axes, source_axes):
     # 1: try and remove any axes except the primary one and the slider ones
     try:
         for ax_n, ax in enumerate(fig.axes):
-            if (ax_n > 0) and (ax not in slider_axes) and (ax not in source_axes):
+            if ( (ax_n > 0) and 
+                (ax not in slider_axes) and
+                (ax not in source_axes) and 
+                (ax not in button_axes)):
                 ax.remove()                
     except:
         pass

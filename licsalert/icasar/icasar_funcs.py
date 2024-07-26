@@ -430,16 +430,21 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
                       'ylabel' : 'TSNE dimension 2'}
         
     if spatial:
+        S_ica, source_outputs = plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica, 
+                                                        hdbscan_param, tsne_param,
+                                                        n_converge_bootstrapping, 
+                                                        n_converge_no_bootstrapping,
+                                                        inset_axes_side = inset_axes_side,
+                                                        fig_filename = plot_2d_labels['title'], 
+                                                        **fig_kwargs)
         
+        # unpack to use the previous naming convention.  
+        labels_hdbscan = source_outputs['labels']
+        xy_tsne = source_outputs['xy']
+        n_clusters = source_outputs['n_clusters']
+        Iq_sorted = source_outputs['Iq_sorted']
+        sources_all_r2 = source_outputs['sources_all_r2']
         
-        plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica, 
-                                hdbscan_param, tsne_param,
-                                n_converge_bootstrapping, 
-                                n_converge_no_bootstrapping,
-                                inset_axes_side = inset_axes_side,
-                                fig_filename = plot_2d_labels['title'], 
-                                **fig_kwargs)
-        pdb.set_trace()
 
     else:
         raise Exception(f"Fucntion removed. ")
@@ -528,7 +533,7 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
     S_all_info = {'sources' : sources_all_r2,                                                                # package into a dict to return
                   'labels' : labels_hdbscan,
                   'xy' : xy_tsne       }
-    print('Saving the key results as a .pkl file... ', end = '')                                            # note that we don't save S_all_info as it's a huge file.  
+    print('Saving the key results as a .pkl file... ', end = '')                                            
     if spatial:
         with open(out_folder / 'ICASAR_results.pkl', 'wb') as f:                            # first save spatial patterns, then time courses (incremental, not cumulative)
             if sica_tica == 'sica':
@@ -542,7 +547,6 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
                 pickle.dump(S_ica_dc.T, f)                                                  # time courses are sources and in S.  Note that because these are incremental, they are no longer mean centered.  
 
             pickle.dump(source_residuals, f)
-            pickle.dump(Iq_sorted, f)
             pickle.dump(n_clusters, f)
             pickle.dump(xy_tsne, f)
             pickle.dump(labels_hdbscan, f)
@@ -688,7 +692,7 @@ def tsne_and_cluster(S_hist, mask, spatial, sica_tica, n_comp,
                                                   np.ones((1, n_comp*n_converge_no_bootstrapping)))))}        
     marker_dict['styles'] = ['o', 'x']
     
-    return sources_all_r3, S_ica, labels_hdbscan, xy_tsne, marker_dict, legend_dict, labels_colours    
+    return sources_all_r3, S_ica, labels_hdbscan, xy_tsne, marker_dict, legend_dict, labels_colours, Iq_sorted, n_clusters
    
 
 
