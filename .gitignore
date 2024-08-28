@@ -9,3 +9,5 @@ licsalert/__pycache__/*
 status_outputs/
 
 issue_testing/
+
+figure_inputs.pkl
