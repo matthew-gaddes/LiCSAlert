@@ -1,10 +1,10 @@
 not_in_repo/
 licsalert/__pycache__/*
 
-001_campi_flegrei_example/ICASAR_outputs/FastICA_results.pkl
-002_campi_flegrei_example_all_figures/ICASAR_outputs/FastICA_results.pkl
-003_vesuvius_example_tica/ICASAR_outputs/FastICA_results.pkl
-004_vesuvius_example_sica/ICASAR_outputs/FastICA_results.pkl
+001_campi_flegrei_example/ICASAR_results/FastICA_results.pkl 
+002_campi_flegrei_example_all_figures/ICASAR_results/FastICA_results.pkl
+003_vesuvius_example_tica/ICASAR_results/FastICA_results.pkl
+004_vesuvius_example_sica/ICASAR_results/FastICA_results.pkl
 
 status_outputs/
 
