@@ -277,6 +277,13 @@ def create_all_ifgs(ifgs_r2, ifg_dates, max_n_all_ifgs = 1000):
 
     
     ########### begin main function
+    if len(ifgs_r2.shape) > 2:
+        raise Exception("The interferograms must be collapsed to row vectors "
+                        "with a value only where the mask is not True.  "
+                        "Therefore, the resuling array should be "
+                        "n_times x n_pixels (2D), but the supplied array has "
+                        f"too many dimensions (it is shape {ifgs_r2.shape}.  "
+                        "Exiting.  ")
     n_ifgs, n_pixs = ifgs_r2.shape
         
     

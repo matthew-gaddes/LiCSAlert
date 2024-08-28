@@ -580,24 +580,44 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
     shape_start = displacement_r2["mask"].shape                                                     # and the shape of the ifgs (ny, nx)
     
     # 1: Downsample the ifgs for use in all following functions.  
-    if downsample_run != 1.0:                                                                                                                       # if we're not actually downsampling, skip for speed
-        displacement_r2["incremental"], displacement_r2["mask"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],          # downsample just the ifgs and their mask.  Uses: from skimage.transform import rescale
-                                                                                  downsample_run, verbose = False)
+    # if we're not actually downsampling, skip for speed
+    if downsample_run != 1.0:                                                                                                                       
+        op  = downsample_ifgs(
+            displacement_r2["incremental"], displacement_r2["mask"],          
+            downsample_run, verbose = False
+            )
+        (displacement_r2["incremental"], displacement_r2["mask"]) = op; del op
+        
+        # also remake the cumulative signal
+        cumulative = np.cumsum(displacement_r2["incremental"], axis=0)
+        # 0s on first acquisition date
+        cumulative = np.concatenate(
+            (np.zeros((1, cumulative.shape[1])), cumulative), axis = 0)          
+        displacement_r2['cumulative'] = cumulative
         
         # remake lons and lats at new resolution
-        if ('lons' in displacement_r2) and ('lats' in displacement_r2):                                             # check if we have lon lat data as not alway strictly necessary.  
-            ifg1 = col_to_ma(displacement_r2['incremental'][0,:], pixel_mask = displacement_r2['mask'])             # get the size of a new ifg (ie convert the row vector to be a rank 2 masked array.  )
-            lons = np.linspace(displacement_r2['lons'][0,0], displacement_r2['lons'][-1,-1], ifg1.shape[1])          # remake the correct number of lons (to suit the number of pixels in the new ifgs, first as 1d
-            displacement_r2['lons'] = np.repeat(lons[np.newaxis, :], ifg1.shape[0], axis = 0)                       # then as 2D
-            lats = np.linspace(displacement_r2['lats'][0,0], displacement_r2['lats'][-1,0], ifg1.shape[0])          # remake the correct number of lats (to suit the number of pixels in the new ifgs, first as 1d
-            displacement_r2['lats'] = np.repeat(lats[:, np.newaxis], ifg1.shape[1], axis = 1)                       # then as 2D
-            if displacement_r2['lats'][0,0] < displacement_r2['lats'][-1,0]:                                        # if the lat in the top row is less than the lat in the bottom row
-                displacement_r2['lats'] = np.flipud(displacement_r2['lats'])                                        # something is reveresed, so flip up down so that the highest lats are in the top row.  
+        # check if we have lon lat data as not alway strictly necessary.  
+        if ('lons' in displacement_r2) and ('lats' in displacement_r2):                                            
+            ifg1 = col_to_ma(displacement_r2['incremental'][0,:], 
+                             pixel_mask = displacement_r2['mask'])             
+            lons = np.linspace(displacement_r2['lons'][0,0], 
+                               displacement_r2['lons'][-1,-1], ifg1.shape[1])         
+            displacement_r2['lons'] = np.repeat(lons[np.newaxis, :], 
+                                                ifg1.shape[0], axis = 0)                       
+            lats = np.linspace(displacement_r2['lats'][0,0], 
+                               displacement_r2['lats'][-1,0], ifg1.shape[0])          
+            displacement_r2['lats'] = np.repeat(lats[:, np.newaxis], 
+                                                ifg1.shape[1], axis = 1)                       
+            
+            if displacement_r2['lats'][0,0] < displacement_r2['lats'][-1,0]:                                        
+                displacement_r2['lats'] = np.flipud(displacement_r2['lats'])                                        
             
         # also downsample other simple data if it's included:
         for product in ['dem', 'E', 'N', 'U']: 
             if product in displacement_r2.keys():
-                displacement_r2[product] = rescale(displacement_r2[product], downsample_run, anti_aliasing = False)                               # do the rescaling
+                displacement_r2[product] = rescale(displacement_r2[product], 
+                                                   downsample_run, 
+                                                   anti_aliasing = False)                               
             
     # 2: Downsample further for plotting.  
     displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],

@@ -392,7 +392,8 @@ def PCA_meg2(X, verbose = False, return_dewhiten = True):
     
     # data whitened (X is mean centered)
     x_white = whiten_mat @ X                
-  
+    
+ 
     if return_dewhiten:
         return vecs, vals, whiten_mat, dewhiten_mat, x_mc, x_decorrelate, x_white
     else:

@@ -36,15 +36,15 @@ print(f"\n\n\n\n CHANGED DOWNSAMPLING TO SPEED UP \n\n\n\n\n\n\n")
 
 licsalert_settings = {"baseline_end"        : "20170101",                               # end baseline stage at YYYYMMDD, need to be before the last acquisition of LiCSAlert will never monitoring anyhting.  
                       "figure_intermediate" : False,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  
-                      "figure_type"         : 'window',                             # either 'window' or 'png' (to save as pngs), or 'both'
-                      "downsample_run"      : 0.2,                                     # data can be downsampled to speed things up
+                      "figure_type"         : 'both',                             # either 'window' or 'png' (to save as pngs), or 'both'
+                      "downsample_run"      : 0.5,                                     # data can be downsampled to speed things up
                       "downsample_plot"     : 0.5,                               # and a 2nd time for fast plotting.  Note this is applied to the restuls of the first downsampling, so is compound
                       "residual_type"       : 'cumulative',                      # controls the type of residual used in the lower plot.  Either cumulative or window   
                       "t_recalculate"       : 40,                               # Number of acquisitions that the lines of best fit are calcualted over.  Larger value makes the algorithm more sensitive
                       'inset_ifgs_scaling'  : 15}                               # scales the size of the incremental and cumulative ifgs in the top row of the figure.  Smaller values gives a bigger figures.  
 
 
-icasar_settings = {"n_pca_comp_start"       : 5,                                                  
+icasar_settings = {"n_pca_comp_start"       : 6,                                                  
                    "n_pca_comp_stop"        : 7,                                                  
                    "bootstrapping_param"    : (200, 0),                              # (number of runs with bootstrapping, number of runs without bootstrapping)                    "hdbscan_param" : (35, 10),                        # (min_cluster_size, min_samples)
                     "tsne_param"             : (30, 12),                                       # (perplexity, early_exaggeration)

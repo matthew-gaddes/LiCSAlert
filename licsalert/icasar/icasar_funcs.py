@@ -161,6 +161,13 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
     if spatial:                                                                                                                 # if we have spatial data
         if np.max(np.isnan(spatial_data['ifgs_dc'])):
             raise Exception("Unable to proceed as the data ('spatial_data['dc_ifgs']') contains Nans.  ")
+            
+        if isinstance(spatial_data['ifgs_dc'], ma.MaskedArray):
+            raise Exception("The interferograms in spatial_data ('ifgs_dc') "
+                            "is a masked array, but must be a numpy array.  "
+                            "Exiting.   ")
+
+        
         mask = spatial_data['mask']                                                                                         # the mask that converts row vector mixtures into 2d (rank 2) arrays.  
         n_ifgs = spatial_data['ifgs_dc'].shape[0]                                                                           # get the number of incremental ifgs
         if n_ifgs != len(spatial_data['ifg_dates_dc']):                                                                     # and check it's equal to the list of ifg dates (YYYYMMDD_YYYYMMDD)
@@ -296,6 +303,7 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
     success = False
     count = 0
     while (success == False) and (count < 10):
+        
         try:
             outputs = PCA_meg2(X_mc, verbose = False)                    
             (PC_vecs, PC_vals, PC_whiten_mat, PC_dewhiten_mat, x_mc,
@@ -430,6 +438,24 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
                       'ylabel' : 'TSNE dimension 2'}
         
     if spatial:
+        
+        
+        
+        # # Save each variable individually to the pickle file
+        # with open('figure_inputs.pkl', 'wb') as f:
+        #     pickle.dump(S_pca, f)
+        #     pickle.dump(S_hists, f)
+        #     pickle.dump(mask, f)
+        #     pickle.dump(spatial, f)
+        #     pickle.dump(sica_tica, f)
+        #     pickle.dump(hdbscan_param, f)
+        #     pickle.dump(tsne_param, f)
+        #     pickle.dump(n_converge_bootstrapping, f)
+        #     pickle.dump(n_converge_no_bootstrapping, f)
+        #     pickle.dump(inset_axes_side, f)
+            
+            
+        
         S_ica, source_outputs = plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica, 
                                                         hdbscan_param, tsne_param,
                                                         n_converge_bootstrapping, 

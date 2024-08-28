@@ -177,7 +177,7 @@ def pngs_to_gif(input_folder, output_file, image_duration = 1000):
     imageio.mimsave(output_file, images, format = 'GIF', duration = image_duration,  loop = 1)
     print('Done!')
 
-
+#%%
 # def find_directories_with_more_than_n_subdirectories(root_dir, n=2):
 #     # List to store directories with more than n subdirectories
 #     result_directories = []
