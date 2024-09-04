@@ -7,6 +7,66 @@ Created on Wed Aug 28 15:52:44 2024
 """
 import pdb
 
+#%%
+
+
+def plot_decomposition_timeseries(interpolated_ts, all_dates, frame_names, 
+                                  title = ''):
+    """
+    Plots columns of a 2D array against a list of dates, so can be used to 
+    visualise the displacement of a pixel through time in multiple frames.  
+    
+    Inputs:
+        interpolated_ts | r2 array | n_acqs x n_frames
+        all_dates | list | date for each row in interpolated_ts
+        frame_names | list | name for each frame (column of interpolated_ts)
+        title | string | Used to name the figure and the window.
+
+    Returns:
+        Figure
+        
+    2024_08_29 | MEG | Written
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+    from datetime import datetime
+    
+    # Convert date strings to datetime objects
+    dates = [datetime.strptime(date, "%Y%m%d") for date in all_dates]
+    
+    # Check dimensions
+    if interpolated_ts.shape[0] != len(all_dates):
+        raise ValueError("Number of date strings must match the number of rows in the data array")
+
+    # Create the plot
+    f, ax = plt.subplots(figsize=(10, 6))
+    f.suptitle(title)
+    f.canvas.manager.set_window_title(title)
+    
+    # Plot each column
+    for i in range(interpolated_ts.shape[1]):
+        ax.scatter(dates, interpolated_ts[:, i], 
+                   label=f'{frame_names[i]}', marker = '.')
+        
+
+    
+    # Format the x-axis to show dates
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    ax.xaxis.set_major_locator(mdates.MonthLocator(interval = 6))
+    
+    # Rotate and align the date labels
+    f.autofmt_xdate()
+    
+    # Add labels and title
+    ax.set_xlabel('Date')
+    ax.set_ylabel('LOS disp. (m)')
+    #f.suptitle('Line Graph of Each Column vs Dates')
+    f.legend()
+    
+    # Show the plot
+    plt.show()
+
+
 
 #%%
 class licsbas_frame():
@@ -494,7 +554,7 @@ def interpolate_missing_times(data):
 #%%
 
 
-def sample_new_times(cumulative_daily_interp, all_dates, new_dates,
+def sample_new_times(cumulative_daily_interp, all_dates, desired_dates,
                      licsbas_frames):
     """
     Given measurements of displacement that are daily (usually interpolating
@@ -504,7 +564,7 @@ def sample_new_times(cumulative_daily_interp, all_dates, new_dates,
     Inputs:
         cumulative_daily_interp | r3 array | (n_times, n_frames, n_pixels)
         all_dates | list | date for each row in cumulative_daily_interp
-        new_dates | list | dates that data will be sampled to.  
+        desired | list | dates that data will be sampled to.  
         licsbas_frames | list of licsbas_frame | used to get the number of
                                                 pixels in each frame.  
         
@@ -522,6 +582,10 @@ def sample_new_times(cumulative_daily_interp, all_dates, new_dates,
         
     """
     import numpy as np  
+    from copy import deepcopy
+    
+    # make a copy to avoid changes
+    new_dates = deepcopy(desired_dates)
     
     _, n_frames, n_pixels_max = cumulative_daily_interp.shape
 

@@ -29,7 +29,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             licsbas_dir  | pathlib Path | If you have used  LiCSBAS, simply provide the directory of the LiCSBAS outputs.                          
             licsbas_jasmin_dir | pathlib Path | If using a LiCSBAS time series that was automatically created on Jasmin for volcano monitoring, 
                                                 simply give the directory of the .json files.  
-            data_as_arg | dict of dicts | displacement_r2: dict_keys(['dem', 'cumulative', 'mask', 'incremental', 'lons', 'lats']) 
+            data_as_arg | dict of dicts | displacement_r2: dict_keys(['dem', 'mask', 'incremental', 'lons', 'lats']) 
                                           tbaseline_info: dict_keys(['acq_dates', 'ifg_dates', 'baselines', 'baselines_cumulative'])
                                           If there are 327 acq dates (as per the example), there are 327 ifg_dates (as these are the short
                                           temporal baseline ifgs joining the acquisitions, )
