@@ -82,9 +82,11 @@ def fastica_MEG(X, n_comp=None,
       Algorithms and Applications, Neural Networks, 13(4-5), 2000,
       pp. 411-430
       
-      2017/07/19 | Merged into one function by MEG and included a PCA function for whitening
+      2017/07/19 | Merged into one function by MEG and included a PCA function 
+                   for whitening
       2017/07/20 | fixed bug when giving the function whitened data
-      2018/02/22 | Return a boolean flag describing if algorithm converged or not (only works with symetric estimation)
+      2018/02/22 | Return a boolean flag describing if algorithm converged or 
+                   not (only works with symetric estimation)
       
     """
     
@@ -214,14 +216,22 @@ def fastica_MEG(X, n_comp=None,
             return fun_prime(x, **fun_args)
 #    if whiten is False:
 #        print('Data must be whitened if whitening is being skipped. ')
+
+    # p should be number of dimensions (variables)? 
+    # n should be number of observations
     p, n = X.shape
 
+    # check if the number of components is larger than either the number of 
+    # variables or observations.  
     if n_comp is None:
         n_comp = min(n, p)
     if (n_comp > min(n, p)):
         n_comp = min(n, p)
-        print("n_comp is too large: it will be set to %s" % n_comp)
-
+        print("n_comp is too large: it will be set to %s" % n_comp, 
+              "\nThis is an unusal error, and suggests that something has gone" 
+              " wrong with the data (such as there are far too few times, or "
+              "far too few pixels).  The code will attempt to continue, "
+              "but is unlikely to be able to perform ICA.  ")
 
     # whiten the data
     if whiten:

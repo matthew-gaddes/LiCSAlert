@@ -117,19 +117,48 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     if licsbas_jasmin_dir is not None:
         # read various settings from the volcano's config file
         outputs = read_config_file(volcano_dir / "LiCSAlert_settings.txt")                                          
+        if region is None:
+            raise Exception(f"The 'region' argument is missing (it is "
+                            "currently 'None').  Exiting.  ")
         
-        print(f"SETTINGS READER HAS NOT BEEN UPDATED SINCE ICASAR ARGS CHANGED")
-        
-        (licsalert_settings, icasar_settings, licsbas_settings) = outputs; del outputs
-        
+        (licsalert_settings, icasar_settings, licsbas_settings) = outputs
+        del outputs
         
         
-        print(f"LiCSAlert is opening a JASMIN COMET Volcano Portal timeseries json file.  ")
-        products = LiCSBAS_json_to_LiCSAlert(licsbas_jasmin_dir / region / f"{volcano}.json",
-                                             licsbas_settings['crop_side_length'])          
-        (displacement_r2, _, tbaseline_info, ref_xy, licsbas_json_creation_time) = products
-        # append licsbas .json file date to list of file dates used (in the text file for each volano)
-        append_licsbas_date_to_file(outdir, region, volcano, licsbas_json_creation_time)                                                        
+        print(f"LiCSAlert is opening a JASMIN COMET Volcano Portal timeseries"
+              " json file.  ")
+        products = LiCSBAS_json_to_LiCSAlert(
+            licsbas_jasmin_dir / region / f"{volcano}.json",
+            licsbas_settings['crop_side_length']
+            )          
+        
+        (displacement_r2, _, tbaseline_info, ref_xy, 
+         licsbas_json_creation_time) = products
+        
+        
+        # #pdb.set_trace()
+        # ############################# Begin debug of imported data
+        # from licsalert.aux import col_to_ma
+        # import matplotlib.pyplot as plt   
+        # plt.switch_backend('qt5agg')
+        # f, ax = plt.subplots(1); ax.matshow(displacement_r2['mask'])
+        # f, ax = plt.subplots(1); ax.matshow(
+        #     col_to_ma(displacement_r2['cumulative'][-1,],
+        #                 displacement_r2['mask']))
+        
+        
+        # # write the data to a file
+        # import pickle
+        # with open('extracted_data.pkl', "wb") as f:
+        #     pickle.dump(displacement_r2, f)
+        #     pickle.dump(tbaseline_info, f)
+        # ############################# end debug
+        
+        
+        # append licsbas .json file date to list of file dates used 
+        # (in the text file for each volano)
+        append_licsbas_date_to_file(outdir, region, volcano, 
+                                    licsbas_json_creation_time)                                                        
         # delete for safety
         del licsbas_json_creation_time                                                                                                                  
         
@@ -184,8 +213,19 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     except:
         pass
 
+    # check for the unusual case that there are fewer pixels than pca_comps 
+    # requested
+    # if icasar_settings['sica_tica'] == 'sica':
+    #     if (displacement_r2['incremental'].shape[1] < 
+    #         icasar_settings['n_pca_comp_start']):
+    #         raise Exception(
+    #             "There are fewer pixels "
+    #             "{displacement_r2['incremental'].shape[1]} than ")
+
     # mixtures_mc and means contains the daisy chain of ifgs mean centered either 
     # in space or time, depending on whther sica or tica
+    
+    
     displacement_r2 = LiCSAlert_preprocessing(displacement_r2, tbaseline_info, 
                                               icasar_settings['sica_tica'],                                                    
                                               licsalert_settings['downsample_run'], 
@@ -199,7 +239,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
               f"{licsalert_settings['baseline_end']}, but it is now {updated_date}")
     licsalert_settings['baseline_end'] = licsalert_date_obj(updated_date, tbaseline_info['acq_dates'])
 
-    # 4: possible run licsalert
+    # 4: Determine if we should run LiCSAlert
     LiCSAlert_status = run_LiCSAlert_status(tbaseline_info['acq_dates'], volcano_dir, 
                                             licsalert_settings['baseline_end'].date, 
                                             licsalert_settings['figure_intermediate'])                       
@@ -209,6 +249,13 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
 
     if LiCSAlert_status['run_LiCSAlert']:                                                                                       
 
+        
+        ######################## begin debug
+        # import matplotlib.pyplot as plt
+        # f, ax = plt.subplots()
+        # ax.matshow(displacement_r2['mask'])
+        ######################## end debug
+        
         # either load ICA from previous run, or compute it.  
         outputs = load_or_create_ICASAR_results(LiCSAlert_status['run_ICASAR'], 
                                                 displacement_r2, tbaseline_info,                             
@@ -976,17 +1023,24 @@ def read_config_file(config_file):
     
     
     # ICASAR settings
-    icasar_settings['n_comp'] = int(config.get('ICASAR', 'n_comp'))                             
+    icasar_settings['n_pca_comp_start'] = int(config.get(
+        'ICASAR', 'n_pca_comp_start'))                             
+    icasar_settings['n_pca_comp_stop'] = int(config.get(
+        'ICASAR', 'n_pca_comp_stop'))                             
     n_bootstrapped =  int(config.get('ICASAR', 'n_bootstrapped'))                 
     n_not_bootstrapped =  int(config.get('ICASAR', 'n_not_bootstrapped'))                 
-    icasar_settings['bootstrapping_param'] = (n_bootstrapped, n_not_bootstrapped)
+    icasar_settings['bootstrapping_param'] = (n_bootstrapped, 
+                                              n_not_bootstrapped)
     
-    HDBSCAN_min_cluster_size =  int(config.get('ICASAR', 'HDBSCAN_min_cluster_size'))                 
+    HDBSCAN_min_cluster_size =  int(config.get(
+        'ICASAR', 'HDBSCAN_min_cluster_size'))                 
     HDBSCAN_min_samples =  int(config.get('ICASAR', 'HDBSCAN_min_samples'))                 
-    icasar_settings['hdbscan_param'] = (HDBSCAN_min_cluster_size, HDBSCAN_min_samples)
+    icasar_settings['hdbscan_param'] = (HDBSCAN_min_cluster_size, 
+                                        HDBSCAN_min_samples)
     
     tsne_perplexity = int(config.get('ICASAR', 'tsne_perplexity'))                 
-    tsne_early_exaggeration = int(config.get('ICASAR', 'tsne_early_exaggeration'))                 
+    tsne_early_exaggeration = int(
+        config.get('ICASAR', 'tsne_early_exaggeration'))                 
     icasar_settings['tsne_param'] = (tsne_perplexity, tsne_early_exaggeration)
     
     ica_tolerance = float(config.get('ICASAR', 'ica_tolerance'))                 
@@ -1000,7 +1054,8 @@ def read_config_file(config_file):
     # LiCSBAS settings
     # licsbas_settings['date_start'] = str(config.get('LiCSBAS', 'date_start'))       
     # licsbas_settings['date_end'] = str(config.get('LiCSBAS', 'date_end'))       
-    licsbas_settings['crop_side_length'] = int(config.get('LiCSBAS', 'crop_side_length'))       
+    licsbas_settings['crop_side_length'] = int(config.get(
+        'LiCSBAS', 'crop_side_length'))       
 
     
     return licsalert_settings, icasar_settings, licsbas_settings

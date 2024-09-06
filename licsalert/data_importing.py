@@ -844,38 +844,139 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length):
     displacement_r3['lons'] = lons_mg
     displacement_r3['lats'] = lats_mg
     
-    # 2: get the mask
-    mask_coh_water = 1 - nested_lists_to_numpy(licsbas_data['mask'])                        # flip as vertical always flipped when working with .json files. Also, LiCSAlert uses 1 for area to be masked, this returns opposite (so 1 - to invert)
+   
     
-    # 3: get the data, mask, and convert to rank 2 in both cumululative and incremental
-    if 'data_raw' in licsbas_data.keys():                                                                   # data can be called one of two things.      
-        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_raw'])                                    # 
+    # 2: get incremental and cumulative, mask, and convert to rank 2 in both 
+    # data can be called one of two things.      
+    if 'data_raw' in licsbas_data.keys():                                                                   
+        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_raw'])                                    
     elif 'data_filt' in licsbas_data.keys():
-        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_filt'])                                    # 
+        cumulative_r3 = nested_lists_to_numpy(licsbas_data['data_filt'])                                    
     else:
-        raise Exception(f"The deformation information is expected to be stored in the .json file as either 'data_raw' or 'data_filt', but neither of these were present so can't continue.  ")
+        raise Exception(f"The deformation information is expected to be stored"
+                        "in the .json file as either 'data_raw' or 'data_filt'"
+                        ", but neither of these were present so can't"
+                        "continue.  ")
+    
+    ############################### debug
+    # #%%
+    # import matplotlib.pyplot as plt    
+    # f, ax = plt.subplots(1); ax.matshow(mask_coh_water)
+    
+    # plot 10 if the ifgs (gives an error at the end)
+    # for i in np.linspace(0, cumulative_r3.shape[0], 10):
+    #     f, ax = plt.subplots(1); ax.matshow(cumulative_r3[int(i),])
+    #     plt.pause(3)
+    #     plt.close()
+    
+    
+    # def accumulate_nan_mask(images):
+    #     """
+    #     Accumulates a boolean mask of where NaN values are in a 4D array of 
+    #     images.
+    
+    #     Parameters:
+    #     images (numpy.ndarray): A 4D numpy array of shape (time, x, y, 
+    #                                                         channels).
+    
+    #     Returns:
+    #     numpy.ndarray: A 2D boolean mask of shape (x, y) where True indicates 
+    #     the presence of a NaN in any of the images.
+    #     """
+    #     import numpy as np
+    #     # Initialize the mask with False values (no NaNs found yet)
+    #     nan_mask = np.zeros(images.shape[1:], dtype=bool)
+        
+    #     # initilise to count nans
+    #     nan_count = np.zeros(images.shape[1:])
+    
+    #     # Iterate over each image and accumulate the NaN mask
+    #     for t in range(images.shape[0]):
+    #         # union of sets
+    #         nan_mask = nan_mask | np.isnan(images[t,])
+            
+    #         nan_count[np.isnan(images[t,])] += 1
+    #     return nan_mask, nan_count
+
+    # nan_mask, nan_count = accumulate_nan_mask(cumulative_r3)
+    # f, ax = plt.subplots(1); ax.matshow(nan_mask)
+    # f, ax = plt.subplots(1); im = ax.matshow(nan_count); f.colorbar(im, ax=ax)
+    # f, ax = plt.subplots(1); im = ax.matshow(mask_coh_water)
+    # #%%
+    ############################### end debug
+    
+       
     cumulative_r3 *= 0.001                                                                             # licsbas standard is mm, convert to m
     n_im, length, width = cumulative_r3.shape                                                          # time series size, n_im = n_acquisisions
-    mask_coh_water_r3 = np.repeat(mask_coh_water[np.newaxis,], n_im, axis = 0)                         # new version that has expanded to be the same size as the cumulative ifgs
     
     # 3a: Reference the time series
-    ifg_offsets = np.nanmean(cumulative_r3[:, ref_xy['y_start']: ref_xy['y_stop'],
-                                           ref_xy['x_start']: ref_xy['x_stop']], 
-                             axis = (1,2))                                          # get the offset between the reference pixel/area and 0 for each time
-    cumulative_r3 = cumulative_r3 - np.repeat(np.repeat(ifg_offsets[:,np.newaxis, np.newaxis], cumulative_r3.shape[1],  axis = 1), cumulative_r3.shape[2], axis = 2)         # do the correction (first make ifg_offsets teh same size as cumulative).      
+    # get the offset between the reference pixel/area and 0 for each time
+    ifg_offsets = np.nanmean(
+        cumulative_r3[:, ref_xy['y_start']: ref_xy['y_stop'],
+                      ref_xy['x_start']: ref_xy['x_stop']], axis = (1,2))                                          
     
-    # 3b: Deal with masking etc.
-    cumulative_r3_ma = ma.array(cumulative_r3, mask=mask_coh_water_r3)                                  # mask the cumulative ifgs (first one should be all 0s), note that this could still have nans in it
-    for nan_pixel in np.argwhere(np.isnan(cumulative_r3_ma)):                                           # find any pixels that are nan in this, and iterate over
-        mask_coh_water_r3[:, nan_pixel[1], nan_pixel[2]] = 1                                            # and modify the mask so that they are masked for all times
-    displacement_r3["cumulative"] = ma.array(cumulative_r3, mask=mask_coh_water_r3)                     # recreate the masked array using the new mask.  
+    # do the correction (first make ifg_offsets teh same size as cumulative).      
+    cumulative_r3 = cumulative_r3 - np.repeat(
+        np.repeat(ifg_offsets[:,np.newaxis, np.newaxis], 
+                  cumulative_r3.shape[1],  axis = 1), 
+        cumulative_r3.shape[2], axis = 2)         
+    
+    
+    ##### 3: Deal with masking etc.
+    # 3.1: get the mask from LiCSBAS
+    # returns -9e18 for water, 0 for incoherent pixels, and 1 for coherent
+    mask_licsbas = nested_lists_to_numpy(licsbas_data['mask'])
+    
+    # get the below 0 (usually -9e18) pixels (1 for where water and masked)
+    mask_water = (mask_licsbas < 0)
+    
+    # only pixels that are 1 are coherent in licsbas mask.  Find these, but 
+    # then flip so that any pixels that are not 1 are masked 
+    # (so now 1 = masked)
+    mask_coh_water = ~ (mask_licsbas == 1)
+    
+    # 3.2 also mask any pixels that are ever nan:
+    # initialise (1 for masked, 0 for not)
+    mask_nan_r3 = np.zeros(cumulative_r3.shape)
+    for epoch_n, ifg in enumerate(cumulative_r3):
+        mask_nan_r3[epoch_n,] = np.isnan(ifg)
+    mask_nan = np.any(mask_nan_r3, axis = 0)
+    del mask_nan_r3
+    
+    # 3.3 combine, masked if True in either.  
+    mask = np.logical_or(mask_coh_water, mask_nan)
+    mask_r3 = np.repeat(mask[np.newaxis,], n_im, axis = 0)
+    ########### debug
+    # import matplotlib.pyplot as plt
+    # f, axes = plt.subplots(1,3)
+    # axes[0].matshow(mask_nan)
+    # axes[1].matshow(mask_coh_water)
+    # axes[2].matshow(mask)
+    # for ax, title in zip(axes, ['mask_nan', 'mask_coh_water', 'mask']):
+    #     ax.set_title(title)
+    ############# end 
+    
 
-    displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], axis = 0)                   # difference these to get the incremental ifgs, should be one less in time dimension than previous.  
-    if displacement_r3["incremental"].mask.shape == ():                                                 # in the case where no pixels are masked, the mask can disappear
-        displacement_r3["incremental"].mask = mask_coh_water_r3[1:]                                        # add a new mask, note that we omit the first one (1:) as we have one less ifg when handling incremental
+
+    # 3.4 and mask the data, same mask at all times
+    cumulative_r3_ma = ma.array(cumulative_r3, mask=mask_r3)
+    displacement_r3["cumulative"] = cumulative_r3_ma
+    # difference these to get the incremental ifgs, 
+    # should be one less in time dimension than previous.  
+    displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], 
+                                             axis = 0)                   
+    # in the case where no pixels are masked, the mask can disappear
+    if displacement_r3["incremental"].mask.shape == ():                                                 
+        # add a new mask, note that we omit the first one (1:)
+        # as we have one less ifg when handling incremental
+        displacement_r3["incremental"].mask = mask_r3[1:]                                        
         
-
+    ######### debug
+    # f, ax = plt.subplots(1)
+    # ax.matshow(displacement_r3['cumulative'][-1,])
+    ###########
     
+
     # 4: Get the acquisition dates, then calcualet ifg_names, temporal baselines, and cumulative temporal baselines
     tbaseline_info["acq_dates"] = sorted([''.join(date_hyphen_format.split('-')) for date_hyphen_format in licsbas_data['dates'] ])         # convert from yyy-mm-dd to yyyymmdd
     tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(tbaseline_info["acq_dates"])                                                # get teh dates of the incremental ifgs
@@ -911,6 +1012,17 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length):
     # r2_arrays_to_googleEarth(dem[np.newaxis, :,:], lons_mg, lats_mg, layer_name_prefix = 'layer', kmz_filename = 'ICs', out_folder = './')
     # r2_arrays_to_googleEarth(displacement_r3['incremental'][10:11,], lons_mg, lats_mg, layer_name_prefix = 'layer', kmz_filename = 'ifg', out_folder = './')
     # import pdb; pdb.set_trace()
+    
+    ##################### debug
+    # import matplotlib.pyplot as plt
+    # f, ax = plt.subplots(1)
+    # ax.matshow(displacement_r3['cumulative'][-1,])
+    # f, ax = plt.subplots(1)
+    # ax.matshow(displacement_r2['mask'])
+    
+    ##################### end
+    
+    
     return displacement_r2, displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
 
 #%%
@@ -927,7 +1039,52 @@ def square_crop_r3_data_in_space(displacement_r3, crop_side_length = 20000):
     History:
         2024_02_01 | MEG | Written
         
-    """
+    """   ############################### debug
+    # #%%
+    # import matplotlib.pyplot as plt    
+    # f, ax = plt.subplots(1); ax.matshow(mask_coh_water)
+    
+    # plot 10 if the ifgs (gives an error at the end)
+    # for i in np.linspace(0, cumulative_r3.shape[0], 10):
+    #     f, ax = plt.subplots(1); ax.matshow(cumulative_r3[int(i),])
+    #     plt.pause(3)
+    #     plt.close()
+    
+    
+    # def accumulate_nan_mask(images):
+    #     """
+    #     Accumulates a boolean mask of where NaN values are in a 4D array of 
+    #     images.
+    
+    #     Parameters:
+    #     images (numpy.ndarray): A 4D numpy array of shape (time, x, y, 
+    #                                                         channels).
+    
+    #     Returns:
+    #     numpy.ndarray: A 2D boolean mask of shape (x, y) where True indicates 
+    #     the presence of a NaN in any of the images.
+    #     """
+    #     import numpy as np
+    #     # Initialize the mask with False values (no NaNs found yet)
+    #     nan_mask = np.zeros(images.shape[1:], dtype=bool)
+        
+    #     # initilise to count nans
+    #     nan_count = np.zeros(images.shape[1:])
+    
+    #     # Iterate over each image and accumulate the NaN mask
+    #     for t in range(images.shape[0]):
+    #         # union of sets
+    #         nan_mask = nan_mask | np.isnan(images[t,])
+            
+    #         nan_count[np.isnan(images[t,])] += 1
+    #     return nan_mask, nan_count
+
+    # nan_mask, nan_count = accumulate_nan_mask(cumulative_r3)
+    # f, ax = plt.subplots(1); ax.matshow(nan_mask)
+    # f, ax = plt.subplots(1); im = ax.matshow(nan_count); f.colorbar(im, ax=ax)
+    # f, ax = plt.subplots(1); im = ax.matshow(mask_coh_water)
+    # #%%
+    ############################### end debug
     import numpy as np
     from geopy import distance
     

@@ -1072,7 +1072,8 @@ def bootstrap_ICA(X, n_comp, bootstrap = True, ica_param = (1e-4, 150),
     if pca_success:                                                                                         
         X_whitened = X_whitened[:n_comp,]                                                                                                       # reduce dimensionality ready for ICA
         try:                                                                                                                                    # try ICA, as it can occasionaly fail (nans etc)
-            W, S, A_white, _, _, ica_success = fastica_MEG(X_whitened, n_comp=n_comp,  
+            W, S, A_white, _, _, ica_success = fastica_MEG(
+                X_whitened, n_comp=n_comp,  
                                                            algorithm="parallel",        
                                                            whiten=False, maxit=ica_param[1],
                                                            tol = ica_param[0], 
