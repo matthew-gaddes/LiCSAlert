@@ -196,13 +196,10 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
     slider_d.on_changed(lambda val: update(val, update_tsne = False, **params))
     slider_e.on_changed(lambda val: update(val, update_tsne = False, **params))
 
-
-
     # Initialize the user_data variable (mutable?)
     chosen_settings = {}
 
     # Initialize a flag to indicate when the button has been clicked
-    
     button = Button(ax_button, 'Continue')
         
     # Set the callback function for the button
@@ -214,24 +211,29 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
     plt.show()#block=False)
 
 
-    # # Wait for user input (v1)
-    while not button_clicked[0]:
-        plt.pause(1.)
-        print("Waiting for the user to select the ICA sources using the "
-              "interactive window.  ")
-    
-    print(f"{S_ica[0].shape[0]} ICA sources have been chosen by the user. "
+    # Wait for user input, if there is a window (i.e. don't if making only 
+    # a png)
+    if (figures == 'window') or (figures == 'png+window'):
+        while not button_clicked[0]:
+            plt.pause(1.)
+            print("Waiting for the user to select the ICA sources using the "
+                  "interactive window.  ")
+        print(f"{S_ica[0].shape[0]} ICA sources have been chosen by the user. "
+              "Continuing")
+    else:
+        print(f"{S_ica[0].shape[0]} ICA sources have been chosen automatically."
           "Continuing")
-    
+
+    # only save the figure if a png is selected.      
     if figures == 'window':
         pass
-    elif figures == "png":
+    elif (figures == "png") or (figures == 'png+window'):
         fig.savefig(f"{png_path}/{fig_filename}.png")
         plt.close()
-    elif figures == 'png+window':
-        fig.savefig(f"{png_path}/{fig_filename}.png")
     else:
-        pass
+        raise Exception(f"'figures' was set incorrectly, and should be  "
+                        "'window', 'png', or 'png+window', but is {figures} "
+                        "Exiting.")
     
     # return the ICA sources from the mutable they are stored in 
     return S_ica[0], source_outputs

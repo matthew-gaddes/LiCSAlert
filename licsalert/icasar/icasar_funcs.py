@@ -138,9 +138,6 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
     from licsalert.icasar.plotting import r2_arrays_to_googleEarth
     from licsalert.icasar.plotting import plot_pca_variance_line, plot_temporal_signals
     from licsalert.icasar.plotting import two_spatial_signals_plot
-    
-    
-    
     from licsalert.icasar.sources_interactive_figure import plot_2d_interactive_fig
     
     
@@ -438,9 +435,7 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
                       'ylabel' : 'TSNE dimension 2'}
         
     if spatial:
-        
-        
-        
+
         # # Save each variable individually to the pickle file
         # with open('figure_inputs.pkl', 'wb') as f:
         #     pickle.dump(S_pca, f)
@@ -456,13 +451,11 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
             
             
         
-        S_ica, source_outputs = plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica, 
-                                                        hdbscan_param, tsne_param,
-                                                        n_converge_bootstrapping, 
-                                                        n_converge_no_bootstrapping,
-                                                        inset_axes_side = inset_axes_side,
-                                                        fig_filename = plot_2d_labels['title'], 
-                                                        **fig_kwargs)
+        S_ica, source_outputs = plot_2d_interactive_fig(
+            S_pca, S_hists, mask, spatial, sica_tica, hdbscan_param,
+            tsne_param, n_converge_bootstrapping, n_converge_no_bootstrapping,
+            inset_axes_side = inset_axes_side, 
+            fig_filename = plot_2d_labels['title'], **fig_kwargs)
         
         # unpack to use the previous naming convention.  
         labels_hdbscan = source_outputs['labels']

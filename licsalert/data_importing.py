@@ -666,13 +666,16 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
 
 
 #%%
-def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length):
+def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     """Given a licsbas .json file (as produced by the processing on Jasmin), extract all the information in it
     in a form that is compatible with LiCSAlert (and ICASAR).  
     Inputs:
         json_file | path | path to file, including extnesion.  
         crop_side_length | None or int | Possibly crop imakes to square of this
                                         side length in km.  
+        mask_type | str | either 'nan' to mask only pixels that are ever nan, 
+                         or 'licsbas' to mask pixels that are in the licsbas 
+                         mask, and those that ever go to nan.  
     Returns:
         displacment_r3 | dict | Keys: cumulative, incremental.  Stored as masked arrays.  Mask should be consistent through time/interferograms
                                 Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
@@ -859,53 +862,51 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length):
                         "continue.  ")
     
     ############################### debug
-    # #%%
-    # import matplotlib.pyplot as plt    
-    # f, ax = plt.subplots(1); ax.matshow(mask_coh_water)
+    #%%
     
-    # plot 10 if the ifgs (gives an error at the end)
+    
+    # # plot 10 if the ifgs (gives an error at the end)
     # for i in np.linspace(0, cumulative_r3.shape[0], 10):
     #     f, ax = plt.subplots(1); ax.matshow(cumulative_r3[int(i),])
     #     plt.pause(3)
     #     plt.close()
     
     
-    # def accumulate_nan_mask(images):
-    #     """
-    #     Accumulates a boolean mask of where NaN values are in a 4D array of 
-    #     images.
+    def accumulate_nan_mask(images):
+        """
+        Accumulates a boolean mask of where NaN values are in a 4D array of 
+        images.
     
-    #     Parameters:
-    #     images (numpy.ndarray): A 4D numpy array of shape (time, x, y, 
-    #                                                         channels).
+        Parameters:
+        images (numpy.ndarray): A 4D numpy array of shape (time, x, y, 
+                                                            channels).
     
-    #     Returns:
-    #     numpy.ndarray: A 2D boolean mask of shape (x, y) where True indicates 
-    #     the presence of a NaN in any of the images.
-    #     """
-    #     import numpy as np
-    #     # Initialize the mask with False values (no NaNs found yet)
-    #     nan_mask = np.zeros(images.shape[1:], dtype=bool)
+        Returns:
+        numpy.ndarray: A 2D boolean mask of shape (x, y) where True indicates 
+        the presence of a NaN in any of the images.
+        """
+        import numpy as np
+        # Initialize the mask with False values (no NaNs found yet)
+        nan_mask = np.zeros(images.shape[1:], dtype=bool)
         
-    #     # initilise to count nans
-    #     nan_count = np.zeros(images.shape[1:])
+        # initilise to count nans
+        nan_count = np.zeros(images.shape[1:])
     
-    #     # Iterate over each image and accumulate the NaN mask
-    #     for t in range(images.shape[0]):
-    #         # union of sets
-    #         nan_mask = nan_mask | np.isnan(images[t,])
+        # Iterate over each image and accumulate the NaN mask
+        for t in range(images.shape[0]):
+            # union of sets
+            nan_mask = nan_mask | np.isnan(images[t,])
             
-    #         nan_count[np.isnan(images[t,])] += 1
-    #     return nan_mask, nan_count
+            nan_count[np.isnan(images[t,])] += 1
+        return nan_mask, nan_count
 
-    # nan_mask, nan_count = accumulate_nan_mask(cumulative_r3)
-    # f, ax = plt.subplots(1); ax.matshow(nan_mask)
-    # f, ax = plt.subplots(1); im = ax.matshow(nan_count); f.colorbar(im, ax=ax)
-    # f, ax = plt.subplots(1); im = ax.matshow(mask_coh_water)
-    # #%%
+    nan_mask, nan_count = accumulate_nan_mask(cumulative_r3)
+
+    #%%
     ############################### end debug
     
-       
+    pdb.set_trace()
+    
     cumulative_r3 *= 0.001                                                                             # licsbas standard is mm, convert to m
     n_im, length, width = cumulative_r3.shape                                                          # time series size, n_im = n_acquisisions
     
@@ -926,38 +927,60 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length):
     # 3.1: get the mask from LiCSBAS
     # returns -9e18 for water, 0 for incoherent pixels, and 1 for coherent
     mask_licsbas = nested_lists_to_numpy(licsbas_data['mask'])
+    # ######## debug plot
+    import matplotlib.pyplot as plt
+    test = np.where(
+        mask_licsbas < -1, -1 * np.ones(mask_licsbas.shape), mask_licsbas 
+                    )
+    f, ax = plt.subplots(1); ax.matshow(test)
+    # ####### end debug
     
     # get the below 0 (usually -9e18) pixels (1 for where water and masked)
     mask_water = (mask_licsbas < 0)
+    #f, ax = plt.subplots(1); ax.matshow(mask_water)
     
-    # only pixels that are 1 are coherent in licsbas mask.  Find these, but 
-    # then flip so that any pixels that are not 1 are masked 
-    # (so now 1 = masked)
-    mask_coh_water = ~ (mask_licsbas == 1)
+    # get incoherent pixels (output 1 for masked as incoherent)
+    # (also includes water pixels)
+    mask_coherence = (mask_licsbas == 0)
     
     # 3.2 also mask any pixels that are ever nan:
     # initialise (1 for masked, 0 for not)
+    #mask_nan = np.zeros(cumulative_r3.shape[1:])
     mask_nan_r3 = np.zeros(cumulative_r3.shape)
     for epoch_n, ifg in enumerate(cumulative_r3):
-        mask_nan_r3[epoch_n,] = np.isnan(ifg)
+        epoch_mask = np.isnan(ifg)
+        mask_nan_r3[epoch_n,] = epoch_mask
+        #mask_nan = np.logical_or(mask_nan, epoch_mask)
+    # reduce to a single mask for all epochs
     mask_nan = np.any(mask_nan_r3, axis = 0)
-    del mask_nan_r3
-    
+   
     # 3.3 combine, masked if True in either.  
-    mask = np.logical_or(mask_coh_water, mask_nan)
+    if mask_type == 'nan':
+        mask = np.logical_or.reduce([mask_water, mask_nan])
+        print("Masking the LiCSBAS timeseries based on pixels that go to nan.")
+    elif mask_type == 'licsbas':
+        mask = np.logical_or.reduce([mask_water, mask_coherence, mask_nan])
+        print("Masking the LiCSBAS timeseries based on the LiCSBAS mask and "
+              "on pixels that go to nan.")
+
     mask_r3 = np.repeat(mask[np.newaxis,], n_im, axis = 0)
     ########### debug
     # import matplotlib.pyplot as plt
-    # f, axes = plt.subplots(1,3)
-    # axes[0].matshow(mask_nan)
-    # axes[1].matshow(mask_coh_water)
-    # axes[2].matshow(mask)
-    # for ax, title in zip(axes, ['mask_nan', 'mask_coh_water', 'mask']):
+    # f, axes = plt.subplots(1,4)
+    # axes[0].matshow(mask_water)
+    # axes[1].matshow(mask_coherence)
+    # axes[2].matshow(mask_nan)
+    # axes[3].matshow(mask)
+    # for ax, title in zip(axes, ['mask_water', 'mask_coherence', 'mask_nans', 
+    #                             'mask']):
     #     ax.set_title(title)
     ############# end 
     
-
-
+    out_mask = ~np.all(np.isnan(cumulative_r3), axis=0)
+    f, ax = plt.subplots(1); ax.matshow(out_mask)
+    
+    pdb.set_trace()
+    
     # 3.4 and mask the data, same mask at all times
     cumulative_r3_ma = ma.array(cumulative_r3, mask=mask_r3)
     displacement_r3["cumulative"] = cumulative_r3_ma
