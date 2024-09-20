@@ -3,7 +3,7 @@
 
 
 
-LiCSAlert is being run for 001_campi_flegrei_example at 15/08/2024 19:13:20
+LiCSAlert is being run for 001_campi_flegrei_example at 20/09/2024 17:09:44
 All the required arguments were found in the dictionary.  
 All the required arguments were found in the dictionary.  
 All the required arguments were found in the dictionary.  
@@ -343,7 +343,7 @@ LiCSBAS date    Past baseline    LiCSAlert
 20210831          yes             not requested
 20210906          yes             not requested
 20210912          yes             pending 
-LiCSAlert status:  1) Run ICASAR: True   2) Run LiCSAlert: True
+LiCSAlert status:  1) Run ICASAR: True  2) Run LiCSAlert: True
 
 Running ICASAR.
 From the data passed to ICASAR, I understand it to be spatial data (e.g. time series of images)
@@ -367,453 +367,463 @@ No results were found for the multiple ICA runs, so these will now be performed.
 
 
 Starting the multiple ICA runs with 6 principal components
-FastICA progress with bootstrapping: FastICA algorithm converged in 24 iterations.  
-0% FastICA algorithm converged in 4 iterations.  
-1% FastICA algorithm converged in 7 iterations.  
-1% FastICA algorithm converged in 10 iterations.  
+FastICA progress with bootstrapping: FastICA algorithm converged in 6 iterations.  
+0% FastICA algorithm converged in 9 iterations.  
+1% FastICA algorithm converged in 66 iterations.  
+1% FastICA algorithm didn't converge in 149 iterations.  
+1% FastICA algorithm converged in 5 iterations.  
 2% FastICA algorithm converged in 7 iterations.  
 2% FastICA algorithm converged in 6 iterations.  
-3% FastICA algorithm converged in 8 iterations.  
-3% FastICA algorithm converged in 4 iterations.  
-4% FastICA algorithm didn't converge in 149 iterations.  
-4% FastICA algorithm converged in 5 iterations.  
-4% FastICA algorithm converged in 6 iterations.  
-5% FastICA algorithm converged in 7 iterations.  
-5% FastICA algorithm converged in 5 iterations.  
-6% FastICA algorithm converged in 5 iterations.  
-6% FastICA algorithm converged in 8 iterations.  
-7% FastICA algorithm converged in 18 iterations.  
-7% FastICA algorithm converged in 7 iterations.  
+3% FastICA algorithm converged in 17 iterations.  
+3% FastICA algorithm converged in 6 iterations.  
+4% FastICA algorithm converged in 10 iterations.  
+4% FastICA algorithm converged in 8 iterations.  
+5% FastICA algorithm converged in 9 iterations.  
+5% FastICA algorithm converged in 10 iterations.  
+6% FastICA algorithm converged in 9 iterations.  
+6% FastICA algorithm converged in 7 iterations.  
+7% FastICA algorithm converged in 17 iterations.  
+7% FastICA algorithm didn't converge in 149 iterations.  
+7% FastICA algorithm converged in 5 iterations.  
+8% FastICA algorithm didn't converge in 149 iterations.  
+8% FastICA algorithm converged in 4 iterations.  
 8% FastICA algorithm converged in 6 iterations.  
-8% FastICA algorithm converged in 88 iterations.  
-9% FastICA algorithm converged in 4 iterations.  
-9% FastICA algorithm converged in 26 iterations.  
-10% FastICA algorithm converged in 26 iterations.  
-10% FastICA algorithm converged in 17 iterations.  
-11% FastICA algorithm didn't converge in 149 iterations.  
-11% FastICA algorithm converged in 4 iterations.  
-11% FastICA algorithm converged in 5 iterations.  
-12% FastICA algorithm converged in 16 iterations.  
-12% FastICA algorithm converged in 20 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+9% FastICA algorithm converged in 9 iterations.  
+10% FastICA algorithm converged in 71 iterations.  
+10% FastICA algorithm converged in 9 iterations.  
+11% FastICA algorithm converged in 8 iterations.  
+11% FastICA algorithm converged in 45 iterations.  
+12% FastICA algorithm converged in 7 iterations.  
+12% FastICA algorithm didn't converge in 149 iterations.  
+12% FastICA algorithm converged in 10 iterations.  
 13% FastICA algorithm didn't converge in 149 iterations.  
-13% FastICA algorithm converged in 4 iterations.  
-13% FastICA algorithm converged in 18 iterations.  
+13% FastICA algorithm converged in 13 iterations.  
+13% FastICA algorithm didn't converge in 149 iterations.  
+13% FastICA algorithm converged in 6 iterations.  
 14% FastICA algorithm didn't converge in 149 iterations.  
-14% FastICA algorithm converged in 4 iterations.  
-14% FastICA algorithm converged in 40 iterations.  
-15% FastICA algorithm converged in 4 iterations.  
-15% FastICA algorithm converged in 4 iterations.  
+14% FastICA algorithm converged in 8 iterations.  
+14% FastICA algorithm converged in 7 iterations.  
+15% FastICA algorithm converged in 80 iterations.  
+15% FastICA algorithm converged in 33 iterations.  
+16% FastICA algorithm converged in 8 iterations.  
 16% FastICA algorithm converged in 12 iterations.  
-16% FastICA algorithm converged in 7 iterations.  
-17% FastICA algorithm converged in 5 iterations.  
-17% FastICA algorithm converged in 11 iterations.  
-18% FastICA algorithm converged in 6 iterations.  
-18% FastICA algorithm converged in 7 iterations.  
-19% FastICA algorithm converged in 12 iterations.  
-19% FastICA algorithm converged in 22 iterations.  
+17% FastICA algorithm converged in 7 iterations.  
+17% FastICA algorithm converged in 88 iterations.  
+18% FastICA algorithm converged in 4 iterations.  
+18% FastICA algorithm didn't converge in 149 iterations.  
+18% FastICA algorithm converged in 5 iterations.  
+19% FastICA algorithm converged in 4 iterations.  
+19% FastICA algorithm converged in 7 iterations.  
 20% FastICA algorithm converged in 6 iterations.  
-20% FastICA algorithm converged in 47 iterations.  
-21% FastICA algorithm converged in 6 iterations.  
-21% FastICA algorithm converged in 6 iterations.  
-22% FastICA algorithm converged in 7 iterations.  
+20% FastICA algorithm converged in 6 iterations.  
+21% FastICA algorithm converged in 5 iterations.  
+21% FastICA algorithm converged in 7 iterations.  
+22% FastICA algorithm converged in 9 iterations.  
 22% FastICA algorithm converged in 6 iterations.  
+23% FastICA algorithm converged in 5 iterations.  
+23% FastICA algorithm didn't converge in 149 iterations.  
 23% FastICA algorithm converged in 6 iterations.  
-23% FastICA algorithm converged in 4 iterations.  
-24% FastICA algorithm converged in 8 iterations.  
-24% FastICA algorithm converged in 27 iterations.  
-25% FastICA algorithm converged in 11 iterations.  
-25% FastICA algorithm converged in 6 iterations.  
-26% FastICA algorithm converged in 7 iterations.  
-26% FastICA algorithm converged in 15 iterations.  
-27% FastICA algorithm converged in 8 iterations.  
-27% FastICA algorithm converged in 6 iterations.  
+24% FastICA algorithm converged in 5 iterations.  
+24% FastICA algorithm converged in 33 iterations.  
+25% FastICA algorithm converged in 54 iterations.  
+25% FastICA algorithm didn't converge in 149 iterations.  
+25% FastICA algorithm converged in 4 iterations.  
+26% FastICA algorithm converged in 5 iterations.  
+26% FastICA algorithm converged in 6 iterations.  
+27% FastICA algorithm didn't converge in 149 iterations.  
+27% FastICA algorithm converged in 61 iterations.  
+27% FastICA algorithm converged in 33 iterations.  
+28% FastICA algorithm converged in 8 iterations.  
 28% FastICA algorithm didn't converge in 149 iterations.  
-28% FastICA algorithm converged in 9 iterations.  
-28% FastICA algorithm didn't converge in 149 iterations.  
-28% FastICA algorithm converged in 7 iterations.  
-28% FastICA algorithm converged in 10 iterations.  
-29% FastICA algorithm converged in 7 iterations.  
+28% FastICA algorithm converged in 6 iterations.  
+28% FastICA algorithm converged in 5 iterations.  
+29% FastICA algorithm converged in 28 iterations.  
+30% FastICA algorithm converged in 19 iterations.  
+30% FastICA algorithm didn't converge in 149 iterations.  
 30% FastICA algorithm converged in 7 iterations.  
-30% FastICA algorithm converged in 4 iterations.  
-31% FastICA algorithm converged in 29 iterations.  
-31% FastICA algorithm didn't converge in 149 iterations.  
-31% FastICA algorithm converged in 6 iterations.  
-32% FastICA algorithm didn't converge in 149 iterations.  
-32% FastICA algorithm converged in 8 iterations.  
-32% FastICA algorithm converged in 17 iterations.  
-33% FastICA algorithm converged in 7 iterations.  
-33% FastICA algorithm didn't converge in 149 iterations.  
-33% FastICA algorithm didn't converge in 149 iterations.  
+31% FastICA algorithm converged in 5 iterations.  
+31% FastICA algorithm converged in 5 iterations.  
+32% FastICA algorithm converged in 38 iterations.  
+32% FastICA algorithm converged in 4 iterations.  
+33% FastICA algorithm converged in 90 iterations.  
 33% FastICA algorithm converged in 6 iterations.  
 34% FastICA algorithm converged in 15 iterations.  
-34% FastICA algorithm didn't converge in 149 iterations.  
-34% FastICA algorithm didn't converge in 149 iterations.  
-34% FastICA algorithm converged in 13 iterations.  
-35% FastICA algorithm converged in 7 iterations.  
-35% FastICA algorithm didn't converge in 149 iterations.  
-35% FastICA algorithm converged in 5 iterations.  
-36% FastICA algorithm converged in 67 iterations.  
-36% FastICA algorithm converged in 12 iterations.  
-37% FastICA algorithm converged in 6 iterations.  
+34% FastICA algorithm converged in 14 iterations.  
+35% FastICA algorithm converged in 13 iterations.  
+35% FastICA algorithm converged in 8 iterations.  
+36% FastICA algorithm converged in 5 iterations.  
+36% FastICA algorithm converged in 5 iterations.  
 37% FastICA algorithm converged in 4 iterations.  
-38% FastICA algorithm converged in 4 iterations.  
-38% FastICA algorithm converged in 5 iterations.  
-39% FastICA algorithm converged in 16 iterations.  
-39% FastICA algorithm converged in 13 iterations.  
-40% FastICA algorithm converged in 5 iterations.  
+37% FastICA algorithm converged in 49 iterations.  
+38% FastICA algorithm converged in 7 iterations.  
+38% FastICA algorithm converged in 7 iterations.  
+39% FastICA algorithm didn't converge in 149 iterations.  
+39% FastICA algorithm converged in 11 iterations.  
+39% FastICA algorithm converged in 4 iterations.  
+40% FastICA algorithm converged in 45 iterations.  
 40% FastICA algorithm didn't converge in 149 iterations.  
-40% FastICA algorithm converged in 7 iterations.  
-41% FastICA algorithm converged in 5 iterations.  
-41% FastICA algorithm converged in 8 iterations.  
-42% FastICA algorithm converged in 4 iterations.  
-42% FastICA algorithm converged in 3 iterations.  
-43% FastICA algorithm converged in 7 iterations.  
-43% FastICA algorithm converged in 8 iterations.  
-44% FastICA algorithm converged in 27 iterations.  
-44% FastICA algorithm converged in 7 iterations.  
-45% FastICA algorithm converged in 7 iterations.  
-45% FastICA algorithm converged in 20 iterations.  
-46% FastICA algorithm converged in 12 iterations.  
-46% FastICA algorithm converged in 7 iterations.  
-47% FastICA algorithm converged in 4 iterations.  
-47% FastICA algorithm didn't converge in 149 iterations.  
-47% FastICA algorithm converged in 4 iterations.  
-48% FastICA algorithm converged in 8 iterations.  
-48% FastICA algorithm converged in 14 iterations.  
-49% FastICA algorithm converged in 7 iterations.  
-49% FastICA algorithm converged in 5 iterations.  
-50% FastICA algorithm converged in 8 iterations.  
-50% FastICA algorithm converged in 7 iterations.  
-51% FastICA algorithm didn't converge in 149 iterations.  
-51% FastICA algorithm converged in 7 iterations.  
-51% FastICA algorithm converged in 10 iterations.  
-52% FastICA algorithm converged in 6 iterations.  
-52% FastICA algorithm converged in 47 iterations.  
-53% FastICA algorithm converged in 7 iterations.  
-53% FastICA algorithm converged in 6 iterations.  
+40% FastICA algorithm converged in 5 iterations.  
+41% FastICA algorithm didn't converge in 149 iterations.  
+41% FastICA algorithm converged in 7 iterations.  
+41% FastICA algorithm converged in 10 iterations.  
+42% FastICA algorithm converged in 6 iterations.  
+42% FastICA algorithm converged in 6 iterations.  
+43% FastICA algorithm converged in 5 iterations.  
+43% FastICA algorithm converged in 57 iterations.  
+44% FastICA algorithm converged in 8 iterations.  
+44% FastICA algorithm didn't converge in 149 iterations.  
+44% FastICA algorithm converged in 5 iterations.  
+45% FastICA algorithm converged in 27 iterations.  
+45% FastICA algorithm converged in 72 iterations.  
+46% FastICA algorithm converged in 18 iterations.  
+46% FastICA algorithm converged in 10 iterations.  
+47% FastICA algorithm converged in 8 iterations.  
+47% FastICA algorithm converged in 9 iterations.  
+48% FastICA algorithm didn't converge in 149 iterations.  
+48% FastICA algorithm converged in 9 iterations.  
+48% FastICA algorithm converged in 104 iterations.  
+49% FastICA algorithm converged in 32 iterations.  
+49% FastICA algorithm converged in 20 iterations.  
+50% FastICA algorithm converged in 54 iterations.  
+50% FastICA algorithm converged in 6 iterations.  
+51% FastICA algorithm converged in 6 iterations.  
+51% FastICA algorithm converged in 5 iterations.  
+52% FastICA algorithm converged in 10 iterations.  
+52% FastICA algorithm converged in 7 iterations.  
+53% FastICA algorithm converged in 8 iterations.  
+53% FastICA algorithm converged in 18 iterations.  
 54% FastICA algorithm converged in 6 iterations.  
-54% FastICA algorithm converged in 6 iterations.  
-55% FastICA algorithm converged in 7 iterations.  
-55% FastICA algorithm converged in 21 iterations.  
-56% FastICA algorithm converged in 12 iterations.  
-56% FastICA algorithm converged in 76 iterations.  
-56% FastICA algorithm converged in 3 iterations.  
-57% FastICA algorithm converged in 6 iterations.  
-57% FastICA algorithm converged in 38 iterations.  
-58% FastICA algorithm converged in 13 iterations.  
-59% FastICA algorithm converged in 62 iterations.  
-59% FastICA algorithm converged in 11 iterations.  
-60% FastICA algorithm converged in 5 iterations.  
-60% FastICA algorithm converged in 5 iterations.  
-61% FastICA algorithm converged in 6 iterations.  
-61% FastICA algorithm converged in 7 iterations.  
-62% FastICA algorithm converged in 5 iterations.  
+54% FastICA algorithm converged in 11 iterations.  
+55% FastICA algorithm didn't converge in 149 iterations.  
+55% FastICA algorithm converged in 25 iterations.  
+55% FastICA algorithm converged in 79 iterations.  
+56% FastICA algorithm converged in 6 iterations.  
+56% FastICA algorithm converged in 16 iterations.  
+56% FastICA algorithm converged in 5 iterations.  
+57% FastICA algorithm converged in 7 iterations.  
+57% FastICA algorithm converged in 8 iterations.  
+58% FastICA algorithm converged in 10 iterations.  
+59% FastICA algorithm converged in 3 iterations.  
+59% FastICA algorithm converged in 61 iterations.  
+60% FastICA algorithm didn't converge in 149 iterations.  
+60% FastICA algorithm converged in 18 iterations.  
+60% FastICA algorithm converged in 8 iterations.  
+61% FastICA algorithm converged in 4 iterations.  
+61% FastICA algorithm converged in 23 iterations.  
 62% FastICA algorithm converged in 12 iterations.  
-63% FastICA algorithm converged in 21 iterations.  
-63% FastICA algorithm converged in 6 iterations.  
-64% FastICA algorithm converged in 23 iterations.  
-64% FastICA algorithm converged in 12 iterations.  
-65% FastICA algorithm converged in 10 iterations.  
-65% FastICA algorithm converged in 20 iterations.  
-66% FastICA algorithm converged in 9 iterations.  
-66% FastICA algorithm converged in 11 iterations.  
-67% FastICA algorithm converged in 117 iterations.  
-67% FastICA algorithm converged in 11 iterations.  
-68% FastICA algorithm converged in 6 iterations.  
-68% FastICA algorithm converged in 15 iterations.  
+62% FastICA algorithm converged in 8 iterations.  
+63% FastICA algorithm converged in 11 iterations.  
+63% FastICA algorithm didn't converge in 149 iterations.  
+63% FastICA algorithm converged in 5 iterations.  
+64% FastICA algorithm converged in 6 iterations.  
+64% FastICA algorithm converged in 13 iterations.  
+65% FastICA algorithm converged in 5 iterations.  
+65% FastICA algorithm converged in 5 iterations.  
+66% FastICA algorithm converged in 5 iterations.  
+66% FastICA algorithm converged in 6 iterations.  
+67% FastICA algorithm converged in 4 iterations.  
+67% FastICA algorithm converged in 5 iterations.  
+68% FastICA algorithm converged in 4 iterations.  
+68% FastICA algorithm converged in 7 iterations.  
 69% FastICA algorithm didn't converge in 149 iterations.  
-69% FastICA algorithm converged in 44 iterations.  
-69% FastICA algorithm converged in 8 iterations.  
-70% FastICA algorithm converged in 16 iterations.  
-70% FastICA algorithm converged in 6 iterations.  
-71% FastICA algorithm didn't converge in 149 iterations.  
+69% FastICA algorithm converged in 10 iterations.  
+69% FastICA algorithm converged in 6 iterations.  
+70% FastICA algorithm converged in 49 iterations.  
+70% FastICA algorithm converged in 4 iterations.  
+71% FastICA algorithm converged in 4 iterations.  
 71% FastICA algorithm didn't converge in 149 iterations.  
 71% FastICA algorithm converged in 5 iterations.  
-71% FastICA algorithm converged in 7 iterations.  
-72% FastICA algorithm converged in 6 iterations.  
-72% FastICA algorithm converged in 58 iterations.  
+72% FastICA algorithm didn't converge in 149 iterations.  
+72% FastICA algorithm didn't converge in 149 iterations.  
+72% FastICA algorithm converged in 5 iterations.  
+72% FastICA algorithm converged in 8 iterations.  
+73% FastICA algorithm converged in 27 iterations.  
 73% FastICA algorithm converged in 8 iterations.  
-73% FastICA algorithm converged in 6 iterations.  
-74% FastICA algorithm converged in 5 iterations.  
-74% FastICA algorithm didn't converge in 149 iterations.  
-74% FastICA algorithm didn't converge in 149 iterations.  
-74% FastICA algorithm converged in 9 iterations.  
-75% FastICA algorithm converged in 5 iterations.  
-75% FastICA algorithm converged in 8 iterations.  
-76% FastICA algorithm converged in 13 iterations.  
-76% FastICA algorithm converged in 14 iterations.  
-77% FastICA algorithm converged in 8 iterations.  
-77% FastICA algorithm converged in 4 iterations.  
-78% FastICA algorithm converged in 6 iterations.  
-78% FastICA algorithm converged in 18 iterations.  
-79% FastICA algorithm converged in 5 iterations.  
-79% FastICA algorithm converged in 14 iterations.  
-80% FastICA algorithm converged in 13 iterations.  
-80% FastICA algorithm converged in 5 iterations.  
-81% FastICA algorithm converged in 5 iterations.  
-81% FastICA algorithm converged in 12 iterations.  
-82% FastICA algorithm converged in 6 iterations.  
-82% FastICA algorithm converged in 4 iterations.  
-83% FastICA algorithm converged in 5 iterations.  
+74% FastICA algorithm converged in 33 iterations.  
+74% FastICA algorithm converged in 61 iterations.  
+75% FastICA algorithm converged in 108 iterations.  
+75% FastICA algorithm didn't converge in 149 iterations.  
+75% FastICA algorithm didn't converge in 149 iterations.  
+75% FastICA algorithm converged in 148 iterations.  
+76% FastICA algorithm converged in 5 iterations.  
+76% FastICA algorithm converged in 7 iterations.  
+77% FastICA algorithm converged in 13 iterations.  
+77% FastICA algorithm didn't converge in 149 iterations.  
+77% FastICA algorithm converged in 3 iterations.  
+78% FastICA algorithm converged in 14 iterations.  
+78% FastICA algorithm didn't converge in 149 iterations.  
+78% FastICA algorithm converged in 4 iterations.  
+79% FastICA algorithm didn't converge in 149 iterations.  
+79% FastICA algorithm converged in 8 iterations.  
+79% FastICA algorithm converged in 9 iterations.  
+80% FastICA algorithm converged in 14 iterations.  
+80% FastICA algorithm converged in 7 iterations.  
+81% FastICA algorithm converged in 8 iterations.  
+81% FastICA algorithm converged in 8 iterations.  
+82% FastICA algorithm converged in 7 iterations.  
+82% FastICA algorithm converged in 58 iterations.  
 83% FastICA algorithm converged in 10 iterations.  
-84% FastICA algorithm converged in 8 iterations.  
-84% FastICA algorithm converged in 56 iterations.  
-85% FastICA algorithm converged in 64 iterations.  
+83% FastICA algorithm converged in 8 iterations.  
+84% FastICA algorithm converged in 5 iterations.  
+84% FastICA algorithm converged in 37 iterations.  
 85% FastICA algorithm converged in 4 iterations.  
-86% FastICA algorithm converged in 3 iterations.  
-86% FastICA algorithm didn't converge in 149 iterations.  
-86% FastICA algorithm converged in 24 iterations.  
-87% FastICA algorithm converged in 25 iterations.  
-87% FastICA algorithm converged in 89 iterations.  
+85% FastICA algorithm converged in 9 iterations.  
+86% FastICA algorithm converged in 5 iterations.  
+86% FastICA algorithm converged in 4 iterations.  
+87% FastICA algorithm converged in 6 iterations.  
+87% FastICA algorithm didn't converge in 149 iterations.  
+87% FastICA algorithm converged in 113 iterations.  
+88% FastICA algorithm converged in 6 iterations.  
 88% FastICA algorithm didn't converge in 149 iterations.  
-88% FastICA algorithm converged in 8 iterations.  
-88% FastICA algorithm converged in 142 iterations.  
-89% FastICA algorithm didn't converge in 149 iterations.  
-89% FastICA algorithm converged in 6 iterations.  
-89% FastICA algorithm converged in 6 iterations.  
+88% FastICA algorithm didn't converge in 149 iterations.  
+88% FastICA algorithm converged in 5 iterations.  
+89% FastICA algorithm converged in 12 iterations.  
+89% FastICA algorithm converged in 3 iterations.  
+90% FastICA algorithm converged in 10 iterations.  
 90% FastICA algorithm converged in 6 iterations.  
-90% FastICA algorithm didn't converge in 149 iterations.  
-90% FastICA algorithm didn't converge in 149 iterations.  
-90% FastICA algorithm didn't converge in 149 iterations.  
-90% FastICA algorithm converged in 8 iterations.  
-91% FastICA algorithm converged in 5 iterations.  
-91% FastICA algorithm converged in 5 iterations.  
-92% FastICA algorithm converged in 55 iterations.  
-92% FastICA algorithm converged in 21 iterations.  
-93% FastICA algorithm converged in 53 iterations.  
-93% FastICA algorithm didn't converge in 149 iterations.  
-93% FastICA algorithm converged in 81 iterations.  
-94% FastICA algorithm converged in 15 iterations.  
-94% FastICA algorithm converged in 4 iterations.  
+91% FastICA algorithm converged in 15 iterations.  
+91% FastICA algorithm didn't converge in 149 iterations.  
+91% FastICA algorithm converged in 32 iterations.  
+92% FastICA algorithm converged in 14 iterations.  
+92% FastICA algorithm converged in 9 iterations.  
+93% FastICA algorithm converged in 55 iterations.  
+93% FastICA algorithm converged in 47 iterations.  
+94% FastICA algorithm converged in 25 iterations.  
+94% FastICA algorithm didn't converge in 149 iterations.  
+94% FastICA algorithm converged in 65 iterations.  
 95% FastICA algorithm converged in 7 iterations.  
-95% FastICA algorithm converged in 95 iterations.  
+95% FastICA algorithm converged in 9 iterations.  
 96% FastICA algorithm converged in 6 iterations.  
-96% FastICA algorithm didn't converge in 149 iterations.  
-96% FastICA algorithm converged in 43 iterations.  
+96% FastICA algorithm converged in 11 iterations.  
+97% FastICA algorithm converged in 6 iterations.  
 97% FastICA algorithm converged in 7 iterations.  
-97% FastICA algorithm converged in 8 iterations.  
-98% FastICA algorithm converged in 13 iterations.  
 98% FastICA algorithm converged in 7 iterations.  
-99% FastICA algorithm converged in 6 iterations.  
-99% FastICA algorithm converged in 6 iterations.  
+98% FastICA algorithm converged in 3 iterations.  
+99% FastICA algorithm converged in 7 iterations.  
+99% FastICA algorithm converged in 10 iterations.  
 100% 
 
 Starting the multiple ICA runs with 7 principal components
-FastICA progress with bootstrapping: FastICA algorithm didn't converge in 149 iterations.  
-0% FastICA algorithm converged in 6 iterations.  
-0% FastICA algorithm converged in 6 iterations.  
-1% FastICA algorithm didn't converge in 149 iterations.  
-1% FastICA algorithm converged in 8 iterations.  
+FastICA progress with bootstrapping: FastICA algorithm converged in 6 iterations.  
+0% FastICA algorithm converged in 5 iterations.  
 1% FastICA algorithm converged in 10 iterations.  
-2% FastICA algorithm converged in 6 iterations.  
-2% FastICA algorithm converged in 5 iterations.  
-3% FastICA algorithm converged in 5 iterations.  
-3% FastICA algorithm converged in 13 iterations.  
-4% FastICA algorithm converged in 43 iterations.  
-4% FastICA algorithm converged in 41 iterations.  
+1% FastICA algorithm converged in 23 iterations.  
+2% FastICA algorithm converged in 19 iterations.  
+2% FastICA algorithm converged in 11 iterations.  
+3% FastICA algorithm converged in 11 iterations.  
+3% FastICA algorithm converged in 6 iterations.  
+4% FastICA algorithm converged in 6 iterations.  
+4% FastICA algorithm converged in 7 iterations.  
 5% FastICA algorithm converged in 6 iterations.  
-5% FastICA algorithm converged in 4 iterations.  
-6% FastICA algorithm converged in 5 iterations.  
-6% FastICA algorithm converged in 6 iterations.  
+5% FastICA algorithm converged in 7 iterations.  
+6% FastICA algorithm converged in 11 iterations.  
+6% FastICA algorithm converged in 9 iterations.  
+7% FastICA algorithm converged in 7 iterations.  
 7% FastICA algorithm converged in 8 iterations.  
-7% FastICA algorithm converged in 14 iterations.  
-8% FastICA algorithm converged in 139 iterations.  
-8% FastICA algorithm converged in 6 iterations.  
-9% FastICA algorithm converged in 46 iterations.  
-9% FastICA algorithm converged in 50 iterations.  
+8% FastICA algorithm converged in 5 iterations.  
+8% FastICA algorithm converged in 7 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+9% FastICA algorithm converged in 24 iterations.  
+10% FastICA algorithm converged in 9 iterations.  
+10% FastICA algorithm didn't converge in 149 iterations.  
 10% FastICA algorithm converged in 6 iterations.  
-10% FastICA algorithm converged in 8 iterations.  
 11% FastICA algorithm converged in 6 iterations.  
-11% FastICA algorithm converged in 6 iterations.  
-12% FastICA algorithm converged in 4 iterations.  
-12% FastICA algorithm converged in 27 iterations.  
-13% FastICA algorithm converged in 20 iterations.  
-13% FastICA algorithm converged in 17 iterations.  
-14% FastICA algorithm converged in 28 iterations.  
-14% FastICA algorithm converged in 5 iterations.  
-15% FastICA algorithm converged in 9 iterations.  
+11% FastICA algorithm converged in 5 iterations.  
+12% FastICA algorithm converged in 6 iterations.  
+12% FastICA algorithm converged in 83 iterations.  
+13% FastICA algorithm converged in 8 iterations.  
+13% FastICA algorithm converged in 29 iterations.  
+14% FastICA algorithm converged in 11 iterations.  
+14% FastICA algorithm converged in 9 iterations.  
+15% FastICA algorithm converged in 7 iterations.  
+15% FastICA algorithm didn't converge in 149 iterations.  
+15% FastICA algorithm didn't converge in 149 iterations.  
 15% FastICA algorithm converged in 7 iterations.  
 16% FastICA algorithm converged in 7 iterations.  
-16% FastICA algorithm converged in 6 iterations.  
-17% FastICA algorithm converged in 6 iterations.  
-17% FastICA algorithm didn't converge in 149 iterations.  
+16% FastICA algorithm converged in 54 iterations.  
+17% FastICA algorithm converged in 28 iterations.  
 17% FastICA algorithm converged in 8 iterations.  
-18% FastICA algorithm converged in 9 iterations.  
-18% FastICA algorithm converged in 5 iterations.  
-19% FastICA algorithm converged in 10 iterations.  
-19% FastICA algorithm didn't converge in 149 iterations.  
-19% FastICA algorithm converged in 22 iterations.  
-20% FastICA algorithm converged in 7 iterations.  
-20% FastICA algorithm converged in 13 iterations.  
-21% FastICA algorithm converged in 6 iterations.  
+18% FastICA algorithm didn't converge in 149 iterations.  
+18% FastICA algorithm converged in 6 iterations.  
+18% FastICA algorithm converged in 10 iterations.  
+19% FastICA algorithm converged in 9 iterations.  
+19% FastICA algorithm converged in 11 iterations.  
+20% FastICA algorithm converged in 4 iterations.  
+20% FastICA algorithm converged in 9 iterations.  
+21% FastICA algorithm converged in 55 iterations.  
 21% FastICA algorithm converged in 37 iterations.  
-22% FastICA algorithm converged in 5 iterations.  
-22% FastICA algorithm converged in 58 iterations.  
-23% FastICA algorithm converged in 4 iterations.  
-23% FastICA algorithm converged in 5 iterations.  
+22% FastICA algorithm converged in 16 iterations.  
+22% FastICA algorithm converged in 6 iterations.  
+23% FastICA algorithm converged in 6 iterations.  
+23% FastICA algorithm converged in 35 iterations.  
+24% FastICA algorithm converged in 4 iterations.  
 24% FastICA algorithm converged in 8 iterations.  
-24% FastICA algorithm converged in 18 iterations.  
-25% FastICA algorithm didn't converge in 149 iterations.  
 25% FastICA algorithm converged in 5 iterations.  
-25% FastICA algorithm converged in 8 iterations.  
-26% FastICA algorithm converged in 8 iterations.  
-26% FastICA algorithm converged in 7 iterations.  
-27% FastICA algorithm converged in 31 iterations.  
-27% FastICA algorithm converged in 9 iterations.  
+25% FastICA algorithm converged in 11 iterations.  
+26% FastICA algorithm converged in 5 iterations.  
+26% FastICA algorithm converged in 12 iterations.  
+27% FastICA algorithm converged in 7 iterations.  
+27% FastICA algorithm converged in 6 iterations.  
 28% FastICA algorithm converged in 7 iterations.  
-28% FastICA algorithm didn't converge in 149 iterations.  
-28% FastICA algorithm converged in 5 iterations.  
-28% FastICA algorithm converged in 11 iterations.  
-29% FastICA algorithm converged in 6 iterations.  
-30% FastICA algorithm didn't converge in 149 iterations.  
-30% FastICA algorithm converged in 33 iterations.  
-30% FastICA algorithm converged in 5 iterations.  
-31% FastICA algorithm converged in 7 iterations.  
-31% FastICA algorithm converged in 82 iterations.  
-32% FastICA algorithm converged in 69 iterations.  
-32% FastICA algorithm converged in 62 iterations.  
-33% FastICA algorithm converged in 13 iterations.  
+28% FastICA algorithm converged in 8 iterations.  
+28% FastICA algorithm converged in 77 iterations.  
+29% FastICA algorithm converged in 8 iterations.  
+30% FastICA algorithm converged in 6 iterations.  
+30% FastICA algorithm converged in 7 iterations.  
+31% FastICA algorithm converged in 6 iterations.  
+31% FastICA algorithm converged in 20 iterations.  
+32% FastICA algorithm converged in 6 iterations.  
+32% FastICA algorithm converged in 12 iterations.  
+33% FastICA algorithm converged in 20 iterations.  
 33% FastICA algorithm converged in 9 iterations.  
+34% FastICA algorithm converged in 101 iterations.  
 34% FastICA algorithm converged in 5 iterations.  
-34% FastICA algorithm converged in 5 iterations.  
-35% FastICA algorithm converged in 8 iterations.  
-35% FastICA algorithm converged in 6 iterations.  
+35% FastICA algorithm converged in 4 iterations.  
+35% FastICA algorithm didn't converge in 149 iterations.  
+35% FastICA algorithm converged in 13 iterations.  
+36% FastICA algorithm didn't converge in 149 iterations.  
+36% FastICA algorithm didn't converge in 149 iterations.  
 36% FastICA algorithm converged in 6 iterations.  
-36% FastICA algorithm converged in 50 iterations.  
-37% FastICA algorithm converged in 7 iterations.  
-37% FastICA algorithm didn't converge in 149 iterations.  
-37% FastICA algorithm converged in 6 iterations.  
+36% FastICA algorithm converged in 12 iterations.  
+37% FastICA algorithm converged in 9 iterations.  
+37% FastICA algorithm converged in 18 iterations.  
 38% FastICA algorithm didn't converge in 149 iterations.  
+38% FastICA algorithm converged in 10 iterations.  
 38% FastICA algorithm converged in 6 iterations.  
-38% FastICA algorithm converged in 6 iterations.  
-39% FastICA algorithm converged in 10 iterations.  
-39% FastICA algorithm converged in 8 iterations.  
-40% FastICA algorithm converged in 4 iterations.  
-40% FastICA algorithm converged in 21 iterations.  
+39% FastICA algorithm converged in 32 iterations.  
+39% FastICA algorithm converged in 6 iterations.  
+40% FastICA algorithm converged in 11 iterations.  
+40% FastICA algorithm converged in 5 iterations.  
 41% FastICA algorithm converged in 6 iterations.  
-41% FastICA algorithm converged in 71 iterations.  
-42% FastICA algorithm converged in 6 iterations.  
-42% FastICA algorithm converged in 5 iterations.  
-43% FastICA algorithm converged in 12 iterations.  
+41% FastICA algorithm converged in 7 iterations.  
+42% FastICA algorithm converged in 4 iterations.  
+42% FastICA algorithm converged in 15 iterations.  
+43% FastICA algorithm converged in 7 iterations.  
 43% FastICA algorithm converged in 5 iterations.  
-44% FastICA algorithm converged in 5 iterations.  
-44% FastICA algorithm converged in 15 iterations.  
-45% FastICA algorithm converged in 6 iterations.  
-45% FastICA algorithm converged in 16 iterations.  
-46% FastICA algorithm converged in 29 iterations.  
-46% FastICA algorithm converged in 5 iterations.  
-47% FastICA algorithm converged in 35 iterations.  
+44% FastICA algorithm converged in 10 iterations.  
+44% FastICA algorithm converged in 8 iterations.  
+45% FastICA algorithm converged in 31 iterations.  
+45% FastICA algorithm converged in 7 iterations.  
+46% FastICA algorithm converged in 6 iterations.  
+46% FastICA algorithm converged in 53 iterations.  
 47% FastICA algorithm converged in 5 iterations.  
+47% FastICA algorithm converged in 7 iterations.  
 48% FastICA algorithm converged in 6 iterations.  
-48% FastICA algorithm converged in 7 iterations.  
-49% FastICA algorithm converged in 23 iterations.  
-49% FastICA algorithm converged in 5 iterations.  
-50% FastICA algorithm converged in 29 iterations.  
-50% FastICA algorithm converged in 11 iterations.  
-51% FastICA algorithm converged in 16 iterations.  
-51% FastICA algorithm converged in 6 iterations.  
-52% FastICA algorithm converged in 12 iterations.  
-52% FastICA algorithm converged in 57 iterations.  
-53% FastICA algorithm converged in 8 iterations.  
-53% FastICA algorithm converged in 9 iterations.  
-54% FastICA algorithm converged in 10 iterations.  
-54% FastICA algorithm converged in 56 iterations.  
-55% FastICA algorithm converged in 4 iterations.  
-55% FastICA algorithm converged in 61 iterations.  
-56% FastICA algorithm converged in 7 iterations.  
-56% FastICA algorithm converged in 11 iterations.  
+48% FastICA algorithm converged in 5 iterations.  
+49% FastICA algorithm converged in 14 iterations.  
+49% FastICA algorithm converged in 8 iterations.  
+50% FastICA algorithm converged in 17 iterations.  
+50% FastICA algorithm converged in 4 iterations.  
+51% FastICA algorithm converged in 8 iterations.  
+51% FastICA algorithm didn't converge in 149 iterations.  
+51% FastICA algorithm converged in 8 iterations.  
+52% FastICA algorithm converged in 25 iterations.  
+52% FastICA algorithm didn't converge in 149 iterations.  
+52% FastICA algorithm converged in 15 iterations.  
+53% FastICA algorithm converged in 5 iterations.  
+53% FastICA algorithm converged in 4 iterations.  
+54% FastICA algorithm converged in 6 iterations.  
+54% FastICA algorithm converged in 11 iterations.  
+55% FastICA algorithm converged in 31 iterations.  
+55% FastICA algorithm didn't converge in 149 iterations.  
+55% FastICA algorithm converged in 7 iterations.  
+56% FastICA algorithm converged in 46 iterations.  
 56% FastICA algorithm converged in 8 iterations.  
-57% FastICA algorithm didn't converge in 149 iterations.  
-57% FastICA algorithm converged in 17 iterations.  
-57% FastICA algorithm converged in 9 iterations.  
-58% FastICA algorithm converged in 10 iterations.  
+56% FastICA algorithm converged in 5 iterations.  
+57% FastICA algorithm converged in 8 iterations.  
+57% FastICA algorithm converged in 6 iterations.  
+58% FastICA algorithm converged in 24 iterations.  
 59% FastICA algorithm converged in 7 iterations.  
-59% FastICA algorithm converged in 60 iterations.  
-60% FastICA algorithm converged in 70 iterations.  
-60% FastICA algorithm converged in 20 iterations.  
-61% FastICA algorithm converged in 5 iterations.  
-61% FastICA algorithm converged in 11 iterations.  
-62% FastICA algorithm converged in 7 iterations.  
+59% FastICA algorithm converged in 6 iterations.  
+60% FastICA algorithm converged in 7 iterations.  
+60% FastICA algorithm converged in 8 iterations.  
+61% FastICA algorithm converged in 20 iterations.  
+61% FastICA algorithm converged in 7 iterations.  
+62% FastICA algorithm converged in 13 iterations.  
 62% FastICA algorithm converged in 14 iterations.  
-63% FastICA algorithm converged in 8 iterations.  
-63% FastICA algorithm converged in 4 iterations.  
-64% FastICA algorithm converged in 7 iterations.  
-64% FastICA algorithm converged in 10 iterations.  
-65% FastICA algorithm didn't converge in 149 iterations.  
+63% FastICA algorithm converged in 13 iterations.  
+63% FastICA algorithm converged in 11 iterations.  
+64% FastICA algorithm converged in 6 iterations.  
+64% FastICA algorithm converged in 6 iterations.  
 65% FastICA algorithm converged in 6 iterations.  
-65% FastICA algorithm converged in 5 iterations.  
+65% FastICA algorithm converged in 8 iterations.  
 66% FastICA algorithm converged in 8 iterations.  
-66% FastICA algorithm didn't converge in 149 iterations.  
-66% FastICA algorithm converged in 6 iterations.  
+66% FastICA algorithm converged in 10 iterations.  
 67% FastICA algorithm converged in 6 iterations.  
-67% FastICA algorithm converged in 5 iterations.  
-68% FastICA algorithm converged in 17 iterations.  
-68% FastICA algorithm converged in 7 iterations.  
-69% FastICA algorithm converged in 24 iterations.  
-69% FastICA algorithm converged in 21 iterations.  
-70% FastICA algorithm converged in 7 iterations.  
-70% FastICA algorithm converged in 6 iterations.  
-71% FastICA algorithm converged in 12 iterations.  
-71% FastICA algorithm converged in 4 iterations.  
+67% FastICA algorithm didn't converge in 149 iterations.  
+67% FastICA algorithm converged in 6 iterations.  
+68% FastICA algorithm converged in 6 iterations.  
+68% FastICA algorithm converged in 5 iterations.  
+69% FastICA algorithm converged in 8 iterations.  
+69% FastICA algorithm didn't converge in 149 iterations.  
+69% FastICA algorithm converged in 18 iterations.  
+70% FastICA algorithm converged in 5 iterations.  
+70% FastICA algorithm converged in 19 iterations.  
+71% FastICA algorithm converged in 6 iterations.  
+71% FastICA algorithm converged in 17 iterations.  
+72% FastICA algorithm didn't converge in 149 iterations.  
+72% FastICA algorithm converged in 8 iterations.  
 72% FastICA algorithm converged in 6 iterations.  
-72% FastICA algorithm converged in 5 iterations.  
-73% FastICA algorithm converged in 17 iterations.  
-73% FastICA algorithm converged in 7 iterations.  
-74% FastICA algorithm didn't converge in 149 iterations.  
+73% FastICA algorithm converged in 49 iterations.  
+73% FastICA algorithm converged in 5 iterations.  
 74% FastICA algorithm converged in 8 iterations.  
-74% FastICA algorithm converged in 4 iterations.  
-75% FastICA algorithm converged in 8 iterations.  
-75% FastICA algorithm converged in 21 iterations.  
-76% FastICA algorithm converged in 6 iterations.  
-76% FastICA algorithm converged in 9 iterations.  
+74% FastICA algorithm converged in 110 iterations.  
+75% FastICA algorithm converged in 6 iterations.  
+75% FastICA algorithm converged in 31 iterations.  
+76% FastICA algorithm converged in 52 iterations.  
+76% FastICA algorithm converged in 19 iterations.  
 77% FastICA algorithm didn't converge in 149 iterations.  
-77% FastICA algorithm converged in 56 iterations.  
-77% FastICA algorithm converged in 30 iterations.  
-78% FastICA algorithm converged in 38 iterations.  
-78% FastICA algorithm converged in 8 iterations.  
+77% FastICA algorithm converged in 13 iterations.  
+77% FastICA algorithm converged in 58 iterations.  
+78% FastICA algorithm converged in 6 iterations.  
+78% FastICA algorithm converged in 6 iterations.  
 79% FastICA algorithm converged in 8 iterations.  
-79% FastICA algorithm converged in 6 iterations.  
-80% FastICA algorithm converged in 54 iterations.  
-80% FastICA algorithm converged in 17 iterations.  
-81% FastICA algorithm converged in 52 iterations.  
-81% FastICA algorithm converged in 6 iterations.  
-82% FastICA algorithm converged in 7 iterations.  
-82% FastICA algorithm converged in 4 iterations.  
-83% FastICA algorithm converged in 11 iterations.  
-83% FastICA algorithm converged in 17 iterations.  
-84% FastICA algorithm converged in 7 iterations.  
-84% FastICA algorithm converged in 23 iterations.  
-85% FastICA algorithm converged in 11 iterations.  
-85% FastICA algorithm converged in 6 iterations.  
+79% FastICA algorithm didn't converge in 149 iterations.  
+79% FastICA algorithm converged in 5 iterations.  
+80% FastICA algorithm converged in 11 iterations.  
+80% FastICA algorithm converged in 28 iterations.  
+81% FastICA algorithm converged in 7 iterations.  
+81% FastICA algorithm didn't converge in 149 iterations.  
+81% FastICA algorithm converged in 13 iterations.  
+82% FastICA algorithm converged in 6 iterations.  
+82% FastICA algorithm converged in 6 iterations.  
+83% FastICA algorithm converged in 12 iterations.  
+83% FastICA algorithm converged in 7 iterations.  
+84% FastICA algorithm converged in 28 iterations.  
+84% FastICA algorithm converged in 6 iterations.  
+85% FastICA algorithm converged in 9 iterations.  
+85% FastICA algorithm converged in 4 iterations.  
+86% FastICA algorithm converged in 18 iterations.  
 86% FastICA algorithm converged in 9 iterations.  
-86% FastICA algorithm converged in 136 iterations.  
-87% FastICA algorithm converged in 7 iterations.  
-87% FastICA algorithm converged in 32 iterations.  
-88% FastICA algorithm converged in 7 iterations.  
-88% FastICA algorithm converged in 27 iterations.  
-89% FastICA algorithm converged in 13 iterations.  
-89% FastICA algorithm converged in 5 iterations.  
+87% FastICA algorithm converged in 4 iterations.  
+87% FastICA algorithm converged in 54 iterations.  
+88% FastICA algorithm converged in 45 iterations.  
+88% FastICA algorithm converged in 31 iterations.  
+89% FastICA algorithm converged in 35 iterations.  
+89% FastICA algorithm converged in 6 iterations.  
 90% FastICA algorithm converged in 6 iterations.  
-90% FastICA algorithm converged in 9 iterations.  
-91% FastICA algorithm converged in 8 iterations.  
+90% FastICA algorithm converged in 7 iterations.  
 91% FastICA algorithm converged in 6 iterations.  
-92% FastICA algorithm converged in 102 iterations.  
-92% FastICA algorithm converged in 5 iterations.  
-93% FastICA algorithm converged in 38 iterations.  
+91% FastICA algorithm converged in 12 iterations.  
+92% FastICA algorithm converged in 6 iterations.  
+92% FastICA algorithm converged in 15 iterations.  
 93% FastICA algorithm converged in 4 iterations.  
-94% FastICA algorithm converged in 9 iterations.  
-94% FastICA algorithm converged in 7 iterations.  
-95% FastICA algorithm converged in 9 iterations.  
-95% FastICA algorithm converged in 28 iterations.  
-96% FastICA algorithm converged in 80 iterations.  
-96% FastICA algorithm converged in 8 iterations.  
-97% FastICA algorithm didn't converge in 149 iterations.  
-97% FastICA algorithm converged in 6 iterations.  
-97% FastICA algorithm converged in 6 iterations.  
-98% FastICA algorithm converged in 8 iterations.  
-98% FastICA algorithm converged in 12 iterations.  
-99% FastICA algorithm converged in 10 iterations.  
-99% FastICA algorithm converged in 40 iterations.  
+93% FastICA algorithm converged in 4 iterations.  
+94% FastICA algorithm converged in 5 iterations.  
+94% FastICA algorithm didn't converge in 149 iterations.  
+94% FastICA algorithm didn't converge in 149 iterations.  
+94% FastICA algorithm converged in 11 iterations.  
+95% FastICA algorithm converged in 6 iterations.  
+95% FastICA algorithm converged in 6 iterations.  
+96% FastICA algorithm converged in 25 iterations.  
+96% FastICA algorithm converged in 30 iterations.  
+97% FastICA algorithm converged in 5 iterations.  
+97% FastICA algorithm converged in 44 iterations.  
+98% FastICA algorithm converged in 4 iterations.  
+98% FastICA algorithm converged in 11 iterations.  
+99% FastICA algorithm converged in 8 iterations.  
+99% FastICA algorithm converged in 6 iterations.  
 100% 
 Starting to compute the pairwise distance matrices....Done!
 Starting to cluster the sources using HDBSCAN....Done!
@@ -823,17 +833,12 @@ Waiting for the user to select the ICA sources using the interactive window.
 Waiting for the user to select the ICA sources using the interactive window.  
 Waiting for the user to select the ICA sources using the interactive window.  
 Waiting for the user to select the ICA sources using the interactive window.  
-Waiting for the user to select the ICA sources using the interactive window.  
-Waiting for the user to select the ICA sources using the interactive window.  
-Waiting for the user to select the ICA sources using the interactive window.  
-Waiting for the user to select the ICA sources using the interactive window.  
-Waiting for the user to select the ICA sources using the interactive window.  
-6 ICA sources have been chosen by the user. Continuing
+5 ICA sources have been chosen by the user. Continuing
 Starting to create the 03_ICA_sources_correlations figure:
 Updating the masks for the two sources.  Of the 7873 in data1 and 8278 in data2, 7645 are in both and can be used.  
-    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
 
-    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
 
 Done.  
 Creating a Google Earth .kmz of the geocoded independent components... Done!
@@ -844,9 +849,15 @@ Source 1: topo_cor_APS
 Source 2: turbulent_APS
 Source 3: turbulent_APS
 Source 4: turbulent_APS
-Source 5: turbulent_APS
 
 
 Saving the key results as a .pkl file... Done!
 Updating the masks for the two sources.  Of the 7873 in data1 and 7873 in data2, 7873 are in both and can be used.  
-Running LiCSAlert for 20210912 (acquisition # 326 of 326) : monitoring date
+Running LiCSAlert for 20210912  (acquisition # 326 of 326) : monitoring date
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(305)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    303 [1;33m        [0mprocessing_dates[0m[1;33m.[0m[0mextend[0m[1;33m([0m[0mLiCSAlert_status[0m[1;33m[[0m[1;34m'dates_baseline'[0m[1;33m][0m[1;33m.[0m[0mprocessed_with_errors[0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    304 [1;33m[1;33m[0m[0m
+[0m[1;32m--> 305 [1;33m        [1;32mfor[0m [0mprocessing_date[0m [1;32min[0m [0mprocessing_dates[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    306 [1;33m[1;33m[0m[0m
+[0m[1;32m    307 [1;33m            processing_date = licsalert_date_obj(
+[0m

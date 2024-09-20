@@ -66,7 +66,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         if not os.path.exists(outdir):                                       # if folder doesn't exist...
             os.mkdir(outdir)                                                 # if doesn't exist, make it                           
         else:                                                                                       # if the folder does already exist
-            print(f"The folder {outdir} appears to exists already.  This is usually "
+            print(f"The folder {outdir} appears to exist already.  This is usually "
                   f"due to the date not having all the required LiCSAlert products, "
                   f"and LiCSAlert is now trying to fill this date again.  ")
             shutil.rmtree(outdir)                                        # delete the folder and all its contents
@@ -166,6 +166,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
                                     licsbas_json_creation_time)                                                        
         # delete for safety
         del licsbas_json_creation_time                                                                                                                  
+    
         
 
     # remaining two ways to pass data to function.  
@@ -230,7 +231,6 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     # mixtures_mc and means contains the daisy chain of ifgs mean centered either 
     # in space or time, depending on whther sica or tica
     
-    
     displacement_r2 = LiCSAlert_preprocessing(
         displacement_r2, tbaseline_info,  icasar_settings['sica_tica'],                                                    
         licsalert_settings['downsample_run'], 
@@ -247,6 +247,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
               f" it has been updated so that it does.  Previously, it was "
               f"{licsalert_settings['baseline_end']}, but it is now " 
               f"{updated_date}")
+    # update this from a string to a licsaleert date object.  
     licsalert_settings['baseline_end'] = licsalert_date_obj(
         updated_date, tbaseline_info['acq_dates']
         )
@@ -392,6 +393,8 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             # write the change in def  / new def text file for that date.  
             write_volcano_status(sources_tcs, residual_tcs, ics_labels, 
                                  volcano_dir / processing_date.date)                                           
+
+            pdb.set_trace()
 
             
         # also plot the ICS and the DEM (done once)
@@ -936,7 +939,8 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
                                 '01_cumulative*.png',
                                 '02_incremental*.png',
                                 '03_incremental_reconstruction*.png',
-                                '04_incremental_residual*.png']
+                                '04_incremental_residual*.png',
+                                '05_cumulative_residual*.png']
 
             
             self.processed_with_errors = []

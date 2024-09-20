@@ -385,10 +385,12 @@ def licsalert_status_map(volcs, outdir, day_list, sig_max = 10,
 #%%
 
 
-def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2, 
-                     figure_date, acq_dates, baselines_cs, baseline_end_date, dayend_date = None,
-                     figure_type = 'both', figure_out_dir=None, ifg_xpos_scaler = 15, sources_labels = None,
-                     cmap = plt.get_cmap('coolwarm')):
+def LiCSAlert_figure(
+        sources_tcs, residual, sources, displacement_r2, figure_date, 
+        acq_dates, baselines_cs, baseline_end_date, dayend_date = None,
+        figure_type = 'both', figure_out_dir=None, ifg_xpos_scaler = 15,
+        sources_labels = None, cmap = plt.get_cmap('coolwarm')
+        ):
     """
     The main fucntion to draw the LiCSAlert figure.  
     
@@ -650,9 +652,15 @@ def LiCSAlert_figure(sources_tcs, residual, sources, displacement_r2,
     n_ics = len(sources_tcs)
     
     #n_ifgs = displacement_r2["incremental"].shape[0]
-    line_args= calcualte_line_args(n_acqs, t_recalculate)                      # which lines of best fit to plot (units are acq_n)
+    # which lines of best fit to plot (units are acq_n), i.e. don't plot 
+    # all the lines or they just overlap, only plot every t_recalculate one
+    line_args= calcualte_line_args(n_acqs, t_recalculate)                      
     c = mpl.colors.ColorConverter().to_rgb                                      
-    cmap_discrete = make_colormap(  [c('black'), c('orange'), 0.33, c('orange'), c('yellow'), 0.66, c('yellow'), c('red')])     # custom colorbar for number of sigmas from line
+     # custom colorbar for number of sigmas from line
+    cmap_discrete = make_colormap(
+        [c('black'), c('orange'), 0.33, c('orange'), c('yellow'), 0.66,
+         c('yellow'), c('red')]
+        )
     cmap_sources = colourbar_for_sources(sources)
     figtitle = f'LiCSAlert figure on {figure_date.date}'
 
@@ -1190,17 +1198,20 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
 
 #%%
 
-def LiCSAlert_epoch_figures(processing_date, displacement_r2_current, reconstructions, residuals, tbaseline_info,
-                            figure_type, figure_out_dir):
+def LiCSAlert_epoch_figures(
+        processing_date, displacement_r2_current,  reconstructions, residuals,
+        tbaseline_info, figure_type, figure_out_dir):
     """
-    Plot last cumulative ifg, last incremetnal ifg, reconstrution for last incremental ifg, and residual for last incremental ifg. 
+    Plot last cumulative ifg, last incremetnal ifg, reconstrution for last 
+    incremental ifg, and residual for last incremental ifg. 
     Also save the data from these figures as a pickle.  
     
     Inputs:
         processing_date          | licsalert date | processing date currently on
         displacement_r2_current | dict | licsalert dict of ifgs
         reconstrutions          | r2 array | reconstructions as row vectors
-        residuals               | r2 array | reconstructions as row vectors
+        residuals               | r2 array | residuals as row vectors.  
+                                            Assumed not to be cumulative.     
         tbasline_info           | dict | licsalert dict of tbaseline info
         figure_type             | string | png / window / both
         figure_out_dir          | Path   | out dir path.  
@@ -1243,19 +1254,30 @@ def LiCSAlert_epoch_figures(processing_date, displacement_r2_current, reconstruc
         inc_1 = zeros
         recon_1 = zeros
         residual_1 = zeros
+        residual_cum = zeros
     else:
         inc_1 = displacement_r2_current['incremental'][processing_date.acq_n-1, :]
         recon_1 = reconstructions[processing_date.acq_n-1,:]
         residual_1 = residuals[processing_date.acq_n-1, :]
+        # sum all the residuals through time to get current cumulative
+        # residual
+        residual_cum = np.sum(residuals[:processing_date.acq_n-1, :], axis = 0)
         
        
-    plot_1_image(cum_1, displacement_r2_current['mask'], f"01_cumulative_{cum_ifg_date}", 
+    plot_1_image(cum_1, displacement_r2_current['mask'], 
+                 f"01_cumulative_{cum_ifg_date}", 
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))    
-    plot_1_image(inc_1, displacement_r2_current['mask'], f"02_incremental_{inc_ifg_date}",
+    plot_1_image(inc_1, displacement_r2_current['mask'], 
+                 f"02_incremental_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
-    plot_1_image(recon_1, displacement_r2_current['mask'], f"03_incremental_reconstruction_{inc_ifg_date}",
+    plot_1_image(recon_1, displacement_r2_current['mask'], 
+                 f"03_incremental_reconstruction_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
-    plot_1_image(residual_1, displacement_r2_current['mask'], f"04_incremental_residual_{inc_ifg_date}",
+    plot_1_image(residual_1, displacement_r2_current['mask'], 
+                 f"04_incremental_residual_{inc_ifg_date}",
+                 figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
+    plot_1_image(residual_cum, displacement_r2_current['mask'], 
+                 f"05_cumulative_residual_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
 
     #  save the data that is plotted as png
@@ -1263,12 +1285,13 @@ def LiCSAlert_epoch_figures(processing_date, displacement_r2_current, reconstruc
                     'incremental'    : inc_1,
                     'reconstruction' : recon_1,
                     'residual'       : residual_1,
-                    'mask'           : displacement_r2_current['mask']}
+                    'mask'           : displacement_r2_current['mask'],
+                    'residual_cum'   : residual_cum}
     with open(figure_out_dir / 'epoch_images_data.pkl', 'wb') as f:
         pickle.dump(epoch_images, f)
     f.close()
     
-    # if plt.get_backend() != 'Qt5Agg':                                                           # check if we need to reset the backend (to interactive window)
+    # if plt.get_backend() != 'Qt5Agg':                                                           
     #     plt.switch_backend('Qt5Agg')        
         
         

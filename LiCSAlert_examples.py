@@ -57,7 +57,7 @@ icasar_settings = {"n_pca_comp_start"       : 6,
 licsbas_settings = {"filtered"               : False,
                     "date_start"            : None,
                     "date_end"              : None,
-                    'mask_type'             : 'licsbas',
+                    'mask_type'             : 'licsbas',                        # "dem" or "licsbas"
                     'crop_pixels'           : None}
 
 

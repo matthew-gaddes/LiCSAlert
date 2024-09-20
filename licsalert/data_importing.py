@@ -862,8 +862,6 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
                         "continue.  ")
     
     ############################### debug
-    #%%
-    
     
     # # plot 10 if the ifgs (gives an error at the end)
     # for i in np.linspace(0, cumulative_r3.shape[0], 10):
@@ -872,37 +870,45 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     #     plt.close()
     
     
-    def accumulate_nan_mask(images):
-        """
-        Accumulates a boolean mask of where NaN values are in a 4D array of 
-        images.
+    # def accumulate_nan_mask(images):
+    #     """
+    #     Accumulates a boolean mask of where NaN values are in a 4D array of 
+    #     images.
     
-        Parameters:
-        images (numpy.ndarray): A 4D numpy array of shape (time, x, y, 
-                                                            channels).
+    #     Parameters:
+    #     images (numpy.ndarray): A 4D numpy array of shape (time, x, y, 
+    #                                                         channels).
     
-        Returns:
-        numpy.ndarray: A 2D boolean mask of shape (x, y) where True indicates 
-        the presence of a NaN in any of the images.
-        """
-        import numpy as np
-        # Initialize the mask with False values (no NaNs found yet)
-        nan_mask = np.zeros(images.shape[1:], dtype=bool)
+    #     Returns:
+    #     numpy.ndarray: A 2D boolean mask of shape (x, y) where True indicates 
+    #     the presence of a NaN in any of the images.
+    #     """
+    #     import numpy as np
+    #     # Initialize the mask with False values (no NaNs found yet)
+    #     nan_mask = np.zeros(images.shape[1:], dtype=bool)
         
-        # initilise to count nans
-        nan_count = np.zeros(images.shape[1:])
+    #     # initilise to count nans
+    #     nan_count = np.zeros(images.shape[1:])
     
-        # Iterate over each image and accumulate the NaN mask
-        for t in range(images.shape[0]):
-            # union of sets
-            nan_mask = nan_mask | np.isnan(images[t,])
+    #     # Iterate over each image and accumulate the NaN mask
+    #     for t in range(images.shape[0]):
+    #         # union of sets
+    #         nan_mask = nan_mask | np.isnan(images[t,])
             
-            nan_count[np.isnan(images[t,])] += 1
-        return nan_mask, nan_count
+    #         nan_count[np.isnan(images[t,])] += 1
+    #     return nan_mask, nan_count
 
-    nan_mask, nan_count = accumulate_nan_mask(cumulative_r3)
+    # nan_mask, nan_count = accumulate_nan_mask(cumulative_r3)
+    # import matplotlib.pyplot as plt
+    # f, ax = plt.subplots(1); ax.matshow(nan_mask)
+    # f, ax = plt.subplots(1); ax.matshow(nan_count)
 
-    #%%
+    # y =164
+    # x = 89
+    
+    # for x, y in zip([89, 89], [164, 177]):
+    #     f, ax = plt.subplots(); ax.plot(cumulative_r3[:, y, x])
+
     ############################### end debug
     
     pdb.set_trace()

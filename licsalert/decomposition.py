@@ -830,6 +830,7 @@ def decompose_image(image, compE, compN, compU):
     var_un = np.nan * np.ones((1, n_pixels))
     var_e = np.nan * np.ones((1, n_pixels))
     
+   
     # iterate over all the pixels (these are the ones that aren't masked)
     for n_pixel in range(n_pixels):
         

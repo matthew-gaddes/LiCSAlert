@@ -74,16 +74,17 @@ def LiCSAlert(sources, baselines_cs, ifgs_baseline, mask, ifgs_monitoring = None
             pass
         else:
             print(f".  ")
-            raise Exception(f"There appears to be a mismatch between the number of "
-                            f"cumulative baselines and the number of interferograms "
-                            f"As there is a cumulative temporal baselines on the first " 
-                            f"acquisition (value = 0) but no daisy chain ifg on that date, " +
-                            f"the baselines should be one longer than the number "
-                            f"of interferograms.  ")
+            raise Exception(
+                f"There appears to be a mismatch between the number of "
+                f"cumulative baselines and the number of interferograms "
+                f"As there is a cumulative temporal baselines on the first " 
+                f"acquisition (value = 0) but no daisy chain ifg on that date, " +
+                f"the baselines should be one longer than the number "
+                f"of interferograms.  "
+                )
         
-        
-
-    # 0: Ensure we can still run LiCSAlert in the case that we have no monitoring interferograms (yet)
+    # 0: Ensure we can still run LiCSAlert in the case that we have no 
+    # monitoring interferograms (yet)
     n_times_baseline = ifgs_baseline.shape[0] + 1                                                   
     if ifgs_monitoring is None:
         ifgs_all = np.copy(ifgs_baseline)                                                                # if there are no monitoring ifgs, ifgs_all is just the set of baseline ifgs
@@ -109,33 +110,57 @@ def LiCSAlert(sources, baselines_cs, ifgs_baseline, mask, ifgs_monitoring = None
     # do an inversion to fit the incremental ifgs using the sources, then
     # make the time courses (inversion results) cumulative, starting at 0
     # d_hat is reconsturction, d_resid is data - reconstrutcion.  
-    tcs_c_baseline, d_hat_baseline, d_resid_baseline = bss_components_inversion(sources, ifgs_baseline, 
-                                                                                cumulative=True, mask = mask)     
+    products = bss_components_inversion(
+        sources, ifgs_baseline, cumulative=True, mask = mask
+        )     
+    tcs_c_baseline, d_hat_baseline, d_resid_baseline = products; del products
     
-    # calcaulte line of best fit, gradient, point to line distances etc. for cumulative time courses.  
-    sources_tcs = tcs_baseline(tcs_c_baseline, baselines_cs[:n_times_baseline], t_recalculate)                                   
+    # calcaulte line of best fit, gradient, point to line distances etc. for 
+    # cumulative time courses.  
+    sources_tcs = tcs_baseline(
+        tcs_c_baseline, baselines_cs[:n_times_baseline], t_recalculate
+        )                                   
    
-    # calculate the residual, which is summed for each pixel, then averaged across an image at any time.  
-    residual = residual_for_pixels(sources, sources_tcs, ifgs_baseline, mask, n_pix_window, residual_type)             
+    # calculate the residual, which is summed for each pixel, then averaged 
+    # across an image at any time.  
+    residual = residual_for_pixels(
+        sources, sources_tcs, ifgs_baseline, mask, n_pix_window, residual_type
+        )             
     
-    # calculate line of best fit, gradient, line to point distances etc for cumulative residual.  
-    residual_tcs = tcs_baseline(residual, baselines_cs[:n_times_baseline], t_recalculate)                               # lines, gradients. etc for residual 
+    # calculate line of best fit, gradient, line to point distances etc for 
+    # cumulative residual.  
+    residual_tcs = tcs_baseline(
+        residual, baselines_cs[:n_times_baseline], t_recalculate
+        )                               
     del tcs_c_baseline, residual
 
     #2: Calculate time courses/distances etc for the monitoring data
     if ifgs_monitoring is not None:
 
         # do the inversion to fit the monitoring ifgs with the sources    
-        tcs_c_monitoring, d_hat_monitoring, d_resid_monitoring = bss_components_inversion(sources, ifgs_monitoring, 
-                                                                                          cumulative=True, mask = mask)                      # compute cumulative time courses for monitoring interferograms (ie simple inversion to fit each ifg in ifgs_baseline using sources.  )
+        # compute cumulative time courses for monitoring interferograms (ie
+        # simple inversion to fit each ifg in ifgs_baseline using sources.  )
+        products = bss_components_inversion(
+            sources, ifgs_monitoring,  cumulative=True, mask = mask
+            )                      
+        (tcs_c_monitoring, d_hat_monitoring, d_resid_monitoring) = products
+        del products
+        
         # remove the 0s on the first row as this isn't the basleine stage.  
         tcs_c_monitoring = np.delete(tcs_c_monitoring, 0,0)
-        sources_tcs_monitor = tcs_monitoring(tcs_c_monitoring, sources_tcs, baselines_cs)                               
+        sources_tcs_monitor = tcs_monitoring(
+            tcs_c_monitoring, sources_tcs, baselines_cs
+            )                               
     
         #3: and update the residual stuff                                                                            
         # get the cumulative residual for baseline and monitoring (hence _cb)    
-        residual_bm = residual_for_pixels(sources, sources_tcs_monitor, ifgs_all, mask, n_pix_window, residual_type)                               
-        residual_tcs_monitor = tcs_monitoring(residual_bm, residual_tcs, baselines_cs, residual=True)               # lines, gradients. etc for residual 
+        residual_bm = residual_for_pixels(
+            sources, sources_tcs_monitor, ifgs_all, mask, n_pix_window, 
+            residual_type
+            )                               
+        residual_tcs_monitor = tcs_monitoring(
+            residual_bm, residual_tcs, baselines_cs, residual=True
+            )               
     
     # 3: combine the reconsuction and residual for all ifgs
     d_hat = (np.hstack((d_hat_baseline, d_hat_monitoring))).T                                                                           # reconstruction, n_times x n_pixels 
@@ -1068,7 +1093,7 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info,
             mask_sources = pickle.load(f_icasar)
             tcs  = pickle.load(f_icasar)    
             source_residuals = pickle.load(f_icasar)    
-            Iq_sorted = pickle.load(f_icasar)    
+            #Iq_sorted = pickle.load(f_icasar)    
             n_clusters = pickle.load(f_icasar)    
             xy_tsne = pickle.load(f_icasar)                             # not used
             labels_hdbscan = pickle.load(f_icasar)                      # not used
