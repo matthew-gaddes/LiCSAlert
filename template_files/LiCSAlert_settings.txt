@@ -1,5 +1,5 @@
 [LiCSAlert]
-downsample_run = 0.3
+downsample_run = 1.0
 downsample_plot = 0.5
 baseline_end = 20190101
 figure_intermediate = True
