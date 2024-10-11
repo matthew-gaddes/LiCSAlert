@@ -1277,7 +1277,7 @@ def LiCSAlert_epoch_figures(
                  f"04_incremental_residual_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
     plot_1_image(residual_cum, displacement_r2_current['mask'], 
-                 f"05_cumulative_residual_{inc_ifg_date}",
+                 f"05_cumulative_residual_{cum_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
 
     #  save the data that is plotted as png
