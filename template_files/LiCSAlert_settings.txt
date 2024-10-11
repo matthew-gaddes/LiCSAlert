@@ -1,0 +1,26 @@
+[LiCSAlert]
+downsample_run = 0.3
+downsample_plot = 0.5
+baseline_end = 20190101
+figure_intermediate = True
+figure_type = png
+t_recalculate = 40
+inset_ifgs_scaling = 15
+
+[ICASAR]
+n_pca_comp_start = 6
+n_pca_comp_stop = 6
+n_bootstrapped = 200
+n_not_bootstrapped = 0
+HDBSCAN_min_cluster_size = 35
+HDBSCAN_min_samples = 10
+tsne_perplexity = 30
+tsne_early_exaggeration = 12
+ica_tolerance = 0.01
+ica_max_iterations = 150
+ifgs_format = cum
+sica_tica = sica
+
+[LiCSBAS]
+crop_side_length = 20000
+mask_type = nan
