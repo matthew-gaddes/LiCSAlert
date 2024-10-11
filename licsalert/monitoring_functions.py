@@ -394,7 +394,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             write_volcano_status(sources_tcs, residual_tcs, ics_labels, 
                                  volcano_dir / processing_date.date)                                           
 
-            pdb.set_trace()
+            
 
             
         # also plot the ICS and the DEM (done once)

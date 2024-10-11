@@ -911,7 +911,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
 
     ############################### end debug
     
-    pdb.set_trace()
+    
     
     cumulative_r3 *= 0.001                                                                             # licsbas standard is mm, convert to m
     n_im, length, width = cumulative_r3.shape                                                          # time series size, n_im = n_acquisisions
@@ -982,10 +982,10 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     #     ax.set_title(title)
     ############# end 
     
-    out_mask = ~np.all(np.isnan(cumulative_r3), axis=0)
-    f, ax = plt.subplots(1); ax.matshow(out_mask)
+    # out_mask = ~np.all(np.isnan(cumulative_r3), axis=0)
+    # f, ax = plt.subplots(1); ax.matshow(out_mask)
     
-    pdb.set_trace()
+    
     
     # 3.4 and mask the data, same mask at all times
     cumulative_r3_ma = ma.array(cumulative_r3, mask=mask_r3)
