@@ -1,6 +1,6 @@
 not_in_repo/
 licsalert/__pycache__/*
-licsalert/icasar/__pycache__/*
+licsalert/icasar/__pycache__/
 
 001_campi_flegrei_example/ICASAR_results/FastICA_results.pkl
 002_campi_flegrei_example_all_figures/ICASAR_results/FastICA_results.pkl
