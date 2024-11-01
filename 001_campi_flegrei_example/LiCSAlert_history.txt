@@ -861,3 +861,24 @@ Running LiCSAlert for 20210912  (acquisition # 326 of 326) : monitoring date
 [0m[1;32m    306 [1;33m[1;33m[0m[0m
 [0m[1;32m    307 [1;33m            processing_date = licsalert_date_obj(
 [0m
+
+
+
+
+
+LiCSAlert is being run for 001_campi_flegrei_example at 30/10/2024 15:54:45
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+LiCSAlert is opening a LiCSBAS directory.  
+Opening the LiCSBAS unfiltered results.  
+Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(199)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    197 [1;33m            [0mdisplacement_r2[0m[1;33m,[0m [0mtbaseline_info[0m [1;33m=[0m [0mts[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    198 [1;33m            [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m--> 199 [1;33m            [1;32mdel[0m [0mts[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    200 [1;33m[1;33m[0m[0m
+[0m[1;32m    201 [1;33m        [1;31m# 3.3: Data processed with users own approach/software.[0m[1;33m[0m[1;33m[0m[0m
+[0m
+*** KeyError: 'baselines_cs'
+*** KeyError: 'baselines_cs'

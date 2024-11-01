@@ -9,6 +9,25 @@ import pdb
 
 #%%
 
+def daisy_chain_from_acquisitions(acquisitions):
+    """Given a list of acquisiton dates, form the names of the interferograms 
+    that would create a simple daisy chain of ifgs.  
+    Inputs:
+        acquisitions | list | list of acquistiion dates in form YYYYMMDD
+    Returns:
+        daisy_chain | list | names of daisy chain ifgs, in form 
+        YYYYMMDD_YYYYMMDD
+    History:
+        2020/02/16 | MEG | Written
+    """
+    daisy_chain = []
+    n_acqs = len(acquisitions)
+    for i in range(n_acqs-1):
+        daisy_chain.append(f"{acquisitions[i]}_{acquisitions[i+1]}")
+    return daisy_chain
+
+#%%
+
 def create_day_list(d_start, d_stop):
     """
     """
@@ -55,3 +74,21 @@ def day_list_to_baselines(day_list_crop):
 
 #%%
 
+def baseline_from_names(names_list):
+    """Given a list of ifg names in the form YYYYMMDD_YYYYMMDD, find the 
+    temporal baselines in days_elapsed
+    Inputs:
+        names_list | list | in form YYYYMMDD_YYYYMMDD
+    Returns:
+        baselines | list of ints | baselines in days
+    History:
+        2020/02/16 | MEG | Documented 
+    """
+    from datetime import datetime
+            
+    baselines = []
+    for file in names_list:
+        master = datetime.strptime(file.split('_')[-2], '%Y%m%d')   
+        slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')   
+        baselines.append(-1 *(master - slave).days)    
+    return baselines

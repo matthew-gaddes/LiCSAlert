@@ -195,6 +195,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             ts = LiCSBAS_to_LiCSAlert(licsbas_dir, figures=True, n_cols=5,                              
                                       **licsbas_settings)
             displacement_r2, tbaseline_info = ts
+            pdb.set_trace()
             del ts
 
         # 3.3: Data processed with users own approach/software.  
