@@ -32,7 +32,7 @@ from licsalert.licsalert import reconstruct_ts_from_dir
 #%% Example 01: Campi Flegrei, only the final figure.  
 
 
-print(f"\n\n\n\n CHANGED DOWNSAMPLING TO SPEED UP \n\n\n\n\n\n\n")
+
 
 licsalert_settings = {"baseline_end"        : "20170101",                               # end baseline stage at YYYYMMDD, need to be before the last acquisition of LiCSAlert will never monitoring anyhting.  
                       "figure_intermediate" : False,                             # if set to True, a figure is produced for all time steps in the monitoring data, which can be time consuming.  

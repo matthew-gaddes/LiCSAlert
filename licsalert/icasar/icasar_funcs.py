@@ -425,10 +425,14 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
         # check that the number of pixels in an image is correct
         # (often get errors here as data could be loaded after settings were chnaged
         if n_pixels_loaded != np.sum(1-spatial_data['mask']):
-            raise Exception(f"There are {S_hist[0].shape[1]} pixels in the ICASAR sources that have been loaded, but"
-                            f" {np.sum(1-spatial_data['mask'])} pixels in the current mask.  This normally happens when the"
-                            f" FastICA results that are being loaded are from a different set of data.  If not, something "
-                            f" is inconsitent with the mask and the coherent pixels.  Exiting.  ")
+            raise Exception(
+                f"There are {S_hists[0][0].shape[1]} pixels in the ICASAR "
+                "sources that have been loaded, but "
+                f"{np.sum(1-spatial_data['mask'])} pixels in the current mask. "
+                "This normally happens when the FastICA results that are "
+                "being loaded are from a different set of data.  If not, "
+                "something is inconsitent with the mask and the coherent "
+                "pixels.  Exiting.  ")
 
     plot_2d_labels = {'title' : '04_clustering_and_manifold_results',
                       'xlabel' : 'TSNE dimension 1',
