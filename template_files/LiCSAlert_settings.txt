@@ -1,7 +1,7 @@
 [LiCSAlert]
 downsample_run = 1.0
 downsample_plot = 0.5
-baseline_end = 20190101
+baseline_end = 20210101
 figure_intermediate = True
 figure_type = png
 t_recalculate = 40
