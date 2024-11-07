@@ -332,59 +332,42 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     #from pathlib import Path
     import pdb
     
-    from licsalert.aux import col_to_ma, r3_to_r2
+    from licsalert.aux import col_to_ma
     from licsalert.icasar.aux import add_square_plot
     
     
-    def determine_licsbas_outdirs(licsbas_outdir):
-        """ LiCSBAS out dirs change names depending on steps.  Find the name of 
-        the step 01-05 directory, and the step 11-16 direcotry.  
+
+    def rank3_ma_to_rank2(ifgs_r3, consistent_mask = False):
+        """A function to take a time series of interferograms stored as a rank 3 array,
+        and convert it into the ICA(SAR) friendly format of a rank 2 array with ifgs as
+        row vectors, and an associated mask.
+
+        For use with ICA, the mask must be consistent (ie the same pixels are masked throughout the time series).
+
         Inputs:
-            licsbas_outdir | Path | path to LiCSBAS dir.  
-            
-        Returns:
-            LiCSBAS_dirs | dict | contains all, ifgs (step 01-05), and 
-                                    TS (steps 11-16)
-                                    
-        History:
-            2024_10_17 | MEG | Create from script.  
+            ifgs_r3 | r3 masked array | ifgs in rank 3 format
+            consistent_mask | boolean | If True, areas of incoherence are consistent through the whole stack
+                                        If false, a consistent mask will be made.  N.b. this step can remove the number of pixels dramatically.
         """
-               
-        LiCSBAS_dirs = {}
-        LiCSBAS_dirs['all'] = os.listdir(licsbas_outdir)
-        
-        # find the TS directory (steps 11-16)
-        for LiCSBAS_folder in LiCSBAS_dirs['all']:
-            if bool(re.match(re.compile('TS_.'), LiCSBAS_folder)):
-                LiCSBAS_dirs['TS_'] = LiCSBAS_folder
-        
-        # look for the step 01-05 folder.  This is tricky as naming conventions
-        # have changed with COMET dev licbas 
-        for LiCSBAS_folder in LiCSBAS_dirs['all']:                                                                   
-            if 'clip' in LiCSBAS_folder and 'TS_' not in LiCSBAS_folder:
-                    LiCSBAS_dirs['ifgs'] = LiCSBAS_folder
-        
-        # if clipping wasn't done, just look for the multi look dir
-        if 'ifgs' not in LiCSBAS_dirs.keys():                                                                        
-            for LiCSBAS_folder in LiCSBAS_dirs['all']:                                                               
-                if re.match(re.compile('GEOCml.+'), LiCSBAS_folder):                                                    
-                    LiCSBAS_dirs['ifgs'] = LiCSBAS_folder
-        
-        # if clipping and multi looking wasn't done, look for ifg dir
-        if 'ifgs' not in LiCSBAS_dirs.keys():                                                                        
-            for LiCSBAS_folder in LiCSBAS_dirs['all']:                                                               
-                if re.match(re.compile('GEOC'), LiCSBAS_folder):                                                        
-                    LiCSBAS_dirs['ifgs'] = LiCSBAS_folder
-        
-        if ('TS_' not in LiCSBAS_dirs) or ('ifgs' not in LiCSBAS_dirs):
-            raise Exception(f"Unable to find the TS_* and ifgs  directories "
-                            "that contain the LiCSBAS results.  Perhaps the "
-                            "LiCSBAS directories have unusual names? "
-                            " Exiting.  ")
-            
-        return LiCSBAS_dirs
 
+        n_ifgs = ifgs_r3.shape[0]
+        # 1: Deal with masking
+        mask_coh_water = ifgs_r3.mask                                                                                               #get the mask as a rank 3, still boolean
+        if consistent_mask:
+            mask_coh_water_consistent = mask_coh_water[0,]                                                                          # if all ifgs are masked in the same way, just grab the first one
+        else:
+            mask_coh_water_sum = np.sum(mask_coh_water, axis = 0)                                                                   # sum to make an image that shows in how many ifgs each pixel is incoherent
+            mask_coh_water_consistent = np.where(mask_coh_water_sum == 0, np.zeros(mask_coh_water_sum.shape),
+                                                                          np.ones(mask_coh_water_sum.shape)).astype(bool)           # make a mask of pixels that are never incoherent
+        ifgs_r3_consistent = ma.array(ifgs_r3, mask = ma.repeat(mask_coh_water_consistent[np.newaxis,], n_ifgs, axis = 0))          # mask with the new consistent mask
 
+        # 2: Convert from rank 3 to rank 2
+        n_pixs = ma.compressed(ifgs_r3_consistent[0,]).shape[0]                                                        # number of non-masked pixels
+        ifgs_r2 = np.zeros((n_ifgs, n_pixs))
+        for ifg_n, ifg in enumerate(ifgs_r3_consistent):
+            ifgs_r2[ifg_n,:] = ma.compressed(ifg)
+
+        return ifgs_r2, mask_coh_water_consistent
 
 
     def ts_quick_plot(ifgs_r3, title):
@@ -479,17 +462,38 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
         else:
             data = np.fromfile(file, dtype=dtype).byteswap().reshape((length, width))
         return data
-    
 
 
     # -1: Check for common argument errors:
     if not isinstance(LiCSBAS_out_folder, pathlib.PurePath):
-        raise Exception(f"'LiCSBAS_out_folder' must be a pathlib Path, but "
-                        f"instead is a {type(LiCSBAS_out_folder)}. Exiting.  ")
+        raise Exception(f"'LiCSBAS_out_folder' must be a pathlib Path, but instead is a {type(LiCSBAS_out_folder)}. Exiting.  ")
     
     # 0: Work out the names of LiCSBAS folders - not tested exhaustively! 
-    LiCSBAS_dirs = determine_licsbas_outdirs(LiCSBAS_out_folder)
+    LiCSBAS_folders = {}
+    LiCSBAS_folders['all'] = os.listdir(LiCSBAS_out_folder)
+
+    for LiCSBAS_folder in LiCSBAS_folders['all']:                                                                   # 1: Loop though looking for the TS direcotry
+        if bool(re.match(re.compile('TS_.'), LiCSBAS_folder)):                                                      # the timeseries output, which is named depending on mutlitlooking and clipping.  
+            LiCSBAS_folders['TS_'] = LiCSBAS_folder
     
+    for LiCSBAS_folder in LiCSBAS_folders['all']:                                                                   # 2a: Loop though looking for the ifgs directory, which depends on lots of things.  
+        if re.match(re.compile('GEOCml.+clip'), LiCSBAS_folder):                                                    # multilooked and clipped
+                LiCSBAS_folders['ifgs'] = LiCSBAS_folder
+
+    if 'ifgs' not in LiCSBAS_folders.keys():                                                                        # 2b: If we haven't found it already
+        for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               # Loop though looking for the other way the ifgs directory can be called
+            if re.match(re.compile('GEOCml.+'), LiCSBAS_folder):                                                    # or just multilooked 
+                LiCSBAS_folders['ifgs'] = LiCSBAS_folder
+
+    if 'ifgs' not in LiCSBAS_folders.keys():                                                                        # 2c if we haven't found it already
+        for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               # loop through
+            if re.match(re.compile('GEOC'), LiCSBAS_folder):                                                        # neither multilooked or clipped
+                LiCSBAS_folders['ifgs'] = LiCSBAS_folder
+    
+    if ('TS_' not in LiCSBAS_folders) or ('ifgs' not in LiCSBAS_folders):
+        raise Exception(f"Unable to find the TS_* and ifgs  directories that contain the LiCSBAS results.  Perhaps the LiCSBAS directories have unusual names?  Exiting.  ")
+
+
     # 1: Open the h5 file with the incremental deformation in.  
     # displacement_r3 = {}                                                                                        # here each image will 1 x width x height stacked along first axis
     displacement_r2 = {}                                                                                        # here each image will be a row vector 1 x pixels stacked along first axis
@@ -497,18 +501,18 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
 
     if filtered:
         print(f"Opening the LiCSBAS filtered results.  ")
-        cumh5 = h5.File(LiCSBAS_out_folder / LiCSBAS_dirs['TS_'] / 'cum_filt.h5' ,'r')                       # either open the filtered file from LiCSBAS
+        cumh5 = h5.File(LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'cum_filt.h5' ,'r')                       # either open the filtered file from LiCSBAS
     else:
         print(f"Opening the LiCSBAS unfiltered results.  ")
-        cumh5 = h5.File(LiCSBAS_out_folder / LiCSBAS_dirs['TS_'] / 'cum.h5' ,'r')                            # or the non filtered file from LiCSBAS
+        cumh5 = h5.File(LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'cum.h5' ,'r')                            # or the non filtered file from LiCSBAS
     tbaseline_info["acq_dates"] = cumh5['imdates'][()].astype(str).tolist()                                     # get the acquisition dates
     cumulative = cumh5['cum'][()]                                                                               # get cumulative displacements as a rank3 numpy array
     cumulative *= 0.001                                                                                         # LiCSBAS default is mm, convert to m
 
     # 2: Open the parameter file to get the number of pixels in width and height (though this should agree with above)   
     try:
-        width = int(get_param_par(LiCSBAS_out_folder / LiCSBAS_dirs['ifgs'] / 'slc.mli.par', 'range_samples'))
-        length = int(get_param_par(LiCSBAS_out_folder / LiCSBAS_dirs['ifgs'] / 'slc.mli.par', 'azimuth_lines'))
+        width = int(get_param_par(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / 'slc.mli.par', 'range_samples'))
+        length = int(get_param_par(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / 'slc.mli.par', 'azimuth_lines'))
     except:
         print(f"Failed to open the 'slc.mli.par' file, so taking the width and length of the image from the h5 file and trying to continue.  ")
         (_, length, width) = cumulative.shape
@@ -532,14 +536,11 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     
     
     #3: Open the mask and the DEM
-    # the mask is 1 for coherenct pixels, 0 for non-coherent/water, and masked for water
-    mask_licsbas = read_img(
-        LiCSBAS_out_folder / LiCSBAS_dirs['TS_'] / 'results' /  'mask', 
-        length, width)                   
+    mask_licsbas = read_img(LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'results' /  'mask', length, width)                   # this is 1 for coherenct pixels, 0 for non-coherent/water, and masked for water
     mask_licsbas = np.logical_and(mask_licsbas, np.invert(np.isnan(mask_licsbas)))                                          # add any nans to the mask (nans become 0)
     mask_licsbas = np.invert(mask_licsbas)                                                                              # invert so that land is 0 (not masked), and water and incoherent are 1 (masked)
     
-    dem = read_img(LiCSBAS_out_folder / LiCSBAS_dirs['ifgs'] / 'hgt', length, width)
+    dem = read_img(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / 'hgt', length, width)
     mask_dem = np.isnan(dem)
     
     mask_cum = np.isnan(cumulative)                                                                       # get where masked
@@ -571,15 +572,9 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     #     ts_quick_plot(displacement_r3["incremental"], title = 'Incremental displacements')
 
     # mask the images, consistent mask through time.  
-    cum_r3 = ma.array(
-        cumulative, mask=np.repeat(mask[np.newaxis,], cumulative.shape[0], 0)
-        )
+    cum_r3 = ma.array(cumulative, mask=np.repeat(mask[np.newaxis,], cumulative.shape[0], 0))
 
-    products = r3_to_r2(cum_r3)      
-    displacement_r2['cumulative'] = products['ifgs']
-    displacement_r2['mask'] = products['mask'] 
-    del products
-    
+    displacement_r2['cumulative'], displacement_r2['mask'] = rank3_ma_to_rank2(cum_r3)      
     displacement_r2['incremental'] = np.diff(displacement_r2['cumulative'], axis = 0)
 
     # 4: work with the acquisiton dates to produces names of daisy chain ifgs, and baselines
@@ -600,7 +595,7 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     # 6: Get the E N U files (these are the components of the ground to satellite look vector in east north up directions.  )   
     try:
         for component in ['E', 'N', 'U']:
-            look_vector_component = read_img(LiCSBAS_out_folder / LiCSBAS_dirs['ifgs'] / f"{component}.geo", length, width)
+            look_vector_component = read_img(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / f"{component}.geo", length, width)
             displacement_r2[component] = look_vector_component
             # displacement_r3[component] = look_vector_component
     except:
@@ -679,10 +674,12 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
         json_file | path | path to file, including extnesion.  
         crop_side_length | None or int | Possibly crop imakes to square of this
                                         side length in km.  
-        mask_type | str | either 'nan' to mask only pixels that are ever nan, 
-                         or 'licsbas' to mask pixels that are in the licsbas 
+        mask_type | str | either :
+                         'licsbas' to mask pixels that are in the licsbas 
                          mask, and those that ever go to nan.  
-                         or 'nan_variable' to just mask the pixels that are nan
+                         'nan_once' to mask only pixels that are ever nan, 
+                         'nan_always' to 
+                         'nan_variable' to just mask the pixels that are nan
                          in the licsbas data (so the mask varies with time)
 
     Returns:
@@ -792,7 +789,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
         mask_nan = np.any(mask_nan_r3, axis = 0)
        
         # 3.3 combine, masked if True in either.  
-        if mask_type == 'nan':
+        if mask_type == 'nan_once':
             mask = np.logical_or.reduce([mask_water, mask_nan])
             mask_r3 = np.repeat(mask[np.newaxis,], n_im, axis = 0)
             print("Masking the LiCSBAS time series based on pixels that go to nan.")
@@ -811,7 +808,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
             mask_r3 = mask
             
         else:
-            raise Exception(f"'mask_type' must be either 'nan', 'licsbas, or "
+            raise Exception(f"'mask_type' must be either 'nan_once', 'licsbas, or "
                             "'nan_variable, but is {licsbas_mask}.  Exiting.")
             
         ########### debug

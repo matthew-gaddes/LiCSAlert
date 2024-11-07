@@ -23,4 +23,4 @@ sica_tica = sica
 
 [LiCSBAS]
 crop_side_length = 20000
-mask_type = nan
+mask_type = nan_once
