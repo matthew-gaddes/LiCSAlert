@@ -809,7 +809,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
             
         else:
             raise Exception(f"'mask_type' must be either 'nan_once', 'licsbas, or "
-                            "'nan_variable, but is {licsbas_mask}.  Exiting.")
+                            f"'nan_variable, but is {licsbas_mask}.  Exiting.")
             
         ########### debug
         # import matplotlib.pyplot as plt
@@ -1007,8 +1007,8 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     
     
     # 3.4 and mask the data, same mask at all times
-    cumulative_r3_ma = ma.array(cumulative_r3, mask=mask_r3)
-    displacement_r3["cumulative"] = cumulative_r3_ma
+    displacement_r3["cumulative"]  = ma.array(cumulative_r3, mask=mask_r3)
+    
     # difference these to get the incremental ifgs, 
     # should be one less in time dimension than previous.  
     displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], 
@@ -1054,10 +1054,20 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     
     # we can only make the r2 data if the mask doesn't vary with time
     if mask_type != 'nan_variable':
-    
-        output = r3_to_r2(displacement_r3['cumulative'])
-        (displacement_r2['cumulative'], displacement_r2['mask']) = output; del output
-        displacement_r2['incremental'], _ = r3_to_r2(displacement_r3['incremental'])                          
+        
+        # returns a dict of an array of ifgs as row (ifgs) and the mask (mask)
+        r2_data = r3_to_r2(displacement_r3['cumulative'])
+ 
+        # unpack
+        displacement_r2['cumulative'] = r2_data['ifgs']
+        displacement_r2['mask'] = r2_data['mask']
+        del r2_data
+        
+        # same for the incremental, but mask is the same as cumualtive so omit
+        r2_data = r3_to_r2(displacement_r3['incremental'])                          
+        displacement_r2['incremental'] = r2_data['ifgs']
+        del r2_data
+        
         
         return displacement_r2, displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
 
