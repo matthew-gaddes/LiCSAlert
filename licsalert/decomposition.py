@@ -89,14 +89,49 @@ class licsbas_frame():
         the path.  
         """
         from licsalert.data_importing import LiCSBAS_to_LiCSAlert    
+        from licsalert.data_importing import LiCSBAS_json_to_LiCSAlert
         
-        op = LiCSBAS_to_LiCSAlert(
-            self.data_dir, filtered = False,  figures = True,  n_cols=5,
-            crop_pixels = None, mask_type = 'dem',  date_start = None,
-            date_end = None
-            )
-
-        (self.displacement_r2, self.tbaseline_info) = op; del op
+        def has_single_json_file(directory):
+            """ """
+            import os
+            # Get a list of all .json files in the directory
+            json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
+            
+            # Check if there is exactly one .json file
+            json_status = (len(json_files) == 1)
+            
+            if json_status:
+                json_file = json_files[0]
+            else:
+                json_file = None
+            return json_status, json_file
+        
+        
+        # determine the type of intput data
+        json_status, json_file = has_single_json_file(self.data_dir)
+        
+        # import data if it's in a .json file
+        if json_status:        
+            print(f"A single .json file was found in the directory, so "
+                  "LiCSAlert is assuming that the data is in a COMET "
+                  "Volcano Portal .json file")
+            
+            op = LiCSBAS_json_to_LiCSAlert(
+                    self.data_dir / json_file, crop_side_length = 4e3,  
+                    mask_type = 'nan_once'
+                    )
+            
+            (self.displacement_r2, _, self.tbaseline_info, _, _) = op; del op
+            
+        # or if its just a LiCSBAS directory.  
+        else:
+            op = LiCSBAS_to_LiCSAlert(
+                self.data_dir, filtered = False,  figures = True,  n_cols=5,
+                crop_pixels = None, mask_type = 'dem',  date_start = None,
+                date_end = None
+                )
+    
+            (self.displacement_r2, self.tbaseline_info) = op; del op
         
         
     def downsample_data(self, ds_factor):
