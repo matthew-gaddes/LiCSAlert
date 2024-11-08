@@ -452,66 +452,97 @@ def LiCSAlert_figure(
     from licsalert.licsalert import licsalert_date_obj
         
     def calcualte_line_args(n_acqs, t_recalculate):
-        """Lines of best fit are calculated for each time step, but we don't want
-        to plot them all (as they lie on top of each other, mostly).  
-        Therefore, calcaulte the numbers of which to plot so that they don't overlap.  '
-        """
+        """Lines of best fit are calculated for each time step, but we don't 
+        wantto plot them all (as they lie on top of each other, mostly).  
+        Therefore, calcaulte the numbers of which to plot so that they don't 
+        overlap. """
         line_args = []    
         for n_acq in range(n_acqs):
-            if n_acq % t_recalculate == 0 and n_acq != 0:                                   # picn_acq which ones, but have to exclue the 0th one
+            # picn_acq which ones, but have to exclue the 0th one
+            if n_acq % t_recalculate == 0 and n_acq != 0:                                   
                 line_args.append(n_acq-1)
-            if n_acq == (n_acqs-1) and n_acq not in line_args:                              # and always pick the last one
+            # and always pick the last one
+            if n_acq == (n_acqs-1) and n_acq not in line_args:                              
                 line_args.append(n_acq)
         return line_args
     
 
-    def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, baselines_cs, ylabel, 
-                  day0_date, figure_date, dayend_date,   cumulative = False):
-        """ Plot all the ifgs (baseline and monitoring) within the grispec_area,
+    def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, baselines_cs, 
+                  ylabel, day0_date, figure_date, dayend_date, 
+                  cumulative = False):
+        """Plot all the ifgs (baseline and monitoring) within the grispec_area,
         up to the date set by figure_date
         """
         from mpl_toolkits.axes_grid1.inset_locator import inset_axes            
         
         # 1: Create a single wide axes for the inset axes to be plotted on
-        ax_ifgs = plt.Subplot(figure, gridspec_area)                                                # a thin but wide axes for all the thumbnail ifgs along the top to go in
-        fig1.add_subplot(ax_ifgs)                                                                   # add to figure
-        ax_ifgs.set_yticks([])                                                                      # no y ticks
+        ax_ifgs = plt.Subplot(figure, gridspec_area)                                                
+        fig1.add_subplot(ax_ifgs)
+        ax_ifgs.set_yticks([])
         ax_ifgs.set_ylim(bottom = 0, top = 1)
-        ax_ifgs.set_xlim(left = 0, right = dayend_date.day_n)                                                    # set x axis upper limit to be the number of acquisitions in the time series
+        # set x axis upper limit to be the number of acquisitions (so figure
+        # doesn't change size too much as new data added)
+        ax_ifgs.set_xlim(left = 0, right = dayend_date.day_n)                                                    
 
-        xticks_every_3months(ax_ifgs, day0_date.date, baselines_cs, include_tick_labels = False)      # update the ticks (but not labels) to be the same as the time course and residual axis
+        # update the ticks (but not labels) to be the same as the time course 
+        # and residual axis
+        xticks_every_3months(
+            ax_ifgs, day0_date.date, baselines_cs, include_tick_labels = False
+            )      
 
-        for ifg_n, source in enumerate(ifgs[:figure_date.acq_n, :]):                                                         # ifgs are rows, loop through.  Make sure we don't try to iterate through more than we have dates for  
+        # ifgs are rows, loop through.  Make sure we don't try to iterate 
+        # through more than we have dates for  
+        for ifg_n, source in enumerate(ifgs[:figure_date.acq_n, :]):                                                         
             #make the ax for the ifg,  x pos, y pox, x width, y width,
-            iax = ax_ifgs.inset_axes([baselines_cs[ifg_n+1], 0., (dayend_date.day_n/ifg_xpos_scaler), 1.],
-                                     transform=ax_ifgs.transData)      
+            iax = ax_ifgs.inset_axes(
+                [baselines_cs[ifg_n+1], 0.,
+                 (dayend_date.day_n/ifg_xpos_scaler), 1.],
+                transform=ax_ifgs.transData
+                )      
             ifg_plot = iax.matshow(col_to_ma(source, pixel_mask), cmap = cmap)                                       
             iax.set_xticks([])                                                                                               
             iax.set_yticks([])
             
             # the last ifg has colorbar and label of range.  
-            if ifg_n == (figure_date.acq_n -1):                                                                                             
-                cbar_ax = inset_axes(iax, width="7%", height="40%",   loc='lower left',  bbox_to_anchor=(1.05, 0.1, 1, 1),              
-                                     bbox_transform=iax.transAxes,borderpad=0)
+            if ifg_n == (figure_date.acq_n -1): 
+                # make an axes for the colourbar
+                cbar_ax = inset_axes(
+                    iax, width="7%", height="40%",   loc='lower left',  
+                    bbox_to_anchor=(1.05, 0.1, 1, 1),
+                    bbox_transform=iax.transAxes,borderpad=0
+                    )
 
                 cbar = fig1.colorbar(ifg_plot, cax = cbar_ax)                           
                 cbar.set_ticks([np.nanmin(source), np.nanmax(source)])
-                cbar.set_ticklabels([f"{np.nanmin(source):.3} m", f"{np.nanmax(source):.3} m"])
-                cbar_ax.tick_params(labelsize=6)                                                                                         #                                    
-                
-                if cumulative:                                                                                                       # cumulative ifg spans from start to end
+                cbar.set_ticklabels(
+                    [f"{np.nanmin(source):.3} m", f"{np.nanmax(source):.3} m"]
+                    )
+                cbar_ax.tick_params(labelsize=6)
+                # make the label (that shows the date range of the last ifg)
+                if cumulative:                                                                                                       
                     ifg_start_date = day0_date.dt
                 else:
-                    ifg_start_date = day0_date.dt + dt.timedelta(int(baselines_cs[-2]))                                               # but incremental is from previous date
-                ifg_end_date = day0_date.dt + dt.timedelta(int(baselines_cs[-1]))                                                     # to final date
-                cbar_ax.set_title(f"{dt.datetime.strftime(ifg_start_date, '%Y%m%d')}\n"
-                                  f"{dt.datetime.strftime(ifg_end_date, '%Y%m%d')}", fontsize = 6, loc = 'left')
+                    # need to get date of previous acquisition.  
+                    # get the number of days to the acquisition before (which
+                    # the incremental ifg is made to), then add this to the 
+                    # first date to make a date.  
+                    ifg_start_date = (day0_date.dt + 
+                                      dt.timedelta(int(
+                                          baselines_cs[figure_date.acq_n-1]))) 
+                    
+                ifg_end_date = figure_date.dt
+                cbar_ax.set_title(
+                    f"{dt.datetime.strftime(ifg_start_date, '%Y%m%d')}\n"
+                    f"{dt.datetime.strftime(ifg_end_date, '%Y%m%d')}", 
+                    fontsize = 6, loc = 'left'
+                    )
         ax_ifgs.set_ylabel(ylabel, fontsize = 7, labelpad = -1)
         
 
     def colourbar_for_sources(icasar_sources):
-        """ Creat a colourbar for the ICA sources that is centered on 0, and cropped so that each side is equal
-        (i.e. if data lies in range [-1 10], will only go slightly blue, but up to max red, with grey at 0)
+        """ Creat a colourbar for the ICA sources that is centered on 0, and 
+        cropped so that each side is equal (i.e. if data lies in range [-1 10],
+        will only go slightly blue, but up to max red, with grey at 0)
         """
         
         ics_min = np.min(icasar_sources)                                                       # 

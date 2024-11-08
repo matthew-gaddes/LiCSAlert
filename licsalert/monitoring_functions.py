@@ -195,7 +195,6 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             ts = LiCSBAS_to_LiCSAlert(licsbas_dir, figures=True, n_cols=5,                              
                                       **licsbas_settings)
             displacement_r2, tbaseline_info = ts
-            pdb.set_trace()
             del ts
 
         # 3.3: Data processed with users own approach/software.  
@@ -534,21 +533,43 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir,
 
         # if the directory for that volcano doesn't exist, make and fill with template
         if os.path.isdir(licsalert_dir / region / volc_name) == False:                                      
-            initiate_licsalert_volcano(licsalert_dir, region, volc_name, template_file_dir)                 
+            initiate_licsalert_volcano(
+                licsalert_dir, region, volc_name, template_file_dir
+                )
 
         # determine when the .json file was modified, and remove microsecods   
-        licsbas_json_time = datetime.fromtimestamp(os.path.getmtime(licsbas_volc_path))                      
+        licsbas_json_time = datetime.fromtimestamp(
+            os.path.getmtime(licsbas_volc_path)
+            )
         licsbas_json_time = licsbas_json_time.replace(microsecond = 0)                                      
 
         # 
-        f = open(licsalert_dir / region / volc_name / 'licsbas_dates.txt', "r")                             # open the file
-        lines = f.readlines()                                                                               # lines of the file to a list                                                                               
-        licsbas_time_used_by_licsalert = datetime.strptime(lines[-1][:-1],  '%Y-%m-%d %H:%M:%S')                   # last line is the date of the .json file last usedd, -1 at the end as \n (linebreak) counts as one character.   
+        f = open(licsalert_dir / region / volc_name / 'licsbas_dates.txt', "r")
+        lines = f.readlines()
+        if len(lines) == 0:
+            raise Exception(
+                "No lines were found in the licsbas_dates.txt file.  Perhaps"
+                " the tempolate file has not be set correctly?  The default"
+                " file has a first row of  2000-01-01 00:00:00 to ensure that"
+                " LiCSAlert is always run at first (i.e. any LiCSBAS time"
+                " series will be younger than this).  "
+                            )
+        # last line is the date of the .json file last usedd, -1 at the end as 
+        # \n (linebreak) counts as one character.   
+        licsbas_time_used_by_licsalert = datetime.strptime(
+            lines[-1][:-1],  '%Y-%m-%d %H:%M:%S'
+            )                   
         
-        if licsbas_json_time > licsbas_time_used_by_licsalert:                                          # if time from licsbas .json file is after the time of the licsbas .json licsalert recorded as having last used
-            volc_names_to_update.append({'name'   : volc_name,                                          # then volcano will need updating
+        # if time from licsbas .json file is after the time of the licsbas 
+        # .json licsalert recorded as having last used
+        if licsbas_json_time > licsbas_time_used_by_licsalert:                                          
+            # then volcano will need updating
+            volc_names_to_update.append({'name'   : volc_name,                                          
                                          'region' : region})
-        else:                                                                                           # else (ie same age, or maybe the licsbas .json is beforet the time recorded as having been used by licsalert)
+        else:                                                                                           
+            # else (ie same age, or maybe the licsbas .json is beforet the 
+            # time recorded as having been used by licsalert), so no need to 
+            # update
             volc_names_current.append({'name'   : volc_name,                
                                       'region' : region})
 
