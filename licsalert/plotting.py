@@ -12,6 +12,100 @@ import matplotlib.pyplot as plt
 #%%
 
 
+def pngs_to_gif(input_folder, output_file, image_duration = 1000):
+    """A function to conbime a folder of .pngs into one gif.
+    Inputs:
+        input_folder | pathlib Path | the location of the pngs.  
+                        E.g. "output_data".  Must be a pathlib Path
+        output_file  | string | e.g. "output.gif"
+        image_duration | float | the time each png is displayed for in 
+                        milliseconds.  e.g. 0.5
+    Returns:
+        gif
+    History:
+        2018/07/23 | MEG: adapted from a script.
+        2018/12/05 | paths must now be absolute.
+        2020/08/18 | MEG | Update to handle paths formatted using the pathlib 
+                            module.  
+        2021_05_04 | MEG | Update to handle paths better.  
+        2023_09_04 | MEG | Add funtion to make sure all images are the same 
+                            size.  
+        2023_09_09 | MEG | GIF time units have changed in milliseconds in new 
+                            version of imageio - update here.  
+    """
+
+    import imageio
+    import os
+    from PIL import Image
+    import re
+
+    def atoi(text):
+        return int(text) if text.isdigit() else text
+
+    def natural_keys(text):
+        '''
+        alist.sort(key=natural_keys) sorts in human order
+        http://nedbatchelder.com/blog/200712/human_sorting.html
+        (See Toothy's implementation in the comments)
+        '''
+        return [ atoi(c) for c in re.split('(\d+)', text) ]
+    
+    def determine_minimim_image_size(images):
+        """ Iterate along the list of images and find the size of the smallest 
+        image
+        """
+        for image_n, image in enumerate(images):
+            ny, nx, _ = image.shape
+            if image_n == 0:
+                min_y = ny
+                min_x = nx
+            else:
+                if ny < min_y:
+                    min_y = ny
+                if nx < min_x:
+                    min_x = nx
+        return min_y, min_x
+
+           
+    def crop_if_larger(images, min_y, min_x):
+        """ If an image is larger than the minimum, crop it.  
+        """
+        for image_n, image in enumerate(images):
+            ny, nx, _ = image.shape
+            if (ny > min_y) or (nx > min_x):
+                print(f"Resizing image from {ny} to {min_y} in y, and {nx} to {min_x} in x ")
+                images[image_n] = image[:min_y, :min_x, :]
+        return images
+
+    # sort the files into a human order
+    image_names = os.listdir(input_folder)              
+    image_names.sort(key=natural_keys)
+
+    # write the images to the .gif
+    images = []
+    for counter, filename in enumerate(image_names):
+        images.append(imageio.imread(input_folder / filename))
+        print(f"Processed {counter} of {len(image_names)} images.  ")
+    
+    # find the minimum image size
+    min_y, min_x = determine_minimim_image_size(images)
+    # and possibly crop all images to that size 
+    images = crop_if_larger(images, min_y, min_x)
+
+    # for image in images:
+    #     print(image.shape)
+    
+    print('Writing the .gif file...', end = "")
+    imageio.mimsave(
+        output_file, images, format = 'GIF', duration = image_duration,  
+        loop = 1
+        )
+    print('Done!')
+
+
+#%%
+
+
 def offset_volc_lls(volcs, threshold = 0.1, offset = 0.2, attempts = 10,
                     verbose = False):
     """ Given the lis of all volcs, update the lons and lats so that

@@ -472,26 +472,32 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     LiCSBAS_folders = {}
     LiCSBAS_folders['all'] = os.listdir(LiCSBAS_out_folder)
 
-    for LiCSBAS_folder in LiCSBAS_folders['all']:                                                                   # 1: Loop though looking for the TS direcotry
-        if bool(re.match(re.compile('TS_.'), LiCSBAS_folder)):                                                      # the timeseries output, which is named depending on mutlitlooking and clipping.  
+    # 1: Loop though looking for the TS direcotry    
+    for LiCSBAS_folder in LiCSBAS_folders['all']:                                                                   
+        if bool(re.match(re.compile('TS_.'), LiCSBAS_folder)):
             LiCSBAS_folders['TS_'] = LiCSBAS_folder
     
-    for LiCSBAS_folder in LiCSBAS_folders['all']:                                                                   # 2a: Loop though looking for the ifgs directory, which depends on lots of things.  
-        if re.match(re.compile('GEOCml.+clip'), LiCSBAS_folder):                                                    # multilooked and clipped
+    # 2a: Loop though looking for the ifgs directory, 
+    for LiCSBAS_folder in LiCSBAS_folders['all']:                                                                   
+        if re.match(re.compile('GEOCml.+clip'), LiCSBAS_folder):                                                    
                 LiCSBAS_folders['ifgs'] = LiCSBAS_folder
 
-    if 'ifgs' not in LiCSBAS_folders.keys():                                                                        # 2b: If we haven't found it already
-        for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               # Loop though looking for the other way the ifgs directory can be called
-            if re.match(re.compile('GEOCml.+'), LiCSBAS_folder):                                                    # or just multilooked 
+    # 2b: If we haven't found it already
+    if 'ifgs' not in LiCSBAS_folders.keys():                                                                        
+        for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               
+            if re.match(re.compile('GEOCml.+'), LiCSBAS_folder):
                 LiCSBAS_folders['ifgs'] = LiCSBAS_folder
 
-    if 'ifgs' not in LiCSBAS_folders.keys():                                                                        # 2c if we haven't found it already
-        for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               # loop through
-            if re.match(re.compile('GEOC'), LiCSBAS_folder):                                                        # neither multilooked or clipped
+    # 2c if we haven't found it already
+    if 'ifgs' not in LiCSBAS_folders.keys():                                                                        
+        for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               
+            if re.match(re.compile('GEOC'), LiCSBAS_folder):
                 LiCSBAS_folders['ifgs'] = LiCSBAS_folder
     
     if ('TS_' not in LiCSBAS_folders) or ('ifgs' not in LiCSBAS_folders):
-        raise Exception(f"Unable to find the TS_* and ifgs  directories that contain the LiCSBAS results.  Perhaps the LiCSBAS directories have unusual names?  Exiting.  ")
+        raise Exception(f"Unable to find the TS_* and ifgs  directories that "
+                        "contain the LiCSBAS results.  Perhaps the LiCSBAS "
+                        "directories have unusual names?  Exiting.  ")
 
 
     # 1: Open the h5 file with the incremental deformation in.  

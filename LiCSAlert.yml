@@ -17,6 +17,9 @@ dependencies:
   - simplekml=1.3
   - geopy=2.4
 
+  - pillow=9 				# only needed to write gifs 
+  - imageio=2.31			# only needed to write gifs. 
+
   - astropy                               # For LiCSBAS - not always needed.
   - beautifulsoup4
   - gdal
