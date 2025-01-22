@@ -5,35 +5,6 @@ Created on Wed Aug 30 10:28:07 2023
 
 @author: matthew
 
-# initialise something to store:
-
-
-  dim 1: day
-  dim 2; volcano
-  dim 3: which value
-
-  plus: 
-    list of days
-    list of volcano names.  
-
-  # need to get number of days 
-  # need to get number of volcanoes.  
-
-
-# get the region directories.  
-# loop through these.  
-  # get the volcano directories.  
-  # loop through these.  
-
-
-2024 update:
-    
-    jasmin new LiCSAlert version.  
-    list of volcanoes that are public.  
-    copy all from Jasmin
-    
-
-
 """
 
 print("Succesfully started the script.  ")
@@ -98,84 +69,6 @@ def matrix_show(matrix, title=None, ax=None, fig=None, save_path = None, vmin0 =
 
 
 
-def pngs_to_gif(input_folder, output_file, image_duration = 1000):
-    """A function to conbime a folder of .pngs into one gif.
-    Inputs:
-        input_folder | pathlib Path | the location of the pngs.  E.g. "output_data".  Must be a pathlib Path
-        output_file  | string | e.g. "output.gif"
-        image_duration | float | the time each png is displayed for in milliseconds.  e.g. 0.5
-    Returns:
-        gif
-    History:
-        2018/07/23 | MEG: adapted from a script.
-        2018/12/05 | paths must now be absolute.
-        2020/08/18 | MEG | Update to handle paths formatted using the pathlib module.  
-        2021_05_04 | MEG | Update to handle paths better.  
-        2023_09_04 | MEG | Add funtion to make sure all images are the same size.  
-        2023_09_09 | MEG | GIF time units have changed in milliseconds in new version of imageio - update here.  
-    """
-
-    import imageio
-    import os
-    from PIL import Image
-    import re
-
-    def atoi(text):
-        return int(text) if text.isdigit() else text
-
-    def natural_keys(text):
-        '''
-        alist.sort(key=natural_keys) sorts in human order
-        http://nedbatchelder.com/blog/200712/human_sorting.html
-        (See Toothy's implementation in the comments)
-        '''
-        return [ atoi(c) for c in re.split('(\d+)', text) ]
-    
-    def determine_minimim_image_size(images):
-        """ Iterate along the list of images and find the size of the smallest image
-        """
-        for image_n, image in enumerate(images):
-            ny, nx, _ = image.shape
-            if image_n == 0:
-                min_y = ny
-                min_x = nx
-            else:
-                if ny < min_y:
-                    min_y = ny
-                if nx < min_x:
-                    min_x = nx
-        return min_y, min_x
-
-           
-    def crop_if_larger(images, min_y, min_x):
-        """ If an image is larger than the minimum, crop it.  
-        """
-        for image_n, image in enumerate(images):
-            ny, nx, _ = image.shape
-            if (ny > min_y) or (nx > min_x):
-                print(f"Resizing image from {ny} to {min_y} in y, and {nx} to {min_x} in x ")
-                images[image_n] = image[:min_y, :min_x, :]
-        return images
-
-    # sort the files into a human order
-    image_names = os.listdir(input_folder)              # get 
-    image_names.sort(key=natural_keys)                  # sort into the correct (human) order
-
-    # write the images to the .gif
-    images = []
-    for counter, filename in enumerate(image_names):
-        images.append(imageio.imread(input_folder / filename))                                  # input_folder must be a pathlib Path to allow simple extension with /
-        print(f"Processed {counter} of {len(image_names)} images.  ")
-    
-    min_y, min_x = determine_minimim_image_size(images)                             # fnid the size of the minimum image
-    images = crop_if_larger(images, min_y, min_x)                                   # make sure there are none bigger than that.  
-
-    # for image in images:
-    #     print(image.shape)
-    
-    print('Writing the .gif file...', end = "")
-    imageio.mimsave(output_file, images, format = 'GIF', duration = image_duration,  loop = 1)
-    print('Done!')
 
 #%%
 # def find_directories_with_more_than_n_subdirectories(root_dir, n=2):
@@ -210,18 +103,23 @@ def pngs_to_gif(input_folder, output_file, image_duration = 1000):
 
 #%%
 
+from licsalert.jasmin_tools import open_comet_frame_files, volcano_name_to_comet_frames
+from licsalert.jasmin_tools import write_jasmin_download_shell_script
+from licsalert.jasmin_tools import update_volcs_with_data, get_lon_lat_of_volcs
+
 
 from licsalert.status import extract_licsalert_status, get_all_volcano_dirs
-from licsalert.status import find_volcano
+from licsalert.status import find_volcano, get_volc_names_fron_dir_of_frames
 
 from licsalert.temporal import create_day_list
+from licsalert.volcano_portal_tools import get_portal_public_volcanoes
+
 
 from licsalert.plotting import status_fig_one_volc, status_fig_all_volcs
         
 #%% Things to set
 
-
-################## jasmin outputs 2023 (for fringe)
+#%%  ################# jasmin outputs 2023 (for fringe)
 # #licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/09_jasmin_clone_2023_08_30/01_test/")
 # licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/09_jasmin_clone_2023_08_30/02_all/")
 # out_dir = Path("./monitoring_jasmin/one_volc/ale_bagu")
@@ -231,8 +129,7 @@ from licsalert.plotting import status_fig_one_volc, status_fig_all_volcs
 # regions = True
 ################## end jasmin outputs 2023 (for fringe)
 
-
-################## jasmin outputs 2024 (for Cities on Volcanoes)
+#%% ################## jasmin outputs 2024 (for Cities on Volcanoes)
 
 # option 1: volcanoes on public portal  
 # cov_volc_names = ['Antisana',
@@ -257,58 +154,75 @@ from licsalert.plotting import status_fig_one_volc, status_fig_all_volcs
 #                  'Turrialba',
 #                  'Villarrica']
 
-# option 2: Camila deforming volcanoes list
-cov_volc_names = [ # camilla deforming list
-                  "Cordon Caulle",
-                  "Wolf",
-                  "Sabancaya",
-                  "Laguna del Maule",
-                  "Cordon del Azufre",
-                  "Sangay",
-                  "Domuyo",
-                  "Alcedo",
-                  "Mevados de Chillan",
-                  "Cerro Azul",
-                  "Fernandina",
-                  "Sierra Negra",
-                  # below are Visible on portal, def observed, central america
-                  "Masaya",                 
-                  "San Miguel",
-                  "Santa Ana",
-                  "Turrialba"]
+# # option 2: Camila deforming volcanoes list
+# cov_volc_names = [ # camilla deforming list
+#                   "Cordon Caulle",
+#                   "Wolf",
+#                   "Sabancaya",
+#                   "Laguna del Maule",
+#                   "Cordon del Azufre",
+#                   "Sangay",
+#                   "Domuyo",
+#                   "Alcedo",
+#                   "Mevados de Chillan",
+#                   "Cerro Azul",
+#                   "Fernandina",
+#                   "Sierra Negra",
+#                   # below are Visible on portal, def observed, central america
+#                   "Masaya",                 
+#                   "San Miguel",
+#                   "Santa Ana",
+#                   "Turrialba"]
 
 
 
-# ?
+# # ?
+# # licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
+# #                      "06_LiCSAlert/05_jasmin_clones/02_2024_01_19_cov_only")
+
+# # current clone of Jasmin data
 # licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
-#                      "06_LiCSAlert/05_jasmin_clones/02_2024_01_19_cov_only")
+#                       "06_LiCSAlert/05_jasmin_clones/2024_06_11_comet_talk")
 
-# current clone of Jasmin data
-licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
-                      "06_LiCSAlert/05_jasmin_clones/2024_06_11_comet_talk")
-
-# print(f"USING THE TEMPORARY TEST DIRECTORY")
-# licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
-#                       "06_LiCSAlert/05_jasmin_clones/test")
+# # print(f"USING THE TEMPORARY TEST DIRECTORY")
+# # licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
+# #                       "06_LiCSAlert/05_jasmin_clones/test")
 
 
-out_dir = Path("./status_outputs/03_comet")
-# d_start = "20200101"                # LiCSAlert baseline ends at end of 2019?  
-d_start = "20180101"                # LiCSAlert baseline ends at end of 2019?  
-d_stop = "20240621"
-test_volcano = 'sabancaya*'
-regions = True
+# out_dir = Path("./status_outputs/03_comet")
+# # d_start = "20200101"                # LiCSAlert baseline ends at end of 2019?  
+# d_start = "20180101"                # LiCSAlert baseline ends at end of 2019?  
+# d_stop = "20240621"
+# test_volcano = 'sabancaya*'
+# regions = True
 
-# volcs_omit = ["guagua_pichincha_121A_08908_131313",  # no coherence
-#               "planchon-peteroa_018A_12472_131313",  # single pixels of large value
-#               ]
-volcs_omit = []
+# # volcs_omit = ["guagua_pichincha_121A_08908_131313",  # no coherence
+# #               "planchon-peteroa_018A_12472_131313",  # single pixels of large value
+# #               ]
+# volcs_omit = []
 
 ################## end jasmin outputs 2024 (for Cities on Volcanoes)
+#%% ################## jasmin outputs 2024 Chile 
 
+# current clone of Jasmin data
+licsalert_dir = Path(
+    "/home/matthew/university_work/03_automatic_detection_algorithm/"
+    "06_LiCSAlert/05_jasmin_clones/2024_11_14_chile_v2"
+    )
 
+# names of all comet frames.  
+comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
 
-#################  local test volcs (processed with LiCSBAS by me?  )
+out_dir = Path("./status_outputs/04_chile_november_2024")
+d_start = "20210101"                
+d_stop = "20241101"
+#test_volcano = 'sabancaya*'
+regions = False
+volcs_omit = []
+generate_bash_dl_file = True
+################## end jasmin outputs 2024 for Chile
+
+#%%  #################  local test volcs (processed with LiCSBAS by me?  )
 # all_volcs_figs_dir = Path('monitoring_steps_all_volcs_test')
 # licsalert_dir = Path("/home/matthew/university_work/31_from_bright/2023_09_08/01a_LiCSAlert_batch_mode_2/")
 # regions = False
@@ -329,30 +243,20 @@ volcs_omit = []
 ################# end local test volcs            
 
 #%% Step 00: volcano names:
+   
     
-# all volcanoes?
-# portal public from licsas
-# other list
+# use a local directory of licsalert frames
+volc_names = get_volc_names_fron_dir_of_frames(
+    licsalert_dir, regions = regions
+    )
 
-# how to convert volcano name to lon lat of centre.  
 
-# get the names of the COMET portal public volcanoes
-from licsalert.volcano_portal_tools import get_portal_public_volcanoes
-volc_names = get_portal_public_volcanoes()
+# # get the names of the COMET portal public volcanoes
+# volc_names = get_portal_public_volcanoes()
+
 
 
 #%% Step 01: Generate bash file to copy selected data from Jasmin
-
-from licsalert.jasmin_tools import open_comet_frame_files, volcano_name_to_comet_frames
-from licsalert.jasmin_tools import write_jasmin_download_shell_script
-from licsalert.jasmin_tools import update_volcs_with_data, get_lon_lat_of_volcs
-
-comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
-
-
-jasmin_dir = Path('mgaddes@xfer1.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/projects/LiCS/volc-portal/processing_output/licsalert')
-local_dir = Path('./licsalert_sync/')
-bash_sync_fle = "jasmin_sync_script.sh"
 
 # open the info on COMET volcano frames and what region they're in.  
 # region is a key, and each value isa list of comet frames in that region
@@ -360,12 +264,20 @@ comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir
 
 # get the frames for the volcanoes of interest.  
 volcs = volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index)    
-        
-# write a shell script to download the LiCSAlert data from jasmin for those frames.    
-write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
-                                   volcs, exclude_json_gz = True,
-                                   exclude_original_ts = False,
-                                   exclude_fastica = True)
+
+if generate_bash_dl_file:
+    jasmin_dir = Path(
+        "mgaddes@xfer1.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/"
+        "projects/LiCS/volc-portal/processing_output/licsalert"
+        )
+    local_dir = Path('./licsalert_sync/')
+    bash_sync_fle = "jasmin_sync_script.sh"
+    
+
+    # write a shell script to download the LiCSAlert data from jasmin 
+    write_jasmin_download_shell_script(
+        jasmin_dir, local_dir, bash_sync_fle, volcs, exclude_json_gz = True,
+        exclude_original_ts = False, exclude_fastica = True)
 
 
 
@@ -373,6 +285,16 @@ write_jasmin_download_shell_script(jasmin_dir, local_dir, bash_sync_fle,
     
 # run jasmin sync file on FOE-linux (to copy data from jasmin to school server)
 # copy from FOE-linux to local.  
+
+#%% Step 02a: possibly move directories that don't have LiCSAlert results
+# to a different directory
+
+from licsalert.jasmin_tools import move_small_directories
+
+move_small_directories(
+    licsalert_dir, licsalert_dir.parent / "to_delete", n = 6)
+
+pdb.set_trace()
 
 #%% Step 03: Compile licalert status for all frames at all times.  
 

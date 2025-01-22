@@ -212,4 +212,5 @@ LiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
                           licsbas_settings = licsbas_settings)
 
 
-licsalert_results_explorer(outdir / volcano, fig_width = 18)                                                 # use this function to explore the results
+# use this function to explore the results interactively
+licsalert_results_explorer(outdir / volcano, fig_width = 18)                                                 

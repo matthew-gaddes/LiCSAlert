@@ -8,7 +8,162 @@ Created on Fri Oct 20 09:59:48 2023
 
 import pdb
 
+#%%
 
+def check_input_data(displacement_r2, tbaseline_info):
+    """ A function to perform any checks on the input data (e.g. the presence
+    of nans).  
+    
+    Inputs: 
+        displacements_r2 | dict | standard LiCSAlert dict 
+        tbaseline_info | dict | standard LiCSAlert dict 
+        
+    Returns:
+        displacements_r2 | dict | standard LiCSAlert dict 
+        tbaseline_info | dict | standard LiCSAlert dict 
+        
+    History:
+        2025_01_22 | MEG | Written.  
+        
+    """
+    import numpy as np
+    
+    # remove cumualtive from the data as that shouldn't be included
+    try:
+        del displacement_r2['cumulative']                                                                                                                 #  this is not needed and is deleted for safety.
+        print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects "
+              f"only the incremental displacements.  ")
+    except:
+        pass
+    
+    # check for nans 
+    if np.isnan(displacement_r2['incremental']).any():
+        raise Exception(
+            "'displacement_r2['incremental']' (i.e. the displacments "
+            "between each time step) contains nans.  All nans should be "
+            " masked.  Exiting.  "
+            )
+        
+    return displacement_r2, tbaseline_info
+
+#%%
+
+def AlignSAR_to_LiCSAlert(alignsar_dc):
+    """ Open an AlignSAR datacube and format the data ready for use with 
+    LiCSAlert. 
+    """
+
+    import numpy as np    
+    import numpy.ma as ma
+    import h5py as h5
+    from datetime import datetime, timedelta
+    
+    from licsalert.aux import r3_to_r2
+    from licsalert.temporal import daisy_chain_from_acquisitions
+    
+    
+    
+    # initialise
+    displacement_r2 = {}
+    tbaseline_info = {}
+    
+    # Open the .nc (data cube) file 
+    cumh5 = h5.File(alignsar_dc, "r")
+    #print(cumh5.keys())
+    
+    # 1: open the cumualtive displacement
+    cumulative = cumh5['cum_displacement'][:]
+    # debug plot
+    # import matplotlib.pyplot as plt
+    # f, ax = plt.subplots()
+    # ax.matshow(cumulative[-1])
+    
+    # lats need reversing so N up
+    cumulative = np.flip(cumulative, axis = 1)
+    # convert from mm to m
+    cumulative *= 0.001
+    (_, length, width) = cumulative.shape
+
+    # 2: reference time seres - N/A (referenced allready)
+    
+    # 3: Open the mask and DEM
+    # Alignsar is 1 for valid data, 0 for masked
+    # switch to LiCSAlert of 1 for masked, 0 for not.  
+    mask_AS = 1 - np.flipud(cumh5['mask'][:])
+    
+    # also mask any pixels that ever go to nan (1 for masked)
+    mask_cum = np.isnan(cumulative)                                                                       
+    mask_cum = (np.sum(mask_cum, axis = 0) > 0)                                                             
+
+    # combine the masks
+    mask = np.logical_or(mask_AS, mask_cum)
+
+    
+    # debug plot
+    # import matplotlib.pyplot as plt
+    # f, ax = plt.subplots(3); ax[0].matshow(mask_AS); ax[1].matshow(mask_cum)
+    # ax[2].matshow(mask)
+    
+    # apply the mask to the DEM
+    dem = np.flipud(cumh5['DEM'][:])
+    dem_ma = ma.array(dem, mask = mask)
+    displacement_r2['dem'] = dem_ma
+    
+    # 3a apply the mask to the data
+    cum_r3 = ma.array(
+        cumulative, mask=np.repeat(mask[np.newaxis,], cumulative.shape[0], 0)
+        )
+    
+    # convert the data to rank 2
+    r2_data = r3_to_r2(cum_r3)
+    displacement_r2['cumulative'] = r2_data['ifgs']
+    displacement_r2['mask'] = r2_data['mask']
+    del r2_data
+    
+    # also calculate incremental displacements
+    displacement_r2['incremental'] = np.diff(
+        displacement_r2['cumulative'], axis = 0
+        )
+    
+    # 5: get the lons and lats of each pixel in the ifgs
+    # lon and lat are stored as row vectors so expand to LiCSAlert meshgrids.  
+    lons, lats = np.meshgrid(cumh5['lon'][:], cumh5['lat'][:])
+    lats = np.flipud(lats)
+    displacement_r2['lats'] = lats
+    displacement_r2['lons'] = lons
+    
+    # 6 Get ENU look vector info N/A - not available.  
+    
+    # 7 Get the time info
+    # open as array, then convert to list of ints
+    tbaseline_info['baselines_cumulative'] = cumh5['time'][:].astype(float)
+     
+    # calculate the shortest temporal baselines between these.  
+    tbaseline_info['baselines'] = np.diff(
+        tbaseline_info['baselines_cumulative']
+        ).tolist()
+    
+    # get the date of the first acquisition (as a string and a datetime) 
+    acq0_date_str = str(cumh5['time'].attrs['units']).split(' ')[2]
+    acq0_dt = datetime.strptime(acq0_date_str,'%Y-%m-%d')
+    
+    # and the dates of all subsequent acquisitions (as a list of strings)
+    tbaseline_info['acq_dates'] = [
+        (acq0_dt + timedelta(i)).strftime('%Y%m%d') for
+        i in tbaseline_info['baselines_cumulative']
+        ]
+
+    # and also the names of the daisy chain of ifgs.  
+    tbaseline_info['ifg_dates'] = daisy_chain_from_acquisitions(
+        tbaseline_info['acq_dates']
+        )
+    
+    # Debug: test output sizes
+    # for key, value in tbaseline_info.items():
+    #     print(f"{key} : {len(value)}")
+       
+    
+    return displacement_r2, tbaseline_info
 
 #%%
 
@@ -183,28 +338,48 @@ def determine_last_licsalert_date(licsalert_dir):
     Returns:
         final_date_dir | pathlib Path | directory of youngest licsalert output.  
     History:
-        2024_12_04 | MEG | Written
+        20??_??_?? | MEG | Written
+        2024_12_04 | MEG | New and more robust function to get date dirs.  
+        
     """
     from glob import glob
     from pathlib import Path
     
     
+    def filter_valid_dates(directories):
+        """
+        Filters a list of directory names, keeping only those that are valid 
+        dates in the yyyymmdd format.
+        Parameters:
+            directories (list): List of directory names (strings).
+            
+        Returns:
+            list: A list of directory names that are valid dates.
+        """
+        from datetime import datetime
+        valid_dates = []
+        for directory in directories:
+            try:
+                # Attempt to parse the directory name as a date (yyyymmdd)
+                datetime.strptime(Path(directory).parts[-1], "%Y%m%d")
+                valid_dates.append(directory)
+            except ValueError:
+                # If parsing fails, it's not a valid date
+                continue
+        return valid_dates
+    
+    # get all the directories and files in the licsalert dir
     licsalert_items = sorted(glob(str(licsalert_dir / '*')))
-    
-    # remove any items that are not a licsalert data directory.  
-    delete_args = []
-    for item_n, licsalert_item in enumerate(licsalert_items):
-        item_name = Path(licsalert_item).parts[-1]
-        if item_name in ["ICASAR_results", "LiCSAlert_history.txt", "aux_data_figs"]:
-            delete_args.append(item_n)
-    
-    for delete_arg in delete_args[::-1]:
-        del licsalert_items[delete_arg]
+    # get only those that are dates.  
+    licsalert_items = filter_valid_dates(licsalert_items)
         
     if len(licsalert_items) == 0:
-        raise Exception(f"There are no LiCSAlert date directories (of the form YYYYMMDD), so there "
-                        f"are no LiCSAlert results to open.  Exiting.")
-    
+        raise Exception(
+            "There are no LiCSAlert date directories (of the form YYYYMMDD), "
+            "so there are no LiCSAlert results to open.  Exiting."
+            )
+   
+    #get the last date
     final_date_dir = Path(sorted(licsalert_items)[-1])
     
     return final_date_dir
@@ -218,10 +393,18 @@ def open_tcs(final_date_dir):
     Inputs:
         
     Returns:
-        sources_tcs | list of dicts | One item in list for each source, each item contains ['cumulative_tc', 'gradient', 'lines', 'sigma', 'distances', 't_recalculate'])
+        sources_tcs | list of dicts | One item in list for each source, 
+                                      each item contains: 
+                                          ['cumulative_tc', 
+                                           'gradient', 
+                                           'lines', 
+                                           'sigma', 
+                                           'distances', 
+                                           't_recalculate'])
     History:
         2023_10_25 | MEG | Written
-        2024_01_04 | MEG | move functionality that finds youngest direcotyr to new function.  
+        2024_01_04 | MEG | move functionality that finds youngest direcotyr 
+                            to new function.  
     """
     
     import pickle
@@ -232,8 +415,11 @@ def open_tcs(final_date_dir):
             residual_tcs = pickle.load(f)
         f.close()
     except:
-        raise Exception(f"Unable to open the time course information for this date.  Perhaps it's "
-                        f"a baseline date so doesn't have enough information to create the licsalert figure? Exiting  ")
+        raise Exception(
+            "Unable to open the time course information for this date.  "
+            "Perhaps it's a baseline date so doesn't have enough information "
+            "to create the licsalert figure? Exiting  "
+            )
 
     return sources_tcs, residual_tcs
 
@@ -297,15 +483,18 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
                                                 If licsbas, the pixels that licsbas thinks should be masked are masked (ie water + incoherent).  Note that the dem masked is added to the licsbas mask to ensure things are consistent, but there should be no change here (every pixel masked in the DEM is also masked in the licsbas mask)
 
     Outputs:
-        displacment_r3 | dict | Keys: cumulative, incremental.  Stored as masked arrays.  Mask should be consistent through time/interferograms
-                                Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
-                                Also Dem, mask, and  E N U (look vector components in east north up diretcion)
         displacment_r2 | dict | Keys: cumulative, incremental, mask.  Stored as row vectors in arrays.  
                                 Also lons and lats, which are the lons and lats of all pixels in the images (ie rank2, and not column or row vectors)    
                                 Also Dem, mask, and  E N U (look vector components in east north up diretcion)
-        tbaseline_info | dict| imdates : acquisition dates as strings
-                              daisy_chain : names of the daisy chain of ifgs, YYYYMMDD_YYYYMMDD
+        tbaseline_info | dict| acq_dates : acquisition dates as strings
+                                e.g. ['20141231', 20150105',  ]
+                               ifg_dates : strings of the daisy chain of ifgs
+                               e.g. ['20141231_20150105', ]
                               baselines : temporal baselines of incremental ifgs
+                              e.g [6, 6, 6]
+                              baselines_cumulatve : relative to  the first 
+                              acquistion.  i.e. [0, 6, 12, 18)]
+                                      NOTE - not a list, a 1D array of floats!
 
     2019/12/03 | MEG | Written
     2020/01/13 | MEG | Update depreciated use of dataset.value to dataset[()] when working with h5py files from LiCSBAS
@@ -333,41 +522,43 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     import pdb
     
     from licsalert.aux import col_to_ma
+    from licsalert.aux import r3_to_r2
     from licsalert.icasar.aux import add_square_plot
     
     
+    
 
-    def rank3_ma_to_rank2(ifgs_r3, consistent_mask = False):
-        """A function to take a time series of interferograms stored as a rank 3 array,
-        and convert it into the ICA(SAR) friendly format of a rank 2 array with ifgs as
-        row vectors, and an associated mask.
+    # def rank3_ma_to_rank2(ifgs_r3, consistent_mask = False):
+    #     """A function to take a time series of interferograms stored as a rank 3 array,
+    #     and convert it into the ICA(SAR) friendly format of a rank 2 array with ifgs as
+    #     row vectors, and an associated mask.
 
-        For use with ICA, the mask must be consistent (ie the same pixels are masked throughout the time series).
+    #     For use with ICA, the mask must be consistent (ie the same pixels are masked throughout the time series).
 
-        Inputs:
-            ifgs_r3 | r3 masked array | ifgs in rank 3 format
-            consistent_mask | boolean | If True, areas of incoherence are consistent through the whole stack
-                                        If false, a consistent mask will be made.  N.b. this step can remove the number of pixels dramatically.
-        """
+    #     Inputs:
+    #         ifgs_r3 | r3 masked array | ifgs in rank 3 format
+    #         consistent_mask | boolean | If True, areas of incoherence are consistent through the whole stack
+    #                                     If false, a consistent mask will be made.  N.b. this step can remove the number of pixels dramatically.
+    #     """
 
-        n_ifgs = ifgs_r3.shape[0]
-        # 1: Deal with masking
-        mask_coh_water = ifgs_r3.mask                                                                                               #get the mask as a rank 3, still boolean
-        if consistent_mask:
-            mask_coh_water_consistent = mask_coh_water[0,]                                                                          # if all ifgs are masked in the same way, just grab the first one
-        else:
-            mask_coh_water_sum = np.sum(mask_coh_water, axis = 0)                                                                   # sum to make an image that shows in how many ifgs each pixel is incoherent
-            mask_coh_water_consistent = np.where(mask_coh_water_sum == 0, np.zeros(mask_coh_water_sum.shape),
-                                                                          np.ones(mask_coh_water_sum.shape)).astype(bool)           # make a mask of pixels that are never incoherent
-        ifgs_r3_consistent = ma.array(ifgs_r3, mask = ma.repeat(mask_coh_water_consistent[np.newaxis,], n_ifgs, axis = 0))          # mask with the new consistent mask
+    #     n_ifgs = ifgs_r3.shape[0]
+    #     # 1: Deal with masking
+    #     mask_coh_water = ifgs_r3.mask                                                                                               #get the mask as a rank 3, still boolean
+    #     if consistent_mask:
+    #         mask_coh_water_consistent = mask_coh_water[0,]                                                                          # if all ifgs are masked in the same way, just grab the first one
+    #     else:
+    #         mask_coh_water_sum = np.sum(mask_coh_water, axis = 0)                                                                   # sum to make an image that shows in how many ifgs each pixel is incoherent
+    #         mask_coh_water_consistent = np.where(mask_coh_water_sum == 0, np.zeros(mask_coh_water_sum.shape),
+    #                                                                       np.ones(mask_coh_water_sum.shape)).astype(bool)           # make a mask of pixels that are never incoherent
+    #     ifgs_r3_consistent = ma.array(ifgs_r3, mask = ma.repeat(mask_coh_water_consistent[np.newaxis,], n_ifgs, axis = 0))          # mask with the new consistent mask
 
-        # 2: Convert from rank 3 to rank 2
-        n_pixs = ma.compressed(ifgs_r3_consistent[0,]).shape[0]                                                        # number of non-masked pixels
-        ifgs_r2 = np.zeros((n_ifgs, n_pixs))
-        for ifg_n, ifg in enumerate(ifgs_r3_consistent):
-            ifgs_r2[ifg_n,:] = ma.compressed(ifg)
+    #     # 2: Convert from rank 3 to rank 2cum_r3
+    #     n_pixs = ma.compressed(ifgs_r3_consistent[0,]).shape[0]                                                        # number of non-masked pixels
+    #     ifgs_r2 = np.zeros((n_ifgs, n_pixs))
+    #     for ifg_n, ifg in enumerate(ifgs_r3_consistent):
+    #         ifgs_r2[ifg_n,:] = ma.compressed(ifg)
 
-        return ifgs_r2, mask_coh_water_consistent
+    #     return ifgs_r2, mask_coh_water_consistent
 
 
     def ts_quick_plot(ifgs_r3, title):
@@ -390,39 +581,6 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
         for axe in np.ravel(axes)[(n_ifgs):]:                                                                   # delete any unused axes
             axe.set_visible(False)
 
-    def daisy_chain_from_acquisitions(acquisitions):
-        """Given a list of acquisiton dates, form the names of the interferograms that would create a simple daisy chain of ifgs.  
-        Inputs:
-            acquisitions | list | list of acquistiion dates in form YYYYMMDD
-        Returns:
-            daisy_chain | list | names of daisy chain ifgs, in form YYYYMMDD_YYYYMMDD
-        History:
-            2020/02/16 | MEG | Written
-        """
-        daisy_chain = []
-        n_acqs = len(acquisitions)
-        for i in range(n_acqs-1):
-            daisy_chain.append(f"{acquisitions[i]}_{acquisitions[i+1]}")
-        return daisy_chain
-    
-        
-    def baseline_from_names(names_list):
-        """Given a list of ifg names in the form YYYYMMDD_YYYYMMDD, find the temporal baselines in days_elapsed
-        Inputs:
-            names_list | list | in form YYYYMMDD_YYYYMMDD
-        Returns:
-            baselines | list of ints | baselines in days
-        History:
-            2020/02/16 | MEG | Documented 
-        """
-        from datetime import datetime
-                
-        baselines = []
-        for file in names_list:
-            master = datetime.strptime(file.split('_')[-2], '%Y%m%d')   
-            slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')   
-            baselines.append(-1 *(master - slave).days)    
-        return baselines
     
     def create_lon_lat_meshgrids(corner_lon, corner_lat, post_lon, post_lat, ifg):
         """ Return a mesh grid of the longitudes and latitues for each pixels.  Not tested!
@@ -447,7 +605,25 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
          - azimuth_pixel_spacing (m)
          - radar_frequency  (Hz)
         """
-        import subprocess as subp
+        import subprocess as subp        
+    def baseline_from_names(names_list):
+        """Given a list of ifg names in the form YYYYMMDD_YYYYMMDD, find the temporal baselines in days_elapsed
+        Inputs:
+            names_list | list | in form YYYYMMDD_YYYYMMDD
+        Returns:
+            baselines | list of ints | baselines in days
+        History:
+            2020/02/16 | MEG | Documented 
+        """
+        from datetime import datetime
+                
+        baselines = []
+        for file in names_list:
+            master = datetime.strptime(file.split('_')[-2], '%Y%m%d')   
+            slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')   
+            baselines.append(-1 *(master - slave).days)    
+        return baselines
+    
         value = subp.check_output(['grep', field,mlipar]).decode().split()[1].strip()
         return value
     
@@ -476,29 +652,34 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     for LiCSBAS_folder in LiCSBAS_folders['all']:                                                                   
         if bool(re.match(re.compile('TS_.'), LiCSBAS_folder)):
             LiCSBAS_folders['TS_'] = LiCSBAS_folder
-    
-    # 2a: Loop though looking for the ifgs directory, 
-    for LiCSBAS_folder in LiCSBAS_folders['all']:                                                                   
-        if re.match(re.compile('GEOCml.+clip'), LiCSBAS_folder):                                                    
-                LiCSBAS_folders['ifgs'] = LiCSBAS_folder
-
-    # 2b: If we haven't found it already
-    if 'ifgs' not in LiCSBAS_folders.keys():                                                                        
-        for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               
-            if re.match(re.compile('GEOCml.+'), LiCSBAS_folder):
-                LiCSBAS_folders['ifgs'] = LiCSBAS_folder
-
-    # 2c if we haven't found it already
-    if 'ifgs' not in LiCSBAS_folders.keys():                                                                        
-        for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               
-            if re.match(re.compile('GEOC'), LiCSBAS_folder):
-                LiCSBAS_folders['ifgs'] = LiCSBAS_folder
-    
-    if ('TS_' not in LiCSBAS_folders) or ('ifgs' not in LiCSBAS_folders):
-        raise Exception(f"Unable to find the TS_* and ifgs  directories that "
+    # and warn if failed to find it
+    if ('TS_' not in LiCSBAS_folders):
+        raise Exception(f"Unable to find the TS_* directory that "
                         "contain the LiCSBAS results.  Perhaps the LiCSBAS "
                         "directories have unusual names?  Exiting.  ")
+    
+    # # 2a: Loop though looking for the ifgs directory, 
+    # for LiCSBAS_folder in LiCSBAS_folders['all']:                                                                   
+    #     if re.match(re.compile('GEOCml.+clip'), LiCSBAS_folder):                                                    
+    #             LiCSBAS_folders['ifgs'] = LiCSBAS_folder
 
+    # # 2b: If we haven't found it already
+    # if 'ifgs' not in LiCSBAS_folders.keys():                                                                        
+    #     for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               
+    #         if re.match(re.compile('GEOCml.+'), LiCSBAS_folder):
+    #             LiCSBAS_folders['ifgs'] = LiCSBAS_folder
+
+    # # 2c if we haven't found it already
+    # if 'ifgs' not in LiCSBAS_folders.keys():                                                                        
+    #     for LiCSBAS_folder in LiCSBAS_folders['all']:                                                               
+    #         if re.match(re.compile('GEOC'), LiCSBAS_folder):
+    #             LiCSBAS_folders['ifgs'] = LiCSBAS_folder
+    
+    # error message if the directories can't be found
+    # elif ('ifgs' not in LiCSBAS_folders):
+    #     raise Exception(f"Unable to find the ifgs directory that "
+    #                     "contain the LiCSBAS results.  Perhaps the LiCSBAS "
+    #                     "directories have unusual names?  Exiting.  ")
 
     # 1: Open the h5 file with the incremental deformation in.  
     # displacement_r3 = {}                                                                                        # here each image will 1 x width x height stacked along first axis
@@ -511,19 +692,14 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     else:
         print(f"Opening the LiCSBAS unfiltered results.  ")
         cumh5 = h5.File(LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'cum.h5' ,'r')                            # or the non filtered file from LiCSBAS
-    tbaseline_info["acq_dates"] = cumh5['imdates'][()].astype(str).tolist()                                     # get the acquisition dates
+    
     cumulative = cumh5['cum'][()]                                                                               # get cumulative displacements as a rank3 numpy array
     cumulative *= 0.001                                                                                         # LiCSBAS default is mm, convert to m
+    (_, length, width) = cumulative.shape
 
-    # 2: Open the parameter file to get the number of pixels in width and height (though this should agree with above)   
-    try:
-        width = int(get_param_par(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / 'slc.mli.par', 'range_samples'))
-        length = int(get_param_par(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / 'slc.mli.par', 'azimuth_lines'))
-    except:
-        print(f"Failed to open the 'slc.mli.par' file, so taking the width and length of the image from the h5 file and trying to continue.  ")
-        (_, length, width) = cumulative.shape
+    pdb.set_trace()
 
-    # 3: Reference the time series
+    # 2: Reference the time series
     ref_str = cumh5['refarea'][()] 
     if not isinstance(ref_str, str):                                                                           # ref_str is sometimes a string, sometimes not (dependent on LiCSBAS version perhaps? )
         ref_str = ref_str.decode()                                                                             # assume that if not a string, a bytes object that can be decoded.        
@@ -546,11 +722,19 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     mask_licsbas = np.logical_and(mask_licsbas, np.invert(np.isnan(mask_licsbas)))                                          # add any nans to the mask (nans become 0)
     mask_licsbas = np.invert(mask_licsbas)                                                                              # invert so that land is 0 (not masked), and water and incoherent are 1 (masked)
     
-    dem = read_img(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / 'hgt', length, width)
+    
+    # v2
+    dem = read_img(
+        LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'results' / 'hgt', 
+        length, width
+        )
+    
     mask_dem = np.isnan(dem)
     
     mask_cum = np.isnan(cumulative)                                                                       # get where masked
-    mask_cum = (np.sum(mask_cum, axis = 0) > 0)                                                             # sum all the pixels in time (dim 0), and if ever bigger than 0 then must be masked at some point so mask.  
+    # sum all the pixels in time (dim 0), and if ever bigger than 0 then must
+    # be masked at some point so mask.  
+    mask_cum = (np.sum(mask_cum, axis = 0) > 0)                                                             
     
     if mask_type == 'dem':
         mask = np.logical_or(mask_dem, mask_cum)                                                        # if dem, mask water (from DEM), and anything that's nan in cumulative (mask_cum)
@@ -580,14 +764,26 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     # mask the images, consistent mask through time.  
     cum_r3 = ma.array(cumulative, mask=np.repeat(mask[np.newaxis,], cumulative.shape[0], 0))
 
-    displacement_r2['cumulative'], displacement_r2['mask'] = rank3_ma_to_rank2(cum_r3)      
-    displacement_r2['incremental'] = np.diff(displacement_r2['cumulative'], axis = 0)
+    r2_data = r3_to_r2(cum_r3)
+    displacement_r2['cumulative'] = r2_data['ifgs']
+    displacement_r2['mask'] = r2_data['mask']
+
+    displacement_r2['incremental'] = np.diff(
+        displacement_r2['cumulative'], axis = 0
+        )
 
     # 4: work with the acquisiton dates to produces names of daisy chain ifgs, and baselines
-    tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(tbaseline_info["acq_dates"])
-    tbaseline_info["baselines"] = baseline_from_names(tbaseline_info["ifg_dates"])
+    tbaseline_info["acq_dates"] = cumh5['imdates'][()].astype(str).tolist()                                     # get the acquisition dates
+    tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(
+        tbaseline_info["acq_dates"]
+        )
+    tbaseline_info["baselines"] = baseline_from_names(
+        tbaseline_info["ifg_dates"]
+        )
     # calculate the cumulative baselines from the baselines, ensure 0 at start.  
-    tbaseline_info["baselines_cumulative"] = np.concatenate((np.zeros((1)), np.cumsum(tbaseline_info["baselines"])), axis = 0)                                                            
+    tbaseline_info["baselines_cumulative"] = np.concatenate(
+        (np.zeros((1)), np.cumsum(tbaseline_info["baselines"])), axis = 0
+        )
     
     # 5: get the lons and lats of each pixel in the ifgs
     geocode_info = create_lon_lat_meshgrids(cumh5['corner_lon'][()], cumh5['corner_lat'][()], 
@@ -601,7 +797,13 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     # 6: Get the E N U files (these are the components of the ground to satellite look vector in east north up directions.  )   
     try:
         for component in ['E', 'N', 'U']:
-            look_vector_component = read_img(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / f"{component}.geo", length, width)
+            # old version
+            # look_vector_component = read_img(LiCSBAS_out_folder / LiCSBAS_folders['ifgs'] / f"{component}.geo", length, width)
+            # new version
+            look_vector_component = read_img(
+                (LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'results' /
+                 f"{component}.geo", length, width)
+                )
             displacement_r2[component] = look_vector_component
             # displacement_r3[component] = look_vector_component
     except:
@@ -652,22 +854,9 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
                                 tbaseline_info)
     
     displacement_r2, tbaseline_info = data
-    
-    
-    
-    
-
-    # if return_r3:
-    #     if ref_area:
-    #         return displacement_r3, displacement_r2, tbaseline_info, ref_xy
-    #     else:
-    #         return displacement_r3, displacement_r2, tbaseline_info
-    # else:
-        
+          
     return displacement_r2, tbaseline_info
-        # if ref_area:
-        #     return displacement_r2, tbaseline_info, ref_xy
-        # else:
+
             
 
 

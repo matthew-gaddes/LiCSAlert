@@ -66,6 +66,14 @@ def determine_abs_max_pixel(cumulative_r3, cumulative_r2):
     def_max = ma.max(cumulative_r3)
     def_min = ma.min(cumulative_r3)
     
+    # debug plot
+    # import matplotlib.pyplot as plt
+    # f, ax = plt.subplots()
+    # ax.matshow(cumulative_r3[-1])
+    
+    # f, ax = plt.subplots()
+    # ax.matshow(cumulative_r2)
+    
     if def_max > np.abs(def_min):
         t, y, x = np.unravel_index(ma.argmax(cumulative_r3), cumulative_r3.shape)
         col_r2 = np.argwhere(cumulative_r2 == def_max)[0,-1]
@@ -396,11 +404,27 @@ def add_square_plot(x_start, x_stop, y_start, y_stop, ax, colour = 'k'):
 def find_nearest_date(given_date, date_list):
     """  Given a list of dates in the form yyyymmdd and a date in the form
     yyyymmdd, find the date nearest to the given one.  
+    
+    History:
+        2024_XX_XX | MEG | Written
+        2025_01_22 | MEG | Making naming clearer. 
     """
     from datetime import datetime
-    given_datetime = datetime.strptime(given_date, '%Y%m%d')
-    date_list = [datetime.strptime(date, '%Y%m%d') for date in date_list]
-    time_diffs = [abs(given_datetime - date) for date in date_list]
+    
+    # convert all dates to tdatetimes.  
+    given_date_dt = datetime.strptime(given_date, '%Y%m%d')
+    date_list_dt = [datetime.strptime(date, '%Y%m%d') for date in date_list]
+    
+    # check that it's not before the first date
+    if given_date_dt < date_list_dt[0]:
+        raise Exception(
+            "WARNING: the chosen date (assumed to be the end of the "
+            "baseline stage) is before the first date of the time series.  "
+            "It must be set to part way though the time series"
+            )
+              
+    # find the nearest
+    time_diffs = [abs(given_date_dt - date) for date in date_list_dt]
     nearest_date_index = time_diffs.index(min(time_diffs))
 
-    return date_list[nearest_date_index].strftime('%Y%m%d')
+    return date_list_dt[nearest_date_index].strftime('%Y%m%d')

@@ -10,7 +10,8 @@ import pdb
 #%%
 
 def LiCSAlert_monitoring_mode(outdir, region, volcano,                                              
-                              licsbas_dir = None, licsbas_jasmin_dir = None, data_as_arg = None,    
+                              licsbas_dir = None, licsbas_jasmin_dir = None, 
+                              data_as_arg = None, alignsar_dc = None,
                               licsalert_settings = None, icasar_settings = None, 
                               licsbas_settings = None, licsalert_pkg_dir = None):                   
     """The main function for running LiCSAlert is monitoring mode.  It was designed to work with LiCSAR interferograms, but could be used with 
@@ -88,8 +89,11 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         
 
     import licsalert
-    from licsalert.data_importing import LiCSBAS_to_LiCSAlert, LiCSBAS_json_to_LiCSAlert
+    from licsalert.data_importing import LiCSBAS_to_LiCSAlert
+    from licsalert.data_importing import LiCSBAS_json_to_LiCSAlert
+    from licsalert.data_importing import AlignSAR_to_LiCSAlert
     from licsalert.data_importing import check_required_args
+    from licsalert.data_importing import check_input_data
     from licsalert.data_exporting import save_licsalert_aux_data
     from licsalert.licsalert import LiCSAlert_preprocessing, LiCSAlert#, shorten_LiCSAlert_data
     from licsalert.licsalert import write_volcano_status, load_or_create_ICASAR_results
@@ -172,12 +176,16 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     # remaining two ways to pass data to function.  
     else:
         # check user has provided inputs.  
-        check_required_args(licsalert_settings, ['t_recalculate', 'baseline_end', 
-                             'figure_intermediate',  'figure_type', 'downsample_run', 
-                             'downsample_plot', 'inset_ifgs_scaling'],
-                            'licsalert_settings')
-        check_required_args(icasar_settings, ['n_pca_comp_start', 'n_pca_comp_stop'],
-                            'icasar_settings')
+        check_required_args(
+            licsalert_settings, ['t_recalculate', 'baseline_end', 
+                                 'figure_intermediate',  'figure_type', 
+                                 'downsample_run',  'downsample_plot', 
+                                 'inset_ifgs_scaling'], 'licsalert_settings'
+            )
+        check_required_args(
+            icasar_settings, ['n_pca_comp_start', 'n_pca_comp_stop'],
+            'icasar_settings'
+            )
 
         # 3.2: As a LiCSBAS direcotry
         if licsbas_dir is not None:
@@ -197,6 +205,13 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             displacement_r2, tbaseline_info = ts
             del ts
 
+        elif alignsar_dc is not None:
+            print(f"LiCSAlert is opening a an AlignSAR data cube.  ")
+            
+            ts = AlignSAR_to_LiCSAlert(alignsar_dc, )
+            displacement_r2, tbaseline_info = ts
+            
+
         # 3.3: Data processed with users own approach/software.  
         else:
             print(f"LiCSAlert is using data that was passed to the function as an argument  ")
@@ -211,13 +226,15 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
                 
     # however data is used, these two arguments must agree.  
     icasar_settings['figures'] = licsalert_settings['figure_type']   
-            
-    try:
-        del displacement_r2['cumulative']                                                                                                                 #  this is not needed and is deleted for safety.
-        print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects "
-              f"only the incremental displacements.  ")
-    except:
-        pass
+        
+
+    # Check data that has been ingested.  
+    displacement_r2, tbaseline_info = check_input_data(
+        displacement_r2, tbaseline_info
+        )
+    
+    
+
 
     # check for the unusual case that there are fewer pixels than pca_comps 
     # requested
@@ -227,6 +244,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     #         raise Exception(
     #             "There are fewer pixels "
     #             "{displacement_r2['incremental'].shape[1]} than ")
+
 
     # mixtures_mc and means contains the daisy chain of ifgs mean centered either 
     # in space or time, depending on whther sica or tica
@@ -278,7 +296,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         (icasar_sources, icasar_mask, ics_labels) = outputs; del outputs
 
         # 4b: Deal with changes to the mask of pixels 
-        licsbas_mask = displacement_r2['mask']                                                                                                                              # make a copy of the licsbas mask before it gets overwritten with the new combined mask
+        licsbas_mask = displacement_r2['mask']                                                                                                                            
         # find the set of pixels in both data.  
         outputs  = update_mask_sources_ifgs(
             icasar_mask, icasar_sources, displacement_r2['mask'], 

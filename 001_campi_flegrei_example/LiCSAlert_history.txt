@@ -882,3 +882,61 @@ Succesfully referenced the LiCSBAS time series using the pixel/area selected by 
 [0m
 *** KeyError: 'baselines_cs'
 *** KeyError: 'baselines_cs'
+
+
+
+
+
+LiCSAlert is being run for 001_campi_flegrei_example at 22/01/2025 10:48:18
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+LiCSAlert is opening a LiCSBAS directory.  
+Opening the LiCSBAS unfiltered results.  
+Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
+Failed to open the E N U files (look vector components), but trying to continue anyway.
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(231)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    229 [1;33m    [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    230 [1;33m[1;33m[0m[0m
+[0m[1;32m--> 231 [1;33m    [1;32mtry[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    232 [1;33m        [1;32mdel[0m [0mdisplacement_r2[0m[1;33m[[0m[1;34m'cumulative'[0m[1;33m][0m                                                                                                                 [1;31m#  this is not needed and is deleted for safety.[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    233 [1;33m        print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects "
+[0m
+*** NameError: name 'acq0_dt' is not defined
+[4;33mReloaded modules[24m: licsalert, licsalert.plotting, licsalert.licsalert, licsalert.data_exporting, licsalert.downsample_ifgs, licsalert.icasar, licsalert.icasar.aux, licsalert.monitoring_functions, licsalert.data_importing, licsalert.aux[0m
+
+
+
+
+
+LiCSAlert is being run for 001_campi_flegrei_example at 22/01/2025 12:40:35
+
+
+
+
+LiCSAlert is being run for 001_campi_flegrei_example at 22/01/2025 12:40:35
+
+All the required arguments were found in the dictionary.  All the required arguments were found in the dictionary.  
+
+All the required arguments were found in the dictionary.  All the required arguments were found in the dictionary.  
+
+All the required arguments were found in the dictionary.  All the required arguments were found in the dictionary.  
+
+LiCSAlert is opening a LiCSBAS directory.  LiCSAlert is opening a LiCSBAS directory.  
+
+Opening the LiCSBAS unfiltered results.  Opening the LiCSBAS unfiltered results.  
+
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/data_importing.py[0m(658)[0;36mLiCSBAS_to_LiCSAlert[1;34m()[0m
+[1;32m    656 [1;33m[1;33m[0m[0m
+[0m[1;32m    657 [1;33m    [1;31m# 2: Reference the time series[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m--> 658 [1;33m    [0mref_str[0m [1;33m=[0m [0mcumh5[0m[1;33m[[0m[1;34m'refarea'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[1;33m)[0m[1;33m][0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    659 [1;33m    [1;32mif[0m [1;32mnot[0m [0misinstance[0m[1;33m([0m[0mref_str[0m[1;33m,[0m [0mstr[0m[1;33m)[0m[1;33m:[0m                                                                           [1;31m# ref_str is sometimes a string, sometimes not (dependent on LiCSBAS version perhaps? )[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    660 [1;33m        [0mref_str[0m [1;33m=[0m [0mref_str[0m[1;33m.[0m[0mdecode[0m[1;33m([0m[1;33m)[0m                                                                             [1;31m# assume that if not a string, a bytes object that can be decoded.[0m[1;33m[0m[1;33m[0m[0m
+[0m> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/data_importing.py[0m(658)[0;36mLiCSBAS_to_LiCSAlert[1;34m()[0m
+[1;32m    656 [1;33m[1;33m[0m[0m
+[0m[1;32m    657 [1;33m    [1;31m# 2: Reference the time series[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m--> 658 [1;33m    [0mref_str[0m [1;33m=[0m [0mcumh5[0m[1;33m[[0m[1;34m'refarea'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[1;33m)[0m[1;33m][0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    659 [1;33m    [1;32mif[0m [1;32mnot[0m [0misinstance[0m[1;33m([0m[0mref_str[0m[1;33m,[0m [0mstr[0m[1;33m)[0m[1;33m:[0m                                                                           [1;31m# ref_str is sometimes a string, sometimes not (dependent on LiCSBAS version perhaps? )[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    660 [1;33m        [0mref_str[0m [1;33m=[0m [0mref_str[0m[1;33m.[0m[0mdecode[0m[1;33m([0m[1;33m)[0m                                                                             [1;31m# assume that if not a string, a bytes object that can be decoded.[0m[1;33m[0m[1;33m[0m[0m
+[0m
+

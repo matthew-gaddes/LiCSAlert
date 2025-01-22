@@ -270,11 +270,21 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
     # -0:  Create all interferograms, create the arary of mixtures (X), and mean centre
     if spatial:
         print(f"Creating all possible variations of the time series (incremental/daisy chain, cumulative, and all possible).  ")        # we allrady have the daisy chain ifgs.  
-        ifgs_all_r2, ifg_dates_all = create_all_ifgs(spatial_data['ifgs_dc'], spatial_data['ifg_dates_dc'], max_n_all_ifgs)             # create all ifgs, even if we don't use them.  
-        ifgs_cum_r2, ifg_dates_cum = create_cumulative_ifgs(spatial_data['ifgs_dc'], spatial_data['ifg_dates_dc'])                      # create the cumulative ifgs, even if we don't use them
-        ifgs_dc = ifg_timeseries(spatial_data['ifgs_dc'], spatial_data['ifg_dates_dc'])                                                 # create a class (an ifg_timeseries) using the daisy chain ifgs
-        ifgs_all = ifg_timeseries(ifgs_all_r2, ifg_dates_all)                                                                           # create a class (an ifg_timeseries) using all possible ifgs
-        ifgs_cum = ifg_timeseries(ifgs_cum_r2, ifg_dates_cum)                                                                           # create a class (an ifg_timeseries) using the cumualtive ifgs.  
+        ifgs_all_r2, ifg_dates_all = create_all_ifgs(
+            spatial_data['ifgs_dc'], spatial_data['ifg_dates_dc'], 
+            max_n_all_ifgs
+            )
+        ifgs_cum_r2, ifg_dates_cum = create_cumulative_ifgs(
+            spatial_data['ifgs_dc'], spatial_data['ifg_dates_dc']
+            )                      
+        # create a class (an ifg_timeseries) using the daisy chain ifgs
+        ifgs_dc = ifg_timeseries(
+            spatial_data['ifgs_dc'], spatial_data['ifg_dates_dc']
+            )                                                 
+        # create a class (an ifg_timeseries) using all possible ifgs
+        ifgs_all = ifg_timeseries(ifgs_all_r2, ifg_dates_all)                                                                           
+        # create a class (an ifg_timeseries) using the cumualtive ifgs.  
+        ifgs_cum = ifg_timeseries(ifgs_cum_r2, ifg_dates_cum)                                                                           
         del ifgs_all_r2, ifg_dates_all, ifgs_cum_r2, ifg_dates_cum
         
         if sica_tica == 'sica':

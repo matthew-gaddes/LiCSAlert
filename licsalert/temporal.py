@@ -34,8 +34,8 @@ def create_day_list(d_start, d_stop):
     from datetime import datetime, timedelta
     import numpy as np
     
-    dstart = datetime.strptime(d_start, '%Y%m%d')                              # 
-    dstop = datetime.strptime(d_stop, '%Y%m%d')                                # 
+    dstart = datetime.strptime(d_start, '%Y%m%d')
+    dstop = datetime.strptime(d_stop, '%Y%m%d')
     
     acq_dates = [dstart]
     dcurrent = acq_dates[-1]
@@ -56,7 +56,8 @@ def create_day_list(d_start, d_stop):
 
 
 def day_list_to_baselines(day_list_crop):
-    """ Given a list of datetimes, get the temporal baselines relative to the first one.  
+    """ Given a list of datetimes, get the temporal baselines relative to the 
+    first one.  
     Inputs:
         day_list_crop | list of datetimes | 
     Returns:

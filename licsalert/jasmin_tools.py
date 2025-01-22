@@ -9,6 +9,48 @@ import pdb
 from glob import glob
 from pathlib import Path
 
+
+#%%
+
+
+
+
+def move_small_directories(indir, outdir, n):
+    """
+    Move subdirectories with fewer than `n` items to `outdir`.
+    
+    This is useful when working with Jasmin licsalert dirs that will only 
+    have a few products if LiCSAlert failed, compared to one with hundreds
+    if it ran succesfully.  
+    
+    Parameters:
+        indir (str): The path to the main directory containing subdirectories.
+        outdir (str): The path to the output directory.
+        n (int): The minimum number of items a subdirectory must have to remain.
+    """
+    import os
+    import shutil
+    
+    # Ensure the output directory exists
+    os.makedirs(outdir, exist_ok=True)
+
+    # Iterate through all subdirectories in the main directory
+    for subdir in os.listdir(indir):
+        subdir_path = os.path.join(indir, subdir)
+
+        # Check if it's a directory
+        if os.path.isdir(subdir_path):
+            # Count items in the subdirectory
+            item_count = len(os.listdir(subdir_path))
+            
+            # Move the directory if it has fewer than `n` items
+            if item_count < n:
+                print(f"Moving {subdir_path} to {outdir}")
+                shutil.move(subdir_path, outdir)
+
+
+
+
 #%%
 
 
@@ -36,14 +78,17 @@ def get_lon_lat_of_volcs(volcs):
         for frame in volc.frame_status:
             try:
                 # open the time series 
-                displacement_r2, tbaseline_info, aux_data = open_aux_data(Path(frame))
+                displacement_r2, tbaseline_info, aux_data = open_aux_data(
+                    Path(frame)
+                    )
                 # get the shape of the images
                 ny, nx = displacement_r2['lons'].shape
                 # get the lon and lat of the centre pixel
                 lons.append(displacement_r2['lons'][int(ny/2), int(nx/2)])
                 lats.append(displacement_r2['lats'][int(ny/2), int(nx/2)])
             except:
-                pass
+                print("Failed to open the lon and lat for "
+                      f"{Path(frame).parts[-1]} but continuing anyway.  ")
                 
         # average across the frames for that volcano
         if (len(lons) > 0) and (len(lats) > 0):
@@ -64,14 +109,15 @@ def update_volcs_with_data(volcs, volc_frame_dirs, volc_frame_names,
     
     Inputs:
         volcs | list | one item for each volcano
-        volc_frame_dirs | list | each item is path to directory of licsalert results
+        volc_frame_dirs | list | each item is path to directory of licsalert 
+                                results
         volc_frame_names | list | names of frames in above list.  Must be the 
                                 same length
                                 
     Returns:
-        volcs | list | one item for each volcano, volcanoes with no data removed.  
-                        frame_status attribute now has path to data, if it exists
-                        and NA if it doesn't 
+        volcs | list | one item for each volcano, volcanoes with no data 
+                        removed.  frame_status attribute now has path to data,
+                        if it exists and NA if it doesn't 
                         
     History:
         2024_06_12 | MEG | Written

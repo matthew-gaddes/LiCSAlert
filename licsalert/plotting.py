@@ -383,6 +383,7 @@ def licsalert_status_map(volcs, outdir, day_list, sig_max = 10,
             ax.coastlines()
         
             scatter_objects = []
+            # loop through each volcano to plot it as a point on the map.
             for volc_n, volc in enumerate(volcs):
         
                 dayn_index = volc.combined_status['dates'].index(day)
@@ -402,6 +403,10 @@ def licsalert_status_map(volcs, outdir, day_list, sig_max = 10,
                     ax.plot([volc.lon_lat_offset[0], volc.lon_lat[0]],
                             [volc.lon_lat_offset[1], volc.lon_lat[1]],
                             c = 'k',  transform=ccrs.PlateCarree())
+                else:
+                    print(f"{volc.name} could not be plotted as at least one"
+                          f" of the lons or lats are nan (they are "
+                          f"{volc.lon_lat}.  Trying to continue.  ")
                 
             
             #colorbar

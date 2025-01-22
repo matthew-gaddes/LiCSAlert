@@ -308,9 +308,11 @@ def create_all_ifgs(ifgs_r2, ifg_dates, max_n_all_ifgs = 1000):
         n_ifgs_all_total += network_dict['n_ifgs_all']                                                          # add to the running total of the total number of ifgs
            
     #3: determine if we can make all ifgs, or if we need to make only some of them.  
-    if n_ifgs_all_total < max_n_all_ifgs:                                                               # if we can just make all ifgs, 
+    # if we can just make all ifgs, 
+    if n_ifgs_all_total < max_n_all_ifgs:                                                               
         ifgs_all_r2, dates_all_r1 = create_all_possible_ifgs(networks)
         
+    # else, just make some of them.  
     else:    
         ifgs_all_r2 = []                                                                                                # list with entry for each entwork
         dates_all_r1 = []                                                                                               # list for all networks

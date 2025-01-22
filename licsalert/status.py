@@ -10,6 +10,44 @@ import pdb
 
 #%%
 
+def get_volc_names_fron_dir_of_frames(licsalert_dir, regions = False):
+    """ Given a directory of lics volcano frames (possibly organised 
+    into regions), get the names of the volcanoes present.  
+    e.g. if there's volcano_156D_12345_123456 and volcano_149A_12345_123456',
+    it will return ['volcano']
+    
+    Inputs:
+        licsalert_dir | pathlib Path | location of licbas (or licsalert) 
+                                        volcano frames.  
+        regions | boolean | If true, the above directories are organised into 
+                            regions.  
+            
+    Returns:
+        volc_names | list | human readable volcano names.  e.g.:
+                            ['corcovado', 'huequi', 'callaqui']
+                            
+    History:
+        2024_11_15 | MEG | Written.  
+    """
+    
+    volc_frame_paths, volc_frame_names = get_all_volcano_dirs(
+        licsalert_dir,  regions = regions
+        )
+    
+    
+    volc_names = []
+    
+    for volc_frame_name in volc_frame_names:
+        camel_name = volc_frame_name[:-18]
+        # remove underscores
+        human_name = camel_name.replace('_', ' ')
+        volc_names.append(human_name)
+        
+    # remove duplicates
+    volc_names = list(set(volc_names))
+    
+    return volc_names
+        
 
 
 #%%
@@ -138,21 +176,7 @@ def extract_licsalert_status(volcs, day_list):
             
         volc.combined_status = combined_status
                 
-
-            
-            
-
-            
-            
-            
-                
-        
-        
-    
-
-    
-
-                
+  
 
 
 
@@ -233,7 +257,7 @@ def get_all_volcano_dirs(licsalert_dir, omits = None, regions = True):
     
     
     # get the paths to each frame licsalert resykts
-    volc_frames = []
+    volc_frame_paths = []
     # make a list to iterate through, which depends on if there are regions.  
     if regions:
         licsalert_dirs = sorted(glob(str(licsalert_dir / '*')))
@@ -259,10 +283,10 @@ def get_all_volcano_dirs(licsalert_dir, omits = None, regions = True):
 
             # if licsalert ran for this volcano frame, add it to the list            
             if licsalert_success:
-                volc_frames.append(volc_dir)
+                volc_frame_paths.append(volc_dir)
                 
     
-    if len(volc_frames) == 0:
+    if len(volc_frame_paths) == 0:
         raise Exception(f"No licsalert directories were found for any volcanoes.  "
                         f"Perhaps 'licsalert_dir' is set incorrectly?  It is "
                         f"currently set to: {licsalert_dir} \n"
@@ -271,18 +295,18 @@ def get_all_volcano_dirs(licsalert_dir, omits = None, regions = True):
     # possibly remove some volcanoes
     if omits is not None:
         for omit in omits:
-            for volc_frame in volc_frames:
+            for volc_frame in volc_frame_paths:
                 # get the frame name from the full path
                 if Path(volc_frame).parts[-1] == omit:
                     # and remove it in the omit list
-                    volc_frames.remove(volc_frame)
+                    volc_frame_paths.remove(volc_frame)
         
     # get just the volcano name
-    volc_names = []
-    for volc_frame in volc_frames:
-        volc_names.append(Path(volc_frame).parts[-1])
+    volc_frame_names = []
+    for volc_frame in volc_frame_paths:
+        volc_frame_names.append(Path(volc_frame).parts[-1])
         
-    return volc_frames, volc_names
+    return volc_frame_paths, volc_frame_names
 
 
     
