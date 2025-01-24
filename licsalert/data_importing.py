@@ -521,65 +521,10 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     #from pathlib import Path
     import pdb
     
-    from licsalert.aux import col_to_ma
-    from licsalert.aux import r3_to_r2
+    from licsalert.aux import col_to_ma, r3_to_r2
+    from licsalert.temporal import daisy_chain_from_acquisitions
+    from licsalert.temporal import baseline_from_names
     from licsalert.icasar.aux import add_square_plot
-    
-    
-    
-
-    # def rank3_ma_to_rank2(ifgs_r3, consistent_mask = False):
-    #     """A function to take a time series of interferograms stored as a rank 3 array,
-    #     and convert it into the ICA(SAR) friendly format of a rank 2 array with ifgs as
-    #     row vectors, and an associated mask.
-
-    #     For use with ICA, the mask must be consistent (ie the same pixels are masked throughout the time series).
-
-    #     Inputs:
-    #         ifgs_r3 | r3 masked array | ifgs in rank 3 format
-    #         consistent_mask | boolean | If True, areas of incoherence are consistent through the whole stack
-    #                                     If false, a consistent mask will be made.  N.b. this step can remove the number of pixels dramatically.
-    #     """
-
-    #     n_ifgs = ifgs_r3.shape[0]
-    #     # 1: Deal with masking
-    #     mask_coh_water = ifgs_r3.mask                                                                                               #get the mask as a rank 3, still boolean
-    #     if consistent_mask:
-    #         mask_coh_water_consistent = mask_coh_water[0,]                                                                          # if all ifgs are masked in the same way, just grab the first one
-    #     else:
-    #         mask_coh_water_sum = np.sum(mask_coh_water, axis = 0)                                                                   # sum to make an image that shows in how many ifgs each pixel is incoherent
-    #         mask_coh_water_consistent = np.where(mask_coh_water_sum == 0, np.zeros(mask_coh_water_sum.shape),
-    #                                                                       np.ones(mask_coh_water_sum.shape)).astype(bool)           # make a mask of pixels that are never incoherent
-    #     ifgs_r3_consistent = ma.array(ifgs_r3, mask = ma.repeat(mask_coh_water_consistent[np.newaxis,], n_ifgs, axis = 0))          # mask with the new consistent mask
-
-    #     # 2: Convert from rank 3 to rank 2cum_r3
-    #     n_pixs = ma.compressed(ifgs_r3_consistent[0,]).shape[0]                                                        # number of non-masked pixels
-    #     ifgs_r2 = np.zeros((n_ifgs, n_pixs))
-    #     for ifg_n, ifg in enumerate(ifgs_r3_consistent):
-    #         ifgs_r2[ifg_n,:] = ma.compressed(ifg)
-
-    #     return ifgs_r2, mask_coh_water_consistent
-
-
-    def ts_quick_plot(ifgs_r3, title):
-        """
-        A quick function to plot a rank 3 array of ifgs.
-        Inputs:
-            title | string | title
-        """
-        n_ifgs = ifgs_r3.shape[0]
-        n_rows = int(np.ceil(n_ifgs / n_cols))
-        fig1, axes = plt.subplots(n_rows,n_cols)
-        fig1.suptitle(title)
-        for n_ifg in range(n_ifgs):
-            ax=np.ravel(axes)[n_ifg]                                                                            # get axes on it own
-            matrixPlt = ax.imshow(ifgs_r3[n_ifg,],interpolation='none', aspect='equal')                         # plot the ifg
-            ax.set_xticks([])
-            ax.set_yticks([])
-            fig1.colorbar(matrixPlt,ax=ax)                                                                       
-            ax.set_title(f'Ifg: {n_ifg}')
-        for axe in np.ravel(axes)[(n_ifgs):]:                                                                   # delete any unused axes
-            axe.set_visible(False)
 
     
     def create_lon_lat_meshgrids(corner_lon, corner_lat, post_lon, post_lat, ifg):
@@ -606,26 +551,8 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
          - radar_frequency  (Hz)
         """
         import subprocess as subp        
-    def baseline_from_names(names_list):
-        """Given a list of ifg names in the form YYYYMMDD_YYYYMMDD, find the temporal baselines in days_elapsed
-        Inputs:
-            names_list | list | in form YYYYMMDD_YYYYMMDD
-        Returns:
-            baselines | list of ints | baselines in days
-        History:
-            2020/02/16 | MEG | Documented 
-        """
-        from datetime import datetime
-                
-        baselines = []
-        for file in names_list:
-            master = datetime.strptime(file.split('_')[-2], '%Y%m%d')   
-            slave = datetime.strptime(file.split('_')[-1][:8], '%Y%m%d')   
-            baselines.append(-1 *(master - slave).days)    
-        return baselines
-    
-        value = subp.check_output(['grep', field,mlipar]).decode().split()[1].strip()
-        return value
+
+
     
         
     def read_img(file, length, width, dtype=np.float32, endian='little'):
@@ -697,7 +624,7 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     cumulative *= 0.001                                                                                         # LiCSBAS default is mm, convert to m
     (_, length, width) = cumulative.shape
 
-    pdb.set_trace()
+    # pdb.set_trace()
 
     # 2: Reference the time series
     ref_str = cumh5['refarea'][()] 
