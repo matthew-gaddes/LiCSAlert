@@ -10,6 +10,138 @@ import pdb
 
 #%%
 
+def import_insar_data(
+        volcano_dir, region, licsalert_settings, icasar_settings, 
+        licsbas_settings,
+        licsbas_jasmin_dir = None, licsbas_dir = None, alignsar_dc = None,
+        data_as_arg = None
+        ):
+    """
+    
+    """
+    
+    # 3: Open the the input data, which can be in various formats (3 so far), 
+    #    And and input settings for that type of data
+    
+    # 3.1: a JASMIN dir and associated text file of settings.  
+    if licsbas_jasmin_dir is not None:
+        # read various settings from the volcano's config file
+        outputs = read_config_file(volcano_dir / "LiCSAlert_settings.txt")                                          
+        if region is None:
+            raise Exception(f"The 'region' argument is missing (it is "
+                            "currently 'None').  Exiting.  ")
+        
+        (licsalert_settings, icasar_settings, licsbas_settings) = outputs
+        del outputs
+        
+        
+        print(f"LiCSAlert is opening a JASMIN COMET Volcano Portal timeseries"
+              " json file.  ")
+        products = LiCSBAS_json_to_LiCSAlert(
+            licsbas_jasmin_dir / region / f"{volcano}.json",
+            licsbas_settings['crop_side_length'], 
+            licsbas_settings['mask_type']
+            )          
+        
+        (displacement_r2, _, tbaseline_info, ref_xy, 
+          licsbas_json_creation_time) = products
+        
+        
+        # #pdb.set_trace()
+        # ############################# Begin debug of imported data
+        # from licsalert.aux import col_to_ma
+        # import matplotlib.pyplot as plt   
+        # plt.switch_backend('qt5agg')
+        # f, ax = plt.subplots(1); ax.matshow(displacement_r2['mask'])
+        # f, ax = plt.subplots(1); ax.matshow(
+        #     col_to_ma(displacement_r2['cumulative'][-1,],
+        #                 displacement_r2['mask']))
+        
+        
+        # # write the data to a file
+        # import pickle
+        # with open('extracted_data.pkl', "wb") as f:
+        #     pickle.dump(displacement_r2, f)
+        #     pickle.dump(tbaseline_info, f)
+        # ############################# end debug
+        
+        
+        # append licsbas .json file date to list of file dates used 
+        # (in the text file for each volano)
+        append_licsbas_date_to_file(outdir, region, volcano, 
+                                    licsbas_json_creation_time)                                                        
+        # delete for safety
+        del licsbas_json_creation_time                                                                                                                  
+    
+        
+
+    # remaining two ways to pass data to function.  
+    else:
+        # check user has provided inputs.  
+        check_required_args(
+            licsalert_settings, ['t_recalculate', 'baseline_end', 
+                                  'figure_intermediate',  'figure_type', 
+                                  'downsample_run',  'downsample_plot', 
+                                  'inset_ifgs_scaling'], 'licsalert_settings'
+            )    
+    
+        check_required_args(
+            icasar_settings, ['n_pca_comp_start', 'n_pca_comp_stop'],
+            'icasar_settings'
+            )
+
+        # 3.2: As a LiCSBAS direcotry
+        if licsbas_dir is not None:
+            # check licsbas_settings are provided.  
+            check_required_args(licsbas_settings, ['mask_type', 'filtered'],
+                                'licsbas_settings')
+            print(f"LiCSAlert is opening a LiCSBAS directory.  ")
+            # if there are no licsbas settings, set them to the default.  
+            if licsbas_settings == None:
+                licsbas_settings = {"filtered"              : False,
+                                    "date_start"            : None,
+                                    "date_end"              : None,
+                                    'mask_type'             : 'licsbas',
+                                    'crop_pixels'           : None}
+            ts = LiCSBAS_to_LiCSAlert(licsbas_dir, figures=True, n_cols=5,                              
+                                      **licsbas_settings)
+            displacement_r2, tbaseline_info = ts
+            del ts
+
+        elif alignsar_dc is not None:
+            print(f"LiCSAlert is opening a an AlignSAR data cube.  ")
+            
+            ts = AlignSAR_to_LiCSAlert(alignsar_dc, )
+            displacement_r2, tbaseline_info = ts
+            
+
+        # 3.3: Data processed with users own approach/software.  
+        else:
+            print(f"LiCSAlert is using data that was passed to the function as an argument  ")
+            displacement_r2 = data_as_arg['displacement_r2']
+            tbaseline_info = data_as_arg["tbaseline_info"]
+            if licsbas_settings is not None:
+                print(f"'licsbas_settings' can only be provided if a "
+                      f"licsbas_dir is provided as the input data.  As data "
+                      f"is being passed to LiCSAlert in a different way, "
+                      f"licsbas_settings will be removed.  ")
+                del licsbas_settings
+                
+    # however data is used, these two arguments must agree.  
+    icasar_settings['figures'] = licsalert_settings['figure_type']   
+        
+
+    # Check data that has been ingested.  
+    displacement_r2, tbaseline_info = check_input_data(
+        displacement_r2, tbaseline_info
+        )
+    
+    
+    return displacement_r2, tbaseline_info
+    
+
+#%%
+
 def check_input_data(displacement_r2, tbaseline_info):
     """ A function to perform any checks on the input data (e.g. the presence
     of nans).  

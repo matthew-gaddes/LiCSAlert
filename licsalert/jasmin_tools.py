@@ -275,15 +275,17 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
 
 
 #%%
-def write_jasmin_download_shell_script(jasmin_dir, local_dir, out_file,
-                                       volcs, exclude_json_gz =True,
-                                       exclude_original_ts = True,
-                                       exclude_fastica = True):
+def write_jasmin_download_shell_script(
+        jasmin_dir, local_dir, out_file,volcs, 
+        exclude_json_gz =True,exclude_original_ts = True,
+        exclude_ICASAR_data = True,
+        exclude_epoch_images = True, exclude_epoch_data = True, 
+        ):
     """ Given a dictionary of volcano frames, create a shell script to download
     the LiCSAlert directories for each one.  
     Inputs:
         jasmin_dir | Path | path to licsalert products on Jasmin, including server.  
-                            e.g. 'mgaddes@xfer1.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/
+                            e.g. 'mgaddes@xfer-vm-01.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/
                             projects/LiCS/volc-portal/processing_output/licsalert'
                             
         local_dir | Path | directory that shell script will sync into
@@ -296,14 +298,19 @@ def write_jasmin_download_shell_script(jasmin_dir, local_dir, out_file,
         exclude_original_ts | Boolean | if True, aux_data_figs/original_ts_data.pkl
                                         is not added to the download script for
                                         each frame.  
-        exclude_fastica | Boolean | if True, ICASAR_results/FastICA_results.pkl
-                                    is not added to the download script for each
-                                    frame
+        exclude_ICASAR_data | Boolean | if True, ICASAR_results/FastICA_results.pkl
+                                        and ICASAR_results.pkl and pca_results.pkl
+                                        are not transferred.  
+        exclude_epoch_iamges | Boolean | If True, the 01.. 02.. images
+                                        for each epoch are not transferred.  
+        exclude_epoch_data | Boolean | If True, the two .pkl files for 
+                                        each epoch are not transferred.  
         
     Returns:
         shell script
     History:
         2023_01_19 | MEG | Written.  
+        2025_02_13 | MEG | Add ability to exclude more files. 
     """
 
     # this exluces the directory of json files for each licsalert date, or doesn't
@@ -319,12 +326,30 @@ def write_jasmin_download_shell_script(jasmin_dir, local_dir, out_file,
     else:
         original_ts = ""
         
-    if exclude_fastica:
-        fastica = "--exclude 'FastICA_results.pkl'"
+    if exclude_ICASAR_data:
+        icasar_data = ("--exclude 'FastICA_results.pkl' "
+                       "--exclude 'ICASAR_results.pkl' "
+                       "--exclude 'pca_results.pkl'"                       
+                       )
     else:
-        fastica = ""
+        icasar_data = ""
+        
+    if exclude_epoch_images:
+        epoch_images = "--exclude '0*_*.png' --exclude 'mask_status.png'"
+    else:
+        epoch_images = ""
+        
+    if exclude_epoch_data:
+        epoch_data = ("--exclude 'epoch_images_data.pkl'"  
+                     " --exclude 'time_course_info.pkl'")
+    else:
+        epoch_data = ""
+        
     
-    json_section = f"{json_gz} {original_ts} {fastica}"
+    
+    json_section = (
+        f"{json_gz} {original_ts} {icasar_data} {epoch_images} {epoch_data}"
+        )
     
     with open(out_file, "w") as script_file:
         # Write shebang (optional, depends on your use case)

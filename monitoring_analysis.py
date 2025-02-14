@@ -204,16 +204,36 @@ from licsalert.plotting import status_fig_one_volc, status_fig_all_volcs
 ################## end jasmin outputs 2024 (for Cities on Volcanoes)
 #%% ################## jasmin outputs 2024 Chile 
 
+# # current clone of Jasmin data
+# licsalert_dir = Path(
+#     "/home/matthew/university_work/03_automatic_detection_algorithm/"
+#     "06_LiCSAlert/05_jasmin_clones/2024_11_14_chile_v2"
+#     )
+
+# # names of all comet frames.  
+# comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
+
+# out_dir = Path("./status_outputs/04_chile_november_2024")
+# d_start = "20210101"                
+# d_stop = "20241101"
+# #test_volcano = 'sabancaya*'
+# regions = False
+# volcs_omit = []
+# generate_bash_dl_file = True
+# ################## end jasmin outputs 2024 for Chile
+
+#%% ################## 10 years of Sentinel paper (2025_02_12)
+
 # current clone of Jasmin data
-licsalert_dir = Path(
-    "/home/matthew/university_work/03_automatic_detection_algorithm/"
-    "06_LiCSAlert/05_jasmin_clones/2024_11_14_chile_v2"
-    )
+# licsalert_dir = Path(
+#     "/home/matthew/university_work/03_automatic_detection_algorithm/"
+#     "06_LiCSAlert/05_jasmin_clones/2024_11_14_chile_v2"
+#     )
 
 # names of all comet frames.  
 comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
 
-out_dir = Path("./status_outputs/04_chile_november_2024")
+#out_dir = Path("./status_outputs/04_chile_november_2024")
 d_start = "20210101"                
 d_stop = "20241101"
 #test_volcano = 'sabancaya*'
@@ -221,6 +241,7 @@ regions = False
 volcs_omit = []
 generate_bash_dl_file = True
 ################## end jasmin outputs 2024 for Chile
+
 
 #%%  #################  local test volcs (processed with LiCSBAS by me?  )
 # all_volcs_figs_dir = Path('monitoring_steps_all_volcs_test')
@@ -244,30 +265,57 @@ generate_bash_dl_file = True
 
 #%% Step 00: volcano names:
    
+try:
     
-# use a local directory of licsalert frames
-volc_names = get_volc_names_fron_dir_of_frames(
-    licsalert_dir, regions = regions
-    )
+    volc_names = get_volc_names_fron_dir_of_frames(
+        licsalert_dir, regions = regions
+        )
+    
+    print(
+        "Succesfully created a list of volcanoes (volc_names) from a "
+        "licsalert directory.  Continuing.  "
+        )
+except:
+    print(
+        "Failed to get the volcano names from a licsalert directory.  Perhaps "
+        "this is the first time this has been run?  You could manually "
+        "provide a list of volc_names, but for now we'll try to generate "
+        "one from the volcanoes that are visible on the COMET volcano portal"
+        )
 
+    try:
+        # get the names of the COMET portal public volcanoes
+        volc_names = get_portal_public_volcanoes()
+        print(
+            "Succesfully generated a list of volcanoes that are visible "
+            "publicly on the COMET volcano portal.  Continuing.  "
+            )
+    except:
+        print(
+            "Failed to generate a list of volcanoes from the COMET volcano "
+            "portal.  Exiting.  ")
 
-# # get the names of the COMET portal public volcanoes
-# volc_names = get_portal_public_volcanoes()
-
-
-
-#%% Step 01: Generate bash file to copy selected data from Jasmin
 
 # open the info on COMET volcano frames and what region they're in.  
 # region is a key, and each value isa list of comet frames in that region
 comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir)
 
-# get the frames for the volcanoes of interest.  
+# convert volc_names to volcs, which is a list of comet_volcano objects
+# output is jasmin_sync_script.sh
 volcs = volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index)    
+
+# tidy up.  
+del volc_names
+
+
+
+#%% Step 01: Generate bash file to copy selected data from Jasmin
+
+
 
 if generate_bash_dl_file:
     jasmin_dir = Path(
-        "mgaddes@xfer1.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/"
+        "mgaddes@xfer-vm-03.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/"
         "projects/LiCS/volc-portal/processing_output/licsalert"
         )
     local_dir = Path('./licsalert_sync/')
@@ -277,7 +325,12 @@ if generate_bash_dl_file:
     # write a shell script to download the LiCSAlert data from jasmin 
     write_jasmin_download_shell_script(
         jasmin_dir, local_dir, bash_sync_fle, volcs, exclude_json_gz = True,
-        exclude_original_ts = False, exclude_fastica = True)
+        exclude_original_ts = False, exclude_ICASAR_data = True,
+        exclude_epoch_images = True, exclude_epoch_data = True)
+
+
+
+pdb.set_trace()
 
 
 
