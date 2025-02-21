@@ -10,6 +10,66 @@ import pdb
 
 #%%
 
+def update_mask(displacement_r2, mask_new):
+    """ Given masked data, apply a new mask to it
+    Lons and Lats are not masked arrays, so are not changed.  
+    The DEM is a masked array, so is changed.  
+    """
+    
+    from copy import deepcopy
+    import numpy as np
+    import numpy.ma as ma
+    
+    from licsalert.aux import r2_to_r3, r3_to_r2
+    
+    displacement_r2_new = deepcopy(displacement_r2)
+    
+    mask_combined = np.logical_or(
+        displacement_r2['mask'], mask_new
+        )
+
+    # debug plot of the two masks
+    # import matplotlib.pyplot as plt
+    # f, axes = plt.subplots(1,3)
+    # axes[0].matshow(displacement_r2['mask'])
+    # axes[1].matshow(mask_new)
+    # axes[2].matshow(mask_combined)
+    
+    # convert data to r3
+    inc_r3 = r2_to_r3(
+        displacement_r2['incremental'], displacement_r2['mask']
+        )
+    
+    n_ifgs = inc_r3.shape[0]
+    
+    # apply the mask to the data
+    inc_r3_new_mask = ma.array(
+        inc_r3, mask=np.repeat(
+            mask_combined[np.newaxis,], n_ifgs, 0
+            )
+        )
+                    
+    # convert the data to rank 2 and add to new dict
+    r2_data = r3_to_r2(inc_r3_new_mask)
+    displacement_r2_new['incremental'] = r2_data['ifgs']
+    displacement_r2_new['mask'] = r2_data['mask']
+    
+    # also mask the DEM.  
+    # displacement_r2_new['dem']  = ma.array(
+    #     displacement_r2['dem'], mask = mask_combined
+    #     )
+    displacement_r2_new['dem'].mask =  mask_combined
+
+
+    # debug plot
+    # f, axes = plt.subplots(1,2)
+    # axes[0].matshow(inc_r3[-1,])
+    # axes[1].matshow(inc_r3_new_mask[-1,])
+    
+    return displacement_r2_new
+
+#%%
+
 def get_licsalert_date_dirs(parent_dir):
     """Get the paths to only the LiCSAlert date directories
     (i.e. not the ones like ICASAR_results)

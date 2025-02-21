@@ -53,7 +53,8 @@ def get_volc_names_fron_dir_of_frames(licsalert_dir, regions = False):
 #%%
 
 def extract_licsalert_status(volcs, day_list):
-    """ For every volcano that we do licsalert for, extract the 2 status values for all possible times.  
+    """ For every volcano that we do licsalert for, extract the 2 status 
+    values for all possible times.  
     Inputs:
         volc_dirs | list of paths as strings | 
         day_list | list of datetimes | consecutive days.  
@@ -115,6 +116,10 @@ def extract_licsalert_status(volcs, day_list):
         # and the frames of that volcano (only the ones with data though)
         volc.status = {}
         for frame_n, frame_path in enumerate(volc.frame_status):
+            
+            if volc.name == 'wolf':
+                pdb.set_trace()
+            
             # check that there is data for that frame
             if frame_path != 'NA':
                 print(f"Creating the LiCSAlert status for frame {volc.frames[frame_n]}")
@@ -126,6 +131,9 @@ def extract_licsalert_status(volcs, day_list):
                 # loop through all licsalert dates
                 for date_dir in get_licsalert_date_dirs(frame_path):
                     # and get the licsalert status for that date
+                    
+
+                    
                     try:
                         licsalert_date = datetime.strptime(Path(date_dir).parts[-1], '%Y%m%d')
                         day_n = day_list.index(licsalert_date)

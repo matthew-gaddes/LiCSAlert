@@ -868,13 +868,26 @@ def shorten_LiCSAlert_data(displacement_r2, n_end, n_start=0, verbose=False):
 
 
 
-def write_volcano_status(sources_tcs_baseline, residual_tcs_baseline, ics_labels, txt_out_dir):
-    """ For each time step, write a 2 line text file that contains the number of sigmas from the line of best fit that the 
-    deformation source is (change in existing deformation) and that the residual is (new deformation).  
+def write_volcano_status(
+        processing_date, sources_tcs_baseline, residual_tcs_baseline, 
+        ics_labels, txt_out_dir
+        ):
+    """ For each time step, write a 2 line text file that contains the number 
+    of sigmas from the line of best fit that the deformation source is 
+    (change in existing deformation) and that the residual is (new 
+                                                               deformation).  
     Inputs:
+        processing_date | LiCSAlert date | 
         sources_tcs_baseline | list of dicts | from the licsalert function
         residual_tcs_baseline | list of dicts | from the licsalert function
-        ics_labels | dict | something like this: {'source_names': ['deformation', 'topo_cor_APS', 'turbulent_APS'], 'labels': array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])}
+        ics_labels | dict | something like this: {'source_names':
+                                                  ['deformation', 
+                                                   'topo_cor_APS', 
+                                                   'turbulent_APS'], 
+                                                  'labels': 
+                                                      array([[1., 0., 0.], 
+                                                             [0., 1., 0.], 
+                                                             [0., 0., 1.]])}
         txt_out_dir | Path | pathlib Path to write file to.  
         
     Returns:
@@ -882,20 +895,32 @@ def write_volcano_status(sources_tcs_baseline, residual_tcs_baseline, ics_labels
         
     History:
         2023_04_04 | MEG | Written
+        2025_02_21 | MEG | Fix bug that baseline used final value from 
+                            monitoring
     """
     import numpy as np
+
+    # extract which acquisition number we are working with.      
+    acq_n = processing_date.acq_n
     
     # calculate change in def status
-    def_col_n = ics_labels['source_names'].index('deformation')                                     # get which column of the one hot encoding related to deformation
-    def_ic_n = np.argwhere(ics_labels['labels'][:, def_col_n] == 1)[0][0]                           # look in that column to find which source number (row) has 1 (ie is positive)
-    def_n_sigmas = sources_tcs_baseline[def_ic_n]['distances'][-1]                                      # get the last distance (n sigmas from the line of best fit) for the dformation source
+    # get which column of the one hot encoding related to deformation
+    def_col_n = ics_labels['source_names'].index('deformation')                                     
     
-    # calculate new def status
-    new_n_sigmas = residual_tcs_baseline[0]['distances'][-1]                                      # get the last distance (n sigmas from the line of best fit) for the residual (there is only one residual so index with 0)
+    # look in that column to find which source number (row) has 1 (ie 
+    # is positive)
+    def_ic_n = np.argwhere(ics_labels['labels'][:, def_col_n] == 1)[0][0]                           
     
+    # extract the n_sigmas for existing deformation (as we know def_ic_n)
+    def_n_sigmas = sources_tcs_baseline[def_ic_n]['distances'][acq_n] 
+    
+    # extract the n_sigmas for new deformation (which comes from residual)
+    new_n_sigmas = residual_tcs_baseline[0]['distances'][acq_n]                                      
+    
+    # write output, existing deformation first, new second.  
     with open(txt_out_dir / 'volcano_status.txt', 'w') as f:
-        f.write(f"{def_n_sigmas[0]}\n")                                             # sigma for existing deformation
-        f.write(f"{new_n_sigmas[0]}\n")                                             # sigma for new deformaiton
+        f.write(f"{def_n_sigmas[0]}\n")                                             
+        f.write(f"{new_n_sigmas[0]}\n")                                             
 
 
 #%%

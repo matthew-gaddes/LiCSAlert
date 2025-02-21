@@ -11,14 +11,43 @@ import pdb
 #%%
 
 def import_insar_data(
-        volcano_dir, region, licsalert_settings, icasar_settings, 
+        volcano, volcano_dir, region, licsalert_settings, icasar_settings, 
         licsbas_settings,
         licsbas_jasmin_dir = None, licsbas_dir = None, alignsar_dc = None,
         data_as_arg = None
         ):
     """
+    Open InSAR data for LiCSAlert.  Data can either be a:
+        licsbas_jasmin_dir - the path a a COMET volcano portal .json
+        licsbas_dir  - the path to a LiCSBAS time series 
+        alignsar_dc - an AlignSAR data cube.  
+        data_as_arg - data processed in a different way.  
+        
+    Inputs:
+
+        volcano | str | name of volcano frame. 
+        volcano_dir | Path | outdir for volcano
+        region | string | region that volcano lies in.  Optional?  
+        
+        licsalert_settings | dict
+        icasar_settings  | dict 
+        licsbas_settings | dict 
+        
+        licsbas_jasmin_dir | path |  COMET volcano portal
+        licsbas_dir | path | 
+        alignsar_dc
+        data_as_arg | dict |
+    
+    Returns:
+        displacement_r2 | dict, things like displacement, mask, DEM, lons etc.  
+        
+    History:
+        2025_02_21 | MEG | Written.  
     
     """
+    
+    from licsalert.monitoring_functions import read_config_file
+
     
     # 3: Open the the input data, which can be in various formats (3 so far), 
     #    And and input settings for that type of data
@@ -26,13 +55,7 @@ def import_insar_data(
     # 3.1: a JASMIN dir and associated text file of settings.  
     if licsbas_jasmin_dir is not None:
         # read various settings from the volcano's config file
-        outputs = read_config_file(volcano_dir / "LiCSAlert_settings.txt")                                          
-        if region is None:
-            raise Exception(f"The 'region' argument is missing (it is "
-                            "currently 'None').  Exiting.  ")
-        
-        (licsalert_settings, icasar_settings, licsbas_settings) = outputs
-        del outputs
+
         
         
         print(f"LiCSAlert is opening a JASMIN COMET Volcano Portal timeseries"
@@ -68,12 +91,14 @@ def import_insar_data(
         
         # append licsbas .json file date to list of file dates used 
         # (in the text file for each volano)
-        append_licsbas_date_to_file(outdir, region, volcano, 
-                                    licsbas_json_creation_time)                                                        
-        # delete for safety
-        del licsbas_json_creation_time                                                                                                                  
-    
+        # append_licsbas_date_to_file(outdir, region, volcano, 
+        #                             licsbas_json_creation_time)                                                        
+        with open(volcano_dir / 'licsbas_dates.txt', "a") as f:
+                f.write(f"{licsbas_json_creation_time}\n")     
         
+        
+        # delete for safety
+        del licsbas_json_creation_time         
 
     # remaining two ways to pass data to function.  
     else:
@@ -138,6 +163,10 @@ def import_insar_data(
     
     
     return displacement_r2, tbaseline_info
+    
+
+#%%
+
     
 
 #%%
@@ -598,7 +627,8 @@ class ifg_timeseries():
 
 def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
                          n_cols=5, crop_pixels = None, mask_type = 'dem', 
-                         date_start = None, date_end = None):
+                         date_start = None, date_end = None,
+                         draw_manual_mask = None):
     """ A function to prepare the outputs of LiCSBAS for use with LiCSALERT. Note that this includes the step of referencing the time series to the reference area selected by LiCSBAS.  
     LiCSBAS uses nans for masked areas - here these are converted to masked arrays.   Can also create three figures: 1) The Full LiCSBAS ifg, and the area
     that it has been cropped to 2) The cumulative displacement 3) The incremental displacement.  
@@ -613,6 +643,7 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
 
         mask_type | string | 'dem' or 'licsbas'  If dem, only the pixels masked in the DEM are masked (i.e. pretty much only water.  ).  Note that any pixels that are incoherent in the time series are also masked (ie if incoherent in one ifg, will be masked for all ifgs.  )
                                                 If licsbas, the pixels that licsbas thinks should be masked are masked (ie water + incoherent).  Note that the dem masked is added to the licsbas mask to ensure things are consistent, but there should be no change here (every pixel masked in the DEM is also masked in the licsbas mask)
+        draw_manual_mask | None | Not currently used here.  
 
     Outputs:
         displacment_r2 | dict | Keys: cumulative, incremental, mask.  Stored as row vectors in arrays.  
@@ -657,6 +688,7 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     from licsalert.temporal import daisy_chain_from_acquisitions
     from licsalert.temporal import baseline_from_names
     from licsalert.icasar.aux import add_square_plot
+    from licsalert.aux import find_nearest_date
 
     
     def create_lon_lat_meshgrids(corner_lon, corner_lat, post_lon, post_lat, ifg):
@@ -902,10 +934,39 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
     if date_start is None:
         date_start = tbaseline_info['acq_dates'][0]
     else:
-        print(f"Cropping the LiCSBAS time series to start on {date_start} (inclusive).  ")
+        updated_date = find_nearest_date(
+            date_start, tbaseline_info['acq_dates']
+            )
+        if updated_date != date_start:
+            print(
+                f"The date to crop the LiCSBAS time series to didn't lie on " 
+                f"an acquisition date so has been updated from {date_start} "
+                f"to {updated_date}"
+                )
+            date_start = updated_date; del updated_date
+        print(
+            f"Cropping the LiCSBAS time series to start on {date_start} "
+            " (inclusive).  "
+            )
+        
     if date_end is None:
         date_end = tbaseline_info['acq_dates'][-1]
     else:
+        updated_date = find_nearest_date(
+            date_end, tbaseline_info['acq_dates']
+            )
+        if updated_date != date_end:
+            print(
+                f"The date to crop the LiCSBAS time series to didn't lie on " 
+                f"an acquisition date so has been updated from {date_end} "
+                f"to {updated_date}"
+                )
+            date_end = updated_date; del updated_date
+        print(
+            f"Cropping the LiCSBAS time series to start on {date_start} "
+            " (inclusive).  "
+            )
+
         print(f"Cropping the LiCSBAS time series to end on {date_end} (inclusive).  ")
 
     # do the cropping
@@ -1007,7 +1068,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
         return data
     
     
-    def create_mask(cumulative_r3, licsbas_mask):
+    def create_mask(cumulative_r3, licsbas_mask, mask_type):
         """ Create the mask
         """
         
@@ -1063,7 +1124,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
             
         else:
             raise Exception(f"'mask_type' must be either 'nan_once', 'licsbas, or "
-                            f"'nan_variable, but is {licsbas_mask}.  Exiting.")
+                            f"'nan_variable, but is {mask_type}.  Exiting.")
             
         ########### debug
         # import matplotlib.pyplot as plt
@@ -1257,7 +1318,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     ###########
     
     # 4: build the masks for the data (but do not apply it yet)
-    mask, mask_r3 = create_mask(cumulative_r3, licsbas_data['mask'])
+    mask, mask_r3 = create_mask(cumulative_r3, licsbas_data['mask'], mask_type)
     
     
     # 3.4 and mask the data, same mask at all times
@@ -1454,3 +1515,12 @@ def square_crop_r3_data_in_space(displacement_r3, crop_side_length = 20000):
                                                                             x_start:x_stop]
     
     return displacement_r3_crop
+
+#%%
+
+# def append_licsbas_date_to_file(outdir, region, volcano, licsbas_json_creation_time):
+#     """Append the licsbas .json timestamp to the file that records these for each volcano.  """
+
+#     with open(outdir / region / volcano / 'licsbas_dates.txt', "a") as licsbas_dates_file:                      # open the file
+#             #licsbas_dates_file.write(f"{datetime.strftime(licsbas_json_timestamp, '%Y-%m-%d %H:%M:%S')}\n")            # and write this first dummy date to it,
+#             licsbas_dates_file.write(f"{licsbas_json_creation_time}\n")            # and write this first dummy date to it,

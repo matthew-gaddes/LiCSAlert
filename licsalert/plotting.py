@@ -9,6 +9,162 @@ Created on Mon Apr  3 15:57:28 2023
 import pdb
 import matplotlib.pyplot as plt
 
+
+
+#%%
+
+
+def create_manual_mask(image):
+    """ 
+    Use a matploblib interactive figure to draw a mask manually.  Useful if a 
+    user would like to omit part of the scene (e.g. a disconnected island)
+    
+    Inputs:
+        image | r2 numpy array | one channel image, usually cumulative ifg.  
+        
+    Returns:
+        mask | r2 numpy array | True for masked areas.  
+        
+    History:
+        2025_02_21 | MEG | Written
+
+    """
+    
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.path import Path
+            
+    class FreehandMaskDrawer:
+        def __init__(self, image, mask_mutable):
+            # check if we need to reset the backend (to interactive window)
+            if plt.get_backend() != 'Qt5Agg':                                                           
+                plt.switch_backend('Qt5Agg')
+            
+            self.image = image
+            self.mask_mutable = mask_mutable
+            self.mask = np.zeros_like(image, dtype=bool)
+            
+            # build the colourmap, coolwarm, with 0 on grey
+            cmap = plt.get_cmap('coolwarm')
+            im_min = np.min(image)
+            im_max = np.max(image)
+            # get the ratio of the data that 0 lies at 
+            cmap_mid = 1 - im_max/(im_max + abs(im_min))                                     
+            
+            # make the colours for plotting the ICs, 0 data is middle (grey) in colour
+            cmap_remapped = remappedColorMap(
+                cmap, start=0.0, midpoint=cmap_mid,
+                stop=1, name='ic_colours_cent'
+                ) 
+            
+            self.fig, self.ax = plt.subplots()
+            self.ax.imshow(image, cmap=cmap_remapped, origin='upper')
+            
+            # initiliase to store whether to advance the figure or not
+            self.continue_status = False
+            
+            # Variables to store drawing coordinates
+            self.xs, self.ys = [], []
+            self.is_drawing = False
+            
+            # Line object to display the drawing path
+            self.line, = self.ax.plot([], [], 'r-', linewidth=2)
+            
+            # Connect mouse events
+            self.cid_press = self.fig.canvas.mpl_connect(
+                'button_press_event', self.on_press
+                )
+            self.cid_motion = self.fig.canvas.mpl_connect(
+                'motion_notify_event', self.on_motion
+                )
+            self.cid_release = self.fig.canvas.mpl_connect(
+                'button_release_event', self.on_release
+                )
+    
+        def on_press(self, event):
+            # Begin drawing if the click is within the axes.
+            if event.inaxes != self.ax:
+                return
+            self.is_drawing = True
+            self.xs = [event.xdata]
+            self.ys = [event.ydata]
+            self.line.set_data(self.xs, self.ys)
+            self.fig.canvas.draw()
+    
+        def on_motion(self, event):
+            # Append coordinates as the mouse moves with the button held down.
+            if not self.is_drawing or event.inaxes != self.ax:
+                return
+            self.xs.append(event.xdata)
+            self.ys.append(event.ydata)
+            self.line.set_data(self.xs, self.ys)
+            self.fig.canvas.draw()
+    
+        def on_release(self, event):
+            # Finish drawing when the mouse button is released.
+            if not self.is_drawing:
+                return
+            self.is_drawing = False
+            
+            # Ensure the polygon is closed by appending the first point if needed.
+            if (self.xs[0], self.ys[0]) != (self.xs[-1], self.ys[-1]):
+                self.xs.append(self.xs[0])
+                self.ys.append(self.ys[0])
+            
+            # Build the polygon from the drawn points.
+            polygon = np.column_stack((self.xs, self.ys))
+            
+            # Create a grid corresponding to the pixel centers.
+            ny, nx = self.image.shape
+            x, y = np.meshgrid(np.arange(nx), np.arange(ny))
+            points = np.vstack((x.ravel(), y.ravel())).T
+            
+            # Use Path to determine which pixel centers are inside the drawn polygon.
+            path = Path(polygon)
+            # Using a small negative radius helps include points on the boundary.
+            grid = path.contains_points(points, radius=-1e-10)
+            self.mask = grid.reshape((ny, nx))
+            
+            # Optionally, overlay the mask on the original image in the current window.
+            self.ax.imshow(
+                np.ma.masked_where(~self.mask, self.mask), cmap='jet', 
+                alpha=0.5
+                )
+            self.fig.canvas.draw()
+    
+            # Disconnect event handlers since drawing is finished.
+            self.fig.canvas.mpl_disconnect(self.cid_press)
+            self.fig.canvas.mpl_disconnect(self.cid_motion)
+            self.fig.canvas.mpl_disconnect(self.cid_release)
+
+            # update status that will exit while that pauses execution 
+            # whilst the user draws the mask
+            self.continue_status = True
+    
+            # add to mask to mutable list
+            self.mask_mutable.append(self.mask)
+            print("Mask created.")
+    
+        def show(self):
+
+            # enter a loop to pause plotting.  self.continue_status is updated
+            # in self.on_release
+            while not self.continue_status:
+                plt.pause(1.)
+                print("Waiting for the user to draw the area to retain...")
+    
+    # initiliase mask
+    mask_drawn = []
+    
+    drawer = FreehandMaskDrawer(image, mask_mutable = mask_drawn)
+    drawer.show()
+    
+    # invert, so True for masked, False for not masked (LiCSAlert convention)
+    mask = ~mask_drawn[0]
+    
+    return mask
+    
+
 #%%
 
 
@@ -315,8 +471,11 @@ def update_overlapping_points(shifted_points, threshold = 0.01,
 #%%
 
 
-def licsalert_status_map(volcs, outdir, day_list, sig_max = 10, 
-                         plot_frequency = "monthly",  figure_type = 'window'):
+def licsalert_status_map(
+        volcs, outdir,  sigma_min = 0., sigma_max = 10., 
+        d_start = None, d_end = None,
+        plot_frequency = "monthly",  figure_type = 'window'
+        ):
     """ Plot multiple volcano statuses on the worldmap.  Colour indicates
     status.  
     
@@ -325,8 +484,10 @@ def licsalert_status_map(volcs, outdir, day_list, sig_max = 10,
                                          lon_lat_offset (as above, but shifted
                                          so points don't lie on top of each other)
          outdir | Path | ouput png files, if backed is 'agg'
-         day_list | list of datetimes | 
-         sig_max | int or float | maximum number of sigmas for colourscale 
+         d_start | str | start date for period to plot daily / monthly yearly
+         d_end | str | end date for period to plot daily / monthly yearly
+
+         sigma_max | int or float | maximum number of sigmas for colourscale 
                                  i.e. if set to 10, any signal that is 10 sigmas
                                      or more will plot as maximum colour (yellow)
          plot_frequency | string | daily / monthly / yearly 
@@ -340,11 +501,14 @@ def licsalert_status_map(volcs, outdir, day_list, sig_max = 10,
     """
     
     import matplotlib.pyplot as plt
+    import matplotlib.colors as colors
+    import matplotlib.cm as cm
     import cartopy.crs as ccrs
     import datetime as dt
     import math
     import warnings
     from copy import deepcopy
+    
 
     # if plt.get_backend() != backend:   
     #     print(f"The matplotlib backend was previously {plt.get_backend()}, "
@@ -358,22 +522,37 @@ def licsalert_status_map(volcs, outdir, day_list, sig_max = 10,
     else: 
         if plt.get_backend() != 'Qt5Agg':                                                               
             plt.switch_backend('Qt5Agg')                                                           
+
+    # 0: small steps to handle dates:    
+    # all volcanoes should shre the same day list (list of datetimes, daily)
+    day_list = volcs[0].combined_status['dates']
     
-    # # all volcanoes should shre the same day list (list of datetimes, 1 epr day)
-    # day_list = volcs[0].combined_status['dates']
-    
+    d_start_dt = dt.datetime.strptime(d_start, "%Y%m%d")
+    d_end_dt = dt.datetime.strptime(d_end, "%Y%m%d")
+
+
     # 1 figure for each day.
     for day_n, day in enumerate(day_list):
+
         
-        # check if we should plot this one
-        if plot_frequency == "daily":
-            plot_today = True
-        elif plot_frequency == 'monthly':
-            plot_today = day.day == 1
-        elif plot_frequency == 'yearly':
-            plot_today = (day.day == 1) and (day.month == 1)
+        if (day > d_start_dt) and (day < d_end_dt):
+            # check if we should plot this one
+            if plot_frequency == "daily":
+                plot_today = True
+            elif plot_frequency == 'monthly':
+                plot_today = day.day == 1
+            elif plot_frequency == 'yearly':
+                plot_today = (day.day == 1) and (day.month == 1)
+        else:
+            plot_today = False
         
         if plot_today:
+            # get figure date as string
+            day_str = dt.datetime.strftime(day, "%Y%m%d")
+            print(
+                f"Creating a LiCSAlert status figure for {day_str}.  "
+                )
+
             fig = plt.figure(figsize=(20, 11))
             ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
             
@@ -387,45 +566,56 @@ def licsalert_status_map(volcs, outdir, day_list, sig_max = 10,
             for volc_n, volc in enumerate(volcs):
         
                 dayn_index = volc.combined_status['dates'].index(day)
+                
+                # extract the two values of volcanic unrest
                 existing_def = volc.combined_status['existing_defs'][dayn_index]
                 new_def = volc.combined_status['new_defs'][dayn_index]
         
-                # check not nans
+                # check not nans for lon and lat of volcano
                 if (not math.isnan(volc.lon_lat[0])) and (not math.isnan(volc.lon_lat[1])):
                 
-                    # if we do, plot it
-                    sc = ax.scatter(volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
-                                    c=max(existing_def, new_def), 
-                                    s=50, transform=ccrs.PlateCarree(), vmin = 0, vmax = sig_max)
-                    scatter_objects.append((sc, volc.name))
+                    # determine the maximum from the two unrest metrics
+                    combined_def = max(existing_def, new_def)
                     
-                    # also plot the lines from the shifted points to their true point.  
-                    ax.plot([volc.lon_lat_offset[0], volc.lon_lat[0]],
+                    # only plot if larger than minimum threshold
+                    if combined_def > sigma_min:
+                    
+                        # if we do, plot the max of existing or new deformation
+                        sc = ax.scatter(
+                            volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
+                            c=combined_def, s=50, transform=ccrs.PlateCarree(),
+                            vmin = sigma_min, vmax = sigma_max
+                            )
+                        scatter_objects.append((sc, volc.name))
+                        
+                        # also plot the lines from the shifted points to their true point.  
+                        ax.plot(
+                            [volc.lon_lat_offset[0], volc.lon_lat[0]],
                             [volc.lon_lat_offset[1], volc.lon_lat[1]],
-                            c = 'k',  transform=ccrs.PlateCarree())
+                            c = 'k',  transform=ccrs.PlateCarree()
+                            )
                 else:
                     print(f"{volc.name} could not be plotted as at least one"
                           f" of the lons or lats are nan (they are "
                           f"{volc.lon_lat}.  Trying to continue.  ")
                 
             
-            #colorbar
+            #colorbar (possibly with no sc created by ax.scatter)
             cbar_ax = fig.add_axes([0.35, 0.15, 0.3, 0.01])  
-            cbar = fig.colorbar(sc, cax=cbar_ax, orientation='horizontal', 
-                                label='# sigma from background')
-            #manually ensure max goes to max for all points (and not just last one)
-            sc.set_clim(0, sig_max)  
+            norm = colors.Normalize(vmin=sigma_min, vmax=sigma_max)
+            cmap = cm.viridis  
+            sm = cm.ScalarMappable(norm=norm, cmap=cmap)
+            cbar = plt.colorbar(sm, cax=cbar_ax, orientation = 'horizontal')
+            cbar.set_label("# sigma from background")
             
             # title
-            date_str = dt.datetime.strftime(volc.combined_status['dates'][dayn_index], 
-                                            "%Y/%m/%d")
+            date_str = dt.datetime.strftime(
+                volc.combined_status['dates'][dayn_index], "%Y/%m/%d"
+                )
             fig.suptitle(date_str)
             
     
-            # save as a png and close the figure.          
-            filename = dt.datetime.strftime(volc.combined_status['dates'][dayn_index], 
-                                            "%Y%m%d")
-            
+            ## save as a png and close the figure.                     
             # Suppress warnings for tight_layout
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -468,8 +658,8 @@ def licsalert_status_map(volcs, outdir, day_list, sig_max = 10,
 
             # 8: Possible save output
             if (figure_type == 'png') or (figure_type == 'both'):
-                fig.savefig(outdir / f"{filename}.png")
-                print(f"Saved the LiCSAlert status map for {filename}")
+                fig.savefig(outdir / f"{day_str}.png")
+                print(f"Saved the LiCSAlert status map for {str}")
             
         else:
             pass
@@ -954,10 +1144,9 @@ def LiCSAlert_figure(
         filename = "_".join(figtitle.split(" "))                                            # figtitle has spaces, but filename must use underscores instead.  
         fig1.savefig(figure_out_dir / f"{filename}.png")# , bbox_inches='tight')            # bbox causes an error "*** AttributeError: 'NoneType' object has no attribute '_get_renderer'
         
-        
-        
-    if plt.get_backend() != 'Qt5Agg':                                                           # check if we need to reset the backend (to interactive window)
-        plt.switch_backend('Qt5Agg')                                                           #  
+    # check if we need to reset the backend (to interactive window)
+    if plt.get_backend() != 'Qt5Agg':                                                           
+        plt.switch_backend('Qt5Agg')
 
 
 #%% interactive figure removed rom here

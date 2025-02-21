@@ -463,7 +463,7 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
         #     pickle.dump(n_converge_no_bootstrapping, f)
         #     pickle.dump(inset_axes_side, f)
             
-            
+        
         
         S_ica, source_outputs = plot_2d_interactive_fig(
             S_pca, S_hists, mask, spatial, sica_tica, hdbscan_param,

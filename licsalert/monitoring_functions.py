@@ -58,6 +58,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     import shutil
     import copy
     from datetime import datetime
+    import numpy as np
     import numpy.ma as ma
     
     
@@ -73,12 +74,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             shutil.rmtree(outdir)                                        # delete the folder and all its contents
             os.mkdir(outdir)                                             # and remake the folder
     
-    def append_licsbas_date_to_file(outdir, region, volcano, licsbas_json_creation_time):
-        """Append the licsbas .json timestamp to the file that records these for each volcano.  """
-    
-        with open(outdir / region / volcano / 'licsbas_dates.txt', "a") as licsbas_dates_file:                      # open the file
-                #licsbas_dates_file.write(f"{datetime.strftime(licsbas_json_timestamp, '%Y-%m-%d %H:%M:%S')}\n")            # and write this first dummy date to it,
-                licsbas_dates_file.write(f"{licsbas_json_creation_time}\n")            # and write this first dummy date to it,
+
     
 
     
@@ -94,10 +90,12 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     from licsalert.licsalert import LiCSAlert_preprocessing, LiCSAlert#, shorten_LiCSAlert_data
     from licsalert.licsalert import write_volcano_status, load_or_create_ICASAR_results
     from licsalert.licsalert import licsalert_date_obj
-    from licsalert.aux import Tee, find_nearest_date
+    from licsalert.aux import Tee, find_nearest_date, col_to_ma
+    from licsalert.aux import update_mask
     from licsalert.downsample_ifgs import downsample_ifgs
     from licsalert.plotting import LiCSAlert_figure, LiCSAlert_epoch_figures
     from licsalert.plotting import LiCSAlert_aux_figures, LiCSAlert_mask_figure
+    from licsalert.plotting import create_manual_mask
     
     # 1: Log all outputs to a file for that volcano:
     if region == None:
@@ -114,23 +112,27 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     print(f"\n\n\n\n\nLiCSAlert is being run for {volcano} at "
           f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")                              
 
-    
+
+    # if using jasmin data, import the settings for that volcano
+    if licsbas_jasmin_dir is not None:
+        outputs = read_config_file(
+            outdir / region / volcano/  "LiCSAlert_settings.txt")                                          
+        (licsalert_settings, icasar_settings, licsbas_settings) = outputs
+        del outputs
+
     # 2: Open the data
-    displacement_r2, tbaseline_info = import_insar_data(
+    displacement_r2, tbaseline_info = import_insar_data(volcano, 
             volcano_dir, region, licsalert_settings, icasar_settings, 
             licsbas_settings,
-            licsbas_jasmin_dir, licsbas_dir, alignsar_dc, data_as_arg)
-            
-
-    #%%
+            licsbas_jasmin_dir, licsbas_dir, alignsar_dc, data_as_arg
+            )
     
-    pdb.set_trace()
-
+    # 3: Possibly draw a mask manually (and apply it to displacement_r2)
+    if 'draw_manual_mask' in licsbas_settings.keys():
+        displacement_r2 = manual_mask_wrapper(
+            volcano_dir, licsbas_settings['draw_manual_mask'], displacement_r2
+            )        
     
-    
-    #%%
-
-
     # check for the unusual case that there are fewer pixels than pca_comps 
     # requested
     if icasar_settings['sica_tica'] == 'sica':
@@ -311,13 +313,13 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             # save info about the time courses
             save_epoch_data(sources_tcs, residual_tcs, 
                             volcano_dir / processing_date.date)                                                             
+            
             # write the change in def  / new def text file for that date.  
-            write_volcano_status(sources_tcs, residual_tcs, ics_labels, 
-                                 volcano_dir / processing_date.date)                                           
+            write_volcano_status(
+                processing_date, sources_tcs, residual_tcs, ics_labels, 
+                volcano_dir / processing_date.date
+                )
 
-            
-
-            
         # also plot the ICS and the DEM (done once)
         LiCSAlert_aux_figures(
             volcano_dir, icasar_sources, displacement_r2['dem'], 
@@ -1192,3 +1194,81 @@ def save_epoch_data(sources_tcs, residual_tcs, outdir):
     #             pass
 
 
+#%%
+
+
+
+def manual_mask_wrapper(volcano_dir, draw_manual_mask, displacement_r2):
+    """Handle either creating or loading a manually drawn mask.  
+    
+    Inputs:
+        volcano_dir | Path | path to the licsalert outdir
+        draw_mask_manualy | True or "load"
+        displacement_r2 | dict | deformation, mask, DEM etc.  
+        
+    Returns:
+        displacement_r2 | dict | Possibly updated with the new mask.  
+        
+    History:
+        2025_02_21 | MEG |  Written.  
+    """
+    import numpy as np
+    import pickle
+    from licsalert.aux import col_to_ma, update_mask
+    from licsalert.plotting import create_manual_mask
+    
+    
+    if draw_manual_mask == True:
+        print(
+            "Creating an intereactive figure to manually draw which parts "
+            " of the time series to mask.  "
+            )
+
+        # creat the cumualtive ifg (sum in time), first as row vector
+        cum_ifg_r1 = np.sum(displacement_r2['incremental'], axis = 0)
+        cum_ifg_r2 = col_to_ma(cum_ifg_r1, displacement_r2['mask'])
+        # draw the mask
+        mask_drawn = create_manual_mask(cum_ifg_r2)
+        
+        # save the mask (and possibly make dir for it)
+        # Create the directory (including any necessary parent directories)
+        (volcano_dir/'aux_data_figs').mkdir(parents=True, exist_ok=True)
+        with open(volcano_dir/'aux_data_figs'/'manual_mask.pkl', 'wb') as f:
+            pickle.dump(mask_drawn, f)
+            
+        mask_success = True
+
+    # or possibly try and load a mask
+    elif draw_manual_mask == 'load':
+        print(
+            f"Trying to load a previously drawn mask...", end = ''
+            )
+        try:
+            with open(volcano_dir/'aux_data_figs'/'manual_mask.pkl', 'rb') as f:
+                mask_drawn = pickle.load(f)
+            print("Succeeded")
+            mask_success = True
+        except:
+            print(
+                "Failed. Trying to continue without a manually drawn mask."
+                )
+            mask_success = False
+    # or alert the user something is not set correctly.  
+    else:
+        print(
+            "'draw_manual_mask' is not True or 'load' "
+            f"(it is {draw_manual_mask}) so "
+            "continuing without a manually drawn mask.  "
+            )
+        mask_success = False
+        
+    
+    # possibly appy new mask to data
+    if mask_success:
+        displacement_r2 = update_mask( displacement_r2, mask_drawn)
+    else:
+        pass
+    
+    return displacement_r2
+    
+    

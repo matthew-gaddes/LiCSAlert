@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 
-def move_small_directories(indir, outdir, n):
+def move_small_directories(indir, outdir, n, regions = True):
     """
     Move subdirectories with fewer than `n` items to `outdir`.
     
@@ -27,6 +27,13 @@ def move_small_directories(indir, outdir, n):
         indir (str): The path to the main directory containing subdirectories.
         outdir (str): The path to the output directory.
         n (int): The minimum number of items a subdirectory must have to remain.
+        
+    Returns:
+        nan
+        
+    History:
+        2024_??_?? | MEG | Written
+        2025_02_19 | MEG | Update to include regions. 
     """
     import os
     import shutil
@@ -34,19 +41,35 @@ def move_small_directories(indir, outdir, n):
     # Ensure the output directory exists
     os.makedirs(outdir, exist_ok=True)
 
-    # Iterate through all subdirectories in the main directory
-    for subdir in os.listdir(indir):
-        subdir_path = os.path.join(indir, subdir)
-
-        # Check if it's a directory
-        if os.path.isdir(subdir_path):
-            # Count items in the subdirectory
-            item_count = len(os.listdir(subdir_path))
+    # if we have regions, get the path to each region directory
+    if regions:
+        region_names = sorted(os.listdir(indir))
+        region_dirs = [indir / region_name for region_name in region_names]
+    
+    # if we don't, just say the indir is the region dir.  
+    else:
+        region_dirs = [indir]
+        
+    
+    for region_dir in region_dirs:
+        volc_names = sorted(os.listdir(region_dir))
+        
+        for volc_name in volc_names:
+            # get the path to current volcano
+            volc_dir = sorted(os.listdir(region_dir / volc_name))
             
-            # Move the directory if it has fewer than `n` items
-            if item_count < n:
-                print(f"Moving {subdir_path} to {outdir}")
-                shutil.move(subdir_path, outdir)
+            # Check if it's a directory
+            if os.path.isdir(str(volc_dir)):
+                
+                # Count items in the subdirectory
+                item_count = len(os.listdir(volc_dir))
+                
+                # Move the directory if it has fewer than `n` items
+                if item_count < n:
+                    print(f"Moving {volc_dir} to {outdir}")
+                    shutil.move(volc_dir, outdir)
+            
+            
 
 
 
@@ -75,7 +98,11 @@ def get_lon_lat_of_volcs(volcs):
     for volc in volcs:
         lons = []
         lats = []
-        for frame in volc.frame_status:
+        for frame_n, frame in enumerate(volc.frame_status):
+            print(
+                f"Opening the lon and lat for {volc.frames[frame_n]}...", 
+                end = ''
+                )
             try:
                 # open the time series 
                 displacement_r2, tbaseline_info, aux_data = open_aux_data(
@@ -86,15 +113,22 @@ def get_lon_lat_of_volcs(volcs):
                 # get the lon and lat of the centre pixel
                 lons.append(displacement_r2['lons'][int(ny/2), int(nx/2)])
                 lats.append(displacement_r2['lats'][int(ny/2), int(nx/2)])
+                print("Succeeded")
             except:
-                print("Failed to open the lon and lat for "
-                      f"{Path(frame).parts[-1]} but continuing anyway.  ")
+                print(f"Failed")
+                    
                 
         # average across the frames for that volcano
         if (len(lons) > 0) and (len(lats) > 0):
             volc.lon_lat = (sum(lons)/ len(lons), sum(lats) / len(lats))
         else:
             volc.lon_lat = (np.nan, np.nan)
+            # warn user if we failed.  
+            print(
+                f"Failed to extract the lon and lat for any of the frames "
+                f"of {volc.name} (volc.region)"
+                )
+        print("\n")
     
     return volcs
     
@@ -277,7 +311,7 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
 #%%
 def write_jasmin_download_shell_script(
         jasmin_dir, local_dir, out_file,volcs, 
-        exclude_json_gz =True,exclude_original_ts = True,
+        exclude_json_gz =True, exclude_original_ts = True,
         exclude_ICASAR_data = True,
         exclude_epoch_images = True, exclude_epoch_data = True, 
         ):
