@@ -179,7 +179,8 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     LiCSAlert_status = run_LiCSAlert_status(
         tbaseline_info['acq_dates'], volcano_dir, 
         licsalert_settings['baseline_end'].date, 
-        licsalert_settings['figure_intermediate']
+        licsalert_settings['figure_intermediate'],
+        licsalert_settings['t_recalculate']
         )
     print(f"LiCSAlert status:  1) Run ICASAR: {LiCSAlert_status['run_ICASAR']}"
           f"  2) Run LiCSAlert: {LiCSAlert_status['run_LiCSAlert']}")
@@ -746,34 +747,51 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
 
 #%%
 
-def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_intermediate):
-    """ When 'LiCSAlert_monitoring_mode' is run in a directory, this function determines which steps
-    need to be done, ranging from nothing (everything is up to date), through to running, ICASAR, and LiCSAlert.  
+def run_LiCSAlert_status(
+        licsbas_dates, volcano_path, date_baseline_end, figure_intermediate,
+        t_recalculate):
+    """ When 'LiCSAlert_monitoring_mode' is run in a directory, this function 
+    determines which steps need to be done, ranging from nothing (everything 
+    is up to date), through to running, ICASAR, and LiCSAlert.  
     
     Inputs:
-        licsbas_dates | list |  ['YYYYMMDD', 'YYYYMMDD' etc.]  of each Sentinel-1 acquisition.  
-        volcano_path | Path | path to the licsalert directory for the current volcano.  
-        date_baseline_end | string | YYYYMMDD of when to end the baseline stage.  Needed to determine if licsbas data goes past this (and we can start licsalert)
-        figure_intermediate | boolean | If true, only the last LiCSAlert date will be processed.  
+        licsbas_dates | list |  ['YYYYMMDD', 'YYYYMMDD' etc.]  of each 
+                                Sentinel-1 acquisition.  
+        volcano_path | Path | path to the licsalert directory for the current 
+                               volcano.  
+        date_baseline_end | string | YYYYMMDD of when to end the baseline 
+                                    stage.  Needed to determine if licsbas 
+                                    data goes past this (and we can start 
+                                                         licsalert)
+        figure_intermediate | boolean | If true, only the last LiCSAlert date 
+                                        will be processed.  
+        r_recalculate | int | Number of acquisitions needed to draw a single
+                              line of best fit though the baseline data
         
     Rerturns:
         LiCSAlert_status | dict | contains: 
-                                            run_ICASAR | Boolean | True if ICASAR will be required.  
-                                            run_LiCSAlert | Boolean | True if required.  
-                                            'processed_with_errors'   : processed_with_errors,                                  # any dates that have missing LiCSAlert products.  
-                                            'not_processed'                 : pending,                                                # not processed
-                                            'to process'
-                                            'licsbas_last_acq'        : licsbas_last_acq}                                        # date of the most recent sentinel-1 acquisition that there is an interferogram for.  
+            run_ICASAR | Boolean | True if ICASAR will be required.  
+            run_LiCSAlert | Boolean | True if required.  
+            'processed_with_errors'   : processed_with_errors,                                  
+            'not_processed'                 : pending,                                          
+            'to process'
+            'licsbas_last_acq'        : licsbas_last_acq}                                        
 
     History:
         2020/02/18 | MEG |  Written        
         2020/06/29 | MEG | Major rewrite to use a folder based structure    
         2020/11/17 | MEG | Write the docs and add compare_two_dates function.  
-        2020/11/24 | MEG | Major update to provide more information on status of volcano being processed.  
-        2021_04_15 | MEG | Fix bug in how LiCSAR_last_acq was not always last date in LiCSAR_dates, as LiCSAR_dates was not always in chronological order.  
+        2020/11/24 | MEG | Major update to provide more information on status 
+                            of volcano being processed.  
+        2021_04_15 | MEG | Fix bug in how LiCSAR_last_acq was not always last 
+                            date in LiCSAR_dates, as LiCSAR_dates was not 
+                            always in chronological order.  
         2021_10_05 | MEG | Update to version 2 to work with .json files.  
         2021_10_13 | MEG | Simplify, comment out logging to a .txt file.  
         2023_04_03 | MEG | Update with option to only process last date.  
+        2025_03_07 | MEG | Add catch to make sure that the baseline 
+                            time series is longer than a single line of best
+                            fit (t_recalculate)
 
     """
     import os 
@@ -917,26 +935,75 @@ def run_LiCSAlert_status(licsbas_dates, volcano_path, date_baseline_end, figure_
     
 
     # 1: Determine if we can run LiCSAlert yet (ie past the baseline stage)
+    
+    
     licsbas_last_acq = licsbas_dates[-1]
-    licsbas_past_baseline = compare_two_dates(date_baseline_end, licsbas_last_acq)                 # determine if the last LiCSAR date is after the baseline stage has ended.  
-    if not licsbas_past_baseline:                                                                 # if we haven't passed the baseline stage yet, we can only wait for more Sentinel acquisitions
-        print(f"LiCSBAS is up to date until {licsbas_last_acq}, but the baseline stage is set to end on {date_baseline_end} "
-              f" and, as this hasn't been reached yet, LiCSAlert cannot be run yet.")
+    # determine if the last LiCSAR date is after the baseline stage has ended.  
+    licsbas_past_baseline = compare_two_dates(
+        date_baseline_end, licsbas_last_acq
+        )                 
+    
+    # determine if the baseline stage is long enough
+    # quick way to get dates before baseline ends
+    baseline_dates = [
+        acq for acq in licsbas_dates 
+        if datetime.datetime.strptime(acq,'%Y%m%d') < 
+        datetime.datetime.strptime(date_baseline_end, '%Y%m%d') 
+        ]
+    
+    #determine if we don't have enough acquisitions to make a single line of 
+    # best fit yet.  
+    if len(baseline_dates) < t_recalculate:
+        licsbas_ts_short = True
+    else:
+        licsbas_ts_short = False
+    
+    
+    # if we're not going to run LiCSAlert
+    if (not licsbas_past_baseline) or (licsbas_ts_short):
+        # warn the user of case 1
+        if (not licsbas_past_baseline):
+            print(
+                f"LiCSBAS is up to date until {licsbas_last_acq}, but the "
+                f"baseline stage is set to end on {date_baseline_end} and, as "
+                "this hasn't  been reached yet, LiCSAlert cannot be run yet."
+                )
         
-        LiCSAlert_status = {'run_ICASAR'              : False,                                             # ICASAR is run unless the folder containing it is found
-                            'run_LiCSAlert'           : False,                                          # LiCSAlert is run if some dates with errors exist, or if there are pending dates.  Same as for LICSBAS.  
-                            'processed_with_errors'   : None,                                  # any dates that have missing LiCSAlert products.  
-                            'not_processed'           : None,                                                # new dates to be processed (ie update LiCSBAS time series, run LiCSAlert)
+        # warn the user of case 2
+        if licsbas_ts_short:
+            print(
+                f"The LiCSBAS time series has only {len(baseline_dates)} " 
+                "acquisitions, which is less than t_recalculate "
+                f"({t_recalculate}) and so LiCSAlert cannot be run yet.  "
+                "Either the baseline data must be moved to a more recent "
+                "date, the time series must be extended to start earlier, "
+                "or more acquisition dates must be added to the time series.  "
+            )
+        
+        LiCSAlert_status = {'run_ICASAR'              : False,                                             
+                            'run_LiCSAlert'           : False,
+                            'processed_with_errors'   : None,
+                            'not_processed'           : None,
                             'create_figure'           : None,
-                            'licsbas_last_acq'        : licsbas_last_acq}                                        # date of the most recent sentinel-1 acquisition that there is an interferogram for.  
+                            'licsbas_last_acq'        : licsbas_last_acq}
         return LiCSAlert_status
         
-    existing_licsalert_dirs, run_ICASAR = get_existing_licsalert_dates(volcano_path)    
-    baseline_monitoring_dates = determine_baseline_or_monitoring(licsbas_dates, date_baseline_end)                # Determine which dates LiCSAlert should have an output for, which are the dates after the baseline has ended (regardless of if we actually have them)
+    existing_licsalert_dirs, run_ICASAR = get_existing_licsalert_dates(
+        volcano_path
+        )    
+    # Determine which dates LiCSAlert should have an output for, which are 
+    # the dates after the baseline has ended (regardless of if we actually 
+    # have them)
+    baseline_monitoring_dates = determine_baseline_or_monitoring(
+        licsbas_dates, date_baseline_end
+        )                
     
     if not figure_intermediate:
-        baseline_monitoring_dates = {'baseline'   : [],                                                         # no figures required for the baseline dates
-                                     'monitoring' : [sorted(baseline_monitoring_dates['monitoring'])[-1]]}        # figure and processing only required on last date.  
+        baseline_monitoring_dates = {
+            'baseline'   : [],                                                         # no figures required for the baseline dates
+            'monitoring' : 
+                [sorted(baseline_monitoring_dates['monitoring'])[-1]]
+            }
     
     # create a licsalert status for all dates in the baseline stage
     dates_baseline  = licsalert_dates(existing_licsalert_dirs , baseline_monitoring_dates['baseline'],

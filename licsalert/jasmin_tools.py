@@ -389,18 +389,40 @@ def write_jasmin_download_shell_script(
         # Write shebang (optional, depends on your use case)
         script_file.write("#!/bin/bash\n\n")
         # Add a warning to the user about how to use the shell script
-        script_file.write(f"# Note - this will only work if you can login to Jasmin\n")
-        script_file.write(f"# which requires running a command such as:\n")
-        script_file.write(f"# eval $(ssh-agent -s); ssh-add ~/.ssh/id_rsa_jasmin\n")
-        script_file.write(f"# after you have setup a key pair with Jasmin.\n\n\n")
-                          
+        script_file.write("# Note - this will only work if you can login to Jasmin\n")
+        script_file.write("# which requires running a command such as:\n")
+        script_file.write("# eval $(ssh-agent -s); ssh-add ~/.ssh/id_rsa_jasmin\n")
+        script_file.write("# after you have setup a key pair with Jasmin.\n\n\n")
 
+        # write a SIGINT so Ctrl+C exits the script , rather than just the 
+        # current rsync command.  
+        script_file.write("# Trap SIGINT (Ctrl+C)\n")
+        script_file.write(
+            "trap 'echo \"Script interrupted, exiting...\"; exit 1' INT\n\n"
+            )
+
+        # determine how many commands there will be
+        frames_total = 0
+        for volc in volcs:
+            for frame in volc.frames:
+                frames_total += 1
+        
+
+        frame_counter = 0
         # iterate over each volcano
         for volc in volcs:
             # and the grames for that volcano
             for frame in volc.frames:
+                # simple echo to say which frame we're downloading
+                script_file.write(
+                    f"echo 'Attempting to rsync {frame} ({frame_counter} of {frames_total})'\n"
+                    )
+                
                 # build the command for that frame        
                 command = (f"rsync -av {json_section} "
                            f"{jasmin_dir / volc.region / frame} "
                            f"{local_dir / volc.region }")
-                script_file.write(command + "\n")
+                script_file.write(command + "\n\n")
+                
+                # update the counter
+                frame_counter += 1

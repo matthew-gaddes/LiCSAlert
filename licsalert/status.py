@@ -55,6 +55,10 @@ def get_volc_names_fron_dir_of_frames(licsalert_dir, regions = False):
 def extract_licsalert_status(volcs, day_list):
     """ For every volcano that we do licsalert for, extract the 2 status 
     values for all possible times.  
+    
+    Also calculate the combined unrest metric (which is currently just a 
+    the maximum of the new / existing deformation metrics for each frame)
+    
     Inputs:
         volc_dirs | list of paths as strings | 
         day_list | list of datetimes | consecutive days.  
@@ -68,58 +72,147 @@ def extract_licsalert_status(volcs, day_list):
     from pathlib import Path
     import os
     from datetime import datetime
+    from copy import deepcopy
     
     from licsalert.aux import get_licsalert_date_dirs
     
             
-    def nearest_smaller(lst, target):
-        smaller_numbers = [num for num in lst if num < target]
+    def calculate_status_combined(volc, day_list):
+        """
+        """
+    
+        # initiliase as empty
+        status_combined = {'dates' : [],
+                           'day_ns' : [],
+                           'existing_defs' : [],
+                           'new_defs'      :[]}
+        # calculate for all days
+        for day in day_list:
+            # add the time info
+            status_combined['dates'].append(day)
+            day_n = day_list.index(day)
+            status_combined['day_ns'].append(day_n)
+            
+            # collate across all frames for that volcano
+            day_existing_defs = []
+            day_new_defs = []
+            
+            for frame, value in volc.status.items():
+                
+                # # 17 is date 107A goes high?  
+                # if day >= datetime(year = 2022, month = 3, day = 16):            
+                #     pdb.set_trace()
+                
+                # find the nearest LiCSAlert status before the current day
+                # first find the day number for the nearest previous day
+                closest_previous_day = nearest_smaller_or_equal(
+                    value['day_ns'], day_n
+                    )
+                
+                # if no data yet (as time series for the frame hasn't started)
+                if closest_previous_day is None:
+                    day_existing_defs.append(0)
+                    day_new_defs.append(0)
+                    
+                # if no data as the time series for that frame has stopped
+                elif day > value['dates'][-1]:
+                    # pdb.set_trace()
+                    day_existing_defs.append(0)
+                    day_new_defs.append(0)
+                    
+                else:
+                    # closest_previous_day is done relative to the start of 
+                    # day_list.  Convert this to be day number relative to 
+                    # the start of the time series for that frame (the frame
+                    # may not go back to the start of day_list)
+                    closest_day_index = value['day_ns'].index(
+                        closest_previous_day
+                        )
+                    
+                    # record the two unrest metrics for that dat
+                    day_existing_defs.append(
+                        value['existing_defs'][closest_day_index]
+                        )
+                    day_new_defs.append(
+                        value['new_defs'][closest_day_index]
+                        )
+        
+            status_combined['existing_defs'].append(max(day_existing_defs))
+            status_combined['new_defs'].append(max(day_new_defs))
+            
+        return status_combined
+        
+        
+    def calculate_status_overall(volc):
+        """ Calculate the overall status, which is just the maximum
+        of the new deformation unrest and existing deformation unrest
+        for each time for the volcano.  
+        """
+        from copy import deepcopy
+        
+        # make a deepcopy to edit
+        volc.status_overall = deepcopy(volc.status_combined)
+        
+        # initialise
+        volc.status_overall['existing_defs']
+        
+        
+        # Take the maximum value from each pair of values to make a single
+        # unrest value for all times 
+        volc.status_overall['unrest_metric'] = [
+            max(a, b) for a, b in zip(
+                volc.status_overall['new_defs'], 
+                volc.status_overall['existing_defs'], 
+                )
+            ]
+        
+        # remove these from the overall status now the unrest metric
+        # has been calculated
+        del volc.status_overall['new_defs']
+        del volc.status_overall['existing_defs']
+        
+    
+    def calculate_status_cumulative(volc):
+        """ Calculate the cumulative unrest metric
+        (which is just the integral of the unrest_metric)
+        """
+        from copy import deepcopy
+        import numpy as np
+        
+        # make a deepcopy to edit
+        volc.status_cumulative = deepcopy(volc.status_overall)
+
+                
+        volc.status_cumulative['unrest_cum'] = np.cumsum(
+            volc.status_cumulative['unrest_metric']
+            )
+       
+        # remove these from the copied version as now redundant
+        del volc.status_cumulative['unrest_metric']
+        
+                    
+    
+            
+    def nearest_smaller_or_equal(lst, target):
+        """ Find the closest item in the list that is smaller or equal.  
+        E.g. looking for day 12, options are [1, 7, 13], 7 will be returned    
+    
+        """
+        smaller_numbers = [num for num in lst if num <= target]
         if smaller_numbers:
             return max(smaller_numbers)
         return None  # If there are no smaller numbers
     
-    # def remove_empty_licsalert_volcs(licsalert_status, volc_names, volc_dirs):
-    #     """  Some ovlcanoes do not have any licsalert outputs so just have a column of 0s.  
-    #     Remove these.  
-    #     Inputs:
-    #         licsalert_status | r2 array | n_times x n_volcs x 2
-    #         volc_names | list of strings |
-    #         volc_dirs | list of paths as strings |
-    #     Returns:
-    #         As above, but with some removed.  
-    #     History:
-    #         2023_09_04 | MEG | Written
-    #     """
-    #     from copy import deepcopy
-        
-    #     licsalert_status_crop = deepcopy(licsalert_status)
-    #     volc_names_crop = deepcopy(volc_names)
-    #     volc_dirs_crop = deepcopy(volc_dirs)
-        
-    #     # get the indexes of ones to delete (that are just 0s)
-    #     volc_del_indexes = []
-    #     for volc_n in range(len(volc_names)):
-    #         if np.sum(licsalert_status[:, volc_n]) == 0:
-    #             #print(f"Noting for {volc_dirs[volc_n]}")
-    #             volc_del_indexes.append(volc_n)
-                
-    #     # do the deleting    
-    #     licsalert_status_crop = np.delete(licsalert_status_crop, volc_del_indexes, axis = 1)                            # each volcano is an item in dimension 1 (columns)
-    #     for volc_n in sorted(volc_del_indexes, reverse = True):
-    #         del volc_names_crop[volc_n]
-    #         del volc_dirs_crop[volc_n]
-                    
-    #     return licsalert_status_crop, volc_names_crop, volc_dirs_crop
     
     # loop through each volcano    
     for volc_n, volc in enumerate(volcs):
-        # and the frames of that volcano (only the ones with data though)
+        
+        # initiliase
         volc.status = {}
+
+        # and the frames of that volcano (only the ones with data though)
         for frame_n, frame_path in enumerate(volc.frame_status):
-            
-            if volc.name == 'wolf':
-                pdb.set_trace()
-            
+                       
             # check that there is data for that frame
             if frame_path != 'NA':
                 print(f"Creating the LiCSAlert status for frame {volc.frames[frame_n]}")
@@ -131,9 +224,6 @@ def extract_licsalert_status(volcs, day_list):
                 # loop through all licsalert dates
                 for date_dir in get_licsalert_date_dirs(frame_path):
                     # and get the licsalert status for that date
-                    
-
-                    
                     try:
                         licsalert_date = datetime.strptime(Path(date_dir).parts[-1], '%Y%m%d')
                         day_n = day_list.index(licsalert_date)
@@ -154,39 +244,21 @@ def extract_licsalert_status(volcs, day_list):
                         pass
                 volc.status[f"{volc.frames[frame_n][-17:]}"] = frame_status
                 
-    
-        # combine the statuses
-        combined_status = {'dates' : [],
-                           'day_ns' : [],
-                           'existing_defs' : [],
-                           'new_defs'      :[]}
-        for day in day_list:
-            combined_status['dates'].append(day)
-            day_n = day_list.index(day)
-            combined_status['day_ns'].append(day_n)
-            
-            # collate across all frames for that volcano
-            day_existing_defs = []
-            day_new_defs = []
-            for frame, value in volc.status.items():
-                closest_previous_day = nearest_smaller(value['day_ns'], day_n)
-                # if no data yet
-                if closest_previous_day is None:
-                    day_existing_defs.append(0)
-                    day_new_defs.append(0)
-                else:
-                    closest_day_index = value['day_ns'].index(closest_previous_day)
-                    day_existing_defs.append(value['existing_defs'][closest_day_index])
-                    day_new_defs.append(value['new_defs'][closest_day_index])
+        # after we have processed all frames for that volcano, 
+        # combine the statuses to make the combined status.  
+        # (that is a a new def and existing def metric for each time)
+        # 2 x times for each volcano
+        volc.status_combined = calculate_status_combined(volc, day_list)
         
-            combined_status['existing_defs'].append(max(day_existing_defs))
-            combined_status['new_defs'].append(max(day_new_defs))
+        # also calculate the overall status
+        # (that is the maximum of new and existing for each volcano)
+        # 1 x times 
+        calculate_status_overall(volc)
+        
+        # calcaulte the integral of the overall status    
+        calculate_status_cumulative(volc)
             
-        volc.combined_status = combined_status
-                
-  
-
-
+        
 
 #%%
 
