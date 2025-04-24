@@ -779,10 +779,14 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
 
     if filtered:
         print(f"Opening the LiCSBAS filtered results.  ")
-        cumh5 = h5.File(LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'cum_filt.h5' ,'r')                       # either open the filtered file from LiCSBAS
+        cumh5 = h5.File(
+            LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'cum_filt.h5' ,'r'
+            )
     else:
         print(f"Opening the LiCSBAS unfiltered results.  ")
-        cumh5 = h5.File(LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'cum.h5' ,'r')                            # or the non filtered file from LiCSBAS
+        cumh5 = h5.File(
+            LiCSBAS_out_folder / LiCSBAS_folders['TS_'] / 'cum.h5' ,'r'
+            )
     
     cumulative = cumh5['cum'][()]                                                                               # get cumulative displacements as a rank3 numpy array
     cumulative *= 0.001                                                                                         # LiCSBAS default is mm, convert to m
@@ -993,7 +997,6 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
                          'licsbas' to mask pixels that are in the licsbas 
                          mask, and those that ever go to nan.  
                          'nan_once' to mask only pixels that are ever nan, 
-                         'nan_always' to 
                          'nan_variable' to just mask the pixels that are nan
                          in the licsbas data (so the mask varies with time)
 
@@ -1349,7 +1352,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     # make cumulative baselines, and ensure that 0 at the start.  
     tbaseline_info["baselines_cumulative"] = np.concatenate((np.zeros((1)), np.cumsum(tbaseline_info["baselines"])), axis = 0)                                                            
     
-    # 5: Try to get the DEM
+    # 5: Try to get the DEM (simple numpy array, uses 1e-20 for water (April 25))
     try:
         dem = nested_lists_to_numpy(licsbas_data['elev'])                                                 # 
         displacement_r3['dem'] = dem                                                                      # 

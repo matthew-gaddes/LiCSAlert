@@ -578,17 +578,17 @@ from licsalert.plotting import status_fig_one_volc, status_fig_all_volcs
 #     "2025_02_13_licsalert/licsalert_sync"
 #     )
 
-# #v2, still copying.  
-# licsalert_dir = Path(
-#     "/home/matthew/university_work/03_automatic_detection_algorithm/"
-#     "06_LiCSAlert/05_jasmin_clones/2025_02_28_s1_10yr/licsalert_sync"
-#     )
-
-# #v3, only status files, but for all volcs
+# #v2, 
 licsalert_dir = Path(
     "/home/matthew/university_work/03_automatic_detection_algorithm/"
-    "06_LiCSAlert/05_jasmin_clones/2025_03_06_s1_10yr_status_only/licsalert"
+    "06_LiCSAlert/05_jasmin_clones/2025_02_28_s1_10yr/licsalert_sync"
     )
+
+# # #v3, only status files, but for all volcs
+# licsalert_dir = Path(
+#     "/home/matthew/university_work/03_automatic_detection_algorithm/"
+#     "06_LiCSAlert/05_jasmin_clones/2025_03_06_s1_10yr_status_only/licsalert"
+#     )
 
 # volc_names = [  
 #     "Campi Flegrei",
@@ -621,6 +621,7 @@ licsalert_dir = Path(
 
 # names of all comet frames.  
 comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
+comet_volcano_frame_index_dir = Path('./comet_volcano_frames_fogo_edit/')
 
 #out_dir = Path("./status_outputs/04_chile_november_2024")
 d_start = "20140101"                
@@ -631,6 +632,8 @@ volcs_omit = []
 generate_bash_dl_file = True
 ################## end jasmin outputs 2024 for Chile
 
+combined_status_method = 'previous'
+combined_status_method = 'window'
 
 #%%  #################  local test volcs (processed with LiCSBAS by me?  )
 # all_volcs_figs_dir = Path('monitoring_steps_all_volcs_test')
@@ -689,12 +692,14 @@ if "volc_names" not in locals():
 
 
 # open the info on COMET volcano frames and what region they're in.  
-# region is a key, and each value isa list of comet frames in that region
+# region is a key, and each value is a list of comet frames in that region
 comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir)
 
 # convert volc_names to volcs, which is a list of comet_volcano objects
 # output is jasmin_sync_script.sh
 volcs = volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index)    
+
+
 
 # tidy up.  
 del volc_names
@@ -738,7 +743,7 @@ del volc_names
 #     licsalert_dir, licsalert_dir.parent / "to_delete", n = 6)
 
 # print("\n\n\nSELECTING ONLY A SUBSET OF THE DATA\n\n\n")
-# volcs = volcs[0:1]
+# volcs = volcs[0:5]
 
 
 #%% Step 03: Compile licalert status for all frames at all times.  
@@ -757,6 +762,8 @@ volcs = update_volcs_with_data(
     )
 
 
+
+
 # add the lon lat info for each volcano
 volcs = get_lon_lat_of_volcs(volcs)
 
@@ -770,16 +777,11 @@ day_list = create_day_list(d_start, d_stop)
 
 
 # get the licsalert status for each volcano frame (update volcs)
-extract_licsalert_status(volcs, day_list)           
+extract_licsalert_status(volcs, day_list, combined_status_method)           
 
 # tidy up
 del volc_frames, volc_frame_names
 
-
-
-
-
-    
 
 
 #%% Step 04: figure for one volcano at all times.  
@@ -817,68 +819,124 @@ del volc_frames, volc_frame_names
 #%% Load / save before plotting
 
 
-print(f"\n\n Saving a pickle of 'volcs' and 'day_list' \n\n ")
-with open("monitoring_analysis_locals.pkl", 'wb') as f:
-    cloudpickle.dump(volcs, f)
-    cloudpickle.dump(day_list, f)
+
+
+# print(f"\n\n Saving a pickle of 'volcs' and 'day_list' \n\n ")
+# with open("monitoring_analysis_locals_RSE_volcs.pkl", 'wb') as f:
+#     cloudpickle.dump(volcs, f)
+#     cloudpickle.dump(day_list, f)
 
 
 
 
 # print(f"\n\n OPENING A PICKLE OF 'volcs' AND 'day_list' \n\n ")
-with open("monitoring_analysis_locals.pkl", 'rb') as f:    
-    volcs = cloudpickle.load(f)
-    day_list = cloudpickle.load(f)
+# with open("monitoring_analysis_locals.pkl", 'rb') as f:    
+# with open("monitoring_analysis_locals_RSE_volcs.pkl", 'rb') as f:    
+#     volcs = cloudpickle.load(f)
+#     day_list = cloudpickle.load(f)
 
-#%% Test fig for only Alcedo
-# #  Plot a figure for each volcano showing the status for each frame at all times
 
-for volc in volcs[0:1]:
+
+#%%  Plot a figure for each volcano showing the status for each frame at all times
+
+fig_indexes, _ = find_volc_indexes(volcs, ['reykjanes'])
+fig_indexes, _ = find_volc_indexes(volcs, ['wolf'])
+fig_indexes, _ = find_volc_indexes(volcs, ['la palma'])             # not in data?
+fig_indexes, _ = find_volc_indexes(volcs, ['laguna del maule'])             # 
+
+for volc in volcs[fig_indexes[0]:fig_indexes[0]+1]:
     print(f"Plotting the unrest metrics for all frames at {volc.name}")
     plot_unrest_metric_all_frames_one_volc(
         volc, ticks_labels_every_n = 6, scatter_points=True
         )
 
 
+"""
+# Campi Flegrei?
+# Sierra Negra?
+# La Palma?
+Can we make one subplot for with eruption and one without?
+
+"""
+
 #%% Order by cumulative unrest
 
 volcs = order_volcs_by_cumulative_unrest(volcs)
 
-plot_unrest_metric_all_volcs(volcs[8:20])
+
+# interactive figure 
+#plot_unrest_metric_all_volcs(volcs[8:20])
 
 volcs_to_remove = [
     'chagulak',
     ]
 
+# v1
 # user defined as interesting
+# volcs_to_plot = [
+#     'reykjanes',
+#     'mauna_loa',
+#     'wolf',
+#     'alcedo',
+#     'ecuador',
+#     'darwin',
+#     'askja',
+#     'domuyo',
+#     'campi_flegrei'
+#     'kilauea',
+#     'mauna_kea'
+#     ]
+
+# v2 3 with eruption, 3 without
 volcs_to_plot = [
     'reykjanes',
     'mauna_loa',
     'wolf',
-    'alcedo',
-    'ecuador',
-    'darwin',
-    'askja',
-    'domuyo',
-    'campi_flegrei'
-    'kilauea',
-    'mauna_kea'
+    'Askja',
+    'Campi Flegrei',
+    'Sierra Negra',
+    'Fogo',
+    'Fujisan'
     ]
 
 
 fig_indexes, _ = find_volc_indexes(volcs, volcs_to_plot)
 
     
+
 #%%
 
+
 def unrest_metric_all_volcs_publication_figure(
-        volcs, n_rows, n_per_row, x_lims, labels_dict, y_lims = None
-        ):
+        volcs, n_rows, n_per_row, x_lims, baseline_end,
+        labels_dict1 = None, labels_dict2 = None, 
+        y_lims=None, arrow_length = 0.1, text_angle=33, figsize = (7.84, 7.84)):
     """
+    Plots unrest metrics for volcanoes on multiple subplots. Each subplot displays a subset of volcanoes.
+    Additionally, annotations are added outside (above) the first and second subplots based on the provided
+    dictionaries of labels.
+    
+    Parameters:
+      volcs: list of volcano objects (each must have attributes:
+             - status_overall: dict with keys 'dates' (list of datetime objects) and 'unrest_metric' (list)
+             - name: volcano name)
+      n_rows: number of subplot rows (expected to be 2 for this version)
+      n_per_row: number of volcanoes per row
+      x_lims: tuple or list with left and right limits for x-axis (e.g. [datetime(2021,1,1), datetime(2025,1,1)])
+      labels_dict1: dictionary for annotations on the top of the first subplot.
+                    Keys are label texts; values are date strings in the format "YYYY_MM_DD"
+      labels_dict2: dictionary for annotations on the top of the second subplot.
+                    Same format as labels_dict1.
+      y_lims: optional, tuple or list with bottom and top y-limits.
     """
     
+    
+    from datetime import datetime
+    import matplotlib.pyplot as plt
+    import matplotlib.colors as mcolors
+    
     def color_extender(colors, n_volcs):
-        """ Extend a list of colours so that it's longer than n_volcs"""
+        """ Extend a list of colours so that it's longer than n_volcs """
         if len(colors) < n_volcs:
             colors = colors + colors
         else:
@@ -887,124 +945,144 @@ def unrest_metric_all_volcs_publication_figure(
         colors = color_extender(colors, n_volcs)
         return colors
     
-    import matplotlib.colors as mcolors
-    
-    def plot_for_subset(volcs, ax):
-        """
-        """
-
-        # Plot each volcano's data and store the line objects.
-        for volc in volcs:
+    def plot_for_subset(volcs_subset, ax):
+        """Plot each volcano's data on ax and add a subplot legend."""
+        for volc in volcs_subset:
             line, = ax.plot(
-                volc.status_overall['dates'], volc.status_overall['unrest_metric'],
-                label=volc.name, c = colors[color_counter[0]]
+                volc.status_overall['dates'],
+                volc.status_overall['unrest_metric'],
+                label=volc.name,
+                c=colors[color_counter[0]]
             )
             lines.append(line)
-            
-            # note that this is a mutable so accesible even if not in locals
             color_counter[0] += 1
             
-            # legend for the subplot
-            legend = ax.legend(
-                loc='upper right', ncol=2, frameon=True, prop={'size': 10}
-                )
-
-    # get a list of colors, and make sure there's more than the volcs    
+        # add the legend for that subplot
+        ax.legend(loc='upper left', ncol=1, frameon=True, prop={'size': 10})
+    
+    # Get a list of colors, extended if necessary.
     colors = list(mcolors.TABLEAU_COLORS)
     colors = color_extender(colors, len(volcs))
     
-    # make this a mutable so it can be accessed by child functions 
+    # Mutable counter for colors.
     color_counter = [0]
     
-    # initiliase to store all lines that are ploted
+    # List to store all line objects
     lines = []
     
-    fig, axes = plt.subplots(n_rows, 1, figsize=(7.84, 7.84)) 
+    #
+    y_label = 'LiCSAlert Unrest metric'
+    
+    # Create subplots
+    fig, axes = plt.subplots(n_rows, 1, figsize=figsize, )
+    plt.subplots_adjust(hspace = 0.4)
+    
     for row in range(n_rows):
-        plot_for_subset(
-            volcs[(row*n_per_row) : ((row + 1)*n_per_row)], axes[row],
-            )
-        
-    # set the x and y lims and grid lines
+        subset = volcs[(row * n_per_row): ((row + 1) * n_per_row)]
+        plot_for_subset(subset, axes[row])
+    
+    # Set the x and y limits and add grid lines to all axes.
     for ax in axes:
-        ax.set_xlim(left = x_lims[0], right = x_lims[1])
-        # possibly apply a shared y_lims
+        ax.set_xlim(left=x_lims[0], right=x_lims[1])
         if y_lims is not None:
             ax.set_ylim(bottom=y_lims[0], top=y_lims[1])
         ax.grid(
             True, which='both', linestyle='--', linewidth=0.5, color='gray', 
             alpha=0.5
             )
+        ax.set_ylabel(y_label)
     
-    # Create the legend that's shared
-    # plt.subplots_adjust(bottom=0.2)
-    # legend = fig.legend(
-    #     loc='upper center', bbox_to_anchor=(0.5, 0.15), ncol=5, frameon=False
-    #     )
-    
-    # date tick labels only on the botttom plot
+    # Only leave x tick labels on the bottom subplot.
     for ax in axes[:-1]:
         ax.set_xticklabels([])
-        
-    # add the eruption labels at the top        
-    # Get the current y-axis limits.
-    y_bottom, y_top = axes[0].get_ylim()
     
-    # Calculate an offset (in data units) to position the text above the axes.
-    offset = 0.2 * (y_top - y_bottom)
     
-    # Add annotations outside the axes area.
-    # Using clip_on=False ensures the text is drawn even if it falls outside the axes.
-    for label_text, date_str in labels_dict.items():
-        # Parse the date string into a datetime object.
-        date_obj = datetime.strptime(date_str, "%Y_%m_%d")
+    # shade the baseline stage:
+    for ax in axes:
+        ax.axvspan(x_lims[0], baseline_end, color='grey', alpha=0.1)
+    
+    # x label
+    axes[-1].set_xlabel('Date')
+    
+    # For first subplot using labels_dict1
+    if labels_dict1 is not None:
+        y_bottom, y_top = axes[0].get_ylim()
+        offset = arrow_length * (y_top - y_bottom)
+        for label_text, date_str in labels_dict1.items():
+            date_obj = datetime.strptime(date_str[0], "%Y_%m_%d")
+            axes[0].annotate(
+                label_text,
+                xy=(date_obj, y_top),                # arrow tip at the top edge of subplot 0
+                xytext=(date_obj, y_top + offset),     # text placed above the axes
+                textcoords='data',
+                arrowprops=dict(arrowstyle="->"),
+                rotation=text_angle,                           # rotated text
+                ha='center',
+                va='bottom',
+                clip_on=False,
+                color = date_str[1]
+            )
         
-        # Annotate with an arrow pointing from the top edge of the axes.
-        axes[0].annotate(
-            label_text,
-            xy=(date_obj, y_top),                  # arrow tip at the top edge of the data
-            xytext=(date_obj, y_top + offset),       # place the text above the axes
-            textcoords='data',
-            arrowprops=dict(arrowstyle="->"),
-            rotation=35,                             # rotate text 45° to help avoid overlaps
-            ha='center',
-            va='bottom',
-            clip_on=False                           # allow drawing outside the axes
+    # For second subplot using labels_dict2
+    if labels_dict2 is not None:
+        y_bottom2, y_top2 = axes[1].get_ylim()
+        offset2 = arrow_length * (y_top2 - y_bottom2)
+        for label_text, date_str in labels_dict2.items():
+            date_obj = datetime.strptime(date_str[0], "%Y_%m_%d")
+            axes[1].annotate(
+                label_text,
+                xy=(date_obj, y_top2),                # arrow tip at the top edge of subplot 1
+                xytext=(date_obj, y_top2 + offset2),     # text placed above the axes
+                textcoords='data',
+                arrowprops=dict(arrowstyle="->"),
+                rotation=0,
+                ha='center',
+                va='bottom',
+                clip_on=False,
+                color = date_str[1]
         )
-
-        
     
+    plt.show()
 
-    
+# Example dictionaries for annotations.
+labels_eruptive = {
+    'Mauna Loa': ['2022_11_27', 'tab:orange'],
+    'Wolf': ['2022_01_07', 'tab:green'],
+    'Fagradalsfjall 1': ['2021_03_19', 'tab:blue'],
+    'Fagradalsfjall 2': ['2021_12_22', 'tab:blue'],
+    'Fagradalsfjall 3': ['2022_08_03', 'tab:blue'],
+    'Fagradalsfjall 4': ['2023_07_10', 'tab:blue'],
+    'Svartsengi': ['2023_12_18', 'tab:blue'],
+}
 
+labels_no_erupt = {
+    'Askja inflation': ['2021_01_01', 'tab:red'],
+    #'Campi Flegrei acc. 1': '2021_02_01',
+    'Campi Flegrei\nacceleration': ['2024_01_01', 'tab:purple'],
+    'Sierra Negra\nacceleration': ['2022_01_01', 'tab:brown']
+}
 
-labels_dict = {
-    'Mauna Loa' : '2022_11_27',
-    'Wolf' : '2022_01_07',
-    'Krysuvik1' : '2021_03_19',
-    'Krysuvik2' : '2022_08_03',
-    'Krysuvik3' : '2023_07_10',
-    'Sundhnúkur' : '2023_12_18'
-    }
-
-# subset for figure    
+# figure
 unrest_metric_all_volcs_publication_figure(
-    [volcs[i] for i in fig_indexes], 3, 3, 
-    x_lims=[datetime(2021,1,1), datetime(2025,1,1)],
-    labels_dict = labels_dict, y_lims = None
-    )
-
-sys.exit()
-
-
-# # all volcs
-# unrest_metric_all_volcs_publication_figure(
-#     volcs, n_rows=4, n_per_row=5, x_lims=[datetime(2021,1,1), datetime(2025,1,1)],
-#     y_lims = [0, 60])
-
-#%%
+    [volcs[i] for i in fig_indexes], 3, 3,
+    x_lims=[datetime(2019, 1, 1), datetime(2025, 1, 1)], 
+    baseline_end=datetime(2021, 1, 1),
+    labels_dict1=labels_eruptive,
+    labels_dict2=labels_no_erupt,
+    y_lims=None, figsize=(7.84, 9)
+)
 
 
+#%% SI figure showing all the other volcs
+
+fig_indexes_si = [i for i in range(len(volcs)) if i not in fig_indexes]
+
+unrest_metric_all_volcs_publication_figure(
+    [volcs[i] for i in fig_indexes_si], 5, 3,
+    x_lims=[datetime(2019, 1, 1), datetime(2025, 1, 1)],
+    baseline_end=datetime(2021, 1, 1),
+    y_lims=None
+)
 
 
 
@@ -1029,51 +1107,4 @@ sys.exit()
     
     
 
-
-#%% Plot them by name (unrest time series for one volc)
-
-# volc_names = [volc.name for volc in volcs]
-
-# import difflib
-
-# volc_name = 'sierra'
-
-# volc_name = 'soufriere'
-# volc_name = 'nyiragongo'
-# volc_name = 'palma'
-# volc_name = 'merapi'
-# volc_name = 'schiveluk' # can't find
-# volc_name = 'popocatepetl' # can't find
-# volc_name = 'fentale'
-
-
-
-
-
-# # wolf - good
-# plot_unrest_metric_all_frames_one_volc(volcs[195], ticks_labels_every_n = 6)
-
-
-# # Agung - not so good.  
-# plot_unrest_metric_all_frames_one_volc(volcs[4], ticks_labels_every_n = 6)
-
-# # Kilauea - 2018 so in baseline stage
-# plot_unrest_metric_all_frames_one_volc(volcs[108], ticks_labels_every_n = 6)
-
-# # Taal - Jan 2020, so in baseline
-# plot_unrest_metric_all_frames_one_volc(volcs[177], ticks_labels_every_n = 6)
-
-# # Nyiragongo - May 2021 - no data? 
-# plot_unrest_metric_all_frames_one_volc(volcs[139], ticks_labels_every_n = 6)
-
-# # La Palma- 2021 09 to 12
-# plot_unrest_metric_all_frames_one_volc(volcs[115], ticks_labels_every_n = 6)
-
-# # Merapi: 21 - 23, need baeline data as this is also  currently 20210101
-# plot_unrest_metric_all_frames_one_volc(volcs[127], ticks_labels_every_n = 6)
-
-# # Fentale - 2025? 
-# plot_unrest_metric_all_frames_one_volc(volcs[78], ticks_labels_every_n = 6)
-
-#%%
 

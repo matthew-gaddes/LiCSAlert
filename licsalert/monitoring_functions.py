@@ -1339,3 +1339,82 @@ def manual_mask_wrapper(volcano_dir, draw_manual_mask, displacement_r2):
     return displacement_r2
     
     
+#%%
+
+
+def calculate_valid_pixels(cum_r3):
+    """
+    """
+    
+    import numpy as np
+
+    # Compute number of valid pixels in each epoch
+    # (mask is True where pixel is masked)
+    n_pixels = [np.sum(~cum_r2.mask) for cum_r2 in cum_r3]
+
+    # debug plot    
+    # f, ax = plt.subplots()
+    # ax.scatter([dt.strptime(i, '%Y%m%d') for i in acq_dates], n_pixels)
+
+    # Sort epochs in descending order of valid pixel count 
+    # i.e. epoch number with most pixels first
+    sorted_pairs = sorted(enumerate(n_pixels), key=lambda x: x[1], reverse=True)
+    n_pixels_idx, _ = zip(*sorted_pairs)
+
+    # Total pixel count in a single image
+    total_pix = cum_r3.shape[1] * cum_r3.shape[2]
+    
+    return n_pixels, n_pixels_idx, total_pix
+
+
+#%%
+
+def intersect_valid_pixels(cum_r3, acq_dates, verbose = False):
+    """ Calculate the number of pixels that are valid at all epochs for
+    the time series as the number of epochs is increased in order of the 
+    number of pixels on each date (i.e. add dates with lots of pixels first)
+    """
+    import numpy as np
+    import numpy.ma as ma
+
+    n_epochs, ny, nx = cum_r3.shape
+
+    # get the number of pixels per epoch, and the order
+    n_pixels, n_pixels_idx, total_pix = calculate_valid_pixels(cum_r3)
+    
+    # initialise
+    n_pix_epoch = []
+    cum_r3_resampled = ma.zeros((0, ny, nx))
+    
+    # nothing is masked before we start
+    mask_r2 = np.zeros((0, ny, nx), dtype=bool)
+    
+    for progress, epoch_n in enumerate(n_pixels_idx):
+        if verbose:
+            print(
+                f"Step {progress} of {n_epochs}: Adding epoch "
+                f"{acq_dates[epoch_n]} to the time series...", end = ''
+                )
+        
+        # get displacement to that epoch
+        cum_r2 = cum_r3[epoch_n:epoch_n+1, ]
+
+        # intersect current mask with previous to make new mask        
+        # mask is True where masked, so need to be not True at all times
+        mask_r2 = ~np.all(~
+                 np.concatenate((mask_r2, cum_r2.mask), axis = 0),
+                 axis=0
+             )[np.newaxis, :, :]
+        
+        # record the number of pixels we have.  Note, True for masked, so 
+        # invert to count non-masked
+        n_pix_epoch.append(np.sum(~mask_r2))
+       
+        if verbose:
+            print(f" Done: {n_pix_epoch[-1]} of {total_pix} pixels remain.  ")
+            
+        
+    # apply the mask
+    cum_r3_resampled.mask = mask_r2
+        
+    return n_pix_epoch
