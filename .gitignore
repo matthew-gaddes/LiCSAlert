@@ -12,3 +12,6 @@ status_outputs/
 issue_testing/
 
 figure_inputs.pkl
+
+monitoring_analysis_locals*.pkl
+comet_volcano_frames_fogo_edit/
