@@ -17,6 +17,7 @@ import os
 from glob import glob
 import sys
 from datetime import datetime
+import pandas as pd
 
 # needed to save user-defined objects
 import cloudpickle 
@@ -24,7 +25,8 @@ import cloudpickle
 
 
 
-#%% 
+#%% plot_unrest_metric_all_frames_one_volc()
+
 def plot_unrest_metric_all_frames_one_volc(
         volc, ticks_labels_every_n = 6, scatter_points = False):
     """
@@ -226,7 +228,7 @@ def plot_unrest_metric_all_frames_one_volc(
     fig.tight_layout()  # Adjust layout to fit labels and title
     plt.show()
 
-#%%
+#%% plot_unrest_metric_all_volcs()
 
 
 def plot_unrest_metric_all_volcs(volcs):
@@ -307,7 +309,7 @@ def plot_unrest_metric_all_volcs(volcs):
 
 
 
-#%%
+#%% order_volcs_by_cumulative_unrest()
 
 
 
@@ -336,7 +338,7 @@ def order_volcs_by_cumulative_unrest(volcs):
     return volcs_sorted
 
 
-#%%
+#%% find_volc_indexes()
 
 def find_volc_indexes(volcs, volc_names):
     """ Given a list of volcs, find which number a volcano is when specified
@@ -446,15 +448,18 @@ def matrix_show(matrix, title=None, ax=None, fig=None, save_path = None, vmin0 =
     
 
 
-#%%
+#%% Imports
 
 from licsalert.jasmin_tools import open_comet_frame_files, volcano_name_to_comet_frames
 from licsalert.jasmin_tools import write_jasmin_download_shell_script
-from licsalert.jasmin_tools import update_volcs_with_data, get_lon_lat_of_volcs
+from licsalert.jasmin_tools import update_volcs_with_data
+#from licsalert.jasmin_tools import get_lon_lat_of_volcs_from_ts_data
+from licsalert.jasmin_tools import get_lon_lat_of_volcs_from_db
 
 
 from licsalert.status import extract_licsalert_status, get_all_volcano_dirs
 from licsalert.status import find_volcano, get_volc_names_fron_dir_of_frames
+from licsalert.status import volcs_from_priority
 
 from licsalert.temporal import create_day_list
 from licsalert.volcano_portal_tools import get_portal_public_volcanoes
@@ -571,69 +576,115 @@ from licsalert.plotting import status_fig_one_volc, status_fig_all_volcs
 #%% ################## 10 years of Sentinel paper (2025_02_12)
 
 
-# current clone of Jasmin data - bug with baseline data
+# # current clone of Jasmin data - bug with baseline data
+# # licsalert_dir = Path(
+# #     "/home/matthew/university_work/03_automatic_detection_algorithm/"
+# #     "06_LiCSAlert/05_jasmin_clones/2025_02_13_s1_10yr_licsalert/"
+# #     "2025_02_13_licsalert/licsalert_sync"
+# #     )
+
+# # #v2, 
 # licsalert_dir = Path(
 #     "/home/matthew/university_work/03_automatic_detection_algorithm/"
-#     "06_LiCSAlert/05_jasmin_clones/2025_02_13_s1_10yr_licsalert/"
-#     "2025_02_13_licsalert/licsalert_sync"
+#     "06_LiCSAlert/05_jasmin_clones/2025_02_28_s1_10yr/licsalert_sync"
 #     )
 
-# #v2, 
-licsalert_dir = Path(
-    "/home/matthew/university_work/03_automatic_detection_algorithm/"
-    "06_LiCSAlert/05_jasmin_clones/2025_02_28_s1_10yr/licsalert_sync"
+# # # #v3, only status files, but for all volcs
+# # licsalert_dir = Path(
+# #     "/home/matthew/university_work/03_automatic_detection_algorithm/"
+# #     "06_LiCSAlert/05_jasmin_clones/2025_03_06_s1_10yr_status_only/licsalert"
+# #     )
+
+# # volc_names = [  
+# #     "Campi Flegrei",
+# #     "Fernandina",
+# #     "Darwin",
+# #     "Sierra Negra",
+# #     "Cerro Azul",
+# #     "Kilauea",
+# #     "Wolf",
+# #     "Laguna del Maule",
+# #     "Ecuador",
+# #     "Reykjanes",
+# #     "Alcedo",
+# #     "Domuyo",
+# #     "Krysuvik",
+# #     "Fogo",
+# #     "Fujisan",
+# #     # bottom left of figure
+# #     "Mauna Loa",
+# #     "Mauna Kea",
+# #     "Etna",
+# #     "Askja",
+# #     "Iztaccihuatl",
+# #     "Pico",
+# #     "Bardarbunga",
+# #     "Esjufjoll",
+# #     "Kverkfjoll"
+# # ]
+
+
+# # names of all comet frames.  
+# comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
+# comet_volcano_frame_index_dir = Path('./comet_volcano_frames_fogo_edit/')
+
+# #out_dir = Path("./status_outputs/04_chile_november_2024")
+# d_start = "20140101"                
+# d_stop = "20250219"
+# #test_volcano = 'sabancaya*'
+# regions = True
+# volcs_omit = []
+# generate_bash_dl_file = True
+# ################## end jasmin outputs 2024 for Chile
+
+# combined_status_method = 'previous'
+# combined_status_method = 'window'
+
+
+#%% COMET summer 25
+
+
+## Generate the volc_names list
+volc_priorities_used = ["A1"]
+lists = volcs_from_priority(
+    "./comet_volcano_database.pkl", 
+    volc_priorities_used
     )
 
-# # #v3, only status files, but for all volcs
-# licsalert_dir = Path(
-#     "/home/matthew/university_work/03_automatic_detection_algorithm/"
-#     "06_LiCSAlert/05_jasmin_clones/2025_03_06_s1_10yr_status_only/licsalert"
-#     )
+volc_names_a1 = []
+for sublist in lists:
+    volc_names_a1.extend(sublist)
+del lists
 
-# volc_names = [  
-#     "Campi Flegrei",
-#     "Fernandina",
-#     "Darwin",
-#     "Sierra Negra",
-#     "Cerro Azul",
-#     "Kilauea",
-#     "Wolf",
-#     "Laguna del Maule",
-#     "Ecuador",
-#     "Reykjanes",
-#     "Alcedo",
-#     "Domuyo",
-#     "Krysuvik",
-#     "Fogo",
-#     "Fujisan",
-#     # bottom left of figure
-#     "Mauna Loa",
-#     "Mauna Kea",
-#     "Etna",
-#     "Askja",
-#     "Iztaccihuatl",
-#     "Pico",
-#     "Bardarbunga",
-#     "Esjufjoll",
-#     "Kverkfjoll"
-# ]
+
+
+# #v3, only status files, but for all volcs
+print(f"USING THE TEST DIR OF THE DATA CLONED FROM JASMIN")
+licsalert_dir = Path(
+    "/home/matthew/university_work/03_automatic_detection_algorithm/"
+    "06_LiCSAlert/05_jasmin_clones/2025_05_22_comet_2025/licsalert_sync_test/"
+    )
 
 
 # names of all comet frames.  
-comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
+#comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
 comet_volcano_frame_index_dir = Path('./comet_volcano_frames_fogo_edit/')
 
-#out_dir = Path("./status_outputs/04_chile_november_2024")
+
 d_start = "20140101"                
 d_stop = "20250219"
 #test_volcano = 'sabancaya*'
 regions = True
 volcs_omit = []
 generate_bash_dl_file = True
-################## end jasmin outputs 2024 for Chile
 
-combined_status_method = 'previous'
-combined_status_method = 'window'
+
+#combined_status_method = 'previous'
+combined_status_method = 'window'               # old method uses 'previous'
+
+
+
+
 
 #%%  #################  local test volcs (processed with LiCSBAS by me?  )
 # all_volcs_figs_dir = Path('monitoring_steps_all_volcs_test')
@@ -662,7 +713,7 @@ if "volc_names" not in locals():
         
     # if it's not, try and generate it.  
     try:
-        volc_names = get_volc_names_fron_dir_of_frames(
+        volc_names_dir = get_volc_names_fron_dir_of_frames(
             licsalert_dir, regions = regions
             )
         
@@ -691,6 +742,14 @@ if "volc_names" not in locals():
                 "portal.  Exiting.  ")
 
 
+
+
+# choose which volc_names to use.  
+volc_names = volc_names_a1
+# volc_names = volc_names_dir
+print("SELECTING ONLY A SUBSET OF THE VOLC_NAMES")
+volc_names = sorted(volc_names)[165:168]
+
 # open the info on COMET volcano frames and what region they're in.  
 # region is a key, and each value is a list of comet frames in that region
 comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir)
@@ -699,14 +758,15 @@ comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir
 # output is jasmin_sync_script.sh
 volcs = volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index)    
 
-
-
 # tidy up.  
 del volc_names
 
 
+# for i, v in enumerate(volcs):
+#     print(f"{i} {v.name}")
 
-# %% Step 01: Generate bash file to copy selected data from Jasmin
+
+#%% Step 01: Generate bash file to copy selected data from Jasmin
 
 
 
@@ -724,6 +784,7 @@ del volc_names
 #         jasmin_dir, local_dir, bash_sync_fle, volcs, exclude_json_gz = True,
 #         exclude_original_ts = False, exclude_ICASAR_data = True,
 #         exclude_epoch_images = True, exclude_epoch_data = True)
+
 
 
 
@@ -754,18 +815,25 @@ volc_frames, volc_frame_names = get_all_volcano_dirs(
     )
 
 
+
+
 # update volcs so it only contains volcanoes we have data for.  
 # also  convert to a list with an entry for each volcano, with frame
 # info accessed from the objects attributes.  
 volcs = update_volcs_with_data(
-    volcs, volc_frames, volc_frame_names,verbose = False
+    volcs, volc_frames, volc_frame_names,verbose=False, remove_all_nans=False
     )
 
 
+#  add the lon lat info for each volcano
+# Method 1: from data 
+# volcs = get_lon_lat_of_volcs_from_ts_data(volcs)
+# method 2: from comet database
+get_lon_lat_of_volcs_from_db(
+    volcs,
+    pd.read_pickle("comet_volcano_database.pkl")
+    )
 
-
-# add the lon lat info for each volcano
-volcs = get_lon_lat_of_volcs(volcs)
 
 # adjust the lon lats of the volcanoes so when plotted they don't overlap
 offset_volc_lls(volcs,  threshold = 2., offset = 2.1, attempts = 200)
@@ -774,14 +842,18 @@ offset_volc_lls(volcs,  threshold = 2., offset = 2.1, attempts = 200)
 day_list = create_day_list(d_start, d_stop)
 
 
-
-
 # get the licsalert status for each volcano frame (update volcs)
 extract_licsalert_status(volcs, day_list, combined_status_method)           
 
 # tidy up
 del volc_frames, volc_frame_names
 
+
+#%%
+
+for n, volc in enumerate(volcs[:10]):
+    print(n)
+    print(volc.frame_status)
 
 
 #%% Step 04: figure for one volcano at all times.  
@@ -808,6 +880,8 @@ del volc_frames, volc_frame_names
 
 #%% Step 05: figure for all volcs at all times.  
 
+pdb.set_trace()
+
 # # status_fig_all_volcs(licsalert_status, volc_frame_names, day_list,  
 # #                      out_dir = out_dir / "all_volcs", 
 # #                      figsize = (20, 12), plot_frequency = 6, label_fs = 16)
@@ -815,6 +889,8 @@ del volc_frames, volc_frame_names
 # # # convert the directory of pngs to a single gif
 # # pngs_to_gif(out_dir / "all_volcs", out_dir / "all_volcs" / "animation.gif",
 # #             image_duration = 250)                                                 
+
+
 
 #%% Load / save before plotting
 
@@ -1043,6 +1119,11 @@ def unrest_metric_all_volcs_publication_figure(
         )
     
     plt.show()
+    
+    fig.savefig('RSE_fig.png', bbox_inches='tight')
+    fig.savefig('RSE_fig.pdf', format='pdf', dpi=1200, bbox_inches='tight')
+    
+    pdb.set_trace()
 
 # Example dictionaries for annotations.
 labels_eruptive = {

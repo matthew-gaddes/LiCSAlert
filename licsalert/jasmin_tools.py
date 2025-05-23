@@ -72,12 +72,75 @@ def move_small_directories(indir, outdir, n, regions = True):
             
 
 
+#%% get_lon_lat_of_volcs_from_db()
 
 
-#%%
+def get_lon_lat_of_volcs_from_db(volcs, df_source):
+    """
+    For every volcano object in `volcs`, look up its coordinates in a
+    DataFrame and add an attribute `lon_dat = (lon, lat)`.
+
+    Parameters
+    ----------
+    volcs : list
+        List of user-defined volcano objects.  Each must have a `.name` attribute.
+    df_source : str | pandas.DataFrame
+        Path to a pickle/CSV/Parquet file **or** an already-loaded DataFrame
+        containing at least the columns `name_col`, `lon_col`, `lat_col`.
+    name_col, lon_col, lat_col : str
+        Column names in the DataFrame.
+    case_insensitive : bool, default True
+        Match names ignoring case and surrounding whitespace.
+
+    Returns
+    -------
+    None
+        Objects are modified in place; nothing is returned.
+    """
+    import pandas as pd
+    from typing import List, Union
+
+    
+
+    # 1. Load or accept the DataFrame
+    if isinstance(df_source, pd.DataFrame):
+        df = df_source.copy()
+    else:
+        # pick the loader you need (pickle / csv / parquet)
+        df = pd.read_pickle(df_source)
+
+    # 2. Build a fast name → (lon, lat) lookup dict
+    norm = lambda s: str(s).strip().lower()
 
 
-def get_lon_lat_of_volcs(volcs):
+    # build the dict (key is name, value is lon lat tuples)
+    coords_lookup = {
+        norm(row['name']): (row['lon'], row['lat'])
+        for _, row in df[['name', 'lon', 'lat']].iterrows()
+    }
+
+
+    # 3. Add lon lat to each volcano
+    for v in volcs:
+        key = norm(v.name)
+        coords = coords_lookup.get(key)
+
+        if coords is None:
+            # You can choose to raise instead, or log:
+            print(f"Warning: '{v.name}' not found in DataFrame")
+            continue
+
+        # Attach the new attribute
+        setattr(v, "lon_lat", coords)
+
+
+
+
+
+#%% get_lon_lat_of_volcs_from_ts_data()
+
+
+def get_lon_lat_of_volcs_from_ts_data(volcs):
     """ Given a list of volcs, add the lon and lat of the centre of the 
     LiCSBAS data (averaged across all the frames)
     
@@ -137,7 +200,7 @@ def get_lon_lat_of_volcs(volcs):
 
 
 def update_volcs_with_data(volcs, volc_frame_dirs, volc_frame_names,
-                           verbose = False):
+                           verbose = False, remove_all_nans = False):
     """ Given the LiCSAlert volcs list (list of comet volcano items),
     update to contain only ones that actually have data.  
     
@@ -148,6 +211,10 @@ def update_volcs_with_data(volcs, volc_frame_dirs, volc_frame_names,
         volc_frame_names | list | names of frames in above list.  Must be the 
                                 same length
                                 
+        remove_all_nans | boolean | if a volcano has only nans for the frame status
+                                    i.e. there's no data, possibly remove it 
+                                    from the volcs list.  
+                                
     Returns:
         volcs | list | one item for each volcano, volcanoes with no data 
                         removed.  frame_status attribute now has path to data,
@@ -155,6 +222,7 @@ def update_volcs_with_data(volcs, volc_frame_dirs, volc_frame_names,
                         
     History:
         2024_06_12 | MEG | Written
+        2025_05_23 | MEG | Update so that all nans are not removed.  
     
     """
     
@@ -165,27 +233,40 @@ def update_volcs_with_data(volcs, volc_frame_dirs, volc_frame_names,
         return True
     
     del_indexes = []
-    # loop through each volcano
+    # iterate over all volcanoes
     for volc_n, volc in enumerate(volcs):
         
-        frame_status = []
-        # and each frame that that volcanoe has
-        for frame in volc.frames:
+        # if there's no licsbas time series, there's can't be any licsalert
+        if volc.processing_status.licsbas_ts:
             
-            # to see if there is licsalert data for that frame
-            if  frame in volc_frame_names:
-                # get the index of the frame
-                index = volc_frame_names.index(frame)
-                frame_status.append(volc_frame_dirs[index])
+            frame_status = []
+            # and each frame that that volcanoe has
+            for frame in volc.frames:
+                # to see if there is licsalert data for that frame
+                if  frame in volc_frame_names:
+                    # get the index of the frame
+                    index = volc_frame_names.index(frame)
+                    frame_status.append(volc_frame_dirs[index])
+                else:
+                    frame_status.append('NA')
+            volc.frame_status = frame_status
+            
+            if contains_only_na(frame_status):
+                # check if we should remove the volcano as there's no data
+                if remove_all_nans:
+                    del_indexes.append(volc_n)
+                    # always update the user when a volcano is being removed.  
+                    print(
+                        f"Removing volcano {volc.name} as it does not have "
+                        "any frames with LiCSAlert results.  "
+                        )
+            # if there is licsalert data, update the object to record this.  
             else:
-                frame_status.append('NA')
-        volc.frame_status = frame_status
-        
-        # check if we should remove the volcano as there's no data
-        if contains_only_na(frame_status):
-            del_indexes.append(volc_n)
+                volc.processing_status.licsalert_result=True
 
+            
     # Sort the indexes in descending order to avoid shifting issues, then delete
+    # (only deletes if del_indexes exits)
     for index in sorted(del_indexes, reverse=True):
         del volcs[index]
         
@@ -240,7 +321,7 @@ def open_comet_frame_files(comet_volcano_frame_index_dir):
         
     return comet_volcano_frame_index
 
-#%%
+#%% volcano_name_to_comet_frames()
 
 def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
     """ Given a list of volcanoes of interest, find the frames that name them
@@ -261,8 +342,8 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
                            that would be returned (e.g. if volcano is abc, abcdef
                            would also be returned. )     
     """
-    
-    
+
+    from types import SimpleNamespace
         
     class comet_volcano:
         def __init__(self, name):
@@ -270,7 +351,12 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
             """
             self.name = name
             self.computer_name = self.create_computer_name()
-            self.frames = []
+            # assume volc is an existing volcano object
+            self.processing_status = SimpleNamespace(
+                name=True,
+                licsbas_ts=False,
+                licsalert_result=False
+                )
             
             
         def create_computer_name(self):
@@ -283,28 +369,70 @@ def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
             volc_name_converted = unidecode(volc_name_converted)
             return volc_name_converted
         
+    
+        def determine_region_and_frames(self, comet_volcano_frame_index):
+            """ Given a comet volcano, find the frames and region from the 
+            comet volcano frame index (list of all frames split but region)
+            """
+            
+            # stores the frames for a certain volcano
+            volc_regions = []
+            volc_frames = []
+            
+            succesful_locate=False
+            
+            # loop through each COMET region
+            for region in list(comet_volcano_frame_index.keys()):
+                
+                # get all the frames for that region 
+                # (i.e. multiple for each volcano)
+                frames = comet_volcano_frame_index[region]
+                
+                # loop through the frames to see if the volcano name is in the frame name
+                for frame in frames:
+                    # the last 18 digits of a frame are the track / burst etc.  
+                    # before that is the volcano name in snake_case
+                    if volc.computer_name == frame[:-18]:
+                        succesful_locate=True
+                        # record, regions should awlays agree
+                        volc_regions.append(region)        
+                        volc_frames.append(frame)
+                        
+                        
+            if succesful_locate:
+                # record all the frames for that volcano
+                self.frames = volc_frames
+                # check that the region awlays agrees
+                unique_regions = list(set(volc_regions))
+                if len(unique_regions) > 1:
+                    raise Exception(
+                        "Multiple regions have been found for one volcano, "
+                        "exiting"
+                        )
+                else:
+                    self.region = unique_regions[0]
+                
+                self.processing_status.licsbas_ts=True
+                    
+            else:
+                print(f"Unable to find a COMET frame for {volc_name}, but "
+                      "continuing anyway")
         
         
-    volc_frames = []
+    volcs = []
+    # iterate over each volcano
     for volc_name in sorted(volc_names):
+        
+        # initialise as custom object , only deal with name
         volc = comet_volcano(volc_name)
-        
-        # loop through each region
-        for region in list(comet_volcano_frame_index.keys()):
-            
-            # get all the frames for that region
-            frames = comet_volcano_frame_index[region]
-            
-            # loop through the frames to see if the volcano name is in the frame name
-            for frame in frames:
-                # the last 18 digits of a frame are the track / burst etc.  
-                # before that is the volcano name in snake_case
-                if volc.computer_name == frame[:-18]:
-                    volc.region = region
-                    volc.frames.append(frame)
-        volc_frames.append(volc)
-        
-    return volc_frames
+
+        # find the region, and any comet frames associated with that vol
+        volc.determine_region_and_frames(comet_volcano_frame_index)
+
+        # add to list of all volcs        
+        volcs.append(volc)
+
+    return volcs
 
 
 

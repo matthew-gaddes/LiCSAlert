@@ -8,6 +8,52 @@ Created on Fri Jan 19 14:15:16 2024
 
 import pdb
 
+
+#%% volc_from_priority()
+
+
+def volcs_from_priority(pkl_path, priorities):
+    """
+    Load a volcano DataFrame from a pickle and return a nested list of names,
+    one sub-list per requested priority, in the same order as `priorities`.
+
+    Parameters
+    ----------
+    pkl_path : str
+        Path to the .pkl file that contains the DataFrame.
+        The DataFrame must have at least the columns 'name' and 'priority'.
+    priorities : List[str]
+        Priority classes you want (e.g. ["A1", "A2"]).
+
+    Returns6
+    -------
+    List[List[str]]
+        Outer list follows the order of `priorities`.
+        Each inner list contains the volcano names that match that priority.
+        If a priority is absent in the DataFrame you get an empty list.
+    """
+    import pandas as pd
+    
+    # 1. Load the DataFrame
+    df = pd.read_pickle(pkl_path)
+
+    # 2. Normalise priority column to *strings*; strip spaces, replace NaNs with "None"
+    df = df.copy()
+    df["priority"] = (
+        df["priority"]
+          .astype(str)            # turn None/NaN into "nan"
+          .where(~df["priority"].isin(["nan", "None"]), "None")  # unify null label
+          .str.strip()
+    )
+
+    # 3. Build the result
+    result = []
+    for pr in priorities:
+        names = df.loc[df["priority"] == pr, "name"].tolist()
+        result.append(names)
+
+    return result
+
 #%%
 
 def get_volc_names_fron_dir_of_frames(licsalert_dir, regions = False):
