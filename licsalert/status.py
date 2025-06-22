@@ -9,52 +9,8 @@ Created on Fri Jan 19 14:15:16 2024
 import pdb
 
 
-#%% volc_from_priority()
 
-
-def volcs_from_priority(pkl_path, priorities):
-    """
-    Load a volcano DataFrame from a pickle and return a nested list of names,
-    one sub-list per requested priority, in the same order as `priorities`.
-
-    Parameters
-    ----------
-    pkl_path : str
-        Path to the .pkl file that contains the DataFrame.
-        The DataFrame must have at least the columns 'name' and 'priority'.
-    priorities : List[str]
-        Priority classes you want (e.g. ["A1", "A2"]).
-
-    Returns6
-    -------
-    List[List[str]]
-        Outer list follows the order of `priorities`.
-        Each inner list contains the volcano names that match that priority.
-        If a priority is absent in the DataFrame you get an empty list.
-    """
-    import pandas as pd
-    
-    # 1. Load the DataFrame
-    df = pd.read_pickle(pkl_path)
-
-    # 2. Normalise priority column to *strings*; strip spaces, replace NaNs with "None"
-    df = df.copy()
-    df["priority"] = (
-        df["priority"]
-          .astype(str)            # turn None/NaN into "nan"
-          .where(~df["priority"].isin(["nan", "None"]), "None")  # unify null label
-          .str.strip()
-    )
-
-    # 3. Build the result
-    result = []
-    for pr in priorities:
-        names = df.loc[df["priority"] == pr, "name"].tolist()
-        result.append(names)
-
-    return result
-
-#%%
+#%% get_volc_names_fron_dir_of_frames()
 
 def get_volc_names_fron_dir_of_frames(licsalert_dir, regions = False):
     """ Given a directory of lics volcano frames (possibly organised 
@@ -96,7 +52,7 @@ def get_volc_names_fron_dir_of_frames(licsalert_dir, regions = False):
         
 
 
-#%%
+#%% extract_licsalert_status()
 
 
 
@@ -131,59 +87,62 @@ def extract_licsalert_status(volcs, day_list, combined_status_method='window'):
         
         # initiliase dict to store the status for each frame at each time
         volc.status = {}
-
-        # and the frames of that volcano (only the ones with data though)
-        for frame_n, frame_path in enumerate(volc.frame_status):
-                       
-            # check that there is data for that frame
-            if frame_path != 'NA':
-                print(f"Creating the LiCSAlert status for frame {volc.frames[frame_n]}")
-                # create to store output for this frame
-                frame_status = {'dates' : [],
-                                'day_ns' : [],
-                                'existing_defs' : [],
-                                'new_defs'      :[]}
-                # loop through all licsalert dates
-                for date_dir in get_licsalert_date_dirs(frame_path):
-                    # and get the licsalert status for that date
-                    try:
-                        licsalert_date = datetime.strptime(Path(date_dir).parts[-1], '%Y%m%d')
-                        day_n = day_list.index(licsalert_date)
-                        # read the status from the .txt file.  
-                        f = open(Path(frame_path)/date_dir/"volcano_status.txt" , "r")
-                        existing_def = float(f.readline()[:-1])
-                        new_def = float(f.readline()[:-1])
-                        
-                        # if no error at this point, assume OK to record values
-                        frame_status['existing_defs'].append(existing_def)
-                        frame_status['new_defs'].append(new_def)
-                        
-                        frame_status['dates'].append(licsalert_date)
-                        frame_status['day_ns'].append(day_n)
-                        
-                        f.close()
-                    except:
-                        pass
-                
-                # add the status for this frame to the dict for all frames
-                volc.status[f"{volc.frames[frame_n][-17:]}"] = frame_status
-                
-        # after we have processed all frames for that volcano, 
-        # combine the statuses to make the combined status.  
-        # (that is a a new def and existing def metric for each time)
-        # 2 x times for each volcano
-        volc.status_combined = calculate_status_combined(
-            volc, day_list, combined_status_method
-            )
         
-        # also calculate the overall status
-        # (that is the maximum of new and existing for each volcano)
-        # 1 x times 
-        calculate_status_overall(volc)
-        
-        # calcaulte the integral of the overall status    
-        calculate_status_cumulative(volc)
-   
+        # only try to make a licsalert status if there are licsalert resultsq
+        if volc.processing_status.licsalert_result == True:
+    
+            # and the frames of that volcano (only the ones with data though)
+            for frame_n, frame_path in enumerate(volc.frame_status):
+                           
+                # check that there is data for that frame
+                if frame_path != 'NA':
+                    print(f"Creating the LiCSAlert status for frame {volc.frames[frame_n]}")
+                    # create to store output for this frame
+                    frame_status = {'dates' : [],
+                                    'day_ns' : [],
+                                    'existing_defs' : [],
+                                    'new_defs'      :[]}
+                    # loop through all licsalert dates
+                    for date_dir in get_licsalert_date_dirs(frame_path):
+                        # and get the licsalert status for that date
+                        try:
+                            licsalert_date = datetime.strptime(Path(date_dir).parts[-1], '%Y%m%d')
+                            day_n = day_list.index(licsalert_date)
+                            # read the status from the .txt file.  
+                            f = open(Path(frame_path)/date_dir/"volcano_status.txt" , "r")
+                            existing_def = float(f.readline()[:-1])
+                            new_def = float(f.readline()[:-1])
+                            
+                            # if no error at this point, assume OK to record values
+                            frame_status['existing_defs'].append(existing_def)
+                            frame_status['new_defs'].append(new_def)
+                            
+                            frame_status['dates'].append(licsalert_date)
+                            frame_status['day_ns'].append(day_n)
+                            
+                            f.close()
+                        except:
+                            pass
+                    
+                    # add the status for this frame to the dict for all frames
+                    volc.status[f"{volc.frames[frame_n][-17:]}"] = frame_status
+                    
+            # after we have processed all frames for that volcano, 
+            # combine the statuses to make the combined status.  
+            # (that is a a new def and existing def metric for each time)
+            # 2 x times for each volcano
+            volc.status_combined = calculate_status_combined(
+                volc, day_list, combined_status_method
+                )
+            
+            # also calculate the overall status
+            # (that is the maximum of new and existing for each volcano)
+            # 1 x times 
+            calculate_status_overall(volc)
+            
+            # calcaulte the integral of the overall status    
+            calculate_status_cumulative(volc)
+       
 
 def calculate_status_combined(
         volc, day_list, combined_status_method = 'window' 

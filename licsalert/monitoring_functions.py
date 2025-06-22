@@ -92,7 +92,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     from licsalert.licsalert import licsalert_date_obj
     from licsalert.aux import Tee, find_nearest_date, col_to_ma
     from licsalert.aux import update_mask
-    from licsalert.downsample_ifgs import downsample_ifgs
+    # from licsalert.downsample_ifgs import downsample_ifgs
     from licsalert.plotting import LiCSAlert_figure, LiCSAlert_epoch_figures
     from licsalert.plotting import LiCSAlert_aux_figures, LiCSAlert_mask_figure
     from licsalert.plotting import create_manual_mask
@@ -121,7 +121,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         del outputs
 
     # 2: Open the data
-    displacement_r2, tbaseline_info = import_insar_data(volcano, 
+    displacement_r3, tbaseline_info = import_insar_data(volcano, 
             volcano_dir, region, licsalert_settings, icasar_settings, 
             licsbas_settings,
             licsbas_jasmin_dir, licsbas_dir, alignsar_dc, data_as_arg
@@ -129,28 +129,31 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     
     # 3: Possibly draw a mask manually (and apply it to displacement_r2)
     if 'draw_manual_mask' in licsbas_settings.keys():
-        displacement_r2 = manual_mask_wrapper(
-            volcano_dir, licsbas_settings['draw_manual_mask'], displacement_r2
+        displacement_r3 = manual_mask_wrapper(
+            volcano_dir, licsbas_settings['draw_manual_mask'], displacement_r3
             )        
     
     # check for the unusual case that there are fewer pixels than pca_comps 
     # requested
-    if icasar_settings['sica_tica'] == 'sica':
-        if (displacement_r2['incremental'].shape[1] < 
-            icasar_settings['n_pca_comp_start']):
-            raise Exception(
-                "There are fewer pixels "
-                "{displacement_r2['incremental'].shape[1]} than ")
+    print(f"REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS")
+    # if icasar_settings['sica_tica'] == 'sica':
+    #     if (displacement_r2['incremental'].shape[1] < 
+    #         icasar_settings['n_pca_comp_start']):
+    #         raise Exception(
+    #             "There are fewer pixels "
+    #             "{displacement_r2['incremental'].shape[1]} than ")
 
 
     # mixtures_mc and means contains the daisy chain of ifgs mean centered either 
     # in space or time, depending on whther sica or tica
     
-    displacement_r2 = LiCSAlert_preprocessing(
-        displacement_r2, tbaseline_info,  icasar_settings['sica_tica'],                                                    
+    displacement_r3 = LiCSAlert_preprocessing(
+        displacement_r3, tbaseline_info,  icasar_settings['sica_tica'],                                                    
         licsalert_settings['downsample_run'], 
         licsalert_settings['downsample_plot']
         )
+
+    
     
     # 3b determine if the date provided happens to be an acquisition date 
     if type(licsalert_settings['baseline_end']) != str:
@@ -182,8 +185,12 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         licsalert_settings['figure_intermediate'],
         licsalert_settings['t_recalculate']
         )
-    print(f"LiCSAlert status:  1) Run ICASAR: {LiCSAlert_status['run_ICASAR']}"
-          f"  2) Run LiCSAlert: {LiCSAlert_status['run_LiCSAlert']}")
+    print(f"LiCSAlert status: \n"
+          f"    1) Run ICASAR: {LiCSAlert_status['run_ICASAR']}\n"
+          f"    2) Run LiCSAlert: {LiCSAlert_status['run_LiCSAlert']}"
+          )
+    
+  
     
 
     if LiCSAlert_status['run_LiCSAlert']:                                                                                       
@@ -192,6 +199,52 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         # f, ax = plt.subplots()
         # ax.matshow(displacement_r2['mask'])
         ######################## end debug
+        
+        # determine 
+        
+        def construct_baseline_ts(displacement_r3):
+            """
+            Given a time series with a time varying mask (i.e. pixels come 
+            in and out of coherene), build a time series with a consistent mask
+            that uses only some of these acquisitions to build a compromise 
+            between temporal resolution and number of pixels
+            
+            
+            
+            spatial_ICASAR_data = {'ifgs_dc'       : displacement_r2['mixtures_mc'][:(baseline_end.acq_n+1),],                             
+                                   'mask'          : displacement_r2['mask'],
+                                   'lons'          : displacement_r2['lons'],
+                                   'lats'          : displacement_r2['lats'],
+                                   
+                                   
+           'ifg_dates_dc'  : tbaseline_info['ifg_dates'][:(baseline_end.acq_n+1)]}                             
+            
+            """
+
+            # determine the number of pixels for each epoch
+            n_pixels, n_pixels_idx, total_pix = calculate_valid_pixels(
+                displacement_r3['cum_ma']
+                )
+
+            # and how those change as we add epochs
+            n_pix_epoch = intersect_valid_pixels(
+                cum_ma,
+                acq_dates,
+                verbose = False
+                )
+
+            epoch_values = calculate_optimal_n_epochs(n_pix_epoch)
+            
+            
+            pdb.set_trace()
+            
+                
+            
+            return displacement_r2
+        
+        
+        baseline_disp_r2 = construct_baseline_ts(displacement_r3)
+        
         
         # either load ICA from previous run, or compute it.  
         outputs = load_or_create_ICASAR_results(

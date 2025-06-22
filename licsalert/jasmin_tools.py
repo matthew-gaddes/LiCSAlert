@@ -8,6 +8,236 @@ Created on Fri Jan 19 11:35:43 2024
 import pdb
 from glob import glob
 from pathlib import Path
+from types import SimpleNamespace
+
+#%%
+
+
+class licsalert_volc:
+    def __init__(self, name):
+        """ 
+        """
+        self.name = name
+        # self.computer_name = self.create_computer_name()
+        self.processing_status = SimpleNamespace(
+            name=True,
+            licsbas_ts=False,
+            licsalert_result=False
+            )
+        
+        
+    def create_computer_name(self):
+        """
+        """
+        from unidecode import unidecode
+        # convert to snake case and all lowercase as this is format used by comet 
+        volc_name_converted = self.name.lower().replace(' ', '_')
+        # swap any accents to nearest ASCII 
+        volc_name_converted = unidecode(volc_name_converted)
+        return volc_name_converted
+    
+    
+    
+    
+    def determine_region_and_frames_from_computer_name(
+            self, comet_volcano_frame_index
+            ):
+        """ Given a comet volcano computer_name, find the frames and region from the 
+        comet volcano frame index (list of all frames split but region)
+        """
+        
+        # print(f"    {self.name}")
+        
+        # stores the frames for a certain volcano
+        volc_regions = []
+        volc_frames = []
+        
+        succesful_locate=False
+        
+        # loop through each COMET region
+        for region in list(comet_volcano_frame_index.keys()):
+            
+            # get all the frames for that region 
+            # (i.e. multiple for each volcano)
+            frames = comet_volcano_frame_index[region]
+            
+            # loop through the frames to see if the volcano name is in the frame name
+            for frame in frames:
+                # the last 18 digits of a frame are the track / burst etc.  
+                # before that is the volcano name in snake_case
+                if self.computer_name == frame[:-18]:
+                    
+                    succesful_locate=True
+                    # record, regions should awlays agree
+                    volc_regions.append(region)        
+                    volc_frames.append(frame)
+                    
+                    
+        if succesful_locate:
+            # record all the frames for that volcano
+            self.frames = volc_frames
+            # check that the region awlays agrees
+            unique_regions = list(set(volc_regions))
+            if len(unique_regions) > 1:
+                raise Exception(
+                    "    Multiple regions have been found for one volcano, "
+                    "exiting"
+                    )
+            else:
+                self.region = unique_regions[0]
+            self.processing_status.licsbas_ts=True
+                
+        else:
+            print(f" Unable to find a COMET frame")
+            
+            
+    def determine_frames_from_computer_name_and_region(
+            self, comet_volcano_frame_index
+            ):
+        """ Given a comet volcano computer_name, find the frames and region from the 
+        comet volcano frame index (list of all frames split but region)
+        """
+        
+        print(f"    {self.name}", end='')
+        
+        # stores the frames for a certain volcano
+        volc_frames = []
+
+        # intialise to record if we find frames for that volcano        
+        succesful_locate=False
+        
+        # get all the frames for that region 
+        # (i.e. multiple for each volcano)
+        if self.region != None:
+            frames = comet_volcano_frame_index[self.region]
+            print(f" | Region: {self.region}", end = '')
+        
+        # if there is no region, we can try and find the frames based only on
+        # the name and then exit this method wth return
+        else:
+            print(f" | Region: currently unknown, searching by name", end='')
+            self.determine_region_and_frames_from_computer_name(
+                comet_volcano_frame_index
+                )
+
+            return
+        
+        # loop through the frames to see if the volcano name is in the frame name
+        for frame in frames:
+            # the last 18 digits of a frame are the track / burst etc.  
+            # before that is the volcano name in snake_case
+            if self.computer_name == frame[:-18]:
+                succesful_locate=True
+                volc_frames.append(frame)
+                    
+        if succesful_locate:
+            # record all the frames for that volcano
+            self.frames = volc_frames
+            self.processing_status.licsbas_ts=True
+            # print(f" | Frames: {self.frames}")
+            print(f" | #frames: {len(self.frames)}")
+                
+        else:
+            print(f" | #frames: 0    <-------- warning")
+
+
+#%%
+
+
+
+def comet_db_to_licsalert_volcs(pkl_path, priorities):
+    """
+    Load a volcano DataFrame from a pickle and return a nested list of names,
+    one sub-list per requested priority, in the same order as `priorities`.
+
+    Parameters
+    ----------
+    pkl_path : str
+        Path to the .pkl file that contains the DataFrame.
+        The DataFrame must have at least the columns 'name' and 'priority'.
+    priorities : List[str]
+        Priority classes you want (e.g. ["A1", "A2"]).
+
+    Returns6
+    -------
+    List[List[str]]
+        Outer list follows the order of `priorities`.
+        Each inner list contains the volcano names that match that priority.
+        If a priority is absent in the DataFrame you get an empty list.
+    """
+    import pandas as pd
+    
+    # 1. Load the DataFrame
+    df = pd.read_pickle(pkl_path)
+
+    # 2. Normalise priority column to *strings*; strip spaces, replace NaNs with "None"
+    df = df.copy()
+    df["priority"] = (
+        df["priority"]
+          .astype(str)            # turn None/NaN into "nan"
+          .where(~df["priority"].isin(["nan", "None"]), "None")  # unify null label
+          .str.strip()
+    )
+
+    # 3. Build the volcs list
+    # make a new dataframe that only has volcs of the required priority.  
+    df_subset = df[df["priority"].isin(priorities)]
+
+    # initialise
+    volcs = []
+    for row in df_subset.itertuples(index=False):
+        # initialise using custom class
+        volc = licsalert_volc(row.name)
+        #add some attributes
+        volc.computer_name = row.vportal_name
+        volc.region = row.vportal_area
+        volcs.append(volc)
+    
+    return volcs
+
+
+#%% volcano_name_to_comet_frames()
+
+def volc_names_to_licsalert_volcs(volc_names, comet_volcano_frame_index):
+    """ Given a list of volcanoes of interest, find the frames that name them
+    from the dictionary of comet volcano frames
+    
+    Inputs:
+        volc_names | list | volcano names, can have accents, capital, and spaces. 
+        comet_volcano_frame_index | dict | each region is a key, and its value
+                                            is a list of the frames in that region.  
+                                            
+    Returns:
+        volc_frames | dict | each volcano name is a key, and the value is a list
+                                of the comet frames for that volcano.  
+        
+    History:
+        2024_01_18 | MEG | Written
+        2024_06_12 | MEG | Fix bug that if volcan name was within other name, 
+                           that would be returned (e.g. if volcano is abc, abcdef
+                           would also be returned. )     
+    """
+        
+    volcs = []
+    # iterate over each volcano
+    for volc_n, volc_name in enumerate(sorted(volc_names)):
+        
+        # initialise as custom object , only deal with name
+        volc = comet_volcano(volc_name)
+
+        # find the region, and any comet frames associated with that vol
+        # if volc_n == 125:
+        #     pdb.set_trace()
+        volc.determine_region_and_frames(comet_volcano_frame_index)
+
+        # add to list of all volcs        
+        volcs.append(volc)
+
+    return volcs
+
+
+
+    
 
 
 #%%
@@ -196,7 +426,7 @@ def get_lon_lat_of_volcs_from_ts_data(volcs):
     return volcs
     
 
-#%%
+#%% update_volcs_with_data()
 
 
 def update_volcs_with_data(volcs, volc_frame_dirs, volc_frame_names,
@@ -282,7 +512,7 @@ def update_volcs_with_data(volcs, volc_frame_dirs, volc_frame_names,
     return volcs
     
 
-#%%
+#%% open_comet_frame_files()
 
 def open_comet_frame_files(comet_volcano_frame_index_dir):
     """ Given a directory that contains files of the name of each COMET
@@ -321,122 +551,10 @@ def open_comet_frame_files(comet_volcano_frame_index_dir):
         
     return comet_volcano_frame_index
 
-#%% volcano_name_to_comet_frames()
-
-def volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index):
-    """ Given a list of volcanoes of interest, find the frames that name them
-    from the dictionary of comet volcano frames
-    
-    Inputs:
-        volc_names | list | volcano names, can have accents, capital, and spaces. 
-        comet_volcano_frame_index | dict | each region is a key, and its value
-                                            is a list of the frames in that region.  
-                                            
-    Returns:
-        volc_frames | dict | each volcano name is a key, and the value is a list
-                                of the comet frames for that volcano.  
-        
-    History:
-        2024_01_18 | MEG | Written
-        2024_06_12 | MEG | Fix bug that if volcan name was within other name, 
-                           that would be returned (e.g. if volcano is abc, abcdef
-                           would also be returned. )     
-    """
-
-    from types import SimpleNamespace
-        
-    class comet_volcano:
-        def __init__(self, name):
-            """ 
-            """
-            self.name = name
-            self.computer_name = self.create_computer_name()
-            # assume volc is an existing volcano object
-            self.processing_status = SimpleNamespace(
-                name=True,
-                licsbas_ts=False,
-                licsalert_result=False
-                )
-            
-            
-        def create_computer_name(self):
-            """
-            """
-            from unidecode import unidecode
-            # convert to snake case and all lowercase as this is format used by comet 
-            volc_name_converted = volc_name.lower().replace(' ', '_')
-            # swap any accents to nearest ASCII 
-            volc_name_converted = unidecode(volc_name_converted)
-            return volc_name_converted
-        
-    
-        def determine_region_and_frames(self, comet_volcano_frame_index):
-            """ Given a comet volcano, find the frames and region from the 
-            comet volcano frame index (list of all frames split but region)
-            """
-            
-            # stores the frames for a certain volcano
-            volc_regions = []
-            volc_frames = []
-            
-            succesful_locate=False
-            
-            # loop through each COMET region
-            for region in list(comet_volcano_frame_index.keys()):
-                
-                # get all the frames for that region 
-                # (i.e. multiple for each volcano)
-                frames = comet_volcano_frame_index[region]
-                
-                # loop through the frames to see if the volcano name is in the frame name
-                for frame in frames:
-                    # the last 18 digits of a frame are the track / burst etc.  
-                    # before that is the volcano name in snake_case
-                    if volc.computer_name == frame[:-18]:
-                        succesful_locate=True
-                        # record, regions should awlays agree
-                        volc_regions.append(region)        
-                        volc_frames.append(frame)
-                        
-                        
-            if succesful_locate:
-                # record all the frames for that volcano
-                self.frames = volc_frames
-                # check that the region awlays agrees
-                unique_regions = list(set(volc_regions))
-                if len(unique_regions) > 1:
-                    raise Exception(
-                        "Multiple regions have been found for one volcano, "
-                        "exiting"
-                        )
-                else:
-                    self.region = unique_regions[0]
-                
-                self.processing_status.licsbas_ts=True
-                    
-            else:
-                print(f"Unable to find a COMET frame for {volc_name}, but "
-                      "continuing anyway")
-        
-        
-    volcs = []
-    # iterate over each volcano
-    for volc_name in sorted(volc_names):
-        
-        # initialise as custom object , only deal with name
-        volc = comet_volcano(volc_name)
-
-        # find the region, and any comet frames associated with that vol
-        volc.determine_region_and_frames(comet_volcano_frame_index)
-
-        # add to list of all volcs        
-        volcs.append(volc)
-
-    return volcs
 
 
+#%% write_jasmin_download_shell_script
 
-#%%
 def write_jasmin_download_shell_script(
         jasmin_dir, local_dir, out_file,volcs, 
         exclude_json_gz =True, exclude_original_ts = True,
@@ -532,25 +650,28 @@ def write_jasmin_download_shell_script(
         # determine how many commands there will be
         frames_total = 0
         for volc in volcs:
-            for frame in volc.frames:
-                frames_total += 1
+            # some volcs may not have any frames.  
+            if hasattr(volc, 'frames'):
+                for frame in volc.frames:
+                    frames_total += 1
         
 
         frame_counter = 0
         # iterate over each volcano
         for volc in volcs:
-            # and the grames for that volcano
-            for frame in volc.frames:
-                # simple echo to say which frame we're downloading
-                script_file.write(
-                    f"echo 'Attempting to rsync {frame} ({frame_counter} of {frames_total})'\n"
-                    )
-                
-                # build the command for that frame        
-                command = (f"rsync -av {json_section} "
-                           f"{jasmin_dir / volc.region / frame} "
-                           f"{local_dir / volc.region }")
-                script_file.write(command + "\n\n")
-                
-                # update the counter
-                frame_counter += 1
+            if hasattr(volc, 'frames'):
+                # and the frames for that volcano
+                for frame in volc.frames:
+                    # simple echo to say which frame we're downloading
+                    script_file.write(
+                        f"echo 'Attempting to rsync {frame} ({frame_counter} of {frames_total})'\n"
+                        )
+                    
+                    # build the command for that frame        
+                    command = (f"rsync -av {json_section} "
+                               f"{jasmin_dir / volc.region / frame} "
+                               f"{local_dir / volc.region }")
+                    script_file.write(command + "\n\n")
+                    
+                    # update the counter
+                    frame_counter += 1

@@ -468,210 +468,11 @@ def update_overlapping_points(shifted_points, threshold = 0.01,
     return shifted_points, finished
 
 
-#%%
-
-
-def licsalert_status_map(
-        volcs, outdir,  sigma_min = 0., sigma_max = 10., 
-        d_start = None, d_end = None,
-        plot_frequency = "monthly",  figure_type = 'window'
-        ):
-    """ Plot multiple volcano statuses on the worldmap.  Colour indicates
-    status.  
-    
-    Inputs:
-        volcs | list of comet_volcanos | contains info such as lon_lat, 
-                                         lon_lat_offset (as above, but shifted
-                                         so points don't lie on top of each other)
-         outdir | Path | ouput png files, if backed is 'agg'
-         d_start | str | start date for period to plot daily / monthly yearly
-         d_end | str | end date for period to plot daily / monthly yearly
-
-         sigma_max | int or float | maximum number of sigmas for colourscale 
-                                 i.e. if set to 10, any signal that is 10 sigmas
-                                     or more will plot as maximum colour (yellow)
-         plot_frequency | string | daily / monthly / yearly 
-         backend | string | 'agg' if exporting pngs, 'qt5agg' for interactive. 
-     Returns:
-         Figure
-         
-     History:
-         2024_06_21 | MEG | Written.  
-         
-    """
-    
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as colors
-    import matplotlib.cm as cm
-    import cartopy.crs as ccrs
-    import datetime as dt
-    import math
-    import warnings
-    from copy import deepcopy
-    
-
-    # if plt.get_backend() != backend:   
-    #     print(f"The matplotlib backend was previously {plt.get_backend()}, "
-    #           f"but has been switched to ", end = '')
-    #     plt.switch_backend(backend)
-    #     print(f"{plt.get_backend()}")
-    
-    # Check matplotlib backend is set correctly 
-    if figure_type == 'png':
-        plt.switch_backend('Agg')                                                           
-    else: 
-        if plt.get_backend() != 'Qt5Agg':                                                               
-            plt.switch_backend('Qt5Agg')                                                           
-
-    # 0: small steps to handle dates:    
-    # all volcanoes should shre the same day list (list of datetimes, daily)
-    day_list = volcs[0].combined_status['dates']
-    
-    d_start_dt = dt.datetime.strptime(d_start, "%Y%m%d")
-    d_end_dt = dt.datetime.strptime(d_end, "%Y%m%d")
-
-
-    # 1 figure for each day.
-    for day_n, day in enumerate(day_list):
-
-        
-        if (day > d_start_dt) and (day < d_end_dt):
-            # check if we should plot this one
-            if plot_frequency == "daily":
-                plot_today = True
-            elif plot_frequency == 'monthly':
-                plot_today = day.day == 1
-            elif plot_frequency == 'yearly':
-                plot_today = (day.day == 1) and (day.month == 1)
-        else:
-            plot_today = False
-        
-        if plot_today:
-            # get figure date as string
-            day_str = dt.datetime.strftime(day, "%Y%m%d")
-            print(
-                f"Creating a LiCSAlert status figure for {day_str}.  "
-                )
-
-            fig = plt.figure(figsize=(20, 11))
-            ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
-            
-            # Make the map global
-            ax.set_global()
-            ax.stock_img()
-            ax.coastlines()
-        
-            scatter_objects = []
-            # loop through each volcano to plot it as a point on the map.
-            for volc_n, volc in enumerate(volcs):
-        
-                dayn_index = volc.combined_status['dates'].index(day)
-                
-                # extract the two values of volcanic unrest
-                existing_def = volc.combined_status['existing_defs'][dayn_index]
-                new_def = volc.combined_status['new_defs'][dayn_index]
-        
-                # check not nans for lon and lat of volcano
-                if (not math.isnan(volc.lon_lat[0])) and (not math.isnan(volc.lon_lat[1])):
-                
-                    # determine the maximum from the two unrest metrics
-                    combined_def = max(existing_def, new_def)
-                    
-                    # only plot if larger than minimum threshold
-                    if combined_def > sigma_min:
-                    
-                        # if we do, plot the max of existing or new deformation
-                        sc = ax.scatter(
-                            volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
-                            c=combined_def, s=50, transform=ccrs.PlateCarree(),
-                            vmin = sigma_min, vmax = sigma_max
-                            )
-                        scatter_objects.append((sc, volc.name))
-                        
-                        # also plot the lines from the shifted points to their true point.  
-                        ax.plot(
-                            [volc.lon_lat_offset[0], volc.lon_lat[0]],
-                            [volc.lon_lat_offset[1], volc.lon_lat[1]],
-                            c = 'k',  transform=ccrs.PlateCarree()
-                            )
-                else:
-                    print(f"{volc.name} could not be plotted as at least one"
-                          f" of the lons or lats are nan (they are "
-                          f"{volc.lon_lat}.  Trying to continue.  ")
-                
-            
-            #colorbar (possibly with no sc created by ax.scatter)
-            cbar_ax = fig.add_axes([0.35, 0.15, 0.3, 0.01])  
-            norm = colors.Normalize(vmin=sigma_min, vmax=sigma_max)
-            cmap = cm.viridis  
-            sm = cm.ScalarMappable(norm=norm, cmap=cmap)
-            cbar = plt.colorbar(sm, cax=cbar_ax, orientation = 'horizontal')
-            cbar.set_label("# sigma from background")
-            
-            # title
-            date_str = dt.datetime.strftime(
-                volc.combined_status['dates'][dayn_index], "%Y/%m/%d"
-                )
-            fig.suptitle(date_str)
-            
-    
-            ## save as a png and close the figure.                     
-            # Suppress warnings for tight_layout
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                plt.tight_layout()
-            
-            # start the interactive part of the figure
-            if (figure_type == 'window') or (figure_type == 'both'):
-                # Create an annotation object
-                annot = ax.annotate("", xy=(0,0), xytext=(10,10),
-                                    textcoords="offset points",
-                                    bbox=dict(boxstyle="round", fc="w"),
-                                    arrowprops=dict(arrowstyle="->"),
-                                    transform=ccrs.PlateCarree())
-                annot.set_visible(False)
-                
-                # Function to update the annotation
-                def update_annot(ind, scatter_obj, label):
-                    pos = scatter_obj.get_offsets()[ind["ind"][0]]
-                    annot.xy = pos
-                    annot.set_text(label)
-                    annot.get_bbox_patch().set_alpha(0.4)
-                
-                # Function to check if mouse is over a scatter point
-                def hover(event):
-                    vis = annot.get_visible()
-                    if event.inaxes == ax:
-                        for scatter_obj, label in scatter_objects:
-                            cont, ind = scatter_obj.contains(event)
-                            if cont:
-                                update_annot(ind, scatter_obj, label)
-                                annot.set_visible(True)
-                                fig.canvas.draw_idle()
-                                return
-                    if vis:
-                        annot.set_visible(False)
-                        fig.canvas.draw_idle()
-                
-                # Connect the hover event to the hover function
-                fig.canvas.mpl_connect("motion_notify_event", hover)
-
-            # 8: Possible save output
-            if (figure_type == 'png') or (figure_type == 'both'):
-                fig.savefig(outdir / f"{day_str}.png")
-                print(f"Saved the LiCSAlert status map for {str}")
-            
-        else:
-            pass
-        
-        
-
-
-#%%
+#%% licsalert_status_map()
 
 
 
-#%%
+#%% LiCSAlert_figure()
 
 
 def LiCSAlert_figure(
@@ -1149,7 +950,7 @@ def LiCSAlert_figure(
         plt.switch_backend('Qt5Agg')
 
 
-#%% interactive figure removed rom here
+#%% licsalert_results_explorer()
 
 
 def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
@@ -1515,7 +1316,7 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
 
 
 
-#%%
+#%% LiCSAlert_epoch_figures
 
 def LiCSAlert_epoch_figures(
         processing_date, displacement_r2_current,  reconstructions, residuals,
@@ -1614,7 +1415,7 @@ def LiCSAlert_epoch_figures(
     #     plt.switch_backend('Qt5Agg')        
         
         
-#%%
+#%% LiCSAlert_aux_figures
 
 def LiCSAlert_aux_figures(parent_dir, icasar_sources, dem, mask):
     """Plot the DEM and the sources as png images.  
@@ -1650,7 +1451,7 @@ def LiCSAlert_aux_figures(parent_dir, icasar_sources, dem, mask):
     f.close()    
     
         
-#%%
+#%% plot_1_image
 
 def plot_1_image(im_r1, mask, title, figure_type, figure_out_dir, figsize = (18,9), cmap =  plt.get_cmap('viridis')):
     """Plot a single image (column or row vector) when also given its mask.  
@@ -1672,7 +1473,7 @@ def plot_1_image(im_r1, mask, title, figure_type, figure_out_dir, figsize = (18,
     #     plt.close(f)
     
     
-#%%
+#%% LiCSAlert_mask_figure
 
 
 def LiCSAlert_mask_figure(icasar_mask, licsbas_mask, mask_combined, licsbas_date, current_output_dir, figure_type):
@@ -1718,7 +1519,7 @@ def LiCSAlert_mask_figure(icasar_mask, licsbas_mask, mask_combined, licsbas_date
         f1.savefig(current_output_dir / "mask_status.png", bbox_inches='tight')
 
 
-#%%
+#%% xticks_every_nmonths()
 
 
 def xticks_every_nmonths(ax_to_update, day0_date, time_values, include_tick_labels, 
@@ -1814,7 +1615,7 @@ def xticks_every_nmonths(ax_to_update, day0_date, time_values, include_tick_labe
 
 
 
-#%%
+#%% make_colormap() and remappedColorMap()
          
 
 def make_colormap(seq):
@@ -1899,7 +1700,7 @@ def remappedColorMap(cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
     #plt.register_cmap(cmap=newcmap)
     return newcmap
 
-#%%
+#%% truncate_colormap()
 
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     """ Take a colorbar and crop it.  Useful for removing blue parts of "terrain""
@@ -1913,7 +1714,7 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     return new_cmap 
 
 
-#%%
+#%% status_fig_one_volc()
 
 
 def status_fig_one_volc(name_and_index, licsalert_status, day_list, fig_type = 'png',
@@ -2042,13 +1843,14 @@ def status_fig_one_volc(name_and_index, licsalert_status, day_list, fig_type = '
         
         
         
-#%%
+#%% status_fig_all_volcs()
 
 
 def status_fig_all_volcs(licsalert_status, volc_names, day_list, out_dir, figsize, 
                          xlim = 11, ylim = 11, plot_frequency = 6, label_fs = 12):
     """
-    
+     This is a 2D plot, with the new deformation unrest metric on one axis, 
+     and the existing deformation unrest metric on the other.
     
     """
     
@@ -2155,10 +1957,7 @@ def status_fig_all_volcs(licsalert_status, volc_names, day_list, out_dir, figsiz
         plt.switch_backend('Qt5Agg')                                                           #  
 
 
-#%%
-
-
-          
+#%% remap_sigmas()
 
 
 def remap_sigmas(signal, volc_name, start = (10,10), end = (100, 11)):

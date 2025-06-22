@@ -143,7 +143,7 @@ def import_insar_data(
         # 3.3: Data processed with users own approach/software.  
         else:
             print(f"LiCSAlert is using data that was passed to the function as an argument  ")
-            displacement_r2 = data_as_arg['displacement_r2']
+            displacement_r3 = data_as_arg['displacement_r3']
             tbaseline_info = data_as_arg["tbaseline_info"]
             if licsbas_settings is not None:
                 print(f"'licsbas_settings' can only be provided if a "
@@ -158,25 +158,22 @@ def import_insar_data(
 
     # Check data that has been ingested.  
     displacement_r2, tbaseline_info = check_input_data(
-        displacement_r2, tbaseline_info
+        displacement_r3, tbaseline_info
         )
     
     
     return displacement_r2, tbaseline_info
     
-
-#%%
-
     
 
 #%%
 
-def check_input_data(displacement_r2, tbaseline_info):
+def check_input_data(displacement_r3, tbaseline_info):
     """ A function to perform any checks on the input data (e.g. the presence
     of nans).  
     
     Inputs: 
-        displacements_r2 | dict | standard LiCSAlert dict 
+        displacements_r3 | dict | standard LiCSAlert dict 
         tbaseline_info | dict | standard LiCSAlert dict 
         
     Returns:
@@ -190,22 +187,22 @@ def check_input_data(displacement_r2, tbaseline_info):
     import numpy as np
     
     # remove cumualtive from the data as that shouldn't be included
-    try:
-        del displacement_r2['cumulative']                                                                                                                 #  this is not needed and is deleted for safety.
-        print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects "
-              f"only the incremental displacements.  ")
-    except:
-        pass
+    # try:
+    #     del displacement_r2['cumulative']                                                                                                                 #  this is not needed and is deleted for safety.
+    #     print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects "
+    #           f"only the incremental displacements.  ")
+    # except:
+    #     pass
     
     # check for nans 
-    if np.isnan(displacement_r2['incremental']).any():
+    if np.isnan(displacement_r3['cum_ma']).any():
         raise Exception(
             "'displacement_r2['incremental']' (i.e. the displacments "
             "between each time step) contains nans.  All nans should be "
             " masked.  Exiting.  "
             )
         
-    return displacement_r2, tbaseline_info
+    return displacement_r3, tbaseline_info
 
 #%%
 

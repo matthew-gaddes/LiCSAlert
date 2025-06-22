@@ -542,8 +542,16 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
 
 #%%
     
-def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
-                            downsample_run=1.0, downsample_plot=0.5, verbose=True):
+def LiCSAlert_preprocessing(
+        displacement_r3,
+        tbaseline_info, 
+        sica_tica,
+        downsample_run=1.0,
+        downsample_plot=0.5,
+        verbose=True,
+        order = 1,
+        anti_aliasing=False
+        ):
     """A function to downsample the data at two scales (one for general working [ie to speed things up], and one 
     for faster plotting.  )  Also, data are mean centered, which is required for ICASAR and LiCSAlert.  
     Note that the downsamples are applied consecutively, so are compound (e.g. if both are 0.5, 
@@ -558,6 +566,11 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
         downsample_run | float | in range [0 1], and used to downsample the "incremental" data
         downsample_plot | float | in range [0 1] and used to downsample the data again for the "incremental_downsample" data
         verbose | boolean | if True, informatin returned to terminal
+        
+        order : int, default 1 | Interpolation order passed to `rescale` 
+                                    (1 = bilinear, 0 = nearest, etc.).
+        anti_aliasing : bool, default False Forwarded to `rescale`.  Set True 
+                                    for images, False for scientific rasters.
         
     Outputs:
         displacement_r2 | dict | input data stored in a dict as row vectors with a mask
@@ -593,78 +606,161 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
         2021_10_13 | MEG | Add function to also downsample ENU grids.  
         2021_11_15 | MEG | Add option to control mean centering, and warning that it is happening.  
         2023_10_26 | MEG | use ifg_timeseries class to handle mean centering more carefully.  
+        
+        2025_06_22 | MEG | WIP - had to remove mean centerering stuff 
     """
     import numpy as np
-    from licsalert.downsample_ifgs import downsample_ifgs
+    # from licsalert.downsample_ifgs import downsample_ifgs
     from licsalert.aux import col_to_ma
     from licsalert.data_importing import ifg_timeseries
     
     from skimage.transform import rescale
 
-    n_pixs_start = displacement_r2["incremental"].shape[1]                                          # as ifgs are row vectors, this is the number of pixels we start with
-    shape_start = displacement_r2["mask"].shape                                                     # and the shape of the ifgs (ny, nx)
+    
+    
+    def rescale_masked(arr_ma, scale, *, order=1, anti_aliasing=False,
+                       **kw):
+        """
+        Down-/up-scale a 3-D MaskedArray with skimage.rescale
+        while preserving the mask.
+    
+        Parameters
+        ----------
+        arr_ma : np.ma.MaskedArray   (t, y, x)
+            Data cube; mask may be nomask.
+        scale  : float | tuple
+            Scale tuple to feed straight into skimage.rescale
+            (for your use-case: (1.0, f, f)).
+        order, anti_aliasing, **kw
+            Forwarded to skimage.transform.rescale.  `preserve_range`
+            is forced to True so numeric range/dtype survive.
+    
+        Returns
+        -------
+        np.ma.MaskedArray
+            Same rank as input, spatially rescaled, with a rebuilt mask.
+        """
+        
+        import numpy.ma as ma
+    
+        # --- 1. replace masked values with NaN so they don’t bias interpolation
+        data_in = arr_ma.filled(np.nan)
+    
+        data_out = rescale(
+            data_in,
+            scale=scale,
+            order=order,
+            anti_aliasing=anti_aliasing,
+            preserve_range=True,      # keep original numeric scale
+            **kw
+        )
+    
+        # --- 2. new mask: every NaN generated above becomes masked
+        mask_out = np.isnan(data_out)
+    
+        # --- 3. pack back into a MaskedArray and restore original dtype
+        return ma.MaskedArray(
+            data_out.astype(arr_ma.dtype, copy=False),
+            mask=mask_out
+        )
+        
+
+
+
+    # n_pixs_start = displacement_r2["incremental"].shape[1]               
+    # shape_start = displacement_r2["mask"].shape                          
     
     # 1: Downsample the ifgs for use in all following functions.  
     # if we're not actually downsampling, skip for speed
-    if downsample_run != 1.0:                                                                                                                       
-        op  = downsample_ifgs(
-            displacement_r2["incremental"], displacement_r2["mask"],          
-            downsample_run, verbose = False
-            )
-        (displacement_r2["incremental"], displacement_r2["mask"]) = op; del op
+    if downsample_run != 1.0:
         
-        # also remake the cumulative signal
-        cumulative = np.cumsum(displacement_r2["incremental"], axis=0)
-        # 0s on first acquisition date
-        cumulative = np.concatenate(
-            (np.zeros((1, cumulative.shape[1])), cumulative), axis = 0)          
-        displacement_r2['cumulative'] = cumulative
+        # downsample the cumulative masked array
+        print(
+            f"The cumulative time series was size "
+            f"{displacement_r3['cum_ma'].shape} ",end=''
+            )
+        
+        # note that the rescale in time (first dimension) is held at 1.  
+        displacement_r3['cum_ma'] = rescale_masked(
+            displacement_r3['cum_ma'],
+            scale=(1.0, downsample_run, downsample_run),
+            order=order,
+            anti_aliasing=anti_aliasing,
+        )
+        
+        print(
+            f"and has been downsampled in space to "
+            f"{displacement_r3['cum_ma'].shape} "
+            )
+        
         
         # remake lons and lats at new resolution
         # check if we have lon lat data as not alway strictly necessary.  
-        if ('lons' in displacement_r2) and ('lats' in displacement_r2):                                            
-            ifg1 = col_to_ma(displacement_r2['incremental'][0,:], 
-                             pixel_mask = displacement_r2['mask'])             
-            lons = np.linspace(displacement_r2['lons'][0,0], 
-                               displacement_r2['lons'][-1,-1], ifg1.shape[1])         
-            displacement_r2['lons'] = np.repeat(lons[np.newaxis, :], 
-                                                ifg1.shape[0], axis = 0)                       
-            lats = np.linspace(displacement_r2['lats'][0,0], 
-                               displacement_r2['lats'][-1,0], ifg1.shape[0])          
-            displacement_r2['lats'] = np.repeat(lats[:, np.newaxis], 
-                                                ifg1.shape[1], axis = 1)                       
+        if ('lons_mg' in displacement_r3) and ('lats_mg' in displacement_r3):
+
+            lons = np.linspace(
+                displacement_r3['lons_mg'][0,0], 
+                displacement_r3['lons_mg'][-1,-1], 
+                displacement_r3['cum_ma'].shape[0]
+                )
+            displacement_r3['lons_mg'] = np.repeat(
+                lons[np.newaxis, :], 
+                displacement_r3['cum_ma'].shape[2],
+                axis = 0
+                )                       
             
-            if displacement_r2['lats'][0,0] < displacement_r2['lats'][-1,0]:                                        
-                displacement_r2['lats'] = np.flipud(displacement_r2['lats'])                                        
+            lats = np.linspace(
+                displacement_r3['lats_mg'][0,0], 
+                displacement_r3['lats_mg'][-1,-1], 
+                displacement_r3['cum_ma'].shape[1]
+                )
+            displacement_r3['lats_mg'] = np.repeat(
+                lats[np.newaxis, :], 
+                displacement_r3['cum_ma'].shape[1],
+                axis = 0
+                )                       
+            
+            # poor quality check to ensure that lats aren't upside down            
+            if displacement_r3['lats_mg'][0,0] < displacement_r3['lats_mg'][-1,0]:                                        
+                displacement_r3['lats_mg'] = np.flipud(displacement_r3['lats_mg'])                                        
             
         # also downsample other simple data if it's included:
         for product in ['dem', 'E', 'N', 'U']: 
-            if product in displacement_r2.keys():
-                displacement_r2[product] = rescale(displacement_r2[product], 
-                                                   downsample_run, 
-                                                   anti_aliasing = False)                               
+            if product in displacement_r3.keys():
+                displacement_r3[product] = rescale(
+                    displacement_r3[product], 
+                    downsample_run, 
+                    anti_aliasing = anti_aliasing
+                    )                               
             
     # 2: Downsample further for plotting.  
-    displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"] = downsample_ifgs(displacement_r2["incremental"], displacement_r2["mask"],
-                                                                                                      downsample_plot, verbose = False)
-    
-    # 3: mean centre in time or space, according to if sica or tica (must be done after downsampling for accuracy)
-    ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])                     # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)
-    
-    displacement_r2['incremental_mc_space'] = ifg_ts.mixtures_mc_space
-    displacement_r2['means_space'] = ifg_ts.means_space
-    
-    displacement_r2['incremental_mc_time'] = ifg_ts.mixtures_mc_time
-    displacement_r2['means_time'] = ifg_ts.means_time
+    # note that the rescale in time (first dimension) is held at 1.  
+    displacement_r3['cum_ma_downsampled'] = rescale_masked(
+        displacement_r3['cum_ma'],
+        scale=(1.0, downsample_run, downsample_run),
+        order=order,
+        anti_aliasing=anti_aliasing,
+    )
 
-    if sica_tica == 'sica':
-        displacement_r2['mixtures_mc'] = ifg_ts.mixtures_mc_space
-        displacement_r2['means'] = ifg_ts.means_space
-    elif sica_tica == 'tica':
-        displacement_r2['mixtures_mc'] = ifg_ts.mixtures_mc_time
-        displacement_r2['means'] = ifg_ts.means_time
-    else:
-        raise Exception(f"'sica_tica' can be either 'sica' or 'tica', but not {sica_tica}.  Exiting.  ")
+    
+    # # 3: mean centre in time or space, according to if sica or tica 
+    # # (must be done after downsampling for accuracy)
+    # ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])                     # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)
+    
+    # displacement_r2['incremental_mc_space'] = ifg_ts.mixtures_mc_space
+    # displacement_r2['means_space'] = ifg_ts.means_space
+    
+    # displacement_r2['incremental_mc_time'] = ifg_ts.mixtures_mc_time
+    # displacement_r2['means_time'] = ifg_ts.means_time
+
+    # if sica_tica == 'sica':
+    #     displacement_r2['mixtures_mc'] = ifg_ts.mixtures_mc_space
+    #     displacement_r2['means'] = ifg_ts.means_space
+    # elif sica_tica == 'tica':
+    #     displacement_r2['mixtures_mc'] = ifg_ts.mixtures_mc_time
+    #     displacement_r2['means'] = ifg_ts.means_time
+    # else:
+    #     raise Exception(f"'sica_tica' can be either 'sica' or 'tica', but not {sica_tica}.  Exiting.  ")
         
         
     # # check sizes of things
@@ -679,11 +775,11 @@ def LiCSAlert_preprocessing(displacement_r2, tbaseline_info, sica_tica,
     #     except:
     #         pass
     
-    print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
-          f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
-          f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
+    # print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
+    #       f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
+    #       f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
 
-    return displacement_r2
+    return displacement_r3
 
 
 #%%
