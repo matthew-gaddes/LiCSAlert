@@ -27,207 +27,6 @@ import cloudpickle
 
 #%% plot_unrest_metric_all_frames_one_volc()
 
-def plot_unrest_metric_all_frames_one_volc(
-        volc, ticks_labels_every_n = 6, scatter_points = False):
-    """
-    Plot the time series for new deformation and existing deformation 
-    for each frame at a volcano, and the combined metric.  
-    
-    """
-    import matplotlib.dates as mdates
-    from matplotlib.lines import Line2D
-    from datetime import datetime
-    
-    # remove no data region?
-    
-    def determine_figure_y_lims(volc):
-        """
-        """
-        n_frames = len(volc.frame_status)
-        frames = volc.frame_status
-
-        # set initial bounds that shouldn't be exceeded for a while
-        y_low = 0
-        y_high = 1
-        
-        # iterate through and plot each frame.  
-        for n_frame in range(n_frames):
-    
-            # get just the frame name with no volcano name.  
-            frame_name = Path(frames[n_frame]).parts[-1][-17:]
-            
-            # if there's no status for a frame, it will return as NA
-            if frame_name != 'NA':
-                
-                # make a 2 x times array of unrest values            
-                unrest_metrics = np.array(
-                    [volc.status[frame_name]['new_defs'],
-                     volc.status[frame_name]['existing_defs']]
-                         )
-            
-                # keep track of figure x limits
-                if np.max(unrest_metrics) > y_high:
-                    y_high = np.max(unrest_metrics)
-                
-        # add a nudge factor so points don't touch edge.  
-        y_high +=1 
-                
-        return y_low, y_high
-    
-    def determine_figure_xlims(volc):
-        """
-        """
-        from datetime import datetime
-        
-        n_frames = len(volc.frame_status)
-        frames = volc.frame_status
-
-        # set initial bounds that shouldn't be exceeded for a while
-        fig_start_dt = datetime(9999, 1, 1, 00, 00, 00)
-        fig_end_dt = datetime(1, 1, 1, 00, 00, 00)
-        
-        
-        # iterate through and plot each frame.  
-        for n_frame in range(n_frames):
-    
-            # get just the frame name with no volcano name.  
-            frame_name = Path(frames[n_frame]).parts[-1][-17:]
-            
-            # if there's no status for a frame, it will return as NA
-            if frame_name != 'NA':
-                
-                # keep track of figure x limits
-                if volc.status[frame_name]['dates'][0] < fig_start_dt:
-                    fig_start_dt = volc.status[frame_name]['dates'][0]
-                if volc.status[frame_name]['dates'][-1] > fig_end_dt:
-                    fig_end_dt = volc.status[frame_name]['dates'][-1]
-                
-        return fig_start_dt, fig_end_dt
-    
-
-
-    def plot_unrest_metric_one_frame(
-            ax, status, d_start_dt, d_end_dt, y_low, y_high, y_title,
-            show_xtick_labels = False, 
-            ):
-        """
-        """
-        
-        dates = status['dates']
-        new_def = status['new_defs']
-        existing_def = status['existing_defs']
-        
-        
-        # Plot left data on primary y-axis
-        line1, = ax.plot(dates, new_def, color=left_colour)
-        if scatter_points:
-             ax.scatter(dates, new_def, color=left_colour, marker = '.')
-             
-        if show_xtick_labels:
-            ax.set_xlabel('Date')
-        #ax.set_ylabel("New deformation", color=left_colour)
-        ax.set_ylabel(y_title, color='k', fontsize = 8)
-        ax.tick_params(axis='y', labelcolor=left_colour)
-        ax.set_ylim(y_low, y_high)
-        
-        # Create a second y-axis sharing the same x-axis
-        ax2 = ax.twinx()
-        line2, = ax2.plot(dates, existing_def, color=right_colour)
-        if scatter_points:
-            ax2.scatter(dates, existing_def, color=right_colour, marker = '.')
-        #ax2.set_ylabel('Existing Deformation', color=right_colour)
-        ax2.tick_params(axis='y', labelcolor=right_colour)
-        ax2.set_ylim(y_low, y_high)
-               
-        ax.set_xlim(left = d_start_dt, right = d_end_dt)
-        # Set up the major locator: every ticks_labels_every_n months
-        major_locator = mdates.MonthLocator(interval=ticks_labels_every_n)
-        ax.xaxis.set_major_locator(major_locator)
-        
-        if show_xtick_labels:
-            # Use a formatter to display dates in YYYY_MM_DD format
-            major_formatter = mdates.DateFormatter("%Y_%m_%d")
-        else:
-            # Turn off tick labels using a NullFormatter
-            from matplotlib.ticker import NullFormatter
-            major_formatter = NullFormatter()
-        ax.xaxis.set_major_formatter(major_formatter)
-        
-        if show_xtick_labels:
-            # Rotate the date labels 45 degrees for better readability
-            plt.setp(ax.get_xticklabels(), rotation=45, ha="right", fontsize=8)
-
-        
-        # Set up the minor locator: every month (no labels by default)
-        minor_locator = mdates.MonthLocator(interval=1)
-        ax.xaxis.set_minor_locator(minor_locator)
-        
-    
-    x_low_dt, x_high_dt = determine_figure_xlims(volc)
-    y_low, y_high = determine_figure_y_lims(volc)
-
-    left_colour = 'tab:blue'
-    right_colour = 'tab:orange'
-    
-    # determine the number of frames for this volcano
-    n_frames = len(volc.frame_status)
-    frames = volc.frame_status
-    
-
-    
-    # dates = volc.status_combined['dates']
-    # new_def = volc.status_combined['new_defs']
-    # existing_def = volc.status_combined['existing_defs']
-    
-    # Create a new figure and primary axis
-    fig, axes = plt.subplots(n_frames+1, 1, figsize=(10, 5))
-    
-    # iterate through and plot each frame.  
-    for n_frame in range(n_frames):
-
-        # get just the frame name with no volcano name.  
-        frame_name = Path(frames[n_frame]).parts[-1][-17:]
-   
-        # print(
-        #     f"{volc.status[frame_name]['dates'][0]} - " 
-        #     f"{volc.status[frame_name]['dates'][-1]}" 
-        #     )
-        if frame_name != 'NA':
-            plot_unrest_metric_one_frame(
-                axes[n_frame], volc.status[frame_name], x_low_dt, x_high_dt,
-                y_low, y_high, frame_name
-                )
-        
-    # bottom row is combined status
-    plot_unrest_metric_one_frame(
-        axes[-1], volc.status_combined, x_low_dt, x_high_dt, 
-        y_low, y_high, 'Combined', show_xtick_labels = True
-        )
-        
-    # add the legend
-    # Create two dummy handles that don't draw anything.
-    dummy_handles = [
-        Line2D([], [], linestyle='None'),  # blank handle for first word
-        Line2D([], [], linestyle='None')   # blank handle for second word
-    ]
-
-    # Create the legend with no visible handles.
-    legend = fig.legend(
-        dummy_handles, ['New deformation', 'Existing deformation'],
-        handlelength=0,  # no line or marker shown
-        frameon=True, loc = 'lower left')   
-
-    # Set the colors of the legend texts.
-    for text, color in zip(legend.get_texts(), [left_colour, right_colour]):
-        text.set_color(color)
-        
-    # -999 puts it behind tick labels
-    legend.set_zorder(0)
-
-    plt.title(f"{volc.name}")
-    fig.tight_layout()  # Adjust layout to fit labels and title
-    plt.show()
-
 #%% plot_unrest_metric_all_volcs()
 
 
@@ -470,201 +269,19 @@ from licsalert.plotting import offset_volc_lls
 
 from licsalert.plotting import status_fig_one_volc, status_fig_all_volcs
         
-#%% Things to set
-
-#%%  ################# jasmin outputs 2023 (for fringe)
-# #licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/09_jasmin_clone_2023_08_30/01_test/")
-# licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/09_jasmin_clone_2023_08_30/02_all/")
-# out_dir = Path("./monitoring_jasmin/one_volc/ale_bagu")
-# d_start = "20200101"
-# d_stop = "20230901"
-# test_volcano = 'ale_bagu*'
-# regions = True
-################## end jasmin outputs 2023 (for fringe)
-
-#%% ################## jasmin outputs 2024 (for Cities on Volcanoes)
-
-# option 1: volcanoes on public portal  
-# cov_volc_names = ['Antisana',
-#                  'Cerro Overo',
-#                  'Cordon del Azufre',
-#                  'Cotopaxi',
-#                  'Domuyo',
-#                  'Fernandina',
-#                  #'Guagua Pichinca',                    # volcano portal spelling
-#                  'Guagua Pichincha',                     # licsbas spelling
-#                  'Laguna del Maule',
-#                  'Masaya',
-#                  'Nevados de Chillan',
-#                  'Planchón-Peteroa',                    # 
-#                  'Sabancaya',
-#                  'San Miguel',
-#                  'San Salvador',
-#                  'Sangay',
-#                  'Santa Ana',
-#                  'Sierra Negra',
-#                  'Tungurahua',
-#                  'Turrialba',
-#                  'Villarrica']
-
-# # option 2: Camila deforming volcanoes list
-# cov_volc_names = [ # camilla deforming list
-#                   "Cordon Caulle",
-#                   "Wolf",
-#                   "Sabancaya",
-#                   "Laguna del Maule",
-#                   "Cordon del Azufre",
-#                   "Sangay",
-#                   "Domuyo",
-#                   "Alcedo",
-#                   "Mevados de Chillan",
-#                   "Cerro Azul",
-#                   "Fernandina",
-#                   "Sierra Negra",
-#                   # below are Visible on portal, def observed, central america
-#                   "Masaya",                 
-#                   "San Miguel",
-#                   "Santa Ana",
-#                   "Turrialba"]
-
-
-
-# # ?
-# # licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
-# #                      "06_LiCSAlert/05_jasmin_clones/02_2024_01_19_cov_only")
-
-# # current clone of Jasmin data
-# licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
-#                       "06_LiCSAlert/05_jasmin_clones/2024_06_11_comet_talk")
-
-# # print(f"USING THE TEMPORARY TEST DIRECTORY")
-# # licsalert_dir = Path("/home/matthew/university_work/03_automatic_detection_algorithm/"
-# #                       "06_LiCSAlert/05_jasmin_clones/test")
-
-
-# out_dir = Path("./status_outputs/03_comet")
-# # d_start = "20200101"                # LiCSAlert baseline ends at end of 2019?  
-# d_start = "20180101"                # LiCSAlert baseline ends at end of 2019?  
-# d_stop = "20240621"
-# test_volcano = 'sabancaya*'
-# regions = True
-
-# # volcs_omit = ["guagua_pichincha_121A_08908_131313",  # no coherence
-# #               "planchon-peteroa_018A_12472_131313",  # single pixels of large value
-# #               ]
-# volcs_omit = []
-
-################## end jasmin outputs 2024 (for Cities on Volcanoes)
-#%% ################## jasmin outputs 2024 Chile 
-
-# # current clone of Jasmin data
-# licsalert_dir = Path(
-#     "/home/matthew/university_work/03_automatic_detection_algorithm/"
-#     "06_LiCSAlert/05_jasmin_clones/2024_11_14_chile_v2"
-#     )
-
-# # names of all comet frames.  
-# comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
-
-# out_dir = Path("./status_outputs/04_chile_november_2024")
-# d_start = "20210101"                
-# d_stop = "20241101"
-# #test_volcano = 'sabancaya*'
-# regions = False
-# volcs_omit = []
-# generate_bash_dl_file = True
-# ################## end jasmin outputs 2024 for Chile
-
-#%% ################## 10 years of Sentinel paper (2025_02_12)
-
-
-# # current clone of Jasmin data - bug with baseline data
-# # licsalert_dir = Path(
-# #     "/home/matthew/university_work/03_automatic_detection_algorithm/"
-# #     "06_LiCSAlert/05_jasmin_clones/2025_02_13_s1_10yr_licsalert/"
-# #     "2025_02_13_licsalert/licsalert_sync"
-# #     )
-
-# # #v2, 
-# licsalert_dir = Path(
-#     "/home/matthew/university_work/03_automatic_detection_algorithm/"
-#     "06_LiCSAlert/05_jasmin_clones/2025_02_28_s1_10yr/licsalert_sync"
-#     )
-
-# # # #v3, only status files, but for all volcs
-# # licsalert_dir = Path(
-# #     "/home/matthew/university_work/03_automatic_detection_algorithm/"
-# #     "06_LiCSAlert/05_jasmin_clones/2025_03_06_s1_10yr_status_only/licsalert"
-# #     )
-
-# # volc_names = [  
-# #     "Campi Flegrei",
-# #     "Fernandina",
-# #     "Darwin",
-# #     "Sierra Negra",
-# #     "Cerro Azul",
-# #     "Kilauea",
-# #     "Wolf",
-# #     "Laguna del Maule",
-# #     "Ecuador",
-# #     "Reykjanes",
-# #     "Alcedo",
-# #     "Domuyo",
-# #     "Krysuvik",
-# #     "Fogo",
-# #     "Fujisan",
-# #     # bottom left of figure
-# #     "Mauna Loa",
-# #     "Mauna Kea",
-# #     "Etna",
-# #     "Askja",
-# #     "Iztaccihuatl",
-# #     "Pico",
-# #     "Bardarbunga",
-# #     "Esjufjoll",
-# #     "Kverkfjoll"
-# # ]
-
-
-# # names of all comet frames.  
-# comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
-# comet_volcano_frame_index_dir = Path('./comet_volcano_frames_fogo_edit/')
-
-# #out_dir = Path("./status_outputs/04_chile_november_2024")
-# d_start = "20140101"                
-# d_stop = "20250219"
-# #test_volcano = 'sabancaya*'
-# regions = True
-# volcs_omit = []
-# generate_bash_dl_file = True
-# ################## end jasmin outputs 2024 for Chile
-
-# combined_status_method = 'previous'
-# combined_status_method = 'window'
-
 
 #%% COMET summer 25
 
 
-## Generate the volc_names list
+## Generate the volcs list of licsalert_volcs
 volc_priorities_used = ["A1"]
-lists = comet_db_to_licsalert_volcs(
-    "./comet_volcano_database.pkl", 
-    volc_priorities_used
-    )
-
-volc_names_a1 = []
-for sublist in lists:
-    volc_names_a1.extend(sublist)
-del lists
-
 
 
 # #v3, only status files, but for all volcs
-print(f"USING THE TEST DIR OF THE DATA CLONED FROM JASMIN")
+# print(f"USING THE TEST DIR OF THE DATA CLONED FROM JASMIN")
 licsalert_dir = Path(
     "/home/matthew/university_work/03_automatic_detection_algorithm/"
-    "06_LiCSAlert/05_jasmin_clones/2025_05_22_comet_2025/licsalert_sync_test/"
+    "06_LiCSAlert/05_jasmin_clones/2025_05_22_comet_2025/licsalert_sync/"
     )
 
 
@@ -677,7 +294,6 @@ d_start = "20140101"
 d_stop = "20250219"
 #test_volcano = 'sabancaya*'
 regions = True
-volcs_omit = []
 generate_bash_dl_file = True
 
 
@@ -685,137 +301,39 @@ generate_bash_dl_file = True
 combined_status_method = 'window'               # old method uses 'previous'
 
 
-
-
-
-#%%  #################  local test volcs (processed with LiCSBAS by me?  )
-# all_volcs_figs_dir = Path('monitoring_steps_all_volcs_test')
-# licsalert_dir = Path("/home/matthew/university_work/31_from_bright/2023_09_08/01a_LiCSAlert_batch_mode_2/")
-# regions = False
-
-# # Option for the 1 volc we plot in detail.  
-# # option 1
-# out_dir = Path("./monitoring_test/one_volc/sierra_negra")
-# d_start = "20170101"
-# d_stop = "20230901"
-# test_volcano = '*sierra*'
-
-# # option 2
-# # out_dir = Path("./monitoring_test/one_volc/erta_ale")
-# # d_start = "20160601"
-# # d_stop = "20230901"
-# # test_volcano = '*erta*'
-
-################# end local test volcs            
-
 #%% Step 00: volcano names:
    
-# volc_names might be passed as a list of strings.  
-if "volc_names" not in locals():
-        
-    # if it's not, try and generate it.  
-    try:
-        volc_names_dir = get_volc_names_fron_dir_of_frames(
-            licsalert_dir, regions = regions
-            )
-        
-        print(
-            "Succesfully created a list of volcanoes (volc_names) from a "
-            "licsalert directory.  Continuing.  "
-            )
-    except:
-        print(
-            "Failed to get the volcano names from a licsalert directory.  Perhaps "
-            "this is the first time this has been run?  You could manually "
-            "provide a list of volc_names, but for now we'll try to generate "
-            "one from the volcanoes that are visible on the COMET volcano portal"
-            )
-    
-        try:
-            # get the names of the COMET portal public volcanoes
-            volc_names = get_portal_public_volcanoes()
-            print(
-                "Succesfully generated a list of volcanoes that are visible "
-                "publicly on the COMET volcano portal.  Continuing.  "
-                )
-        except:
-            print(
-                "Failed to generate a list of volcanoes from the COMET volcano "
-                "portal.  Exiting.  ")
+# populate with name, computer_name, and region, but no frame info yet.  
+print(
+      f"Initialising the volcs list with name, computer_name, and region...", 
+      end = ''
+      )
+volcs = comet_db_to_licsalert_volcs(
+    "./comet_volcano_database.pkl", 
+    volc_priorities_used
+    )
+print("Done\n\n")
 
-
-
-
-# choose which volc_names to use.  
-volc_names = volc_names_a1
-# volc_names = volc_names_dir
-# print("SELECTING ONLY A SUBSET OF THE VOLC_NAMES")
-# volc_names = sorted(volc_names)[165:168]
 
 # open the info on COMET volcano frames and what region they're in.  
 # region is a key, and each value is a list of comet frames in that region
-comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir)
-
-# convert volc_names to volcs, which is a list of comet_volcano objects
-# output is jasmin_sync_script.sh
-volcs = volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index)    
-
-# tidy up.  
-del volc_names
-
-
-# for i, v in enumerate(volcs):
-#     print(f"{i} {v.name}")
-
-
-#%% Step 01: Generate bash file to copy selected data from Jasmin
-
-
-
-# if generate_bash_dl_file:
-#     jasmin_dir = Path(
-#         "mgaddes@xfer-vm-03.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/"
-#         "projects/LiCS/volc-portal/processing_output/licsalert"
-#         )
-#     local_dir = Path('./licsalert_sync/')
-#     bash_sync_fle = "jasmin_sync_script.sh"
-    
-
-#     # write a shell script to download the LiCSAlert data from jasmin 
-#     write_jasmin_download_shell_script(
-#         jasmin_dir, local_dir, bash_sync_fle, volcs, exclude_json_gz = True,
-#         exclude_original_ts = False, exclude_ICASAR_data = True,
-#         exclude_epoch_images = True, exclude_epoch_data = True)
-
-
-
-
-
-
-#%% Step 02:
-    
-# # run jasmin sync file on FOE-linux (to copy data from jasmin to school server)
-# # copy from FOE-linux to local.  
-
-#%% Step 02a: possibly move directories that don't have LiCSAlert results
-# # to a different directory
-
-# from licsalert.jasmin_tools import move_small_directories
-
-# move_small_directories(
-#     licsalert_dir, licsalert_dir.parent / "to_delete", n = 6)
-
-# print("\n\n\nSELECTING ONLY A SUBSET OF THE DATA\n\n\n")
-# volcs = volcs[0:5]
-
-
-#%% Step 03: Compile licalert status for all frames at all times.  
-
-# get path to licsalert frames for each volcano, and their names (snake case)
-volc_frames, volc_frame_names = get_all_volcano_dirs(
-    licsalert_dir, volcs_omit,regions
+comet_volcano_frame_index = open_comet_frame_files(
+    comet_volcano_frame_index_dir
     )
 
+print(f"Adding frame information to each volcano....")
+# add the frame info to the volcs
+for volc in volcs:
+    volc.determine_frames_from_computer_name_and_region(
+        comet_volcano_frame_index
+        )
+print("Done")
+
+
+# # get path to licsalert frames for each volcano, and their names (snake case)
+volc_frames, volc_frame_names = get_all_volcano_dirs(
+    licsalert_dir, [],regions
+    )
 
 
 
@@ -827,10 +345,44 @@ volcs = update_volcs_with_data(
     )
 
 
-#  add the lon lat info for each volcano
-# Method 1: from data 
-# volcs = get_lon_lat_of_volcs_from_ts_data(volcs)
-# method 2: from comet database
+#%% Step 01: Generate bash file to copy selected data from Jasmin
+
+
+regions = list(set([v.region for v in volcs if v.region != None]))
+
+
+for n, v in enumerate(volcs):
+    if v.region == 'indian_island':
+        print(n, v.name)
+    
+
+
+# print("USING ONLY THE AFRICAN VOLCANOES")
+# volcs = [v for v in volcs if v.region == 'africa']
+
+
+if generate_bash_dl_file:
+    jasmin_dir = Path(
+        "mgaddes@xfer-vm-03.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/"
+        "projects/LiCS/volc-portal/processing_output/licsalert"
+        )
+    local_dir = Path('./licsalert_sync/')
+    bash_sync_fle = "jasmin_sync_script.sh"
+    
+
+    # write a shell script to download the LiCSAlert data from jasmin 
+    write_jasmin_download_shell_script(
+        jasmin_dir, local_dir, bash_sync_fle, volcs, exclude_json_gz = True,
+        exclude_original_ts = False, exclude_ICASAR_data = True,
+        exclude_epoch_images = True, exclude_epoch_data = True)
+
+
+# run bash file to sync data
+
+#%% Step 02: handle volcano lon and lat info
+
+print(f"Finding lon and lat info for all volcs...", end = '')
+
 get_lon_lat_of_volcs_from_db(
     volcs,
     pd.read_pickle("comet_volcano_database.pkl")
@@ -840,6 +392,13 @@ get_lon_lat_of_volcs_from_db(
 # adjust the lon lats of the volcanoes so when plotted they don't overlap
 offset_volc_lls(volcs,  threshold = 2., offset = 2.1, attempts = 200)
 
+print(f"Done.  ")
+
+
+#%% Step 03: Compile licalert status for all frames at all times.  
+
+
+
 # simple list of datetime for each status day
 day_list = create_day_list(d_start, d_stop)
 
@@ -847,11 +406,9 @@ day_list = create_day_list(d_start, d_stop)
 # get the licsalert status for each volcano frame (update volcs)
 extract_licsalert_status(volcs, day_list, combined_status_method)           
 
-# tidy up
-del volc_frames, volc_frame_names
+# # tidy up
+# del volc_frames, volc_frame_names
 
-
-#%%
 
 
 #%% Step 04: figure for one volcano at all times.  
@@ -892,11 +449,9 @@ del volc_frames, volc_frame_names
 #%% Step 06: New worldmap figure
 
 
-"""
-This needs editing to show volcanoes in grey if they have no licsalert
-status, and then colour by status.  
+# for volc in volcs:
+#     print(f"{volc.name} {volc.processing_status}")
 
-"""
 
 def licsalert_status_map(
         volcs, outdir,  sigma_min = 0., sigma_max = 10., 
@@ -943,22 +498,67 @@ def licsalert_status_map(
         """ 
         """
         
+        # existing_def = volc.status_combined['existing_defs'][dayn_index]
+        # new_def = volc.status_combined['new_defs'][dayn_index]
+        
+        
+        # # determine the maximum from the two unrest metrics
+        # combined_def = max(existing_def, new_def)
+        
+        # pdb.set_trace()
+        
+        # # only plot if larger than minimum threshold
+        # if combined_def > sigma_min:
+        
+        #     # if we do, plot the max of existing or new deformation
+        #     sc = ax.scatter(
+        #         volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
+        #         c=combined_def, s=50, transform=ccrs.PlateCarree(),
+        #         vmin = sigma_min, vmax = sigma_max
+        #         )
+                
+                
+        # ------------------------------------------------------------------
+        # inside your time‐loop over `dayn_index`
+        # ------------------------------------------------------------------
+        
         existing_def = volc.status_combined['existing_defs'][dayn_index]
-        new_def = volc.status_combined['new_defs'][dayn_index]
+        new_def      = volc.status_combined['new_defs'][dayn_index]
         
+        # 1.  “Best” of the two values, ignoring NaN
+        combined_def = np.nanmax([existing_def, new_def])
         
-        # determine the maximum from the two unrest metrics
-        combined_def = max(existing_def, new_def)
+        # 2.  If *both* were NaN, walk backwards to find the last valid value
+        used_fallback = False
+        if np.isnan(combined_def):
+            for prev in range(dayn_index - 1, -1, -1):        # step −1 until 0
+                prev_val = np.nanmax([
+                    volc.status_combined['existing_defs'][prev],
+                    volc.status_combined['new_defs'][prev]
+                ])
+                if not np.isnan(prev_val):                    # found something
+                    combined_def = prev_val
+                    used_fallback = True
+                    break
         
-        # only plot if larger than minimum threshold
+        # # If everything up to t=0 is NaN we simply skip plotting
+        # if np.isnan(combined_def):
+        #     continue
+        
+        # 3.  Pick a marker shape depending on whether we fell back
+        marker_style = '^' if used_fallback else 'o'          # ▲ for carried value
+        
+        # Plot only if above threshold
         if combined_def > sigma_min:
-        
-            # if we do, plot the max of existing or new deformation
             sc = ax.scatter(
-                volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
-                c=combined_def, s=50, transform=ccrs.PlateCarree(),
-                vmin = sigma_min, vmax = sigma_max
-                )
+                volc.lon_lat_offset[0], volc.lon_lat_offset[1],
+                c=combined_def,
+                s=50,
+                marker=marker_style,
+                transform=ccrs.PlateCarree(),
+                vmin=sigma_min, vmax=sigma_max
+            )
+        
             scatter_objects.append((sc, volc.name))
             
             # also plot the lines from the shifted points to their true point.  
@@ -976,6 +576,9 @@ def licsalert_status_map(
             volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
             c=c, s=50, transform=ccrs.PlateCarree(),
             )
+        
+        # needed to hover on points interactively
+        scatter_objects.append((sc, volc.name))
         
         # also plot the lines from the shifted points to their true point.  
         ax.plot(
@@ -1112,7 +715,7 @@ def licsalert_status_map(
                 
             
             #colorbar (possibly with no sc created by ax.scatter)
-            cbar_ax = fig.add_axes([0.35, 0.15, 0.3, 0.01])  
+            cbar_ax = fig.add_axes([0.35, 0.07, 0.3, 0.01])  
             norm = colors.Normalize(vmin=sigma_min, vmax=sigma_max)
             cmap = cm.viridis  
             sm = cm.ScalarMappable(norm=norm, cmap=cmap)
@@ -1127,6 +730,16 @@ def licsalert_status_map(
                     ),
                 "%Y/%m/%d")
             fig.suptitle(date_str)
+            
+            
+            # manual legend that has no licsbas and no licsalert colours
+            add_status_legend(
+                ax,
+                colour_nolicsbas=no_licsbas_c,       
+                colour_nolicsalert=no_licsalert_c,
+                bbox=(0.01, 0.01, 0.35, 0.1)      
+            )
+
 
     
             ## save as a png and close the figure.                     
@@ -1181,22 +794,14 @@ def licsalert_status_map(
     
     
 
-    add_status_legend(
-        ax,
-        colour_nolicsbas=no_licsbas_c,       # must match your plot_volc_manual_colour
-        colour_nolicsalert=no_licsalert_c,
-        bbox=(0.01, 0.01, 0.35, 0.1)      # tweak position/size as you like
-    )
-
     
 licsalert_status_map(
     volcs, sigma_min = 0., sigma_max = 10.,
-    #d_start = '20151231', d_end = '20170101',
     d_start = '20241231', d_end = '20251231',
-    outdir = Path("./status_outputs/03_comet/"),
+    outdir = Path("./status_outputs/04_comet_summer_2025/"),
     plot_frequency = 'yearly', figure_type = 'window',
     no_licsbas_c='tab:red',
-    no_licsalert_c='tab:pink'
+    no_licsalert_c='tab:brown'
     )
 
 # possibly create an animation from multiple frames
@@ -1204,7 +809,6 @@ licsalert_status_map(
 #             image_duration = 750)                                                 
     
     
-
 
 sys.exit()
 
@@ -1231,10 +835,220 @@ sys.exit()
 
 #%%  Plot a figure for each volcano showing the status for each frame at all times
 
-fig_indexes, _ = find_volc_indexes(volcs, ['reykjanes'])
+
+
+def plot_unrest_metric_all_frames_one_volc(
+        volc, ticks_labels_every_n = 6, scatter_points = False):
+    """
+    Plot the time series for new deformation and existing deformation 
+    for each frame at a volcano, and the combined metric.  
+    
+    """
+    import matplotlib.dates as mdates
+    from matplotlib.lines import Line2D
+    from datetime import datetime
+    
+    # remove no data region?
+    
+    def determine_figure_y_lims(volc):
+        """
+        """
+        n_frames = len(volc.frame_status)
+        frames = volc.frame_status
+
+        # set initial bounds that shouldn't be exceeded for a while
+        y_low = 0
+        y_high = 1
+        
+        # iterate through and plot each frame.  
+        for n_frame in range(n_frames):
+    
+            # get just the frame name with no volcano name.  
+            frame_name = Path(frames[n_frame]).parts[-1][-17:]
+            
+            # if there's no status for a frame, it will return as NA
+            if frame_name != 'NA':
+                
+                # make a 2 x times array of unrest values            
+                unrest_metrics = np.array(
+                    [volc.status[frame_name]['new_defs'],
+                     volc.status[frame_name]['existing_defs']]
+                         )
+            
+                # keep track of figure x limits
+                if np.max(unrest_metrics) > y_high:
+                    y_high = np.max(unrest_metrics)
+                
+        # add a nudge factor so points don't touch edge.  
+        y_high +=1 
+                
+        return y_low, y_high
+    
+    def determine_figure_xlims(volc):
+        """
+        """
+        from datetime import datetime
+        
+        n_frames = len(volc.frame_status)
+        frames = volc.frame_status
+
+        # set initial bounds that shouldn't be exceeded for a while
+        fig_start_dt = datetime(9999, 1, 1, 00, 00, 00)
+        fig_end_dt = datetime(1, 1, 1, 00, 00, 00)
+        
+        
+        # iterate through and plot each frame.  
+        for n_frame in range(n_frames):
+    
+            # get just the frame name with no volcano name.  
+            frame_name = Path(frames[n_frame]).parts[-1][-17:]
+            
+            # if there's no status for a frame, it will return as NA
+            if frame_name != 'NA':
+                
+                # keep track of figure x limits
+                if volc.status[frame_name]['dates'][0] < fig_start_dt:
+                    fig_start_dt = volc.status[frame_name]['dates'][0]
+                if volc.status[frame_name]['dates'][-1] > fig_end_dt:
+                    fig_end_dt = volc.status[frame_name]['dates'][-1]
+                
+        return fig_start_dt, fig_end_dt
+    
+
+
+    def plot_unrest_metric_one_frame(
+            ax, status, d_start_dt, d_end_dt, y_low, y_high, y_title,
+            show_xtick_labels = False, 
+            ):
+        """
+        """
+        
+        dates = status['dates']
+        new_def = status['new_defs']
+        existing_def = status['existing_defs']
+        
+        
+        # Plot left data on primary y-axis
+        line1, = ax.plot(dates, new_def, color=left_colour)
+        if scatter_points:
+             ax.scatter(dates, new_def, color=left_colour, marker = '.')
+             
+        if show_xtick_labels:
+            ax.set_xlabel('Date')
+        #ax.set_ylabel("New deformation", color=left_colour)
+        ax.set_ylabel(y_title, color='k', fontsize = 8)
+        ax.tick_params(axis='y', labelcolor=left_colour)
+        ax.set_ylim(y_low, y_high)
+        
+        # Create a second y-axis sharing the same x-axis
+        ax2 = ax.twinx()
+        line2, = ax2.plot(dates, existing_def, color=right_colour)
+        if scatter_points:
+            ax2.scatter(dates, existing_def, color=right_colour, marker = '.')
+        #ax2.set_ylabel('Existing Deformation', color=right_colour)
+        ax2.tick_params(axis='y', labelcolor=right_colour)
+        ax2.set_ylim(y_low, y_high)
+               
+        ax.set_xlim(left = d_start_dt, right = d_end_dt)
+        # Set up the major locator: every ticks_labels_every_n months
+        major_locator = mdates.MonthLocator(interval=ticks_labels_every_n)
+        ax.xaxis.set_major_locator(major_locator)
+        
+        if show_xtick_labels:
+            # Use a formatter to display dates in YYYY_MM_DD format
+            major_formatter = mdates.DateFormatter("%Y_%m_%d")
+        else:
+            # Turn off tick labels using a NullFormatter
+            from matplotlib.ticker import NullFormatter
+            major_formatter = NullFormatter()
+        ax.xaxis.set_major_formatter(major_formatter)
+        
+        if show_xtick_labels:
+            # Rotate the date labels 45 degrees for better readability
+            plt.setp(ax.get_xticklabels(), rotation=45, ha="right", fontsize=8)
+
+        
+        # Set up the minor locator: every month (no labels by default)
+        minor_locator = mdates.MonthLocator(interval=1)
+        ax.xaxis.set_minor_locator(minor_locator)
+        
+    
+    x_low_dt, x_high_dt = determine_figure_xlims(volc)
+    y_low, y_high = determine_figure_y_lims(volc)
+
+    left_colour = 'tab:blue'
+    right_colour = 'tab:orange'
+    
+    # determine the number of frames for this volcano
+    n_frames = len(volc.frame_status)
+    frames = volc.frame_status
+    
+
+    
+    # dates = volc.status_combined['dates']
+    # new_def = volc.status_combined['new_defs']
+    # existing_def = volc.status_combined['existing_defs']
+    
+    # Create a new figure and primary axis
+    fig, axes = plt.subplots(n_frames+1, 1, figsize=(10, 5))
+    
+    # iterate through and plot each frame.  
+    for n_frame in range(n_frames):
+
+
+        pdb.set_trace()
+
+        # get just the frame name with no volcano name.  
+        frame_name = Path(frames[n_frame]).parts[-1][-17:]
+   
+        # print(
+        #     f"{volc.status[frame_name]['dates'][0]} - " 
+        #     f"{volc.status[frame_name]['dates'][-1]}" 
+        #     )
+        if frame_name != 'NA':
+            plot_unrest_metric_one_frame(
+                axes[n_frame], volc.status[frame_name], x_low_dt, x_high_dt,
+                y_low, y_high, frame_name
+                )
+        
+    # bottom row is combined status
+    plot_unrest_metric_one_frame(
+        axes[-1], volc.status_combined, x_low_dt, x_high_dt, 
+        y_low, y_high, 'Combined', show_xtick_labels = True
+        )
+        
+    # add the legend
+    # Create two dummy handles that don't draw anything.
+    dummy_handles = [
+        Line2D([], [], linestyle='None'),  # blank handle for first word
+        Line2D([], [], linestyle='None')   # blank handle for second word
+    ]
+
+    # Create the legend with no visible handles.
+    legend = fig.legend(
+        dummy_handles, ['New deformation', 'Existing deformation'],
+        handlelength=0,  # no line or marker shown
+        frameon=True, loc = 'lower left')   
+
+    # Set the colors of the legend texts.
+    for text, color in zip(legend.get_texts(), [left_colour, right_colour]):
+        text.set_color(color)
+        
+    # -999 puts it behind tick labels
+    legend.set_zorder(0)
+
+    plt.title(f"{volc.name}")
+    fig.tight_layout()  # Adjust layout to fit labels and title
+    plt.show()
+
+
+
+#fig_indexes, _ = find_volc_indexes(volcs, ['kilauea'])
+fig_indexes, _ = find_volc_indexes(volcs, ['fernandina'])
 fig_indexes, _ = find_volc_indexes(volcs, ['wolf'])
-fig_indexes, _ = find_volc_indexes(volcs, ['la palma'])             # not in data?
-fig_indexes, _ = find_volc_indexes(volcs, ['laguna del maule'])             # 
+# fig_indexes, _ = find_volc_indexes(volcs, ['wolf'])
+# fig_indexes, _ = find_volc_indexes(volcs, ['la palma'])             # not in data?
+# fig_indexes, _ = find_volc_indexes(volcs, ['laguna del maule'])             # 
 
 for volc in volcs[fig_indexes[0]:fig_indexes[0]+1]:
     print(f"Plotting the unrest metrics for all frames at {volc.name}")
@@ -1243,6 +1057,8 @@ for volc in volcs[fig_indexes[0]:fig_indexes[0]+1]:
         )
 
 
+
+sys.exit()
 """
 # Campi Flegrei?
 # Sierra Negra?
