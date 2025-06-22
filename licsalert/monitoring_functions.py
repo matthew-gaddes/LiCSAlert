@@ -6,6 +6,7 @@ Created on Mon Jun 29 14:09:28 2020
 @author: matthew
 """
 import pdb
+import matplotlib.pyplot as plt
 
 #%%
 
@@ -200,50 +201,20 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         # ax.matshow(displacement_r2['mask'])
         ######################## end debug
         
-        # determine 
+        # determine the time series to be used for ICA.  Note that this is
+        # no longer all epochs, and is instead a subset that compromises
+        # temporal resolution and the number of pixels retained.  
+        # pass full time series and end of baseline info so that function 
+        # can crop to only baseline
+        displacement_r2_ica = construct_baseline_ts(
+            displacement_r3,
+            tbaseline_info,
+            licsalert_settings['baseline_end']
+            )
         
-        def construct_baseline_ts(displacement_r3):
-            """
-            Given a time series with a time varying mask (i.e. pixels come 
-            in and out of coherene), build a time series with a consistent mask
-            that uses only some of these acquisitions to build a compromise 
-            between temporal resolution and number of pixels
-            
-            
-            
-            spatial_ICASAR_data = {'ifgs_dc'       : displacement_r2['mixtures_mc'][:(baseline_end.acq_n+1),],                             
-                                   'mask'          : displacement_r2['mask'],
-                                   'lons'          : displacement_r2['lons'],
-                                   'lats'          : displacement_r2['lats'],
-                                   
-                                   
-           'ifg_dates_dc'  : tbaseline_info['ifg_dates'][:(baseline_end.acq_n+1)]}                             
-            
-            """
-
-            # determine the number of pixels for each epoch
-            n_pixels, n_pixels_idx, total_pix = calculate_valid_pixels(
-                displacement_r3['cum_ma']
-                )
-
-            # and how those change as we add epochs
-            n_pix_epoch = intersect_valid_pixels(
-                cum_ma,
-                acq_dates,
-                verbose = False
-                )
-
-            epoch_values = calculate_optimal_n_epochs(n_pix_epoch)
-            
-            
-            pdb.set_trace()
-            
-                
-            
-            return displacement_r2
-        
-        
-        baseline_disp_r2 = construct_baseline_ts(displacement_r3)
+        # mean centre?  
+        # add extra info to this array.  
+        # then pass to ICA function.  
         
         
         # either load ICA from previous run, or compute it.  
