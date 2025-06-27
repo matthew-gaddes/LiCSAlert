@@ -8,10 +8,19 @@ import pdb
 import matplotlib.pyplot as plt
  
 
-#%%
+#%% LiCSAlert()
 
-def LiCSAlert(sources, baselines_cs, ifgs_baseline, mask, ifgs_monitoring = None, t_recalculate = 10, verbose=False, 
-              n_pix_window = 20, residual_type = 'cumulative'):
+def LiCSAlert(sources,
+              mask_sources,
+              inc_mc_space,
+              baselines_cs,
+              baseline_end,
+              t_recalculate = 10,
+              verbose=False, 
+              n_pix_window = 20,
+              residual_type = 'cumulative'
+              ):
+    
     """ Main LiCSAlert algorithm for a daisy-chain timeseries of interferograms.  
     
     Inputs:
@@ -50,79 +59,118 @@ def LiCSAlert(sources, baselines_cs, ifgs_baseline, mask, ifgs_monitoring = None
         2023_10_19 | MEG | remove option to save some products.  
     """
     import numpy as np
+    import numpy.ma as ma
     import pickle
-    from licsalert.licsalert import bss_components_inversion, residual_for_pixels, tcs_baseline, tcs_monitoring  
+    from licsalert.licsalert import bss_components_inversion, tcs_baseline
+    from licsalert.licsalert import tcs_monitoring, residual_for_pixels
+    from licsalert.aux import update_mask
         
-    def check_input_sizes(baselines_cs, ifgs_all, sources):
-        """ Check that there are the correct number of interferograms
-        and the correct number of temporal baselines. 
-        Also check that the number of pixels is correct between the sources
-        and the interfergraoms.  
-        """
+    # def check_input_sizes(baselines_cs, ifgs_all, sources):
+    #     """ Check that there are the correct number of interferograms
+    #     and the correct number of temporal baselines. 
+    #     Also check that the number of pixels is correct between the sources
+    #     and the interfergraoms.  
+    #     """
     
-        # check number of pixels
-        if sources.shape[1] != ifgs_baseline.shape[1]:                                                                                              # 2nd dimension ([1] bit) is the number of pixels, which we compare.  
-            raise Exception(f"The sources don't have the same number of pixels ({sources.shape[1]}) as the interferograms "
-                            f"({ifgs_baseline.shape[1]}), so can't be used to fit them.  This is usually due to changing "
-                            f"the cropped region but not re-running ICASAR.  Exiting...")
+    #     # check number of pixels
+    #     if sources.shape[1] != ifgs_baseline.shape[1]:                                                                                              # 2nd dimension ([1] bit) is the number of pixels, which we compare.  
+    #         raise Exception(f"The sources don't have the same number of pixels ({sources.shape[1]}) as the interferograms "
+    #                         f"({ifgs_baseline.shape[1]}), so can't be used to fit them.  This is usually due to changing "
+    #                         f"the cropped region but not re-running ICASAR.  Exiting...")
         
-        # print(f"There are {baselines_cs.shape[0]} cumulative temporal baselines (set by baselines_cs), "
-        #       f"and {ifgs_all.shape[0]} interferograms", end = '')
-        if not baselines_cs.shape[0] != (ifgs_baseline.shape[0] + ifgs_monitoring.shape[0] + 1):                                                             # check in the case that there are monitoring ifgs
-            # print(f", which is correct (as there are no daisy chain intefergraom on the "
-            #       f"acquisition date.  ")
-            pass
-        else:
-            print(f".  ")
-            raise Exception(
-                f"There appears to be a mismatch between the number of "
-                f"cumulative baselines and the number of interferograms "
-                f"As there is a cumulative temporal baselines on the first " 
-                f"acquisition (value = 0) but no daisy chain ifg on that date, " +
-                f"the baselines should be one longer than the number "
-                f"of interferograms.  "
-                )
+    #     # print(f"There are {baselines_cs.shape[0]} cumulative temporal baselines (set by baselines_cs), "
+    #     #       f"and {ifgs_all.shape[0]} interferograms", end = '')
+    #     if not baselines_cs.shape[0] != (ifgs_baseline.shape[0] + ifgs_monitoring.shape[0] + 1):                                                             # check in the case that there are monitoring ifgs
+    #         # print(f", which is correct (as there are no daisy chain intefergraom on the "
+    #         #       f"acquisition date.  ")
+    #         pass
+    #     else:
+    #         print(f".  ")
+    #         raise Exception(
+    #             f"There appears to be a mismatch between the number of "
+    #             f"cumulative baselines and the number of interferograms "
+    #             f"As there is a cumulative temporal baselines on the first " 
+    #             f"acquisition (value = 0) but no daisy chain ifg on that date, " +
+    #             f"the baselines should be one longer than the number "
+    #             f"of interferograms.  "
+    #             )
+        
+        
+    # function was designed to work with incremental so convert cumulative:
+    # inc_ma = ma.diff(cum_ma, axis=0)
         
     # 0: Ensure we can still run LiCSAlert in the case that we have no 
     # monitoring interferograms (yet)
-    n_times_baseline = ifgs_baseline.shape[0] + 1                                                   
-    if ifgs_monitoring is None:
-        ifgs_all = np.copy(ifgs_baseline)                                                                # if there are no monitoring ifgs, ifgs_all is just the set of baseline ifgs
-        n_times_monitoring = 0                                                                           # there are no monitoring ifgs
-    else:
-        ifgs_all = np.vstack((ifgs_baseline, ifgs_monitoring))                                           # ifgs are row vectors, so stack vertically
-        n_times_monitoring = ifgs_monitoring.shape[0]
-    check_input_sizes(baselines_cs, ifgs_all, sources)
-
-    # # pdb.set_trace()
-    # # start debug
-    # plt.switch_backend('qt5agg')
-    # # for i in range(4):
-    # #     f, ax = plt.subplots()
-    # #     ax.plot(tcs_c[:,i])
-    # #     plt.pause(2)
-    # from licsalert.aux import col_to_ma
-    # f, axes = plt.subplots(1,2)
-    # axes[0].matshow(col_to_ma(ifgs_baseline[0,:], mask))
-    # axes[1].matshow(col_to_ma(sources[3,:], mask))
-    # # end
+    # not needed now?
+    
+    # +1 still needed?  
+    # n_times_baseline = baseline_end.acq_n + 1
+    # if ifgs_monitoring is None:
+    #     ifgs_all = np.copy(ifgs_baseline)                                                                # if there are no monitoring ifgs, ifgs_all is just the set of baseline ifgs
+    #     n_times_monitoring = 0                                                                           # there are no monitoring ifgs
+    # else:
+    #     ifgs_all = np.vstack((ifgs_baseline, ifgs_monitoring))                                           # ifgs are row vectors, so stack vertically
+    #     n_times_monitoring = ifgs_monitoring.shape[0]
+    # check_input_sizes(baselines_cs, ifgs_all, sources)
         
     # do an inversion to fit the incremental ifgs using the sources, then
     # make the time courses (inversion results) cumulative, starting at 0
     # d_hat is reconsturction, d_resid is data - reconstrutcion.  
-    products = bss_components_inversion(
-        sources, ifgs_baseline, cumulative=True, mask = mask
-        )     
-    tcs_c_baseline, d_hat_baseline, d_resid_baseline = products; del products
     
+    
+    
+    # tcs)_c : time courses as column vectors (i.e. n_times x n_ics)
+    # d_hat, d_resid.  Same as cum_ma
+    # NOTE that these are not cumulative (as working with incremental data
+    # and cumualtive is set to False.  
+    # also note that we only use the baseline data here.  
+    # time courses (tcs) should be the same length as incremental 
+    # input ifgs inc_ma[...] as cumulative is set to false
+    tcs, d_hat, d_resid = bss_components_inversion_per_epoch(
+        sources,
+        mask_sources,
+        inc_mc_space[:baseline_end.acq_n, ],
+        cumulative=False
+    )
+    
+    # create cumulative time courses (i.e. integrate in time):
+    # note that tcs_c_baseline is now 1 longer than incremental input ifgs.  
+    tcs_c_baseline = np.concatenate(
+        (np.zeros(
+            (1, tcs.shape[1])
+            ),
+         np.cumsum(
+             tcs, axis=0)
+         ),
+        axis = 0
+    )         
+    del tcs
+    
+    # f, ax = plt.subplots()
+    # ax.matshow(d_hat[10,])
+    # # debug plot
+    # f, axes = plt.subplots(tcs_cs.shape[1], 1)
+    # for ax_n, tc in enumerate(tcs_cs.T):
+    #     axes[ax_n].plot(tc)
+    # # end 
+        
     # calcaulte line of best fit, gradient, point to line distances etc. for 
     # cumulative time courses.  
     sources_tcs = tcs_baseline(
-        tcs_c_baseline, baselines_cs[:n_times_baseline], t_recalculate
-        )                                   
+        tcs_c_baseline, 
+        baselines_cs[:baseline_end.acq_n+1],
+        t_recalculate,
+    )                                   
    
+    
+    pdb.set_trace()
+    
     # calculate the residual, which is summed for each pixel, then averaged 
     # across an image at any time.  
+    
+    # this needs to be similar to how it was caldulated in bss_inversion?  
+    # ie per epoch?  Can we just use this output to then calculte Andy's window approach etc? 
+    
     residual = residual_for_pixels(
         sources, sources_tcs, ifgs_baseline, mask, n_pix_window, residual_type
         )             
@@ -130,7 +178,7 @@ def LiCSAlert(sources, baselines_cs, ifgs_baseline, mask, ifgs_monitoring = None
     # calculate line of best fit, gradient, line to point distances etc for 
     # cumulative residual.  
     residual_tcs = tcs_baseline(
-        residual, baselines_cs[:n_times_baseline], t_recalculate
+        residual, baselines_cs[:baseline_end.acq_n], t_recalculate
         )                               
     del tcs_c_baseline, residual
 
@@ -172,8 +220,280 @@ def LiCSAlert(sources, baselines_cs, ifgs_baseline, mask, ifgs_monitoring = None
         return sources_tcs_monitor, residual_tcs_monitor, d_hat, d_resid
     
 
+#%% LiCSAlert() backup 2025_06_25
 
-#%%
+
+# def LiCSAlert(sources,
+#               baselines_cs,
+#               ifgs_baseline,
+#               mask,
+#               ifgs_monitoring = None,
+#               t_recalculate = 10,
+#               verbose=False, 
+#               n_pix_window = 20,
+#               residual_type = 'cumulative'
+#               ):
+    
+#     """ Main LiCSAlert algorithm for a daisy-chain timeseries of interferograms.  
+    
+#     Inputs:
+#         sources | r2 array | sources (from ICASAR) as row vectors, as per ICA, that can be turned back to interferograms with a rank 2 boolean mask of which pixels are masked and the col_to_ma function.  
+#         baselines_cs | r1 array | time values for each point in the time series, commonly (12,24,36) for Sentinel-1 data.  Could also be described as the cumulative temporal baselines.  
+#         ifgs_baseline | r2 array | ifgs used in baseline stage as row vectors
+#         mask | r2 array boolean | mask to convert a row vector (e.g. a row in sources or ifgs) back to a rank2 array.  
+#         ifgs_monitoring | r2 array or None | ifgs used in monitoring stage as row vectors
+#         t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
+#         verbose | boolean | if True, various information is printed to screen.  
+#         n_pix_window | int | side length of square windows used for the window residual calculation.  
+#         residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summer in time for each pixel, then averaged in space across each ifg.  )
+#                                                         If window, the residual is the ratio of the max in a window (e.g. 20x20 pixels) over the mean for all windows for that time.  Value at each point is the cumulative.  
+        
+#     Outputs
+#         sources_tcs_monitor | list of dicts | list, with item for each time course.  Each dictionary contains:
+#         cumualtive_tc | cumulative time course : the cumulative sum of how that IC is used to fit each interferogram.  Column vector.  
+#         gradient      | gradient of the cumulative time course in the baseline stage.  float.  
+#         lines         | n_times x n_times.  The lines of best fit used to calculate the line-of-best-fit to point distance at each time.  
+#                         Each column is a line of best fit, but many values are zeros as the lines of best fit are redrawn periodically.  
+#         sigma         | sigma (standard deviation) of the line-to-point distances in the baseline stage
+#         distances     | number of standard deviations each point is from it's line of best fit.  
+#         t_recalcaulte | integer, how often the lines of best fit are redrawn.  
+                                                                
+#         residual_tcs_monitor | list of dicts | As per above, but only for the cumulative residual (i.e. list is length 1)
+        
+#         d_hat            | rank 2 array | reconstructions (of incremrental ifgs)   
+#         d_resid         | rank 2 array | residual (d - d_hat)
+    
+#     History:
+#         2019/12/XX | MEG |  Written from existing script.  
+#         2020/02/16 | MEG |  Update to work with no monitoring interferograms
+#         2020/12/14 | MEG | Improve docs and add option to save outputs.  
+#         2021_11_30 | MEG | Add new residual method (max residual of spatial window / mean of residual of all spatial windows for each ifg)
+#         2023_04_03 | MEG | also return residual and reconsructions
+#         2023_10_19 | MEG | remove option to save some products.  
+#     """
+#     import numpy as np
+#     import pickle
+#     from licsalert.licsalert import bss_components_inversion, residual_for_pixels, tcs_baseline, tcs_monitoring  
+        
+#     def check_input_sizes(baselines_cs, ifgs_all, sources):
+#         """ Check that there are the correct number of interferograms
+#         and the correct number of temporal baselines. 
+#         Also check that the number of pixels is correct between the sources
+#         and the interfergraoms.  
+#         """
+    
+#         # check number of pixels
+#         if sources.shape[1] != ifgs_baseline.shape[1]:                                                                                              # 2nd dimension ([1] bit) is the number of pixels, which we compare.  
+#             raise Exception(f"The sources don't have the same number of pixels ({sources.shape[1]}) as the interferograms "
+#                             f"({ifgs_baseline.shape[1]}), so can't be used to fit them.  This is usually due to changing "
+#                             f"the cropped region but not re-running ICASAR.  Exiting...")
+        
+#         # print(f"There are {baselines_cs.shape[0]} cumulative temporal baselines (set by baselines_cs), "
+#         #       f"and {ifgs_all.shape[0]} interferograms", end = '')
+#         if not baselines_cs.shape[0] != (ifgs_baseline.shape[0] + ifgs_monitoring.shape[0] + 1):                                                             # check in the case that there are monitoring ifgs
+#             # print(f", which is correct (as there are no daisy chain intefergraom on the "
+#             #       f"acquisition date.  ")
+#             pass
+#         else:
+#             print(f".  ")
+#             raise Exception(
+#                 f"There appears to be a mismatch between the number of "
+#                 f"cumulative baselines and the number of interferograms "
+#                 f"As there is a cumulative temporal baselines on the first " 
+#                 f"acquisition (value = 0) but no daisy chain ifg on that date, " +
+#                 f"the baselines should be one longer than the number "
+#                 f"of interferograms.  "
+#                 )
+        
+#     # 0: Ensure we can still run LiCSAlert in the case that we have no 
+#     # monitoring interferograms (yet)
+#     n_times_baseline = ifgs_baseline.shape[0] + 1                                                   
+#     if ifgs_monitoring is None:
+#         ifgs_all = np.copy(ifgs_baseline)                                                                # if there are no monitoring ifgs, ifgs_all is just the set of baseline ifgs
+#         n_times_monitoring = 0                                                                           # there are no monitoring ifgs
+#     else:
+#         ifgs_all = np.vstack((ifgs_baseline, ifgs_monitoring))                                           # ifgs are row vectors, so stack vertically
+#         n_times_monitoring = ifgs_monitoring.shape[0]
+#     check_input_sizes(baselines_cs, ifgs_all, sources)
+
+#     # # pdb.set_trace()
+#     # # start debug
+#     # plt.switch_backend('qt5agg')
+#     # # for i in range(4):
+#     # #     f, ax = plt.subplots()
+#     # #     ax.plot(tcs_c[:,i])
+#     # #     plt.pause(2)
+#     # from licsalert.aux import col_to_ma
+#     # f, axes = plt.subplots(1,2)
+#     # axes[0].matshow(col_to_ma(ifgs_baseline[0,:], mask))
+#     # axes[1].matshow(col_to_ma(sources[3,:], mask))
+#     # # end
+        
+#     # do an inversion to fit the incremental ifgs using the sources, then
+#     # make the time courses (inversion results) cumulative, starting at 0
+#     # d_hat is reconsturction, d_resid is data - reconstrutcion.  
+#     products = bss_components_inversion(
+#         sources, ifgs_baseline, cumulative=True, mask = mask
+#         )     
+#     tcs_c_baseline, d_hat_baseline, d_resid_baseline = products; del products
+    
+#     # calcaulte line of best fit, gradient, point to line distances etc. for 
+#     # cumulative time courses.  
+#     sources_tcs = tcs_baseline(
+#         tcs_c_baseline, baselines_cs[:n_times_baseline], t_recalculate
+#         )                                   
+   
+#     # calculate the residual, which is summed for each pixel, then averaged 
+#     # across an image at any time.  
+#     residual = residual_for_pixels(
+#         sources, sources_tcs, ifgs_baseline, mask, n_pix_window, residual_type
+#         )             
+    
+#     # calculate line of best fit, gradient, line to point distances etc for 
+#     # cumulative residual.  
+#     residual_tcs = tcs_baseline(
+#         residual, baselines_cs[:n_times_baseline], t_recalculate
+#         )                               
+#     del tcs_c_baseline, residual
+
+#     #2: Calculate time courses/distances etc for the monitoring data
+#     if ifgs_monitoring is not None:
+
+#         # do the inversion to fit the monitoring ifgs with the sources    
+#         # compute cumulative time courses for monitoring interferograms (ie
+#         # simple inversion to fit each ifg in ifgs_baseline using sources.  )
+#         products = bss_components_inversion(
+#             sources, ifgs_monitoring,  cumulative=True, mask = mask
+#             )                      
+#         (tcs_c_monitoring, d_hat_monitoring, d_resid_monitoring) = products
+#         del products
+        
+#         # remove the 0s on the first row as this isn't the basleine stage.  
+#         tcs_c_monitoring = np.delete(tcs_c_monitoring, 0,0)
+#         sources_tcs_monitor = tcs_monitoring(
+#             tcs_c_monitoring, sources_tcs, baselines_cs
+#             )                               
+    
+#         #3: and update the residual stuff                                                                            
+#         # get the cumulative residual for baseline and monitoring (hence _cb)    
+#         residual_bm = residual_for_pixels(
+#             sources, sources_tcs_monitor, ifgs_all, mask, n_pix_window, 
+#             residual_type
+#             )                               
+#         residual_tcs_monitor = tcs_monitoring(
+#             residual_bm, residual_tcs, baselines_cs, residual=True
+#             )               
+    
+#     # 3: combine the reconsuction and residual for all ifgs
+#     d_hat = (np.hstack((d_hat_baseline, d_hat_monitoring))).T                                                                           # reconstruction, n_times x n_pixels 
+#     d_resid = (np.hstack((d_resid_baseline, d_resid_monitoring))).T                                                                     # residual
+
+#     if ifgs_monitoring is None:
+#         return sources_tcs, residual_tcs
+#     else:
+#         return sources_tcs_monitor, residual_tcs_monitor, d_hat, d_resid
+
+
+#%% construct_baseline_ts()
+
+def construct_baseline_ts(sica_tica, 
+                          displacement_r3, 
+                          tbaseline_info,
+                          baseline_end,
+                          interactive=False
+):
+    """
+    A function to prepare the baseline time series for ICA.  First step
+    is dropping some epochs that cause many pixels to be lost, followed by
+    mean centering 
+    """
+    import numpy as np
+    
+    from licsalert.pixel_selection import automatic_pixel_epoch_selection
+    from licsalert.temporal import daisy_chain_from_acquisitions
+    from licsalert.data_importing import ifg_timeseries
+    
+    # 1: select a subset of the epochs to create a compromise between lots of 
+    # pixels and lots of epochs (i.e. drop the epochs that cause lots of 
+    # pixels to be lost when a consistent mask through time is sought)
+    displacement_r2_ica, tbaseline_info_ica = automatic_pixel_epoch_selection(
+        displacement_r3,
+        tbaseline_info,
+        baseline_end,
+        interactive
+        )
+    
+    # also copy some auxilliary info to the new array
+    for key in ['dem', 'lons_mg', 'lats_mg']:
+        displacement_r2_ica[key] = displacement_r3[key]
+    
+    # rename the output to be more readable
+    displacement_r2_ica['cumulative'] = displacement_r2_ica['ifgs']
+    
+    # create the incremental displacments
+    displacement_r2_ica['incremental'] = np.diff(
+        displacement_r2_ica['cumulative'],
+        axis = 0
+        )
+    
+    # calculate the dates of the incremental ifgs
+    tbaseline_info_ica['ifg_dates'] = daisy_chain_from_acquisitions(
+        tbaseline_info_ica['acq_dates']
+    )
+        
+    
+    # 2: mean centre in time or space, according to if sica or tica 
+    # create a class (an ifg_timeseries) using the incremtnal measurements, 
+    # and handle all mean centering (in time and space)
+    
+    ifg_ts = ifg_timeseries(
+        displacement_r2_ica["incremental"],
+        tbaseline_info_ica['ifg_dates']
+    )
+    
+    displacement_r2_ica['incremental_mc_space'] = ifg_ts.mixtures_mc_space
+    displacement_r2_ica['means_space'] = ifg_ts.means_space
+    
+    displacement_r2_ica['incremental_mc_time'] = ifg_ts.mixtures_mc_time
+    displacement_r2_ica['means_time'] = ifg_ts.means_time
+
+    if sica_tica == 'sica':
+        displacement_r2_ica['mixtures_mc'] = ifg_ts.mixtures_mc_space
+        displacement_r2_ica['means'] = ifg_ts.means_space
+    elif sica_tica == 'tica':
+        displacement_r2_ica['mixtures_mc'] = ifg_ts.mixtures_mc_time
+        displacement_r2_ica['means'] = ifg_ts.means_time
+    else:
+        raise Exception(
+            f"'sica_tica' can be either 'sica' or 'tica', but not "
+            f"{sica_tica}.  Exiting.  "
+            )
+        
+    # check sizes of things
+    n_acq = len(tbaseline_info_ica['acq_dates'])
+    
+    print(
+        f"\nChecking the size of the baseline data that has been created for"
+        f"use with ICA:  ")
+    
+    for key, value in tbaseline_info_ica.items():
+        print(f"    {key} : {len(value)}")
+        
+    for key, value in displacement_r2_ica.items():
+        try:
+            print(f"    {key} : {value.shape}")
+        except:
+            pass
+   
+    print(f"\n\n")
+    
+    return displacement_r2_ica, tbaseline_info_ica
+    
+    
+    
+
+
+#%% residual_for_pixels()
 
 def residual_for_pixels(sources, sources_tcs, ifgs, mask, n_pix_window = 20, 
                         residual_type = 'cumulative', n_skip=None):
@@ -389,11 +709,13 @@ def tcs_monitoring(tcs_c, sources_tcs, baselines_cs, residual=False):
     else:
         n_acqs_monitor = tcs_c.shape[0]                                                              # number of time steps is just the number of interferograms
         if n_acqs != (n_acqs_baseline + n_acqs_monitor):
-            raise Exception(f"There is a mismatch in the number of acquisitions.  "
-                            f"The number of acquistions in the baseline stage "
-                            f"plus the number of acquisitions in the monitoring stage "
-                            f"should equal the number of acquisitions in the cumulative "
-                            f"temporal baselines, but doesn't.  Exiting.  ")
+            raise Exception(
+                f"There is a mismatch in the number of acquisitions.  "
+                f"The number of acquistions in the baseline stage "
+                f"plus the number of acquisitions in the monitoring stage "
+                f"should equal the number of acquisitions in the cumulative "
+                f"temporal baselines, but doesn't.  Exiting.  "
+            )
     
     
     
@@ -451,7 +773,16 @@ def tcs_monitoring(tcs_c, sources_tcs, baselines_cs, residual=False):
 #%%
         
         
-def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logfile_dir, LiCSBAS_bin, lon_lat = None, downsampling = 1, n_para=1):
+def LiCSBAS_for_LiCSAlert(
+        LiCSAR_frame,
+        LiCSAR_frames_dir,
+        LiCSBAS_out_dir,
+        logfile_dir,
+        LiCSBAS_bin,
+        lon_lat = None,
+        downsampling = 1,
+        n_para=1
+    ):
     """ Call this to either create a LiCSBAS timeseries from LiCSAR products, or to update one when new products become available.  
     Not all LiCSBAS features are supported! 
     
@@ -537,11 +868,8 @@ def LiCSBAS_for_LiCSAlert(LiCSAR_frame, LiCSAR_frames_dir, LiCSBAS_out_dir, logf
     # LiCSBAS 16 - fiter
     
 
+#%% LiCSAlert_preprocessing()
 
-   
-
-#%%
-    
 def LiCSAlert_preprocessing(
         displacement_r3,
         tbaseline_info, 
@@ -551,7 +879,7 @@ def LiCSAlert_preprocessing(
         verbose=True,
         order = 1,
         anti_aliasing=False
-        ):
+    ):
     """A function to downsample the data at two scales (one for general working [ie to speed things up], and one 
     for faster plotting.  )  Also, data are mean centered, which is required for ICASAR and LiCSAlert.  
     Note that the downsamples are applied consecutively, so are compound (e.g. if both are 0.5, 
@@ -610,11 +938,101 @@ def LiCSAlert_preprocessing(
         2025_06_22 | MEG | WIP - had to remove mean centerering stuff 
     """
     import numpy as np
+    import numpy.ma as ma
     # from licsalert.downsample_ifgs import downsample_ifgs
     from licsalert.aux import col_to_ma
     from licsalert.data_importing import ifg_timeseries
     
     from skimage.transform import rescale
+
+    # class MeanCenteredArray:
+    #     def __init__(self, masked_array):
+    #         if not isinstance(masked_array, np.ma.MaskedArray):
+    #             raise TypeError("Input must be a masked array")
+    #         # interal/private attriubute
+    #         self._arr = masked_array
+    #         self.mean_centered = _MeanCenteredAccessor(self._arr)
+    
+    #     @property
+    #     def original(self):
+    #         return self._arr
+    
+    
+    # class _MeanCenteredAccessor:
+    #     def __init__(self, arr):
+    #         self._original = arr
+    
+    #         # Precompute mean-centered versions
+    #         # Mean-centre in space (each image mean = 0)
+    #         image_means = arr.mean(axis=(1, 2))  # shape (time,)
+    #         self._space_centered = arr - image_means[:, np.newaxis, np.newaxis]
+    
+    #         # Mean-centre in time (each pixel's time series mean = 0)
+    #         pixel_means = arr.mean(axis=0)  # shape (y, x)
+    #         self._time_centered = arr - pixel_means[np.newaxis, :, :]
+    
+    #     @property
+    #     def space(self):
+    #         """Return image-wise mean-centred array (mean over y,x = 0 for each time slice)."""
+    #         return self._space_centered
+    
+    #     @property
+    #     def time(self):
+    #         """Return time-wise mean-centred array (mean over time = 0 for each pixel)."""
+    #         return self._time_centered
+
+    import numpy as np
+    
+    class MeanCenteredArray:
+        def __init__(self, masked_array):
+            if not isinstance(masked_array, np.ma.MaskedArray):
+                raise TypeError("Input must be a masked array")
+            
+            self._arr = masked_array
+    
+            # Precompute means
+            self._image_means = self._arr.mean(axis=(1, 2))  # shape (time,)
+            self._pixel_means = self._arr.mean(axis=0)       # shape (y, x)
+    
+            # Accessors
+            self.mean_centered = _MeanCenteredAccessor(self._arr, self._image_means, self._pixel_means)
+            self.means = _MeanAccessor(self._image_means, self._pixel_means)
+    
+        @property
+        def original(self):
+            return self._arr
+    
+    
+    class _MeanCenteredAccessor:
+        def __init__(self, arr, image_means, pixel_means):
+            self._space_centered = arr - image_means[:, np.newaxis, np.newaxis]
+            self._time_centered = arr - pixel_means[np.newaxis, :, :]
+    
+        @property
+        def space(self):
+            """Mean-centre in space: each 2D slice has zero mean."""
+            return self._space_centered
+    
+        @property
+        def time(self):
+            """Mean-centre in time: each pixel's time series has zero mean."""
+            return self._time_centered
+    
+    
+    class _MeanAccessor:
+        def __init__(self, image_means, pixel_means):
+            self._image_means = image_means
+            self._pixel_means = pixel_means
+    
+        @property
+        def space(self):
+            """Return 1D array of means over space (y,x) for each time step."""
+            return self._image_means
+    
+        @property
+        def time(self):
+            """Return 2D array of mean time series per pixel (shape: y, x)."""
+            return self._pixel_means
 
     
     
@@ -665,8 +1083,6 @@ def LiCSAlert_preprocessing(
         )
         
 
-
-
     # n_pixs_start = displacement_r2["incremental"].shape[1]               
     # shape_start = displacement_r2["mask"].shape                          
     
@@ -693,7 +1109,6 @@ def LiCSAlert_preprocessing(
             f"{displacement_r3['cum_ma'].shape} "
             )
         
-        
         # remake lons and lats at new resolution
         # check if we have lon lat data as not alway strictly necessary.  
         if ('lons_mg' in displacement_r3) and ('lats_mg' in displacement_r3):
@@ -701,24 +1116,24 @@ def LiCSAlert_preprocessing(
             lons = np.linspace(
                 displacement_r3['lons_mg'][0,0], 
                 displacement_r3['lons_mg'][-1,-1], 
-                displacement_r3['cum_ma'].shape[0]
-                )
+                displacement_r3['cum_ma'].shape[2]
+            )
             displacement_r3['lons_mg'] = np.repeat(
                 lons[np.newaxis, :], 
-                displacement_r3['cum_ma'].shape[2],
+                displacement_r3['cum_ma'].shape[1],
                 axis = 0
-                )                       
+            )                       
             
             lats = np.linspace(
                 displacement_r3['lats_mg'][0,0], 
                 displacement_r3['lats_mg'][-1,-1], 
                 displacement_r3['cum_ma'].shape[1]
-                )
+            )
             displacement_r3['lats_mg'] = np.repeat(
                 lats[np.newaxis, :], 
                 displacement_r3['cum_ma'].shape[1],
                 axis = 0
-                )                       
+            )                       
             
             # poor quality check to ensure that lats aren't upside down            
             if displacement_r3['lats_mg'][0,0] < displacement_r3['lats_mg'][-1,0]:                                        
@@ -731,7 +1146,7 @@ def LiCSAlert_preprocessing(
                     displacement_r3[product], 
                     downsample_run, 
                     anti_aliasing = anti_aliasing
-                    )                               
+                )                               
             
     # 2: Downsample further for plotting.  
     # note that the rescale in time (first dimension) is held at 1.  
@@ -741,49 +1156,117 @@ def LiCSAlert_preprocessing(
         order=order,
         anti_aliasing=anti_aliasing,
     )
-
     
-    # # 3: mean centre in time or space, according to if sica or tica 
-    # # (must be done after downsampling for accuracy)
-    # ifg_ts = ifg_timeseries(displacement_r2["incremental"], tbaseline_info['ifg_dates'])                     # create a class (an ifg_timeseries) using the incremtnal measurements, and handle all mean centering (in time and space)
     
-    # displacement_r2['incremental_mc_space'] = ifg_ts.mixtures_mc_space
-    # displacement_r2['means_space'] = ifg_ts.means_space
+    # 3: also compute the incremental displacements
+    displacement_r3['inc_ma'] = ma.diff(
+        displacement_r3['cum_ma'],
+        axis=0
+        )
     
-    # displacement_r2['incremental_mc_time'] = ifg_ts.mixtures_mc_time
-    # displacement_r2['means_time'] = ifg_ts.means_time
-
-    # if sica_tica == 'sica':
-    #     displacement_r2['mixtures_mc'] = ifg_ts.mixtures_mc_space
-    #     displacement_r2['means'] = ifg_ts.means_space
-    # elif sica_tica == 'tica':
-    #     displacement_r2['mixtures_mc'] = ifg_ts.mixtures_mc_time
-    #     displacement_r2['means'] = ifg_ts.means_time
-    # else:
-    #     raise Exception(f"'sica_tica' can be either 'sica' or 'tica', but not {sica_tica}.  Exiting.  ")
-        
-        
-    # # check sizes of things
-    # n_acq = len(tbaseline_info['acq_dates'])
+    displacement_r3['inc_ma_downsampled'] = ma.diff(
+        displacement_r3['cum_ma_downsampled'],
+        axis=0
+        )
     
-    # for key, value in tbaseline_info.items():
-    #     print(f"{key} : {len(value)}")
-        
-    # for key, value in displacement_r2.items():
-    #     try:
-    #         print(f"{key} : {value.shape}")
-    #     except:
-    #         pass
-    
-    # print(f"Interferogram were originally {shape_start} ({n_pixs_start} unmasked pixels), "
-    #       f"but have been downsampled to {displacement_r2['mask'].shape} ({displacement_r2['incremental'].shape[1]} unmasked pixels) for use with LiCSAlert, "
-    #       f"and have been downsampled to {displacement_r2['mask_downsampled'].shape} ({displacement_r2['incremental_downsampled'].shape[1]} unmasked pixels) for figures.  ")
-
+    # deal with mean centering (which could be in space or time)
+    displacement_r3['cum_ma'] = MeanCenteredArray(displacement_r3['cum_ma'])
+    displacement_r3['inc_ma'] = MeanCenteredArray(displacement_r3['inc_ma'])
+   
     return displacement_r3
 
+#%% bss_components_inversion_per_epoch()
 
-#%%
-def bss_components_inversion(sources, interferograms, cumulative = True, mask = None):
+def bss_components_inversion_per_epoch(
+        sources,
+        mask_sources,
+        ifgs,
+        cumulative=True
+        ):
+    """
+    
+    Returns:
+        
+        tcs_c | n_times x n_ics
+        d_hat | n_pixels x n_times |
+        d_resid | n_pixles x n_times
+    
+    """
+    import numpy as np
+    import numpy.ma as ma
+    from licsalert.aux import col_to_ma, update_mask
+    
+    n_ics=sources.shape[0]
+    n_epochs=ifgs.shape[0]
+    
+    # initialise to store outputs
+    tcs_c=np.zeros((n_epochs, n_ics))
+    d_hat=ma.zeros(ifgs.shape)
+    d_resid=ma.zeros(ifgs.shape)
+    
+    
+
+    
+    # iterate over each epoch
+    for epoch_n, epoch in enumerate(ifgs):
+        
+        
+        # find pixels that are valid in ICs and the current epoch
+        mask_epoch = epoch.mask
+        mask_sources_epoch = np.invert(
+                np.logical_and(
+                    np.invert(mask_sources),
+                    np.invert(mask_epoch)
+                    )
+                )
+        
+        # mask the ICs with the new mask
+        sources_masked = update_mask(
+            {'incremental' : sources,
+             'mask' : mask_sources},
+            mask_sources_epoch
+            )
+        
+        # make the epoch with the new mask
+        epoch_masked = ma.array(epoch, mask=mask_sources_epoch)
+        
+        # and convert it to a row vector (but still rank 2 as time is dim 1
+        # and this is a time series of length 1)
+        epoch_masked_r1 = ma.compressed(epoch_masked)[np.newaxis, :]
+        
+        
+        # invert to fit the epoch using the ICs
+        # tcs_c are m, d_hat is reconstruction, d_resid is epoch-reconstruction
+        tcs_c_cur, d_hat_cur, d_resid_cur = bss_components_inversion(
+            sources_masked['incremental'], 
+            epoch_masked_r1, 
+            cumulative=cumulative,
+            mask=mask_sources_epoch
+            )
+        
+        # convert rank1 vectors back to rank 2 matrices (ie. images)
+        d_hat_cur_r2 = col_to_ma(d_hat_cur, mask_sources_epoch)
+        d_resid_cur_r2 = col_to_ma(d_resid_cur, mask_sources_epoch)
+        
+        # and record
+        tcs_c[epoch_n,] = tcs_c_cur
+        d_hat[epoch_n,] = d_hat_cur_r2
+        d_resid[epoch_n,] = d_resid_cur_r2
+        
+        
+        
+        
+        
+    return tcs_c, d_hat, d_resid
+
+
+#%% bss_components_inversion()
+def bss_components_inversion(
+        sources,
+        interferograms,
+        cumulative=True,
+        mask = None
+        ):
     """
     A function to fit an interferogram using components learned by BSS, and return how strongly
     each component is required to reconstruct that interferogramm, and the
@@ -806,12 +1289,23 @@ def bss_components_inversion(sources, interferograms, cumulative = True, mask = 
 
     (n_ifgs, n_pixels) = interferograms.shape
 
-    d = interferograms.T                                                 # a column vector (p x 1)
-    g = sources.T                                                       # a matrix of ICA sources and each is a column (p x n_sources)
-    m = np.linalg.inv(g.T @ g) @ g.T @ d                                # m (n_sources x n_ifgs)
-    d_hat = g@m                                                         # reconstructed ifgs, as column vectors
-    d_resid = d - d_hat                                                 # residual between each ifg and its reconstruction (for all pixels at all times)
-    m = m.T                                                             # make these column vectors
+    # a column vector (p x n_ifgs)
+    d = interferograms.T                                                 
+    
+    # a matrix of ICA sources and each is a column (p x n_sources)
+    g = sources.T                                                       
+    
+    #invert to fit,  m (n_sources x n_ifgs)
+    m = np.linalg.inv(g.T @ g) @ g.T @ d                                
+    
+    # reconstructed ifgs, as column vectors
+    d_hat = g@m
+    
+    # residual between each ifg and its reconstruction (for all pixels at all times)
+    d_resid = d - d_hat
+    
+    # make these column vectors
+    m = m.T                                                             
 
     # ##%% debug figure: show how the sources are used to reconstruct an ifg.  
     # pdb.set_trace()
@@ -849,10 +1343,11 @@ def bss_components_inversion(sources, interferograms, cumulative = True, mask = 
     #             ax.set_yticks([])
     # ##%%
 
+    # sum through time, and make 0 at the start
     if cumulative:
         m_cs = np.cumsum(m, axis=0)
-        m_cs = np.concatenate((np.zeros((1, m.shape[1])), m_cs), axis = 0)          # make 0 at the start.  
-        return m_cs, d_hat, d_resid                       # return cumualtives (_cs)
+        m_cs = np.concatenate((np.zeros((1, m.shape[1])), m_cs), axis = 0)          
+        return m_cs, d_hat, d_resid                       
     else:
         return m, d_hat, d_resid
         
@@ -1130,13 +1625,19 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
     return X_inc, X_cum
 
 
-#%%
+#%% load_or_create_ICASAR_results()
 
 
 
 
-def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info, 
-                                  baseline_end, out_dir, ICASAR_settings):
+def load_or_create_ICASAR_results(
+        run_ICASAR,
+        displacement_r2,
+        tbaseline_info, 
+        baseline_end,
+        out_dir,
+        ICASAR_settings
+        ):
     """
     ICASAR results are always required by LiCSAlert, and these need either to be computed (usually only once at the start),
     or loaded (more common).  
@@ -1144,8 +1645,9 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info,
     Inputs:
         run_ICASAR | boolean | whether ICASAR should be run, or the results from a previous run loaded.  
         displacment_r2 | dict | interferograms and associated data that are used by the ICASAR algorithm  
+                                mixtures_mc (mean centered) are extracted from this.  
         tbaseline_info | dict | various temporal information, such as ifg_dates
-        baseline_end | string | YYYYMMDD that the baseline ends on.  
+        # baseline_end | string | YYYYMMDD that the baseline ends on.  
     Returns:
         icasar_sources | rank 2 array | sources as row vectors
         mask_sources
@@ -1180,11 +1682,13 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info,
         
         # index the data, note +1 so that the chosen ifg_n is included.  
         # mean centered data has already been mean centered in time or space, as required.  
-        spatial_ICASAR_data = {'ifgs_dc'       : displacement_r2['mixtures_mc'][:(baseline_end.acq_n+1),],                             
-                               'mask'          : displacement_r2['mask'],
-                               'lons'          : displacement_r2['lons'],
-                               'lats'          : displacement_r2['lats'],
-                               'ifg_dates_dc'  : tbaseline_info['ifg_dates'][:(baseline_end.acq_n+1)]}                             
+        spatial_ICASAR_data = {
+            'ifgs_dc'       : displacement_r2['mixtures_mc'][:(baseline_end.acq_n+1),],                             
+            'mask'          : displacement_r2['mask'],
+            'lons'          : displacement_r2['lons_mg'],
+            'lats'          : displacement_r2['lats_mg'],
+            'ifg_dates_dc'  : tbaseline_info['ifg_dates'][:(baseline_end.acq_n+1)]
+            }
         if 'dem' in displacement_r2.keys():
             spatial_ICASAR_data['dem'] = displacement_r2['dem']
         
@@ -1207,7 +1711,8 @@ def load_or_create_ICASAR_results(run_ICASAR, displacement_r2, tbaseline_info,
             tcs -= np.repeat(np.mean(tcs, axis = 0)[np.newaxis, : ], axis = 0, repeats = tcs.shape[0])
             check_means(sources, tcs)
             
-        
+    
+    # load from a previous run    
     else:
         with open(out_dir / "ICASAR_results.pkl", 'rb') as f_icasar:                                                                     # Or open the products from a previous ICASAR run.  
             sources = pickle.load(f_icasar)   

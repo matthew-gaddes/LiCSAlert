@@ -10,10 +10,43 @@ import pdb
 
 #%%
 
+def mean_centre_r3_masked_array(arr):
+    """
+    Mean-centre a 3D NumPy masked array:
+    1. Centre each image (2D slice along time) so image mean = 0.
+    2. Centre each pixel's time series so its mean over time = 0.
+
+    Parameters:
+        arr (np.ma.MaskedArray): 3D masked array (time, y, x)
+
+    Returns:
+        np.ma.MaskedArray: mean-centred masked array
+        
+    History:
+        2025_06_27 | MEG | Written
+    """
+    import numpy as np
+    
+    # Step 1: Mean centre each image in time
+    means_space = arr.mean(axis=(1, 2))  # Shape: (time,)
+    arr_mc_space = arr - means_space[:, np.newaxis, np.newaxis]
+
+    # Step 2: Mean centre each pixel over time
+    means_time = arr.mean(axis=0)  # Shape: (y, x)
+    arr_mc_time = arr - means_time[np.newaxis, :, :]
+
+    return arr_mc_space, means_space, arr_mc_time, means_time
+
+
+#%% update_mask()
+
 def update_mask(displacement_r2, mask_new):
     """ Given masked data, apply a new mask to it
     Lons and Lats are not masked arrays, so are not changed.  
-    The DEM is a masked array, so is changed.  
+    The DEM is a masked array, so is changed (if it's in the dict)
+    
+    2025_06_26 | Don't try to mask the dem if it doesn't exist.  
+  
     """
     
     from copy import deepcopy
@@ -54,11 +87,12 @@ def update_mask(displacement_r2, mask_new):
     displacement_r2_new['incremental'] = r2_data['ifgs']
     displacement_r2_new['mask'] = r2_data['mask']
     
-    # also mask the DEM.  
-    # displacement_r2_new['dem']  = ma.array(
-    #     displacement_r2['dem'], mask = mask_combined
-    #     )
-    displacement_r2_new['dem'].mask =  mask_combined
+    if 'dem' in displacement_r2.keys():
+        # also mask the DEM.  
+        # displacement_r2_new['dem']  = ma.array(
+        #     displacement_r2['dem'], mask = mask_combined
+        #     )
+        displacement_r2_new['dem'].mask =  mask_combined
 
 
     # debug plot

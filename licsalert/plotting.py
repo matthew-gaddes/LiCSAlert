@@ -1476,15 +1476,23 @@ def plot_1_image(im_r1, mask, title, figure_type, figure_out_dir, figsize = (18,
 #%% LiCSAlert_mask_figure
 
 
-def LiCSAlert_mask_figure(icasar_mask, licsbas_mask, mask_combined, licsbas_date, current_output_dir, figure_type):
-    """ Create a .png showing the licsbas mask, the ICASAR mask, and the current combined mask (ie the pixels in both).  
+def LiCSAlert_mask_figure(
+        mask_icasar, mask_epoch, 
+        licsbas_date, 
+        current_output_dir,
+        figure_type
+        ):
+    """ Create a .png showing the licsbas mask, the ICASAR mask, and the 
+    current combined mask (ie the pixels in both).  
     
     Inputs:
-        icasar_mask | r2 array | the mask used by ICASAR
-        licsbas_mask | r2 array | the mask produced by the last run of LiCSBAS
-        mask_combined | r2 array | the mask that removes any pixels that aren't in bothh the sources and the ifgs
+        mask_icasar | r2 array | the mask used by ICASAR
+        mask_epoch | r2 array | the mask produced by the last run of LiCSBAS
+        mask_combined | r2 array | the mask that removes any pixels that aren't
+                                   in both the sources and the ifgs
         licsbas_date | string | the date that LiCSAlert is being run to.  
-        current_output_dir | Path | the folder that LiCSALert is currently outputting to
+        current_output_dir | Path | the folder that LiCSALert is currently 
+                                    outputting to
     Returns:
         .png figure
     History:
@@ -1492,31 +1500,78 @@ def LiCSAlert_mask_figure(icasar_mask, licsbas_mask, mask_combined, licsbas_date
         2020/07/01 | MEG | Major rewrite to suit directory based structure.  
         2020/07/03 | MEG | continue major rewrite, and write docs.  
         2021_10_20 | MEG Simplify for LiCSAlert 2.0
+        2025_06_25 | MEG | Change to per epoch masking for LiCSAlert 4.  
     """
+    import numpy as np
     import matplotlib.pyplot as plt
     
-    # 0 Check matplotlib backend is set correctly 
-    if figure_type == 'png':
-        plt.switch_backend('Agg')                                                           #  works when there is no X11 forwarding, and when displaying plots during creation would be annoying.  
-    else: 
-        if plt.get_backend() != 'Qt5Agg':                                                               # check what the backend is 
-            plt.switch_backend('Qt5Agg')                                                           #  and switch to interactive if it wasn't already.  
+    # # 0 Check matplotlib backend is set correctly 
+    # if figure_type == 'png':
+    #     plt.switch_backend('Agg')
+    # else: 
+    #     if plt.get_backend() != 'Qt5Agg':
+    #         plt.switch_backend('Qt5Agg')
+    
+    n_pixels = mask_icasar.shape[0] * mask_icasar.shape[1]
     
     title = f"LiCSBAS_last_date_{licsbas_date}"
 
     # 1 Figure showing the masks
-    f1,axes = plt.subplots(1,3, figsize = (12,6))
-    axes[0].imshow(icasar_mask)
-    axes[0].set_title('(ICASAR) sources mask')
-    axes[1].imshow(licsbas_mask)
-    axes[1].set_title('LiCSBAS mask')
+    f1,axes = plt.subplots(1,5, figsize = (18,6))
+    axes[0].imshow(mask_icasar)
+    axes[0].set_title(f'ICA mask\n({n_pixels - np.sum(mask_icasar)} pixels)')
+    
+    axes[1].imshow(mask_epoch)
+    axes[1].set_title(
+        f'Current epoch mask\n({n_pixels - np.sum(mask_epoch)} pixels)'
+        )
+    
+    # find the pixels that are not masked in both
+    mask_combined = np.invert(
+        np.logical_and(
+            np.invert(mask_icasar),
+            np.invert(mask_epoch)
+            )
+        )
+    
     axes[2].imshow(mask_combined)
-    axes[2].set_title('Current combined mask')
+    axes[2].set_title(
+        f'Combined mask\n({n_pixels - np.sum(mask_combined)} pixels)'
+        )
+    
+    # find the pixels that are valid in ICA, but not the epoch
+    missing_epoch = np.invert(
+        np.logical_and(
+            np.invert(mask_icasar),
+            mask_epoch
+            )
+        )
+    axes[3].imshow(missing_epoch)
+    axes[3].set_title(
+        f'Valid in ICA but not epoch\n({n_pixels-np.sum(missing_epoch)} pixlels)'
+        )
+    
+    
+    # find the pixels that are valid in the epoch, but not ICA
+    missing_ica = np.invert(
+        np.logical_and(
+            mask_icasar,
+            np.invert(mask_epoch)
+            )
+        )
+    axes[4].imshow(missing_ica)
+    axes[4].set_title(
+        f'Valid in epoch but not ICA\n({n_pixels-np.sum(missing_ica)} pixlels)'
+        )
+    
     f1.suptitle(title)
     
     f1.canvas.manager.set_window_title(title)
     if (figure_type == 'png') or (figure_type == 'both'):
-        f1.savefig(current_output_dir / "mask_status.png", bbox_inches='tight')
+        f1.savefig(
+            current_output_dir / "mask_status.png", 
+            bbox_inches='tight'
+            )
 
 
 #%% xticks_every_nmonths()

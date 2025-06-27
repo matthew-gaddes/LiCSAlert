@@ -8,10 +8,12 @@ Created on Sun Jun 22 13:41:27 2025
 
 import pdb
 
-#%% construct_baseline_ts()
+#%% automatic_pixel_epoch_selection()
 
-def construct_baseline_ts(displacement_r3, tbaseline_info,
-                          baseline_end, interactive=False):
+def automatic_pixel_epoch_selection(displacement_r3, 
+                                    tbaseline_info,
+                                    baseline_end,
+                                    interactive=False):
     """
     Given a time series with a time varying mask (i.e. pixels come 
     in and out of coherene), build a time series with a consistent mask
@@ -38,23 +40,20 @@ def construct_baseline_ts(displacement_r3, tbaseline_info,
     from licsalert.aux import r3_to_r2
 
     # crop the input data in time
-    cum_ma_baseline = displacement_r3['cum_ma'][:(baseline_end.acq_n+1)]
+    cum_ma_baseline = displacement_r3['cum_ma'].original[:(baseline_end.acq_n+1)]
     acq_dates_baseline = tbaseline_info['acq_dates'][:(baseline_end.acq_n+1)]                                 
     
-    
-
     # determine the number of pixels for each epoch
     n_pixels, n_pixels_idx, total_pix = calculate_valid_pixels(
         cum_ma_baseline
         )
-
+    
     # and how those change as we add epochs
     n_pix_epoch = intersect_valid_pixels(
         cum_ma_baseline,
         acq_dates_baseline,
         verbose = False
         )
-    
     
     # calculate optimal number of epochs
     epoch_values, optimal_epoch_n = calculate_optimal_n_epochs(
@@ -106,6 +105,10 @@ def construct_baseline_ts(displacement_r3, tbaseline_info,
         
     # flatten to ICA standard (image is a row vector)            
     displacement_r2_ica = r3_to_r2(cum_ma_ica_consistent)
+
+    tbaseline_info_ica = {
+        'acq_dates' : acq_dates_ica
+        }
 
     return displacement_r2_ica, tbaseline_info_ica
 
