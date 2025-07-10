@@ -20,32 +20,70 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
                             labels = None, legend = None, markers = None, 
                             figures = 'window', png_path = './', 
                             fig_filename = '2d_interactive_plot'):
-    """ Data are plotted in a 2D space, and when hovering over a point, further information about it (e.g. what image it is)  appears in an inset axes.  
+    """ 
+    Data are plotted in a 2D space, and when hovering over a point, 
+    further information about it (e.g. what image it is)  appears in an inset axes.  
+   
     Inputs:
-        xy | rank 2 array | e.g. 2x100, the x and y positions of each data
-        colours | rank 1 array | e.g. 100, value used to set the colour of each data point
-        spatial_data | dict or None | contains 'images_r3' in which the images are stored as in a rank 3 array (e.g. n_images x heigh x width).  Masked arrays are supported.  
-        temporal_data | dict or None | contains 'tcs_r2' as time signals as row vectors and 'xvals' which are the times for each item in the timecourse.   
-        inset_axes_side | dict | inset axes side length as a fraction of the full figure, in x and y direction
-        arrow_length | float | lenth of arrow from data point to inset axes, as a fraction of the full figure.  
+        S_pca | r2 array | pca components as row vectors.  
+                            e.g. 8 X 2841
+        S_hists | list of list of r2 arrays.  
+                    First list is PC number of sources.  e.g. if run for 
+                    6,7 and 8 PCA sources, this will be length 3
+                    Second list is number of ICA runs.  E.g. if 200
+                    bootstrapped runs, this will be length 200
+                    R2 arrays are ICs recovered by that run.  
+                    e.g. 6 x 2841. 
+        mask | r2 boolean | mask to convert row vector to r2 masked array.  
+        spatial | boolean | True is need to use mask to convert row vectors
+                            back to images. 
+        sica_tica | str | sica or tica, depending on type of ICA run.  
+        hdbscan_param | tuple | XXXX
+        tsne_param | tuple | XXXX
+        n_converge_bootstrapping | int | number of bootstrapped runs.  e.g. 200
+        n_converge_no_bootstrapping | int | number of non-bootstrapped runs.  e.g. 0
+        inset_axes_side | dict | inset axes side length as a fraction of the 
+                                  full figure, in x and y direction
+        arrow_length | float | lenth of arrow from data point to inset axes, 
+                                as a fraction of the full figure.  
         figsize | tuple |  standard Matplotlib figsize tuple, in inches.  
-        labels | dict or None | title for title, xlabel for x axis label, and ylabel for y axis label
-        legend | dict or None | elements contains the matplotilb symbols.  E.g. for a blue circle: Line2D([0], [0], marker='o', color='w', markerfacecolor='#1f77b4')
+        labels | dict or None | title for title, xlabel for x axis label, and 
+                                ylabel for y axis label
+        legend | dict or None | elements contains the matplotilb symbols.  E.g.
+                                for a blue circle: Line2D([0], [0], marker='o',
+                                 color='w', markerfacecolor='#1f77b4')
                                 labels contains the strings for each of these.       
-        markers | dict or None | dictionary containing labels (a numpy array where each number relates to a different marker style e.g. (1,0,1,0,0,0,1 etc))) 
-                                 and markers (a list of the different Matplotlib marker styles e.g. ['o', 'x'])
-        figures | string,  "window" / "png" / "png+window" | controls if figures are produced (either as a window, saved as a png, or both)
-        png_path | string | if a png is to be saved, a path to a folder can be supplied, or left as default to write to current directory.  
-        fig_filename | string | name of file, if you wish to set one.  Doesn't include the extension (as it's always a png).  
+        markers | dict or None | dictionary containing labels (a numpy array 
+                                   where each number relates to a different 
+                                   marker style e.g. (1,0,1,0,0,0,1 etc))) 
+                                 and markers (a list of the different 
+                                  Matplotlib marker styles e.g. ['o', 'x'])
+        figures | string,  "window" / "png" / "png+window" | controls if 
+                                    figures are produced (either as a window, 
+                                                  saved as a png, or both)
+        png_path | string | if a png is to be saved, a path to a folder 
+                            can be supplied, or left as default to write to 
+                            current directory.  
+        fig_filename | string | name of file, if you wish to set one.  Doesn't
+                                include the extension (as it's always a png).  
+    
      Returns:
         Interactive figure
     History:
         2020/09/09 | MEG | Modified from a sript in the ICASAR package.  
-        2020/09/10 | MEG | Add labels, and change so that images are stored as rank3 arrays.  
+        2020/09/10 | MEG | Add labels, and change so that images are stored as 
+                            rank3 arrays.  
         2020/09/10 | MEG | Add legend option.  
         2020/09/11 | MEG | Add option to have different markers.  
         2020/09/15 | MEG | Add option to set size of inset axes.  
-        2021_04_16 | MEG | Add figures option (png, png and window, or just window), option to save to a directory, and option to set filename.  
+        2021_04_16 | MEG | Add figures option (png, png and window, or just 
+                           window), option to save to a directory, and option 
+                            to set filename.  
+        2024_??_?? | MEG | Update so that multiple PCA runs can be visualised
+                            and clustering and TSNE settings changed in the 
+                            figure.  
+                            
+        2025_07_10 | MEG | Update the docs.  
     
     """
 

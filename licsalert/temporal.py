@@ -7,6 +7,48 @@ Created on Fri Jan 19 14:34:45 2024
 """
 import pdb
 
+#%% 
+
+def calculate_all_temporal_info(tbaseline_info):
+    """Given the acquisition dates (epochs) of a time series, calculate
+    information about the temporal baselines of the daisy chain of short
+    temporal baseline intererograms.  
+    
+    Inputs:
+        tbaseline_info | dict | contains a list of acq_dates in form yyyymmdd
+        
+    Returns:
+        tbaseline_info | dict | as above, but with ifg_dates, baselines, and 
+                                baselines_cs
+                                
+    History:
+        2026_07_03 | MEG | Written
+    
+    """
+    
+    import numpy as np
+    
+    # get teh dates of the incremental ifgs
+    tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(
+        tbaseline_info["acq_dates"]
+        )                                                
+    
+    # get the baselines in days of these ifgs
+    tbaseline_info["baselines"] = baseline_from_names(
+        tbaseline_info["ifg_dates"]
+        )
+    
+    # make cumulative baselines, and ensure that 0 at the start.  
+    tbaseline_info["baselines_cumulative"] = np.concatenate(
+        (np.zeros((1)),
+         np.cumsum(tbaseline_info["baselines"])), 
+        axis = 0
+    )
+    
+    return tbaseline_info
+
+
+
 #%%
 
 def daisy_chain_from_acquisitions(acquisitions):

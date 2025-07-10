@@ -8,7 +8,7 @@ Created on Fri Oct 20 09:59:48 2023
 
 import pdb
 
-#%%
+#%% import_insar_data()
 
 def import_insar_data(
         volcano, volcano_dir, region, licsalert_settings, icasar_settings, 
@@ -352,8 +352,10 @@ def check_required_args(settings_dict, required_inputs, settings_name):
 #%%
 
 
-def crop_ts_data_in_time(date_start, date_end,
-                         displacement_r2, tbaseline_info):
+def crop_ts_data_in_time(
+        date_start, date_end,
+        displacement_r3, tbaseline_info
+    ):
     """ Crop time series of data (e.g. licsbas time series) in time.  
     Inputs:
         date_start | yyyymmdd | string, inclusive.  
@@ -374,7 +376,7 @@ def crop_ts_data_in_time(date_start, date_end,
     date_start = licsalert_date_obj(date_start, tbaseline_info['acq_dates'])
     date_end = licsalert_date_obj(date_end, tbaseline_info['acq_dates'])
     
-    displacement_r2_crop = deepcopy(displacement_r2)
+    displacement_r3_crop = deepcopy(displacement_r3)
     tbaseline_info_crop = deepcopy(tbaseline_info)
     
     # crop the time series information in time, for products with n_acq -1 entries
@@ -400,13 +402,16 @@ def crop_ts_data_in_time(date_start, date_end,
 
 
 
-#%%
+#%% crop_licsalert_results_in_time
 
 
-def crop_licsalert_results_in_time(processing_date,
-                                   acq_dates, sources_tcs, residual_tcs,
-                                   reconstructions, residuals, 
-                                   displacement_r2, tbaseline_info):
+def crop_licsalert_results_in_time(
+        processing_date,
+        acq_dates, sources_tcs, residual_tcs,
+        reconstructions, residuals, 
+        displacement_r2, tbaseline_info
+    ):
+    
     """ Crop some licsalert products in time.  
     Inputs:
         start_date | string YYYYMMDD | Date to crop to. Must be an acquisition date.  
@@ -424,8 +429,13 @@ def crop_licsalert_results_in_time(processing_date,
     # 
     processing_date = licsalert_date_obj(processing_date, acq_dates)
     
-    data = crop_ts_data_in_time(acq_dates[0], processing_date.date, displacement_r2, 
-                                tbaseline_info)
+    data = crop_ts_data_in_time(
+        acq_dates[0], 
+        processing_date.date, 
+        displacement_r2, 
+        tbaseline_info
+        )
+    
     displacement_r2_crop, tbaseline_info_crop = data
     
     # make deep copies that will become the cropped outputs.  
@@ -1344,10 +1354,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
 
     # 4: Get the acquisition dates, then calcualet ifg_names, temporal baselines, and cumulative temporal baselines
     tbaseline_info["acq_dates"] = sorted([''.join(date_hyphen_format.split('-')) for date_hyphen_format in licsbas_data['dates'] ])         # convert from yyy-mm-dd to yyyymmdd
-    tbaseline_info["ifg_dates"] = daisy_chain_from_acquisitions(tbaseline_info["acq_dates"])                                                # get teh dates of the incremental ifgs
-    tbaseline_info["baselines"] = baseline_from_names(tbaseline_info["ifg_dates"])                                                          # and their temporal baselines
-    # make cumulative baselines, and ensure that 0 at the start.  
-    tbaseline_info["baselines_cumulative"] = np.concatenate((np.zeros((1)), np.cumsum(tbaseline_info["baselines"])), axis = 0)                                                            
+
     
     # 5: Try to get the DEM (simple numpy array, uses 1e-20 for water (April 25))
     try:

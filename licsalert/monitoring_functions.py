@@ -92,7 +92,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     from licsalert.licsalert import write_volcano_status, load_or_create_ICASAR_results
     from licsalert.licsalert import licsalert_date_obj
     from licsalert.licsalert import construct_baseline_ts
-    from licsalert.temporal import baseline_from_names
+    from licsalert.temporal import calculate_all_temporal_info
     from licsalert.aux import Tee, find_nearest_date, col_to_ma
     from licsalert.aux import update_mask
     # from licsalert.downsample_ifgs import downsample_ifgs
@@ -159,11 +159,16 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     
     # add the temporal baselines (in days) for single master ifgs. relative
     # to the first acquisition
-    tbaseline_info['baselines_cumulative'] = baseline_from_names(
-            [f"{tbaseline_info['acq_dates'][0]}_{i}"
-             for i in tbaseline_info['acq_dates']
-             ]
-        )
+    # old (jun 2025)
+    # tbaseline_info['baselines_cumulative'] = np.array(
+    #     baseline_from_names(
+    #         [f"{tbaseline_info['acq_dates'][0]}_{i}"
+    #          for i in tbaseline_info['acq_dates']
+    #          ]
+    #     )
+    # )
+    # new (jul 25)
+    tbaseline_info=calculate_all_temporal_info(tbaseline_info)
     
     # 3b determine if the date provided happens to be an acquisition date 
     if type(licsalert_settings['baseline_end']) != str:
@@ -216,6 +221,8 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             licsalert_settings['baseline_end']
         )
         
+
+        
         # either load ICA from previous run, or compute it.  
         # note that displacement_r2_ica contains mixtures_mc, which are the 
         # input ifgs either mean centered in time or space, depending on 
@@ -266,7 +273,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             LiCSAlert_mask_figure(
                 mask_icasar, 
                 mask_epoch,
-                tbaseline_info['acq_dates'][-1],  
+                tbaseline_info['acq_dates'][-1],        # is this correct?
                 volcano_dir / processing_date.date, 
                 figure_type = licsalert_settings['figure_type']
             )
@@ -324,7 +331,8 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
 
             # plot the main LiCSAlert figure for this date
             LiCSAlert_figure(
-                sources_tcs, residual_tcs, icasar_sources, displacement_r2,                                                  
+                sources_tcs, residual_tcs, icasar_sources, mask_icasar,
+                displacement_r3,                                                  
                 figure_date = processing_date, 
                 acq_dates = tbaseline_info['acq_dates'], 
                 baselines_cs = tbaseline_info['baselines_cumulative'],
@@ -337,11 +345,11 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             
             # also plot the extra info figures.  
             LiCSAlert_epoch_figures(
-                processing_date, displacement_r2, reconstructions, residuals,
-                 tbaseline_info, 
-                 figure_type = licsalert_settings['figure_type'], 
-                 figure_out_dir = volcano_dir / processing_date.date
-                 )
+                processing_date, displacement_r3, reconstructions, residuals,
+                tbaseline_info, 
+                figure_type = licsalert_settings['figure_type'], 
+                figure_out_dir = volcano_dir / processing_date.date
+            )
             
             # save info about the time courses
             save_epoch_data(sources_tcs, residual_tcs, 
@@ -355,11 +363,14 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
 
         # also plot the ICS and the DEM (done once)
         LiCSAlert_aux_figures(
-            volcano_dir, icasar_sources, displacement_r2['dem'], 
-            displacement_r2['mask']
-            ) 
+            volcano_dir,
+            icasar_sources,
+            displacement_r3['dem'], 
+            mask_icasar
+        ) 
+        
         # also plot some info (e.g. DEM, input data), once.  
-        save_licsalert_aux_data(volcano_dir, displacement_r2, tbaseline_info)
+        save_licsalert_aux_data(volcano_dir, displacement_r3, tbaseline_info)
 
     sys.stdout = original                                                                                                                                      # return stdout to be normal.  
     f_run_log.close()                                                                                                                                          # and close the log file.  
@@ -1064,9 +1075,9 @@ def run_LiCSAlert_status(
                         'dates_monitoring'        : dates_monitoring}
     
     # 8: Print the information to the terminal (and the sys.out file)
-    print(f"LiCSBAS date    Past baseline    LiCSAlert      ")
-    for date_n, date in enumerate(sorted(licsbas_dates)):                                               # iterate over all acquistisions
-        print(f"{date}          ", end = '')
+    print(f"Epoch #    LiCSBAS date    Past baseline    LiCSAlert      ")
+    for date_n, date in enumerate(sorted(licsbas_dates)):
+        print(f"{date_n}            {date}          ", end = '')
         if dt.strptime(date, '%Y%m%d') >   dt.strptime(date_baseline_end, '%Y%m%d'):                     # check if after end of baseline   
             print('yes             ', end = '')
         else:

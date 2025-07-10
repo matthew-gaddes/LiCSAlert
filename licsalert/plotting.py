@@ -476,7 +476,8 @@ def update_overlapping_points(shifted_points, threshold = 0.01,
 
 
 def LiCSAlert_figure(
-        sources_tcs, residual, sources, displacement_r2, figure_date, 
+        sources_tcs, residual, sources, sources_mask, 
+        displacement_r3, figure_date, 
         acq_dates, baselines_cs, baseline_end_date, dayend_date = None,
         figure_type = 'both', figure_out_dir=None, ifg_xpos_scaler = 15,
         sources_labels = None, cmap = plt.get_cmap('coolwarm')
@@ -557,7 +558,7 @@ def LiCSAlert_figure(
         return line_args
     
 
-    def plot_ifgs(ifgs, pixel_mask, figure, gridspec_area, baselines_cs, 
+    def plot_ifgs(ifgs_r3, figure, gridspec_area, baselines_cs, 
                   ylabel, day0_date, figure_date, dayend_date, 
                   cumulative = False):
         """Plot all the ifgs (baseline and monitoring) within the grispec_area,
@@ -582,14 +583,14 @@ def LiCSAlert_figure(
 
         # ifgs are rows, loop through.  Make sure we don't try to iterate 
         # through more than we have dates for  
-        for ifg_n, source in enumerate(ifgs[:figure_date.acq_n, :]):                                                         
+        for ifg_n, ifg_r2 in enumerate(ifgs_r3[:figure_date.acq_n, :]):                                                         
             #make the ax for the ifg,  x pos, y pox, x width, y width,
             iax = ax_ifgs.inset_axes(
                 [baselines_cs[ifg_n+1], 0.,
                  (dayend_date.day_n/ifg_xpos_scaler), 1.],
                 transform=ax_ifgs.transData
                 )      
-            ifg_plot = iax.matshow(col_to_ma(source, pixel_mask), cmap = cmap)                                       
+            ifg_plot = iax.matshow(ifg_r2, cmap = cmap)                                       
             iax.set_xticks([])                                                                                               
             iax.set_yticks([])
             
@@ -603,9 +604,9 @@ def LiCSAlert_figure(
                     )
 
                 cbar = fig1.colorbar(ifg_plot, cax = cbar_ax)                           
-                cbar.set_ticks([np.nanmin(source), np.nanmax(source)])
+                cbar.set_ticks([np.nanmin(ifg_r2), np.nanmax(ifg_r2)])
                 cbar.set_ticklabels(
-                    [f"{np.nanmin(source):.3} m", f"{np.nanmax(source):.3} m"]
+                    [f"{np.nanmin(ifg_r2):.3} m", f"{np.nanmax(ifg_r2):.3} m"]
                     )
                 cbar_ax.tick_params(labelsize=6)
                 # make the label (that shows the date range of the last ifg)
@@ -748,25 +749,10 @@ def LiCSAlert_figure(
         if plt.get_backend() != 'Qt5Agg':                                                               # check what the backend is 
             plt.switch_backend('Qt5Agg')                                                           #  and switch to interactive if it wasn't already.  
 
-
-
-    # -1: Check that the sizes of the sources and the interferograms agree in x and y.  Raise error if not.  
-    if sources.shape[1] == displacement_r2['incremental'].shape[1]:
-        sources_downsampled = False
-    elif sources.shape[1] == displacement_r2['incremental_downsampled'].shape[1]:
-        sources_downsampled = True
-    else:
-        raise Exception(f"There appears to be a mismatch in the number of pixels contained within the sources ({sources.shape[1]} pixels) "
-                        f"and the interferograms ({displacement_r2['incremental'].shape[1]} pixels) or the downsampled interferograms "
-                        f"({displacement_r2['incremental_downsampled'].shape[1]} pixels).  The sources must have the same number of pixels "
-                        f"as one of these so that their mask can be used to turn the sources from row vectors into images.  ")
-        
     
     # 0: Start, some definitions that shouldn't need changing (ie hard coded variables)
     #line_best_fit_alpha = 0.7
     dot_marker_size = 12
-    
-    
     
     # 1 set some preliminary stuff
     t_recalculate = sources_tcs[0]["t_recalculate"]
@@ -792,21 +778,22 @@ def LiCSAlert_figure(
 
     
     # 3: Plot the ifgs along the top
-    plot_ifgs(np.cumsum(displacement_r2["incremental_downsampled"], axis = 0), displacement_r2["mask_downsampled"], 
+    plot_ifgs(displacement_r3['cum_ma_downsampled'],
               fig1, grid[0,1:], baselines_cs, 'Cumulative', 
-              day0_date, figure_date, dayend_date, cumulative = True)                                                                # cumulative ifgs
-    plot_ifgs(displacement_r2["incremental_downsampled"], displacement_r2["mask_downsampled"], 
+              day0_date, figure_date, dayend_date, cumulative = True)
+    
+    plot_ifgs(displacement_r3['inc_ma_downsampled'],
               fig1, grid[1,1:], baselines_cs, 'Incremental', 
-              day0_date, figure_date, dayend_date, cumulative = False)                                                                # cumulative ifgs
+              day0_date, figure_date, dayend_date, cumulative = False)
     
     # 4: Plot each source and its time course 
     for row_n, source_tc in enumerate(sources_tcs):
         # 4a: Plot the source
-        ax_source = plt.Subplot(fig1, grid[row_n+2,0])                                                                                      # create an axes for the IC (spatial source)
-        if sources_downsampled:
-            im = ax_source.matshow(col_to_ma(sources[row_n], displacement_r2["mask_downsampled"]), cmap = cmap_sources) #, vmin = np.min(sources), vmax = np.max(sources))   # plot the downsampled source
-        else:
-            im = ax_source.matshow(col_to_ma(sources[row_n], displacement_r2["mask"]), cmap = cmap_sources) #, vmin = np.min(sources), vmax = np.max(sources))                # or plot the full resolution source
+        ax_source = plt.Subplot(fig1, grid[row_n+2,0])
+        im = ax_source.matshow(
+            col_to_ma(sources[row_n], sources_mask),
+            cmap = cmap_sources) #, vmin = np.min(sources), vmax = np.max(sources))  
+
         ax_source.set_xticks([])
         ax_source.set_yticks([])
         ax_source.set_ylabel(f"IC {row_n}")
@@ -902,29 +889,32 @@ def LiCSAlert_figure(
     std_cbar.ax.yaxis.set_label_position('left')
     
     # 7: Possibly add the DEM
-    if 'dem' in displacement_r2.keys():                                                                                         # DEM is not alway included.  
+    if 'dem' in displacement_r3.keys():                                                                                         # DEM is not alway included.  
         ax_dem = plt.Subplot(fig1, grid[1,0])                                                                                   # create an axes for the IC (spatial source)
         terrain_cmap = plt.get_cmap('terrain')                                                                                  # appropriate colours for a dem
         terrain_cmap = truncate_colormap(terrain_cmap, 0.2, 1)                                                                  # but crop (truncate) the blue parts as we are only interested in land
-        dem_plot = ax_dem.imshow(displacement_r2["dem"], cmap = terrain_cmap)                                                   # plot the DEM
+        dem_plot = ax_dem.imshow(
+            displacement_r3["dem"],
+            cmap = terrain_cmap
+        )
         ax_dem.xaxis.tick_top()                                                                                                 #
         ax_dem.tick_params(axis='both', which='major', labelsize=7)                                                             # adjust fontsize
         ax_dem.tick_params(axis='both', which='minor', labelsize=7)
-        ax_dem.set_xticks([0, displacement_r2['dem'].shape[1]])                                                                 # tick only the min and max in each direction
-        ax_dem.set_yticks([0, displacement_r2['dem'].shape[0]])
+        ax_dem.set_xticks([0, displacement_r3['dem'].shape[1]])                                                                 # tick only the min and max in each direction
+        ax_dem.set_yticks([0, displacement_r3['dem'].shape[0]])
 
         ax_dem.xaxis.set_label_position('top')
-        if ('lons' in displacement_r2.keys()) and ('lats' in displacement_r2.keys()):                                           # if we have lons and lats, we can update the tick lables to be lons and lats.  
+        if ('lons_mg' in displacement_r3.keys()) and ('lats_mg' in displacement_r3.keys()):                                           # if we have lons_mg and lats_mg, we can update the tick lables to be lons_mg and lats_mg.  
             
-            ax_dem.set_xticklabels([str(round(displacement_r2['lons'][-1,0], 2)) + "$^\circ$", str(round(displacement_r2['lons'][-1,-1], 2)) + "$^\circ$" ])
-            ax_dem.set_yticklabels([str(round(displacement_r2['lats'][0,0], 2))  + "$^\circ$", str(round(displacement_r2['lats'][-1,0], 2)) + "$^\circ$"])
+            ax_dem.set_xticklabels([str(round(displacement_r3['lons_mg'][-1,0], 2)) + "$^\circ$", str(round(displacement_r3['lons_mg'][-1,-1], 2)) + "$^\circ$" ])
+            ax_dem.set_yticklabels([str(round(displacement_r3['lats_mg'][0,0], 2))  + "$^\circ$", str(round(displacement_r3['lats_mg'][-1,0], 2)) + "$^\circ$"])
         # ax_dem.set_ylabel('Latitude ($^\circ$)', fontsize = 6)
         # ax_dem.set_xlabel("Longitude ($^\circ$)", fontsize = 6)
             
         #colorbar for the DEM, just gets in the way.              
         # axins = inset_axes(ax_dem, width="7%", height="50%",   loc='lower left',  bbox_to_anchor=(1.05, 0., 1, 1),              # isnet axes just to left of the main axix for a colorbar
         #                     bbox_transform=ax_dem.transAxes,borderpad=0)
-        # #fig1.colorbar(dem_plot, cax = axins, ticks = [0, np.nanmax(displacement_r2['dem'])])                                    # colorbar, tick only 0 and the max (and check max is not a nan)
+        # #fig1.colorbar(dem_plot, cax = axins, ticks = [0, np.nanmax(displacement_r3['dem'])])                                    # colorbar, tick only 0 and the max (and check max is not a nan)
         # fig1.colorbar(dem_plot, cax = axins, ticks = [])                                    # colorbar, tick only 0 and the max (and check max is not a nan)
         # #axins.tick_params(axis='both', which='major', labelsize=6, rotation = 90)                                               #
         fig1.add_subplot(ax_dem)
@@ -932,13 +922,13 @@ def LiCSAlert_figure(
         # work out the size of the ICs/ DEM and add to the DEM bit of the figure.  
         from geopy import distance
         image_size = {}
-        image_size['x'] = int(distance.distance((displacement_r2['lats'][-1,0], displacement_r2['lons'][-1,0]),                       # bottom left corner  
-                                                (displacement_r2['lats'][-1,-1], displacement_r2['lons'][-1,-1])).meters / 1000)      #  to bottom right, and convert to integere kms
-        image_size['y'] = int(distance.distance((displacement_r2['lats'][-1,0], displacement_r2['lons'][-1,0]),                       # bottom left 
-                                            (displacement_r2['lats'][0,0], displacement_r2['lons'][0,0])).meters / 1000)              # to to top left, and conver to integer kms
+        image_size['x'] = int(distance.distance((displacement_r3['lats_mg'][-1,0], displacement_r3['lons_mg'][-1,0]),                       # bottom left corner  
+                                                (displacement_r3['lats_mg'][-1,-1], displacement_r3['lons_mg'][-1,-1])).meters / 1000)      #  to bottom right, and convert to integere kms
+        image_size['y'] = int(distance.distance((displacement_r3['lats_mg'][-1,0], displacement_r3['lons_mg'][-1,0]),                       # bottom left 
+                                            (displacement_r3['lats_mg'][0,0], displacement_r3['lons_mg'][0,0])).meters / 1000)              # to to top left, and conver to integer kms
         
-        ax_dem.text(-0.5 * displacement_r2['dem'].shape[1], -0.75 * displacement_r2['dem'].shape[0], f"WxH (km): {image_size['x']} x {image_size['y']}\n"              # add these in these labels in the space above the DEM.  
-                        f"DEM (m): {int(np.nanmin(displacement_r2['dem'])), int(np.nanmax(displacement_r2['dem']))}", fontsize = 6 )
+        ax_dem.text(-0.5 * displacement_r3['dem'].shape[1], -0.75 * displacement_r3['dem'].shape[0], f"WxH (km): {image_size['x']} x {image_size['y']}\n"              # add these in these labels in the space above the DEM.  
+                        f"DEM (m): {int(np.nanmin(displacement_r3['dem'])), int(np.nanmax(displacement_r3['dem']))}", fontsize = 6 )
     
     # 8: Possible save output
     if (figure_type == 'png') or (figure_type == 'both'):
@@ -1239,18 +1229,20 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
         plt.switch_backend('Qt5Agg')                                                           
       
     # 1: Open data and some simple processing 
-    displacement_r2, tbaseline_info, aux_data = open_aux_data(licsalert_out_dir)
+    displacement_r3, tbaseline_info, aux_data = open_aux_data(licsalert_out_dir)
     final_date_dir = determine_last_licsalert_date(licsalert_out_dir)
     sources_tcs, residual_tcs = open_tcs(final_date_dir)    
     
     print(f"A LiCSAlert directory for {final_date_dir.parts[-1]} was found "
           f"so the interactive figure will be created up to this date.  ")
     
-    crop = crop_licsalert_results_in_time(final_date_dir.parts[-1], tbaseline_info['acq_dates'],
-                                          sources_tcs, residual_tcs,
-                                          None, None, displacement_r2, tbaseline_info)
+    crop = crop_licsalert_results_in_time(
+        final_date_dir.parts[-1], tbaseline_info['acq_dates'],
+        sources_tcs, residual_tcs,
+        None, None, displacement_r3, tbaseline_info
+        )
     
-    sources_tcs, residual_tcs, _, _, displacement_r2, tbaseline_info = crop; del crop
+    sources_tcs, residual_tcs, _, _, displacement_r3, tbaseline_info = crop; del crop
     
     n_sources = len(sources_tcs)
     n_pixels = np.size(displacement_r2['incremental'], axis = 1)
@@ -1319,19 +1311,22 @@ def licsalert_results_explorer(licsalert_out_dir, fig_width = 18):
 #%% LiCSAlert_epoch_figures
 
 def LiCSAlert_epoch_figures(
-        processing_date, displacement_r2_current,  reconstructions, residuals,
+        processing_date, displacement_r3_current,  reconstructions, residuals,
         tbaseline_info, figure_type, figure_out_dir):
     """
     Plot last cumulative ifg, last incremetnal ifg, reconstrution for last 
     incremental ifg, and residual for last incremental ifg. 
     Also save the data from these figures as a pickle.  
     
+    Note that reconstructions and residuals are of the incremental displacements,
+    so are 1 shorter in time than the cum_ma in displacement_r3
+    
+    
     Inputs:
         processing_date          | licsalert date | processing date currently on
-        displacement_r2_current | dict | licsalert dict of ifgs
-        reconstrutions          | r2 array | reconstructions as row vectors
-        residuals               | r2 array | residuals as row vectors.  
-                                            Assumed not to be cumulative.     
+        displacement_r3_current | dict | licsalert dict of ifgs
+        reconstrutions          | r3 array | reconstructions of incremental data
+        residuals               | r3 array | residuals, Assumed not to be cumulative.     
         tbasline_info           | dict | licsalert dict of tbaseline info
         figure_type             | string | png / window / both
         figure_out_dir          | Path   | out dir path.  
@@ -1357,56 +1352,69 @@ def LiCSAlert_epoch_figures(
   
     if processing_date.acq_n == 0:
         # this is just the same date repeated as the first acquisition so no ifg
-        inc_ifg_date = f"{tbaseline_info['acq_dates'][0]}_{tbaseline_info['acq_dates'][processing_date.acq_n]}"
+        inc_ifg_date = (
+            f"{tbaseline_info['acq_dates'][0]}_"
+            f"{tbaseline_info['acq_dates'][processing_date.acq_n]}"
+        )
     else:
         # the date of the acquistiions before this one to the current one
-        inc_ifg_date = (f"{tbaseline_info['acq_dates'][processing_date.acq_n-1]}_"
-                       f"{tbaseline_info['acq_dates'][processing_date.acq_n]}")
+        inc_ifg_date = (
+            f"{tbaseline_info['acq_dates'][processing_date.acq_n-1]}_"
+            f"{tbaseline_info['acq_dates'][processing_date.acq_n]}"
+        )
+        
     # the first acquisition date to the current one.  
-    cum_ifg_date = f"{tbaseline_info['acq_dates'][0]}_{tbaseline_info['acq_dates'][processing_date.acq_n]}"
+    cum_ifg_date = (
+        f"{tbaseline_info['acq_dates'][0]}_"
+        f"{tbaseline_info['acq_dates'][processing_date.acq_n]}"
+    )
+
     
     # 1: do the plots
-    cum_1 = np.sum(displacement_r2_current['incremental'][:processing_date.acq_n,], axis = 0)
+    #cum_1 = np.sum(displacement_r3_current['inc_ma'][:processing_date.acq_n,], axis = 0)
+    cum_1 = displacement_r3_current['cum_ma'].original[processing_date.acq_n,]
 
     # the first date is a special case as there is no data yet    
     if processing_date.acq_n == 0:
-        zeros = np.zeros((1, displacement_r2_current['incremental'].shape[1]))
+        zeros = np.zeros((1, displacement_r3_current['inc_ma'].shape[1]))
         inc_1 = zeros
         recon_1 = zeros
         residual_1 = zeros
         residual_cum = zeros
     else:
-        inc_1 = displacement_r2_current['incremental'][processing_date.acq_n-1, :]
-        recon_1 = reconstructions[processing_date.acq_n-1,:]
-        residual_1 = residuals[processing_date.acq_n-1, :]
+        # note -1s here as no incremental data on epoch 0
+        inc_1 = displacement_r3_current['inc_ma'].original[processing_date.acq_n-1,]
+        recon_1 = reconstructions[processing_date.acq_n-1,]
+        residual_1 = residuals[processing_date.acq_n-1,]
         # sum all the residuals through time to get current cumulative
         # residual
-        residual_cum = np.sum(residuals[:processing_date.acq_n-1, :], axis = 0)
+        residual_cum = np.sum(residuals[:processing_date.acq_n-1,], axis = 0)
         
-       
-    plot_1_image(cum_1, displacement_r2_current['mask'], 
-                 f"01_cumulative_{cum_ifg_date}", 
+    # output each of the pngs
+    plot_1_image(cum_1, f"01_cumulative_{cum_ifg_date}", 
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))    
-    plot_1_image(inc_1, displacement_r2_current['mask'], 
-                 f"02_incremental_{inc_ifg_date}",
+    
+    plot_1_image(inc_1, f"02_incremental_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
-    plot_1_image(recon_1, displacement_r2_current['mask'], 
-                 f"03_incremental_reconstruction_{inc_ifg_date}",
+    
+    plot_1_image(recon_1,  f"03_incremental_reconstruction_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
-    plot_1_image(residual_1, displacement_r2_current['mask'], 
-                 f"04_incremental_residual_{inc_ifg_date}",
+    
+    plot_1_image(residual_1, f"04_incremental_residual_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
-    plot_1_image(residual_cum, displacement_r2_current['mask'], 
-                 f"05_cumulative_residual_{cum_ifg_date}",
+    
+    plot_1_image(residual_cum,  f"05_cumulative_residual_{cum_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
 
     #  save the data that is plotted as png
-    epoch_images = {'cumulative'     : cum_1,
-                    'incremental'    : inc_1,
-                    'reconstruction' : recon_1,
-                    'residual'       : residual_1,
-                    'mask'           : displacement_r2_current['mask'],
-                    'residual_cum'   : residual_cum}
+    epoch_images = {
+        'cumulative'     : cum_1,
+        'incremental'    : inc_1,
+        'reconstruction' : recon_1,
+        'residual'       : residual_1,
+        'mask'           : displacement_r3_current['cum_ma'].original.mask[processing_date.acq_n,],
+        'residual_cum'   : residual_cum
+    }
     with open(figure_out_dir / 'epoch_images_data.pkl', 'wb') as f:
         pickle.dump(epoch_images, f)
     f.close()
@@ -1436,15 +1444,31 @@ def LiCSAlert_aux_figures(parent_dir, icasar_sources, dem, mask):
     import numpy.ma as ma
     import pickle
     
+    from licsalert.aux import col_to_ma
+    
     aux_fig_dir = parent_dir / "aux_data_figs"                                                                                                                    # make a directory to save some aux figures.  
     aux_fig_dir.mkdir(parents=True, exist_ok=True)                                   
-    dem_ma_r1 = ma.compressed(ma.array(dem, mask = mask))
-    plot_1_image(dem_ma_r1, mask, f"DEM", figure_type = 'png', figure_out_dir = aux_fig_dir, figsize = (18,9))
+
+    plot_1_image(
+        dem,
+        f"DEM",
+        figure_type='png',
+        figure_out_dir=aux_fig_dir,
+        figsize = (18,9)
+    )
+    
     for source_n, ic in enumerate(icasar_sources):
-        plot_1_image(ic, mask, f"IC_{source_n}", figure_type = 'png', figure_out_dir = aux_fig_dir, figsize = (18,9))
+        source_r2=col_to_ma(ic, mask)
+        plot_1_image(
+            source_r2,
+            f"IC_{source_n}",
+            figure_type='png',
+            figure_out_dir=aux_fig_dir,
+            figsize = (18,9)
+        )
         
     aux_images = {'icasar_sources'  : icasar_sources,
-                  'dem'             : dem_ma_r1,
+                  'dem'             : dem,
                   'mask'            : mask}
     with open(aux_fig_dir / 'aux_images_data.pkl', 'wb') as f:
         pickle.dump(aux_images, f)
@@ -1453,7 +1477,13 @@ def LiCSAlert_aux_figures(parent_dir, icasar_sources, dem, mask):
         
 #%% plot_1_image
 
-def plot_1_image(im_r1, mask, title, figure_type, figure_out_dir, figsize = (18,9), cmap =  plt.get_cmap('viridis')):
+def plot_1_image(im_r2,
+                 title,
+                 figure_type,
+                 figure_out_dir,
+                 figsize = (18,9),
+                 cmap =  plt.get_cmap('viridis')
+     ):
     """Plot a single image (column or row vector) when also given its mask.  
     
     """
@@ -1462,7 +1492,7 @@ def plot_1_image(im_r1, mask, title, figure_type, figure_out_dir, figsize = (18,
     
     
     f, ax = plt.subplots(1,1, figsize = figsize)
-    im = ax.matshow(col_to_ma(im_r1, mask), cmap = cmap)
+    im = ax.matshow(im_r2, cmap = cmap)
     f.colorbar(im, label = 'Displacement (m)')
     f.suptitle(title)
     

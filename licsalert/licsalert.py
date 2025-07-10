@@ -126,34 +126,22 @@ def LiCSAlert(sources,
     # also note that we only use the baseline data here.  
     # time courses (tcs) should be the same length as incremental 
     # input ifgs inc_ma[...] as cumulative is set to false
-    tcs, d_hat, d_resid = bss_components_inversion_per_epoch(
+    products = bss_components_inversion_per_epoch(
         sources,
         mask_sources,
         inc_mc_space[:baseline_end.acq_n, ],
         cumulative=False
     )
+    tcs_c_baseline, d_hat_baseline, d_resid_baseline = products; del products
     
     # create cumulative time courses (i.e. integrate in time):
     # note that tcs_c_baseline is now 1 longer than incremental input ifgs.  
     tcs_c_baseline = np.concatenate(
-        (np.zeros(
-            (1, tcs.shape[1])
-            ),
-         np.cumsum(
-             tcs, axis=0)
-         ),
+        (np.zeros((1, tcs_c_baseline.shape[1])),
+         np.cumsum(tcs_c_baseline, axis=0)),
         axis = 0
     )         
-    del tcs
-    
-    # f, ax = plt.subplots()
-    # ax.matshow(d_hat[10,])
-    # # debug plot
-    # f, axes = plt.subplots(tcs_cs.shape[1], 1)
-    # for ax_n, tc in enumerate(tcs_cs.T):
-    #     axes[ax_n].plot(tc)
-    # # end 
-        
+
     # calcaulte line of best fit, gradient, point to line distances etc. for 
     # cumulative time courses.  
     sources_tcs = tcs_baseline(
@@ -162,59 +150,89 @@ def LiCSAlert(sources,
         t_recalculate,
     )                                   
    
-    
-    pdb.set_trace()
-    
     # calculate the residual, which is summed for each pixel, then averaged 
-    # across an image at any time.  
-    
-    # this needs to be similar to how it was caldulated in bss_inversion?  
-    # ie per epoch?  Can we just use this output to then calculte Andy's window approach etc? 
-    
+    # across an image at any time.      
     residual = residual_for_pixels(
-        sources, sources_tcs, ifgs_baseline, mask, n_pix_window, residual_type
-        )             
+            d_resid_baseline,
+            n_pix_window, 
+            residual_type,
+    )
     
     # calculate line of best fit, gradient, line to point distances etc for 
     # cumulative residual.  
     residual_tcs = tcs_baseline(
-        residual, baselines_cs[:baseline_end.acq_n], t_recalculate
-        )                               
-    del tcs_c_baseline, residual
+        residual,
+        baselines_cs[:baseline_end.acq_n+1],
+        t_recalculate,
+    )                               
+    #del tcs_c_baseline, residual
 
     #2: Calculate time courses/distances etc for the monitoring data
-    if ifgs_monitoring is not None:
-
+    #if ifgs_monitoring is not None:
+    # manually force into the indent
+    if True:
+    
         # do the inversion to fit the monitoring ifgs with the sources    
         # compute cumulative time courses for monitoring interferograms (ie
         # simple inversion to fit each ifg in ifgs_baseline using sources.  )
-        products = bss_components_inversion(
-            sources, ifgs_monitoring,  cumulative=True, mask = mask
-            )                      
+        products = bss_components_inversion_per_epoch(
+            sources,
+            mask_sources,
+            inc_mc_space[baseline_end.acq_n: ],
+            cumulative=False
+        )
         (tcs_c_monitoring, d_hat_monitoring, d_resid_monitoring) = products
         del products
         
-        # remove the 0s on the first row as this isn't the basleine stage.  
-        tcs_c_monitoring = np.delete(tcs_c_monitoring, 0,0)
+        # make cumulative
+        tcs_c_monitoring = np.cumsum(tcs_c_monitoring, axis=0)
+        
+        # extend the baseline time courses (sources_tcs) using the monitoring tcs
         sources_tcs_monitor = tcs_monitoring(
-            tcs_c_monitoring, sources_tcs, baselines_cs
-            )                               
-    
+            tcs_c_monitoring,
+            sources_tcs, 
+            baselines_cs
+        )                               
+        
         #3: and update the residual stuff                                                                            
         # get the cumulative residual for baseline and monitoring (hence _cb)    
+        # residual_bm = residual_for_pixels(            # old
+        #     sources, sources_tcs_monitor, ifgs_all, mask, n_pix_window, 
+        #     residual_type
+        #     )                               
         residual_bm = residual_for_pixels(
-            sources, sources_tcs_monitor, ifgs_all, mask, n_pix_window, 
-            residual_type
-            )                               
+                np.concatenate(
+                    (d_resid_baseline, 
+                     d_resid_monitoring),
+                    axis = 0),
+                n_pix_window, 
+                residual_type,
+        )
+            
         residual_tcs_monitor = tcs_monitoring(
-            residual_bm, residual_tcs, baselines_cs, residual=True
-            )               
+            residual_bm,
+            residual_tcs,
+            baselines_cs,
+            residual=True,
+        )               
     
-    # 3: combine the reconsuction and residual for all ifgs
-    d_hat = (np.hstack((d_hat_baseline, d_hat_monitoring))).T                                                                           # reconstruction, n_times x n_pixels 
-    d_resid = (np.hstack((d_resid_baseline, d_resid_monitoring))).T                                                                     # residual
+    # 3: combine the reconsuction and residual for all ifg
+    # reconstruction
+    d_hat = np.concatenate(
+        (d_hat_baseline,
+         d_hat_monitoring),
+        axis = 0,
+        )
+    # residual                                                                  
+    d_resid = np.concatenate(
+        (d_resid_baseline,
+         d_resid_monitoring),
+        axis = 0,
+        )
 
-    if ifgs_monitoring is None:
+    #if ifgs_monitoring is None:
+    if False:
+        
         return sources_tcs, residual_tcs
     else:
         return sources_tcs_monitor, residual_tcs_monitor, d_hat, d_resid
@@ -495,121 +513,197 @@ def construct_baseline_ts(sica_tica,
 
 #%% residual_for_pixels()
 
-def residual_for_pixels(sources, sources_tcs, ifgs, mask, n_pix_window = 20, 
-                        residual_type = 'cumulative', n_skip=None):
+def residual_for_pixels(
+    d_resid,
+    n_pix_window=20, 
+    residual_type='cumulative',
+):
     """
-    Given spatial sources and their time courses, reconstruct the entire time series and calcualte:
-        - RMS of the residual between each reconstructed and real ifg
-        - RMS of the cumulative residual between each reconstucted and real ifg
-    N.b. if you only want to use some of the time courses (ie time course is 100 ifgs long, but only using the last 50 ifgs),
-         this first n_skip ifgs can be set.  
-
-    Inputs:
-        sources | r2 array | sources as row vectors
-        sources_tcs | list of dicts | As per LiCSAlert, a list with an item for each sources, and each item is a dictionary of various itmes
-        ifgs | r2 array | interferograms as row vectors
-        mask | r2 array of boolean | to convert a row vector back to a rank 2 masked array.  
-        n_skip | None or int | if an int, the first n_skip values of the timecourses will be skipped.  
-        n_pix_window | int | side length of square windows used for the window residual calculation.  
-        residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summer in time for each pixel, then averaged in space across each ifg.  )
-                                                        If window, the residual is the ratio of the max in a window (e.g. 20x20 pixels) over the mean for all windows for that time.  Value at each point is the cumulative.  
-
-    Outputs:
-        residual_ts | r2 array | Column vector of the RMS residual between that ifg, and its reconstruction
-        residual_cs | r2 array | Column vector of the RMS residual between an ifg and the cumulative residual (for each pixel)
-                                 N.b. the point is that if we have a strong atmosphere, it then reverses in the next ifg
-                                 so the cumulative for each pixel goes back to zero
-
-    2019/01/XX | MEG | Written, in discussion with AH
-    2019/12/06 | MEG | Comment and documentation
-    2020/01/02 | MEG | Update to use new LiCSAlert list of dictionaries
-    2020/02/06 | MEG | Fix bug as had forgotten to convert cumulative time courses to be incremental
-    2021_11_30 | MEG | Add new residual method (ratio of maximum in window for mean of all windows)
     """
-
     import numpy as np
-    import numpy.ma as ma
-    from licsalert.aux import r2_to_r3
-
-    def list_dict_to_r2(sources_tcs):
-        """ Extract the cumulative time courses from the sources_tcs list of dicts, and convert them to incremental
-        time courses.  
-        """
-        
-        n_sources = len(sources_tcs)
-        tcs_c_length = sources_tcs[0]["cumulative_tc"].shape[0]                               # as many rows as time steps
-        tcs = np.zeros((tcs_c_length - 1, n_sources))                                          # initiate
-        for n_source, source_tc in enumerate(sources_tcs):                              # loop through each source
-            # convert the cumulative tc to the incremental.  
-            tcs[:,n_source:n_source+1] = np.diff(source_tc["cumulative_tc"], axis = 0)                    # convert to incremental time course, add 0 at start to ensure that we get something of the same length.  
-        return tcs
-                    
-
-    (n_sources, n_pixs) = sources.shape                                         # number of sources and number of pixels
-    tcs = list_dict_to_r2(sources_tcs)                                          # get the incremental time courses as a rank 2 array (ie. as column vectors, so something like 55x5, if there are 55 times and 5 sources)
-    if n_skip is not None:                                                      # crop/remove the first ifgs
-        tcs = tcs[n_skip:,]                                                        # usually the baseline ifgs when used with monitoring data
+    
+    
+    # sum residual through time for each pixel
+    d_resid_cs = np.cumsum(d_resid, axis = 0)
     
 
-    data_model_residual = ifgs - (tcs @ sources)                                                # residual for each pixel at each time (ie the data - the reconstrutcion)
-    data_model_residual_cs = np.cumsum(data_model_residual, axis = 0)                           # summing the residual for each pixel cumulatively through time, same size as above.     
-    residual_ts = np.zeros((data_model_residual.shape[0], 1))                                   # initiate, n_ifgs x 1 array
-    residual_cs = np.zeros((data_model_residual.shape[0], 1))                                   # initiate, n_ifgs x 1 array
-    for row_n in range(data_model_residual.shape[0]):                                           # loop through each ifg
-        residual_ts[row_n, 0] = np.sqrt(np.sum(data_model_residual[row_n,:]**2)/n_pixs)         # RMS of residual for each ifg
-        residual_cs[row_n, 0] = np.sqrt(np.sum(data_model_residual_cs[row_n,:]**2)/n_pixs)      # RMS of residual for cumulative ifgs.  i.e. if atmosphere reverses, should cancel in 2nd cumulative ifg.  
-        
-    # method 2: calculate the residual in spatial windows.  
-    residuals_cs_r3 = r2_to_r3(data_model_residual_cs, mask)                                        # convert from row vectors to rank 2 images.  n_times x ny x nx
-    (n_residuals, ny, nx) = residuals_cs_r3.shape
-    n_windows_x = int(np.floor(nx / n_pix_window))                                                  # the number of whole windows we can it in the x direction.  
-    rem_x = nx % (n_pix_window * n_windows_x)                                                       # the number of pixels remaining if we do that.  
-    border_x = int(rem_x / 2)                                                                       # what half the border will be
-    n_windows_y = int(np.floor(ny / n_pix_window))                                                  # as above but for y
-    rem_y = ny % (n_pix_window * n_windows_y)
-    border_y = int(rem_y / 2)
-    
-    residual_cs_window = np.zeros((data_model_residual.shape[0], 1))                                   # initiate, n_ifgs x 1 array, to store the ratio of the max residual to the mean residual for each ifg. 
-    residual_cs_windows_r3 = np.zeros((n_residuals, n_windows_y, n_windows_x))                                   # initiate, n_ifgs x 1 array
-    for n_resid, residual_cs_r3 in enumerate(residuals_cs_r3):
-        for row_n in range(n_windows_y):
-            for col_n in range(n_windows_x):
-                window_region = residuals_cs_r3[n_resid, (border_y + row_n*n_pix_window):(border_y + (row_n+1)*n_pix_window), 
-                                                         (border_x + col_n*n_pix_window):(border_x + (col_n+1)*n_pix_window) ]                 # extract the window region
-                n_coherent_pixs = (n_pix_window**2) - np.sum(window_region.mask)                                                               # get the number of coherent pixels in the windo (maksed pixels are 1)
-                if False not in window_region.mask:                                                                                             # if there are no unmasked pixels (unmasked = False)
-                    residual_cs_windows_r3[n_resid, row_n, col_n] = np.nan                                                                      # then the residual for that window is just nan
-                else:
-                    residual_cs_windows_r3[n_resid, row_n, col_n] = np.sqrt(ma.sum(window_region**2)/n_coherent_pixs)                           # ge the RMS error for the window, and assign to the array that stores them.  
-        
-        residual_cs_window[n_resid] = np.nanmax(residual_cs_windows_r3[n_resid,]) / np.nanmean(residual_cs_windows_r3[n_resid,])                # calculate the ratio between the largest and mean residual 
-        #residual_cs_window[n_resid] = np.nanmax(residual_cs_windows_r3[n_resid,]) / np.nanmin(residual_cs_windows_r3[n_resid,])                # calculate the ratio between the largest and minimum residual
-    # end method 2
-    
-
-    # debugging/ examining plot
-    # import numpy.ma as ma
-    # import matplotlib.pyplot as plt
-    # n_plot = 15
-    # f, axes = plt.subplots(2,n_plot, figsize = (30,7))
-    # residuals = residuals_cs_r3[:n_plot,]
-    # window_residuals = residual_cs_windows_r3[:n_plot,]
-    # for i in range(n_plot):
-    #     #axes[0,i].imshow(residuals[i,], vmin = ma.min(residuals), vmax = ma.max(residuals))                                        # share colorbar
-    #     axes[0,i].imshow(residuals[i,])                                                                                             # dont 
-    #     axes[1,i].imshow(window_residuals[i,], vmin = np.nanmin(window_residuals), vmax = np.nanmax(window_residuals))              # share colorbar
-    
-    # determine which residual to return, and add 0 to first row (as 0 residual on first acquisition date)
     if residual_type == 'cumulative':
-        residual = residual_cs
+        residual = rmse_per_image = np.sqrt(
+            np.mean(d_resid_cs**2, axis=(1, 2))
+            )
     elif residual_type == 'window':
+        
+        # if we can't fit our image with the windows exactly, find how
+        # big the padding around the edge needs to be.  
+        (n_residuals, ny, nx) = d_resid_cs.shape
+        n_windows_x = int(np.floor(nx / n_pix_window))
+        rem_x = nx % (n_pix_window * n_windows_x)
+        border_x = int(rem_x / 2)
+        n_windows_y = int(np.floor(ny / n_pix_window))
+        rem_y = ny % (n_pix_window * n_windows_y)
+        border_y = int(rem_y / 2)
+        
+        residual_cs_window = np.zeros((data_model_residual.shape[0], 1))
+        residual_cs_windows_r3 = np.zeros((n_residuals, n_windows_y, n_windows_x))
+        for n_resid, residual_cs_r3 in enumerate(d_resid_cs):
+            for row_n in range(n_windows_y):
+                for col_n in range(n_windows_x):
+                    window_region = d_resid_cs[
+                        n_resid, (border_y + row_n*n_pix_window):(border_y + (row_n+1)*n_pix_window), 
+                        (border_x + col_n*n_pix_window):(border_x + (col_n+1)*n_pix_window)
+                        ]
+                    n_coherent_pixs = (n_pix_window**2) - np.sum(window_region.mask)                                                               # get the number of coherent pixels in the windo (maksed pixels are 1)
+                    if False not in window_region.mask:                                                                                             # if there are no unmasked pixels (unmasked = False)
+                        residual_cs_windows_r3[n_resid, row_n, col_n] = np.nan                                                                      # then the residual for that window is just nan
+                    else:
+                        residual_cs_windows_r3[n_resid, row_n, col_n] = np.sqrt(ma.sum(window_region**2)/n_coherent_pixs)                           # ge the RMS error for the window, and assign to the array that stores them.  
+            
+            residual_cs_window[n_resid] = np.nanmax(residual_cs_windows_r3[n_resid,]) / np.nanmean(residual_cs_windows_r3[n_resid,])                # calculate the ratio between the largest and mean residual 
         residual = residual_cs_window
     else:
-        raise Exception(f"'residual_type' must be either 'cumulative' or 'window'.  Exiting as it's {residual_type}")
-        
-    residual = np.concatenate((np.zeros((1, residual_cs.shape[1])), residual_cs), axis = 0)
-        
+        raise Exception(
+            f"'residual_type' must be either 'cumulative' or 'window'. "
+            " Exiting as it's {residual_type}"
+        )
+
+    # ensure not a masked array
+    residual = residual.filled(np.nan)    
+    
+    # make it have zeros on epoch 0
+    residual = np.concatenate(
+        (np.zeros((1)), residual), axis = 0
+    )
+    
+    # make rank 2 (n_times x 1), so the same as cumulative time courses which 
+    # are n_timex x n_ics
+    residual = residual[:, np.newaxis]
+    
     return residual
+
+
+# def residual_for_pixels(
+#         sources,
+#         sources_tcs,
+#         ifgs,
+#         mask,
+#         n_pix_window=20, 
+#         residual_type='cumulative',
+#         n_skip=None,
+#     ):
+    
+#     """
+#     Given spatial sources and their time courses, reconstruct the entire time series and calcualte:
+#         - RMS of the residual between each reconstructed and real ifg
+#         - RMS of the cumulative residual between each reconstucted and real ifg
+#     N.b. if you only want to use some of the time courses (ie time course is 100 ifgs long, but only using the last 50 ifgs),
+#          this first n_skip ifgs can be set.  
+
+#     Inputs:
+#         sources | r2 array | sources as row vectors
+#         sources_tcs | list of dicts | As per LiCSAlert, a list with an item for each sources, and each item is a dictionary of various itmes
+#         ifgs | r2 array | interferograms as row vectors
+#         mask | r2 array of boolean | to convert a row vector back to a rank 2 masked array.  
+#         n_skip | None or int | if an int, the first n_skip values of the timecourses will be skipped.  
+#         n_pix_window | int | side length of square windows used for the window residual calculation.  
+#         residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summer in time for each pixel, then averaged in space across each ifg.  )
+#                                                         If window, the residual is the ratio of the max in a window (e.g. 20x20 pixels) over the mean for all windows for that time.  Value at each point is the cumulative.  
+
+#     Outputs:
+#         residual_ts | r2 array | Column vector of the RMS residual between that ifg, and its reconstruction
+#         residual_cs | r2 array | Column vector of the RMS residual between an ifg and the cumulative residual (for each pixel)
+#                                  N.b. the point is that if we have a strong atmosphere, it then reverses in the next ifg
+#                                  so the cumulative for each pixel goes back to zero
+
+#     2019/01/XX | MEG | Written, in discussion with AH
+#     2019/12/06 | MEG | Comment and documentation
+#     2020/01/02 | MEG | Update to use new LiCSAlert list of dictionaries
+#     2020/02/06 | MEG | Fix bug as had forgotten to convert cumulative time courses to be incremental
+#     2021_11_30 | MEG | Add new residual method (ratio of maximum in window for mean of all windows)
+#     """
+
+#     import numpy as np
+#     import numpy.ma as ma
+#     from licsalert.aux import r2_to_r3
+
+#     def list_dict_to_r2(sources_tcs):
+#         """ Extract the cumulative time courses from the sources_tcs list of dicts, and convert them to incremental
+#         time courses.  
+#         """
+        
+#         n_sources = len(sources_tcs)
+#         tcs_c_length = sources_tcs[0]["cumulative_tc"].shape[0]                               # as many rows as time steps
+#         tcs = np.zeros((tcs_c_length - 1, n_sources))                                          # initiate
+#         for n_source, source_tc in enumerate(sources_tcs):                              # loop through each source
+#             # convert the cumulative tc to the incremental.  
+#             tcs[:,n_source:n_source+1] = np.diff(source_tc["cumulative_tc"], axis = 0)                    # convert to incremental time course, add 0 at start to ensure that we get something of the same length.  
+#         return tcs
+                    
+
+#     (n_sources, n_pixs) = sources.shape                                         # number of sources and number of pixels
+#     tcs = list_dict_to_r2(sources_tcs)                                          # get the incremental time courses as a rank 2 array (ie. as column vectors, so something like 55x5, if there are 55 times and 5 sources)
+#     if n_skip is not None:                                                      # crop/remove the first ifgs
+#         tcs = tcs[n_skip:,]                                                        # usually the baseline ifgs when used with monitoring data
+    
+
+#     data_model_residual = ifgs - (tcs @ sources)                                                # residual for each pixel at each time (ie the data - the reconstrutcion)
+#     data_model_residual_cs = np.cumsum(data_model_residual, axis = 0)                           # summing the residual for each pixel cumulatively through time, same size as above.     
+#     residual_ts = np.zeros((data_model_residual.shape[0], 1))                                   # initiate, n_ifgs x 1 array
+#     residual_cs = np.zeros((data_model_residual.shape[0], 1))                                   # initiate, n_ifgs x 1 array
+#     for row_n in range(data_model_residual.shape[0]):                                           # loop through each ifg
+#         residual_ts[row_n, 0] = np.sqrt(np.sum(data_model_residual[row_n,:]**2)/n_pixs)         # RMS of residual for each ifg
+#         residual_cs[row_n, 0] = np.sqrt(np.sum(data_model_residual_cs[row_n,:]**2)/n_pixs)      # RMS of residual for cumulative ifgs.  i.e. if atmosphere reverses, should cancel in 2nd cumulative ifg.  
+        
+#     # method 2: calculate the residual in spatial windows.  
+#     residuals_cs_r3 = r2_to_r3(data_model_residual_cs, mask)                                        # convert from row vectors to rank 2 images.  n_times x ny x nx
+#     (n_residuals, ny, nx) = residuals_cs_r3.shape
+#     n_windows_x = int(np.floor(nx / n_pix_window))                                                  # the number of whole windows we can it in the x direction.  
+#     rem_x = nx % (n_pix_window * n_windows_x)                                                       # the number of pixels remaining if we do that.  
+#     border_x = int(rem_x / 2)                                                                       # what half the border will be
+#     n_windows_y = int(np.floor(ny / n_pix_window))                                                  # as above but for y
+#     rem_y = ny % (n_pix_window * n_windows_y)
+#     border_y = int(rem_y / 2)
+    
+#     residual_cs_window = np.zeros((data_model_residual.shape[0], 1))                                   # initiate, n_ifgs x 1 array, to store the ratio of the max residual to the mean residual for each ifg. 
+#     residual_cs_windows_r3 = np.zeros((n_residuals, n_windows_y, n_windows_x))                                   # initiate, n_ifgs x 1 array
+#     for n_resid, residual_cs_r3 in enumerate(residuals_cs_r3):
+#         for row_n in range(n_windows_y):
+#             for col_n in range(n_windows_x):
+#                 window_region = residuals_cs_r3[n_resid, (border_y + row_n*n_pix_window):(border_y + (row_n+1)*n_pix_window), 
+#                                                          (border_x + col_n*n_pix_window):(border_x + (col_n+1)*n_pix_window) ]                 # extract the window region
+#                 n_coherent_pixs = (n_pix_window**2) - np.sum(window_region.mask)                                                               # get the number of coherent pixels in the windo (maksed pixels are 1)
+#                 if False not in window_region.mask:                                                                                             # if there are no unmasked pixels (unmasked = False)
+#                     residual_cs_windows_r3[n_resid, row_n, col_n] = np.nan                                                                      # then the residual for that window is just nan
+#                 else:
+#                     residual_cs_windows_r3[n_resid, row_n, col_n] = np.sqrt(ma.sum(window_region**2)/n_coherent_pixs)                           # ge the RMS error for the window, and assign to the array that stores them.  
+        
+#         residual_cs_window[n_resid] = np.nanmax(residual_cs_windows_r3[n_resid,]) / np.nanmean(residual_cs_windows_r3[n_resid,])                # calculate the ratio between the largest and mean residual 
+#         #residual_cs_window[n_resid] = np.nanmax(residual_cs_windows_r3[n_resid,]) / np.nanmin(residual_cs_windows_r3[n_resid,])                # calculate the ratio between the largest and minimum residual
+#     # end method 2
+    
+
+#     # debugging/ examining plot
+#     # import numpy.ma as ma
+#     # import matplotlib.pyplot as plt
+#     # n_plot = 15
+#     # f, axes = plt.subplots(2,n_plot, figsize = (30,7))
+#     # residuals = residuals_cs_r3[:n_plot,]
+#     # window_residuals = residual_cs_windows_r3[:n_plot,]
+#     # for i in range(n_plot):
+#     #     #axes[0,i].imshow(residuals[i,], vmin = ma.min(residuals), vmax = ma.max(residuals))                                        # share colorbar
+#     #     axes[0,i].imshow(residuals[i,])                                                                                             # dont 
+#     #     axes[1,i].imshow(window_residuals[i,], vmin = np.nanmin(window_residuals), vmax = np.nanmax(window_residuals))              # share colorbar
+    
+#     # determine which residual to return, and add 0 to first row (as 0 residual on first acquisition date)
+#     if residual_type == 'cumulative':
+#         residual = residual_cs
+#     elif residual_type == 'window':
+#         residual = residual_cs_window
+#     else:
+#         raise Exception(f"'residual_type' must be either 'cumulative' or 'window'.  Exiting as it's {residual_type}")
+        
+#     residual = np.concatenate((np.zeros((1, residual_cs.shape[1])), residual_cs), axis = 0)
+        
+#     return residual
 
 
 #%%
@@ -676,10 +770,15 @@ def tcs_monitoring(tcs_c, sources_tcs, baselines_cs, residual=False):
     
     Inputs:
         tcs_cs | rank 2 array | time courses as column vectors
-        sources_tcs | list of dicts | 
+        sources_tcs | list of dicts | one list entry for each time course,
+                                      keys are: 'cumulative_tc', 'gradient',
+                                                 'lines', 'sigma',
+                                                 'distances','t_recalculate'
+
+                                          
         baselines_cs  | r1 array | time values for each point in the time course.  
-                                    for Sentinel-1, commonly (12,24,36 etc if 12 day acquisitions.  )
-        residual | boolean | 
+
+        residual | boolean | if working with a residual time course
         
     Outputs:
         sources_tcs | list of dicts | as per description.  
@@ -688,7 +787,7 @@ def tcs_monitoring(tcs_c, sources_tcs, baselines_cs, residual=False):
         2020/01/02 | MEG | Written
     """
     import numpy as np
-    import copy                                                                                   # needed for the deep copy of the list of dictionaries
+    import copy
     
     
     # cumulative baselines originally started without 0.  Reformat back to starting
@@ -696,7 +795,8 @@ def tcs_monitoring(tcs_c, sources_tcs, baselines_cs, residual=False):
     #baselines_cs = baselines_cs[1:]
     
     # 1: Small initial steps
-    sources_tcs_monitor = copy.deepcopy(sources_tcs)                                              # copy so that we can change without affecting version calcaulted only from baseline data
+    # copy so that we can change without affecting version calcaulted only from baseline data
+    sources_tcs_monitor = copy.deepcopy(sources_tcs)
     # get from the baseline stage
     t_recalculate = sources_tcs_monitor[0]["t_recalculate"]                                       
     # get the number of monitoring ifgs.  
@@ -1168,6 +1268,13 @@ def LiCSAlert_preprocessing(
         displacement_r3['cum_ma_downsampled'],
         axis=0
         )
+    
+
+    # debug    
+    # pdb.set_trace()
+    # f, ax = plt.subplots()
+    # ax.matshow(displacement_r3['cum_ma'].mask[1])
+    
     
     # deal with mean centering (which could be in space or time)
     displacement_r3['cum_ma'] = MeanCenteredArray(displacement_r3['cum_ma'])
