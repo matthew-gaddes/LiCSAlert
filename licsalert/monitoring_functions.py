@@ -8,7 +8,7 @@ Created on Mon Jun 29 14:09:28 2020
 import pdb
 import matplotlib.pyplot as plt
 
-#%%
+#%% LiCSAlert_monitoring_mode()
 
 def LiCSAlert_monitoring_mode(outdir, region, volcano,                                              
                               licsbas_dir = None, licsbas_jasmin_dir = None, 
@@ -106,7 +106,9 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         volcano_dir = outdir / volcano
     else:
         volcano_dir = outdir / region / volcano
-    volcano_dir.mkdir(parents=True, exist_ok=True)                                   
+    volcano_dir.mkdir(parents=True, exist_ok=True)         
+    # remove as now output to volcano_dir
+    del outdir                          
     
     # append to the single txt file for that volcano                                 
     f_run_log = open(volcano_dir / "LiCSAlert_history.txt", 'a')                                                                          
@@ -120,7 +122,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     # if using jasmin data, import the settings for that volcano
     if licsbas_jasmin_dir is not None:
         outputs = read_config_file(
-            outdir / region / volcano/  "LiCSAlert_settings.txt")                                          
+            volcano_dir /  "LiCSAlert_settings.txt")                                          
         (licsalert_settings, icasar_settings, licsbas_settings) = outputs
         del outputs
 
@@ -152,7 +154,9 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     # in space or time, depending on whther sica or tica
     
     displacement_r3 = LiCSAlert_preprocessing(
-        displacement_r3, tbaseline_info,  icasar_settings['sica_tica'],                                                    
+        displacement_r3,
+        tbaseline_info,
+        icasar_settings['sica_tica'],                                                    
         licsalert_settings['downsample_run'], 
         licsalert_settings['downsample_plot']
         )
@@ -218,7 +222,10 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
             icasar_settings['sica_tica'],
             displacement_r3,
             tbaseline_info,
-            licsalert_settings['baseline_end']
+            licsalert_settings['baseline_end'],
+            volcano_dir,
+            licsalert_settings['figure_type'],
+            interactive=False,                # useful to set to True to debug
         )
         
 
@@ -376,7 +383,7 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     f_run_log.close()                                                                                                                                          # and close the log file.  
 
 
-#%%
+#%% create_licsalert_update_list()
 
 def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir, 
                                  licsbas_json_type = 'unfiltered'):
@@ -556,7 +563,7 @@ def create_licsalert_update_list(licsbas_dir, licsalert_dir, template_file_dir,
 
 
 
-#%%
+#%% LiCSBAS_json_to_LiCSAlert()
 
 def LiCSBAS_json_to_LiCSAlert(json_file):
     """Given a licsbas .json file (as produced by the processing on Jasmin), extract all the information in it
@@ -788,7 +795,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
     return displacement_r2, displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
 
 
-#%%
+#%% run_LiCSAlert_status()
 
 def run_LiCSAlert_status(
         licsbas_dates, volcano_path, date_baseline_end, figure_intermediate,
@@ -1100,7 +1107,7 @@ def run_LiCSAlert_status(
 
 
 
-#%%
+#%% read_config_file()
 
 def read_config_file(config_file):
     """Given a .txt file of arguments, read it into dictionaries
@@ -1186,7 +1193,7 @@ def read_config_file(config_file):
 
 
 
-#%%
+#%% update_mask_sources_ifgs()
 
 def update_mask_sources_ifgs(mask_data1, data1, mask_data2, data2, verbose = True):
     """ Given two masks of pixels, create a mask of pixels that are valid for both.  
@@ -1266,7 +1273,7 @@ def update_mask_sources_ifgs(mask_data1, data1, mask_data2, data2, verbose = Tru
 
 
 
-#%%
+#%% save_epoch_data()
 def save_epoch_data(sources_tcs, residual_tcs, outdir):
     """ Save the useful LiCSAlert outputs in a pickle.  Also include the DEM.  
     
@@ -1304,9 +1311,7 @@ def save_epoch_data(sources_tcs, residual_tcs, outdir):
     #             pass
 
 
-#%%
-
-
+#%% manual_mask_wrapper()
 
 def manual_mask_wrapper(volcano_dir, draw_manual_mask, displacement_r2):
     """Handle either creating or loading a manually drawn mask.  
@@ -1382,8 +1387,7 @@ def manual_mask_wrapper(volcano_dir, draw_manual_mask, displacement_r2):
     return displacement_r2
     
     
-#%%
-
+#%% calculate_valid_pixels()
 
 def calculate_valid_pixels(cum_r3):
     """
@@ -1410,7 +1414,7 @@ def calculate_valid_pixels(cum_r3):
     return n_pixels, n_pixels_idx, total_pix
 
 
-#%%
+#%% intersect_valid_pixels()
 
 def intersect_valid_pixels(cum_r3, acq_dates, verbose = False):
     """ Calculate the number of pixels that are valid at all epochs for

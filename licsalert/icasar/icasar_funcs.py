@@ -7,7 +7,7 @@ Created on Tue May 29 11:23:10 2018
 
 import pdb
 
-#%%
+#%% ICASAR()
 
 def ICASAR(n_pca_comp_start, n_pca_comp_stop, 
            spatial_data = None, temporal_data = None, figures = "window", 
@@ -111,22 +111,13 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
         r2_arrays_to_googleEarth                        # geocode spatial sources and make a .kmz for use with Google Earth.  
     """
 
-
-    import matplotlib.pyplot as plt
-    plt.switch_backend('Qt5Agg')
-    import sys
-    import pdb
-    # print(f"\n\n\nDEBUG IMPORT\n\n\n")
-    # sys.path.append("/home/matthew/university_work/python_stuff/python_scripts")
-    # from small_plot_functions import matrix_show
-
     # external functions
     import numpy as np
     import numpy.ma as ma  
     import matplotlib.pyplot as plt
-    import shutil                                                                # used to make/remove folders etc
-    import os                                                                    # ditto
-    import pickle                                                                # to save outputs.  
+    import shutil         
+    import os
+    import pickle
     from pathlib import Path
     import pdb
     
@@ -140,7 +131,16 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
     from licsalert.icasar.plotting import two_spatial_signals_plot
     from licsalert.icasar.sources_interactive_figure import plot_2d_interactive_fig
     
+    # debug to plot input time series dates
+    import matplotlib.pyplot as plt
+    from matplotlib.dates import AutoDateLocator, DateFormatter
+    from datetime import datetime
+    import numpy as np
+    from itertools import combinations
     
+    
+    # debug plot to visualise the temporal baselines of the data used for ICA.  
+    # timeline_and_gap_stack(spatial_data['ifg_dates_dc'])
     
     # -5 Check inputs, unpack either spatial or temporal data, and check for nans
     if temporal_data is None and spatial_data is None:                                                                  # check inputs
@@ -269,22 +269,37 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
 
     # -0:  Create all interferograms, create the arary of mixtures (X), and mean centre
     if spatial:
-        print(f"Creating all possible variations of the time series (incremental/daisy chain, cumulative, and all possible).  ")        # we allrady have the daisy chain ifgs.  
+        print(f"Creating all possible variations of the time series "
+              "(incremental/daisy chain, cumulative, and all possible).  "
+              )
+        
+        # create all ifgs between acquisitions, up to max_n_all_ifgs
         ifgs_all_r2, ifg_dates_all = create_all_ifgs(
-            spatial_data['ifgs_dc'], spatial_data['ifg_dates_dc'], 
-            max_n_all_ifgs
+            spatial_data['ifgs_dc'],
+            spatial_data['ifg_dates_dc'], 
+            max_n_all_ifgs,
             )
+        
+        # also create the cumualtive ifgs (relative to the first acq.  )
         ifgs_cum_r2, ifg_dates_cum = create_cumulative_ifgs(
-            spatial_data['ifgs_dc'], spatial_data['ifg_dates_dc']
+            spatial_data['ifgs_dc'],
+            spatial_data['ifg_dates_dc']
             )                      
-        # create a class (an ifg_timeseries) using the daisy chain ifgs
+        
+        # create a class (an ifg_timeseries) for the three types (inc, cum, all)
         ifgs_dc = ifg_timeseries(
-            spatial_data['ifgs_dc'], spatial_data['ifg_dates_dc']
+            spatial_data['ifgs_dc'],
+            spatial_data['ifg_dates_dc']
             )                                                 
-        # create a class (an ifg_timeseries) using all possible ifgs
-        ifgs_all = ifg_timeseries(ifgs_all_r2, ifg_dates_all)                                                                           
-        # create a class (an ifg_timeseries) using the cumualtive ifgs.  
-        ifgs_cum = ifg_timeseries(ifgs_cum_r2, ifg_dates_cum)                                                                           
+        ifgs_all = ifg_timeseries(
+            ifgs_all_r2,
+            ifg_dates_all,
+            )
+        ifgs_cum = ifg_timeseries(
+            ifgs_cum_r2,
+            ifg_dates_cum,
+            )                                                                           
+        
         del ifgs_all_r2, ifg_dates_all, ifgs_cum_r2, ifg_dates_cum
         
         if sica_tica == 'sica':
@@ -312,6 +327,7 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
     while (success == False) and (count < 10):
         
         try:
+            # X_mc is either inc, cum or all ifgs, as set above.  
             outputs = PCA_meg2(X_mc, verbose = False)                    
             (PC_vecs, PC_vals, PC_whiten_mat, PC_dewhiten_mat, x_mc,
              x_decorrelate, x_white) = outputs; del outputs
@@ -356,34 +372,318 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
             
         if spatial:
             if sica_tica == 'sica':
+                # select only the desired number of PCs
                 S_pca = S_pca[:n_pca_comp_stop,:]
                 A_pca = A_pca[:,:n_pca_comp_stop]
-                inversion_results = bss_components_inversion(S_pca, 
-                                                             [ifgs_dc.mixtures_mc_space,
-                                                              ifgs_all.mixtures_mc_space])            
+                
+                # invert to fit both daisy chain and all ifgs using PCs
+                inversion_results = bss_components_inversion(
+                    S_pca, 
+                    [ifgs_dc.mixtures_mc_space,
+                     ifgs_all.mixtures_mc_space]
+                    )            
                 source_residuals = inversion_results[0]['residual']                                                                     
                 A_pca_dc = inversion_results[0]['tcs'].T                                                                                
-                A_pca_all = inversion_results[1]['tcs'].T                                                                               
-                two_spatial_signals_plot(S_pca, spatial_data['mask'], 
-                                         spatial_data['dem'], 
-                                         A_pca_dc, A_pca_all, 
-                                         ifgs_dc.t_baselines, 
-                                         ifgs_all.t_baselines,
-                                         f"02_PCA_{n_pca_comp_stop}_components", 
-                                         spatial_data['ifg_dates_dc'], 
-                                         fig_kwargs)
+                A_pca_all = inversion_results[1]['tcs'].T
+                
+                # debug
+                f, ax=plt.subplots()
+                ax.scatter(
+                    ifgs_all.t_baselines,
+                    A_pca_all[:,1],
+                    )
+   
+    
+                #%%
+                # # maually draw round points on the temporal baseline 
+                # # correlation plot.  
+                # from licsalert.debugging import select_points
+                # idx = select_points(
+                #     ifgs_all.t_baselines,
+                #     A_pca_all[:,1],
+                #     )
+                
+                # from licsalert.aux import col_to_ma
+                
+                # n_plot=10
+                # f, axes = plt.subplots(1,n_plot)
+                # for i in range(n_plot):
+                #     axes[i].matshow(
+                #         col_to_ma(
+                #             ifgs_all.mixtures_mc_space[idx[i]],
+                #             mask,
+                #             )
+                #         )
+                    
+                # # 409 unusual
+                
+                # f, ax = plt.subplots(1)
+                # ax.scatter(
+                #     ifgs_all.mixtures_mc_space[409],
+                #     ifgs_all.mixtures_mc_space[161],
+                #     )
+                
+     
+     
+
+#%%
+
+                import numpy as np
+                import matplotlib.pyplot as plt
+                import matplotlib.dates as mdates
+                from matplotlib.widgets import Cursor
+                from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+                from datetime import datetime
+                from licsalert.aux import col_to_ma
+                
+                
+                def scatter_with_vector_preview(
+                    x,
+                    y,
+                    imgs,
+                    imgs_reco,
+                    A,
+                    mask,
+                    *,
+                    date_pairs,
+                    sources=None,
+                    thresh_frac: float = 0.01,
+                    scatter_kw: dict | None = None,
+                    cmap: str = "viridis",
+                    resid_cmap: str = "RdBu_r",
+                    highlight_kw: dict | None = None,
+                ):
+                    """
+                    Interactive PCA/ICA explorer with an extra subplot that shows each sample's
+                    (date₁, date₂) position.
+                
+                    Parameters
+                    ----------
+                    x, y           : 1-D arrays – coordinates for the primary scatter plot
+                    date_pairs     : list[str]  – strings "yyyymmdd_yyyymmdd", *one per row*
+                    imgs, imgs_reco
+                    A, mask, sources, thresh_frac, scatter_kw, cmap, resid_cmap
+                                    : same meaning as in the original function
+                    highlight_kw   : dict – style overrides for the highlight marker
+                    """
+                    # ── sanity checks ───────────────────────────────────────────────────────
+                    x = np.asarray(x)
+                    y = np.asarray(y)
+                    imgs       = np.asarray(imgs)
+                    imgs_reco  = np.asarray(imgs_reco)
+                    A          = np.asarray(A)
+                    date_pairs = np.asarray(date_pairs)
+                
+                    if len(date_pairs) != x.size:
+                        raise ValueError("`date_pairs` must have the same length as `x`/`y`.")
+                    if imgs.shape != imgs_reco.shape:
+                        raise ValueError("imgs and imgs_reco must have the same shape")
+                    if not (imgs.shape[0] == x.size == y.size == A.shape[0]):
+                        raise ValueError("First dimension of x, y, imgs and A must match")
+                    if imgs.ndim != 2:
+                        raise ValueError("imgs must be a 2-D array of row vectors (N, ny*nx)")
+                    if mask.ndim != 2:
+                        raise ValueError("mask must be a 2-D array (ny, nx)")
+                
+                    ny, nx      = mask.shape
+                    n_sources   = 0 if sources is None else sources.shape[0]
+                    highlight_kw = {"s": 60, "c": "crimson", "marker": "X", "zorder": 4,
+                                    **(highlight_kw or {})}
+                
+                    # ── parse dates once ----------------------------------------------------
+                    def _split(p):
+                        a, b = p.split("_")
+                        return (datetime.strptime(a, "%Y%m%d"),
+                                datetime.strptime(b, "%Y%m%d"))
+                    date1, date2 = zip(*map(_split, date_pairs))
+                    date1, date2 = np.array(date1), np.array(date2)
+                
+                    dmin, dmax = min(date1.min(), date2.min()), max(date1.max(), date2.max())
+                
+                    # ── figure & layout -----------------------------------------------------
+                    fig = plt.figure(figsize=(15, 6))
+                
+                    if n_sources:
+                        # Two-row grid: sources on top (full width) + bottom row with 3 panels
+                        gs_root = fig.add_gridspec(
+                            2, 1, height_ratios=[0.6, 2.4], hspace=0.15
+                        )
+                        gs_src   = gs_root[0].subgridspec(1, n_sources, wspace=0.05)
+                        gs_bottom = gs_root[1].subgridspec(
+                            1, 3, width_ratios=[1.3, 1.3, 2.6], wspace=0.30
+                        )
+                        # -- top sources -----------------------------------------------------
+                        for i in range(n_sources):
+                            ax = fig.add_subplot(gs_src[0, i])
+                            ax.set_xticks([]), ax.set_yticks([])
+                            ax.set_title(f"S{i}", fontsize=9)
+                            im_s = col_to_ma(sources[i], mask)
+                            im = ax.imshow(im_s, cmap=cmap, origin="upper")
+                            cax = inset_axes(
+                                ax, width="6%", height="70%", loc="lower right",
+                                bbox_to_anchor=(0, 0, 1, 1), bbox_transform=ax.transAxes,
+                                borderpad=0,
+                            )
+                            fig.colorbar(im, cax=cax)
+                    else:
+                        gs_bottom = fig.add_gridspec(
+                            1, 3, width_ratios=[1.3, 1.3, 2.6], wspace=0.30
+                        )
+                
+                    # LEFT: main scatter -----------------------------------------------------
+                    ax_sc = fig.add_subplot(gs_bottom[0, 0])
+                    skw = {"s": 22, "c": "tab:blue", "alpha": 0.8, **(scatter_kw or {})}
+                    ax_sc.scatter(x, y, **skw)
+                    ax_sc.axhline(0, color="k", linewidth=1)
+                    ax_sc.set_title("Hover a point to preview")
+                    Cursor(ax_sc, useblit=True, color="grey", linewidth=0.5)
+                
+                    # MIDDLE: date-pair scatter ---------------------------------------------
+                    ax_dt = fig.add_subplot(gs_bottom[0, 1])
+                    ax_dt.scatter(date1, date2, s=20, c="tab:green", alpha=0.75)
+                    ax_dt.set_xlim(dmin, dmax)
+                    ax_dt.set_ylim(dmax, dmin)      # invert y-axis (earlier dates at top)
+                    year_locator = mdates.YearLocator()
+                    year_fmt     = mdates.DateFormatter("%Y")
+                    for axis in (ax_dt.xaxis, ax_dt.yaxis):
+                        axis.set_major_locator(year_locator)
+                        axis.set_major_formatter(year_fmt)
+                    ax_dt.grid(True, linestyle=":", lw=0.6)
+                    ax_dt.set_xlabel("Date 1")
+                    ax_dt.set_ylabel("Date 2")
+                    ax_dt.set_title("Date pairs (yearly ticks, shared limits)")
+                    # highlight handle – created on first hover
+                    hl_dt = None
+                
+                    # RIGHT: per-point previews ---------------------------------------------
+                    gs_prev = gs_bottom[0, 2].subgridspec(2, 2, wspace=0.07, hspace=0.25)
+                    ax_orig = fig.add_subplot(gs_prev[0, 0])
+                    ax_reco = fig.add_subplot(gs_prev[0, 1])
+                    ax_resi = fig.add_subplot(gs_prev[1, 0])
+                    ax_bar  = fig.add_subplot(gs_prev[1, 1])
+                
+                    for a in (ax_orig, ax_reco, ax_resi):
+                        a.set_xticks([]), a.set_yticks([])
+                
+                    ax_orig.set_title("Original", fontsize=10)
+                    ax_reco.set_title("Reconstruction", fontsize=10)
+                    ax_resi.set_title("Residual", fontsize=10)
+                
+                    # placeholders (for fast updates) ---------------------------------------
+                    im_orig = im_reco = im_resi = None
+                    current_idx = None
+                    pick_radius = thresh_frac * np.hypot(np.ptp(x), np.ptp(y))
+                
+                    # ── hover callback ─────────────────────────────────────────────────────-
+                    def on_move(event):
+                        nonlocal current_idx, im_orig, im_reco, im_resi, hl_dt
+                        if event.inaxes is not ax_sc or event.xdata is None:
+                            return
+                
+                        dist = np.hypot(x - event.xdata, y - event.ydata)
+                        idx  = np.argmin(dist)
+                        if dist[idx] > pick_radius or idx == current_idx:
+                            return
+                        current_idx = idx
+                
+                        # -- update the three image panels ----------------------------------
+                        img_o = col_to_ma(imgs[idx], mask)
+                        img_r = col_to_ma(imgs_reco[idx], mask)
+                        img_s = img_o - img_r
+                
+                        if im_orig is None:
+                            im_orig = ax_orig.imshow(img_o, cmap=cmap, origin="upper")
+                            im_reco = ax_reco.imshow(img_r, cmap=cmap, origin="upper")
+                            im_resi = ax_resi.imshow(img_s, cmap=resid_cmap, origin="upper")
+                            for ax_i, im in zip(
+                                (ax_orig, ax_reco, ax_resi),
+                                (im_orig, im_reco, im_resi),
+                            ):
+                                cax = inset_axes(
+                                    ax_i, width="4%", height="70%", loc="lower right",
+                                    bbox_to_anchor=(0, 0, 1, 1), bbox_transform=ax_i.transAxes,
+                                    borderpad=0,
+                                )
+                                fig.colorbar(im, cax=cax)
+                        else:
+                            im_orig.set_data(img_o)
+                            im_reco.set_data(img_r)
+                            im_resi.set_data(img_s)
+                            im_orig.set_clim(np.nanmin(img_o), np.nanmax(img_o))
+                            im_reco.set_clim(np.nanmin(img_r), np.nanmax(img_r))
+                            im_resi.set_clim(np.nanmin(img_s), np.nanmax(img_s))
+                
+                        # -- update the weights bar plot ------------------------------------
+                        ax_bar.cla()
+                        ax_bar.bar(np.arange(A.shape[1]), A[idx], color="tab:orange")
+                        ax_bar.set_title("Mixing weights", fontsize=10)
+                        ax_bar.set_xlabel("Component", fontsize=8)
+                        ax_bar.set_ylabel("Weight", fontsize=8)
+                        ax_bar.tick_params(axis="both", labelsize=7)
+                        ax_bar.set_ylim(np.nanmin(A), np.nanmax(A))
+                
+                        # -- highlight the corresponding point in date scatter -------------
+                        if hl_dt is None:
+                            hl_dt = ax_dt.scatter(
+                                date1[idx], date2[idx], **highlight_kw
+                            )
+                        else:
+                            hl_dt.set_offsets([date1[idx], date2[idx]])
+                
+                        fig.canvas.draw_idle()
+                
+                    fig.canvas.mpl_connect("motion_notify_event", on_move)
+                    fig.tight_layout()
+                    return fig
+                
+                
+                # ── Example call (comment-in when running) ──────────────────────────────────
+                fig = scatter_with_vector_preview(
+                    x=ifgs_all.t_baselines,
+                    y=A_pca_all[:, 1],
+                    imgs=ifgs_all.mixtures_mc_space,
+                    imgs_reco=A_pca_all @ S_pca,
+                    A=A_pca_all,
+                    mask=mask,
+                    sources=S_pca,
+                    date_pairs=ifgs_all.ifg_dates,   # e.g. ["20240101_20240215", ...]
+                )
+
+
+
+                
+                
+                #%%
+                
+                pdb.set_trace()
+                
+                
+                
+                two_spatial_signals_plot(
+                    S_pca, spatial_data['mask'], 
+                    spatial_data['dem'], 
+                    A_pca_dc, A_pca_all, 
+                    ifgs_dc.t_baselines, 
+                    ifgs_all.t_baselines,
+                    f"02_PCA_{n_pca_comp_stop}_components", 
+                    spatial_data['ifg_dates_dc'], 
+                    fig_kwargs,
+                    )
+                
             elif sica_tica == 'tica':
                 A_pca = A_pca[:, :n_pca_comp_stop]
                 S_pca_cum = S_pca_cum[:n_pca_comp_stop, :]
                 S_pca_dc = np.diff(S_pca_cum, axis = 1, prepend = 0)                                                                    
-                two_spatial_signals_plot(A_pca.T, spatial_data['mask'], 
-                                         spatial_data['dem'], 
-                                         S_pca_dc.T, S_pca_cum.T, 
-                                         ifgs_dc.t_baselines, 
-                                         ifgs_cum.t_baselines,                            
-                                         f"02_PCA_{n_pca_comp_stop}_components", 
-                                         spatial_data['ifg_dates_dc'], 
-                                         fig_kwargs)                    
+                two_spatial_signals_plot(
+                    A_pca.T, spatial_data['mask'], 
+                    spatial_data['dem'], 
+                    S_pca_dc.T, S_pca_cum.T, 
+                    ifgs_dc.t_baselines, 
+                    ifgs_cum.t_baselines,                            
+                    f"02_PCA_{n_pca_comp_stop}_components", 
+                    spatial_data['ifg_dates_dc'], 
+                    fig_kwargs,
+                    )
         else:
             
             S_pca = S_pca[:n_pca_comp_stop, ]
@@ -501,9 +801,20 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
             A_ica_dc = inversion_results[0]['tcs'].T                                                                                                               # in sICA, time courses are in A
             A_ica_all = inversion_results[1]['tcs'].T                                                                                                              # time courses to fit all possible interferograms.                                   
             if fig_kwargs['figures'] != "none":                
-                dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons =   two_spatial_signals_plot(S_ica, spatial_data['mask'], spatial_data['dem'], 
-                                                                                                          A_ica_dc, A_ica_all, ifgs_dc.t_baselines, ifgs_all.t_baselines,
-                                                                                                          "03_ICA_sources", spatial_data['ifg_dates_dc'], fig_kwargs)
+                outputs=two_spatial_signals_plot(
+                    S_ica,
+                    spatial_data['mask'],
+                    spatial_data['dem'], 
+                    A_ica_dc,
+                    A_ica_all,
+                    ifgs_dc.t_baselines,
+                    ifgs_all.t_baselines,
+                    "03_ICA_sources",
+                    spatial_data['ifg_dates_dc'],
+                    fig_kwargs
+                    )
+                (dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons)=outputs
+                
         elif sica_tica == 'tica':
             S_ica_cum = S_ica                                                                                                                                     # if temporal, sources are time courses, and are for the cumulative ifgs (as the transpose of these was given to the ICA function).  Note that these each have a mean of 0
             S_ica_dc = np.diff(S_ica_cum, axis = 1, prepend = 0)                                                                                                  # the diff of the cumluative time courses is the incremnetal (daisy chain) time course.  Prepend a 0 to make it thesame size as the original diays chain (ie. the capture the difference between 0 and first value).  Note that these are no longer each mean centered
@@ -512,9 +823,21 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
             A_ica = inversion_results[0]['tcs']                                                                                                                   # in tICA, spatial sources are row vector (ie these are the images)
             source_residuals = inversion_results[0]['residual']                                                                                                   # how well the cumulative time courses are fit?  Not clear.  
             if fig_kwargs['figures'] != "none":
-                dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons = two_spatial_signals_plot(A_ica, spatial_data['mask'], spatial_data['dem'],                           # here A are the images, simply the result of the inversion and no consideration given to their mean
-                                                                                                        S_ica_dc.T, S_ica_cum.T, ifgs_dc.t_baselines, ifgs_cum.t_baselines,          # 
-                                                                                                        "03_ICA_sources", spatial_data['ifg_dates_dc'], fig_kwargs)                    
+                outupts = two_spatial_signals_plot(
+                    A_ica,
+                    spatial_data['mask'],
+                    spatial_data['dem'],                          
+                    S_ica_dc.T,
+                    S_ica_cum.T,
+                    ifgs_dc.t_baselines,
+                    ifgs_cum.t_baselines,
+                    "03_ICA_sources",
+                    spatial_data['ifg_dates_dc'],
+                    fig_kwargs
+                    )                    
+                
+                (dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons)=outputs
+                
     else:
         inversion_results = bss_components_inversion(S_ica, [X_mc])                                                 # invert to fit the mean centered mixture.    
         source_residuals = inversion_results[0]['residual']                                                         # how well we fit those
@@ -793,7 +1116,7 @@ def update_mask_sources_ifgs(mask_sources, sources, mask_ifgs, ifgs):
 
 
 
-#%%
+#%% bootstrapped_sources_to_centrotypes()
 
 def bootstrapped_sources_to_centrotypes(sources_r2, hdbscan_param, tsne_param,
                                         update_tsne):
@@ -1099,8 +1422,7 @@ def bootstrap_ICA(X, n_comp, bootstrap = True, ica_param = (1e-4, 150),
 
 
 
-#%%
-
+#%% pairwise_comparison()
 
 def pairwise_comparison(sources_r2):
     """ Compte the pairwise distances and similarities for ICA sources.  
@@ -1114,8 +1436,6 @@ def pairwise_comparison(sources_r2):
     S = np.abs(S)                                                                # covariance of 1 and -1 are equivalent for our case
     D = 1 - S                                                                   # convert to dissimilarity    
     return D, S
-    
- 
 
 
 #%%
@@ -1160,7 +1480,7 @@ def sources_list_to_r2_r3(sources, mask = None):
 
 
 
-#%%
+#%% cluster_quality_index
 
 def cluster_quality_index(labels, S):
     """

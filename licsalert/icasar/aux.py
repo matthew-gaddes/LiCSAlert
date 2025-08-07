@@ -64,6 +64,7 @@ def maps_tcs_rescale(maps, tcs):
 
 
 
+
 #%%
 
 
@@ -82,7 +83,10 @@ def bss_components_inversion(sources, interferograms):
     """
     import numpy as np
     
+    # initialise
     inversion_results = []
+    
+    # iterate to fit as many time series of interferogram as were given.  
     for interferogram in interferograms:
         interferogram -= np.mean(interferogram)                     # mean centre
         n_pixels = np.size(interferogram)

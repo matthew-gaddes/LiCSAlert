@@ -441,8 +441,7 @@ def create_folder(folder):
         print("Failed!") 
         
         
-        #%%
-
+#%% col_to_ma()
 
 def col_to_ma(col, pixel_mask):
     """ A function to take a column vector and a 2d pixel mask and reshape the column into a masked array.  

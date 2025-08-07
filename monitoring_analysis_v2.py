@@ -389,6 +389,8 @@ get_lon_lat_of_volcs_from_db(
     )
 
 
+
+
 # adjust the lon lats of the volcanoes so when plotted they don't overlap
 offset_volc_lls(volcs,  threshold = 2., offset = 2.1, attempts = 200)
 

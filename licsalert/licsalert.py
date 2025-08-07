@@ -414,22 +414,47 @@ def LiCSAlert(sources,
 
 #%% construct_baseline_ts()
 
-def construct_baseline_ts(sica_tica, 
-                          displacement_r3, 
-                          tbaseline_info,
-                          baseline_end,
-                          interactive=False
-):
+def construct_baseline_ts(
+        sica_tica, 
+        displacement_r3, 
+        tbaseline_info,
+        baseline_end,
+        volcano_dir,
+        figures='png',
+        interactive=False
+        ):
     """
     A function to prepare the baseline time series for ICA.  First step
     is dropping some epochs that cause many pixels to be lost, followed by
     mean centering 
+    
+    Inputs:
+        sica_tica | str | either 'sica' or 'tica'
+        displacement_r3 | dict | time series info as rank 3
+        tbaseline_info | dict | temporal info associated with time series. 
+        baseline_end | licsalert date | time series up to this date is used
+                                        as the baseline data.  
+        volcano_dir | Path | outdir for current volcano.  
+        figures | str | png, window, or both. 
+        interactive | boolean | interacitve figure to explore how the trade off
+                                between number of epochs and number of pixels. 
+                                (i.e. few epochs means lots of pixels, lots of 
+                                 epochs means few pixels, usually)
+                                
+    Returns:
+        
+    History:
+        2025_07_?? | MEG | Written.  
+    
     """
     import numpy as np
     
     from licsalert.pixel_selection import automatic_pixel_epoch_selection
     from licsalert.temporal import daisy_chain_from_acquisitions
     from licsalert.data_importing import ifg_timeseries
+    
+    
+
     
     # 1: select a subset of the epochs to create a compromise between lots of 
     # pixels and lots of epochs (i.e. drop the epochs that cause lots of 
@@ -438,7 +463,9 @@ def construct_baseline_ts(sica_tica,
         displacement_r3,
         tbaseline_info,
         baseline_end,
-        interactive
+        volcano_dir,
+        figures,
+        interactive,
         )
     
     # also copy some auxilliary info to the new array
@@ -1803,9 +1830,13 @@ def load_or_create_ICASAR_results(
             ICASAR_settings['figures'] = 'png+window'                                                                                  # update licsalert name to ICASAR name.  
             
         # Run ICASAR (slow). tcs are incremental (i.e. not cumulative)
-        outputs = ICASAR(spatial_data = spatial_ICASAR_data,
-                        out_folder = out_dir, **ICASAR_settings,
-                        ica_verbose = 'short', label_sources = True)                     
+        outputs = ICASAR(
+            spatial_data=spatial_ICASAR_data,
+            out_folder=out_dir,
+            **ICASAR_settings,
+            ica_verbose='short',
+            label_sources = True
+        )
         
         (sources, tcs, residual, Iq, n_clusters, S_all_info, r2_ifg_means, 
         ics_labels ) = outputs; del outputs

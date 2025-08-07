@@ -10,11 +10,23 @@ import pdb
 
 #%%
 
-def two_spatial_signals_plot(images, mask, dem, tcs_dc, tcs_all, t_baselines_dc, t_baselines_all, 
-                             title, ifg_dates_dc, fig_kwargs):
+def two_spatial_signals_plot(
+        images,
+        mask,
+        dem,
+        tcs_dc,
+        tcs_all,
+        t_baselines_dc,
+        t_baselines_all,
+        title,
+        ifg_dates_dc,
+        fig_kwargs
+        ):
     """
-    Product the two plots that show spatial sources (comparison to DEM and ifg baseline, and then sources and cumulative time courses).  
-    Note that this figure doesn't mind if we are working spatially or temporally - it just plots what it is given.  
+    Product the two plots that show spatial sources (comparison to DEM 
+     and ifg baseline, and then sources and cumulative time courses).  
+    Note that this figure doesn't mind if we are working spatially or 
+    temporally - it just plots what it is given.  
     
     Inputs:
         images | n_images x n_pixels | spatial signals as row vectors.  
@@ -58,9 +70,11 @@ def two_spatial_signals_plot(images, mask, dem, tcs_dc, tcs_all, t_baselines_dc,
         
     try:
     # figure of IC to DEM correlations, and cumulative time courses 
-        outputs  = dem_and_temporal_source_figure(images, mask, fig_kwargs, dem, 
-                                                  temporal_data, 
-                                                  fig_title = f"{title}_correlations")        
+        outputs  = dem_and_temporal_source_figure(
+            images, mask, fig_kwargs, dem, 
+            temporal_data, 
+            fig_title = f"{title}_correlations",
+            )        
         (dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons) = outputs
     except:
         raise Exception(f"Failed to plot the signals and their correlations "
@@ -82,7 +96,7 @@ def plot_spatial_signals(spatial_map, pixel_mask, tcs, shape, title, ifg_dates_d
         shape | tuple | the shape of the grid that the spatial maps are reshaped to
         title | string | figure tite and png filename (nb .png will be added, don't include here)
         temporal_baselines | x axis values for time courses.  Useful if some data are missing (ie the odd 24 day ifgs in a time series of mainly 12 day)
-        figures | string,  "window" / "png" / "png+window" | controls if figures are produced (either as a window, saved as a png, or both)
+        figures | string,  "window" / "png" / "both" | controls if figures are produced (either as a window, saved as a png, or both)
         png_path | string | if a png is to be saved, a path to a folder can be supplied, or left as default to write to current directory.  
         
     Returns:
@@ -243,7 +257,7 @@ def plot_spatial_signals(spatial_map, pixel_mask, tcs, shape, title, ifg_dates_d
             plt.close()
         except:
             print(f"Failed to save the figure.  Trying to continue.  ")
-    elif figures == 'png+window':
+    elif figures == 'both':
         try:
             fig1.savefig(f"{png_path}/{title}.png")
         except:
@@ -255,8 +269,15 @@ def plot_spatial_signals(spatial_map, pixel_mask, tcs, shape, title, ifg_dates_d
 
 #%%
 
-def dem_and_temporal_source_figure(sources, sources_mask, fig_kwargs, dem = None, temporal_data = None, fig_title = None,
-                                   max_pixels = 1000):
+def dem_and_temporal_source_figure(
+        sources, 
+        sources_mask, 
+        fig_kwargs, 
+        dem = None,
+        temporal_data = None,
+        fig_title = None,
+        max_pixels = 1000
+        ):
     """ Given sources recovered by a blind signal separation method (e.g. PCA or ICA) compare them in space to hte DEM,
     and in time to the temporal baselines.  
     Inputs:
@@ -294,31 +315,73 @@ def dem_and_temporal_source_figure(sources, sources_mask, fig_kwargs, dem = None
             r2_arrays_new.append(r2_array[:, index])
         return r2_arrays_new
     
+    # debug plot
+    import matplotlib.pyplot as plt
+    f, ax = plt.subplots()
+    ax.plot(np.cumsum(temporal_data['temporal_baselines']))
+    
     if fig_title is not None:
         print(f"Starting to create the {fig_title} figure:")
     
+    # if we have the DEM, correlations between it and the sources.
     if dem is not None:
         dem_ma = ma.masked_invalid(dem)                                                                                                             # LiCSBAS dem uses nans, but lets switch to a masked array (with nans masked)
         # find the pixels in commom between the ICs and the DEM
-        outputs = update_mask_sources_ifgs(sources_mask, sources,                             
-                                          ma.getmask(dem_ma), 
-                                          ma.compressed(dem_ma)[np.newaxis,:])            
+        outputs = update_mask_sources_ifgs(
+            sources_mask, sources,                             
+            ma.getmask(dem_ma), 
+            ma.compressed(dem_ma)[np.newaxis,:]
+            )
         (dem_new_mask, sources_new_mask, mask_both) = outputs
         
-        [sources_new_mask, dem_new_mask] = reduce_n_pixs([sources_new_mask, dem_new_mask], max_pixels)                                                          # possibly reduce the number of pixels to speed things up (kernel density estimate is slow)
-        dem_to_sources_comparisons = signals_to_master_signal_comparison(sources_new_mask, dem_new_mask, density = True)                                        # And then we can do kernel density plots for each IC and the DEM
+        # possibly reduce the number of pixels to speed things up (kernel density estimate is slow)
+        [sources_new_mask, dem_new_mask] = reduce_n_pixs(
+            [sources_new_mask, dem_new_mask],
+            max_pixels
+            )
+        
+        # And then we can do kernel density plots for each IC and the DEM                                                          
+        dem_to_sources_comparisons = signals_to_master_signal_comparison(
+            sources_new_mask,
+            dem_new_mask,
+            density = True
+            )
         
     else:
         dem_to_sources_comparisons = None
         dem_ma = None
     
     if temporal_data is not None:
-        tcs_to_tempbaselines_comparisons = signals_to_master_signal_comparison(temporal_data['tcs'].T, 
-                                                                               np.asarray(temporal_data['temporal_baselines'])[np.newaxis,:], density = True)               # And then we can do kernel density plots for each IC and the DEM
+        # And then we can do kernel density plots for each IC and the DEM
+        tcs_to_tempbaselines_comparisons = signals_to_master_signal_comparison(
+            temporal_data['tcs'].T, 
+            np.asarray(temporal_data['temporal_baselines'])[np.newaxis,:],
+            density = True
+            )
     else:
         tcs_to_tempbaselines_comparisons = None
-                                                 
-    plot_source_tc_correlations(sources, sources_mask, dem_ma, dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons, fig_title = fig_title, **fig_kwargs)       # do the atual plotting
+         
+    # debug
+    # ic_n=1
+    # f, ax = plt.subplots()
+    # ax.scatter(
+    #     tcs_to_tempbaselines_comparisons['xyzs'][ic_n][0,],  # x?
+    #     tcs_to_tempbaselines_comparisons['xyzs'][ic_n][1,],  # y?
+    #     )  
+        
+    # do the atual plotting
+    plot_source_tc_correlations(
+        sources,
+        sources_mask,
+        dem_ma,
+        dem_to_sources_comparisons,
+        tcs_to_tempbaselines_comparisons,
+        fig_title=fig_title,
+        **fig_kwargs
+        )
+    
+    pdb.set_trace()
+    
     print("Done.  ")
     return dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons
 
@@ -326,9 +389,18 @@ def dem_and_temporal_source_figure(sources, sources_mask, fig_kwargs, dem = None
 
 
 
-def plot_source_tc_correlations(sources, mask, dem = None, dem_to_ic_comparisons = None, tcs_to_tempbaselines_comparisons = None,
-                                png_path = './', figures = "window", fig_title = None):
-    """Given information about the ICs, their correlations with the DEM, and their time courses correlations with an intererograms temporal basleine, 
+def plot_source_tc_correlations(
+        sources,
+        mask,
+        dem = None,
+        dem_to_ic_comparisons = None,
+        tcs_to_tempbaselines_comparisons = None,
+        png_path = './',
+        figures = "window",
+        fig_title = None
+        ):
+    """Given information about the ICs, their correlations with the DEM, and 
+    their time courses correlations with an intererograms temporal basleine, 
     create a plot of this information.  
     Inputs:
         sources | rank 2 array | sources as row vectors.  
@@ -340,7 +412,7 @@ def plot_source_tc_correlations(sources, mask, dem = None, dem_to_ic_comparisons
                                         cor_coefs | list | correlation coefficients between each signal and the master signal.  
         tcs_to_tempbaselines_comparisons| dict | keys as above.  
         png_path | string | if a png is to be saved, a path to a folder can be supplied, or left as default to write to current directory.  
-        figures | string,  "window" / "png" / "png+window" | controls if figures are produced (either as a window, saved as a png, or both)
+        figures | string,  "window" / "png" / "both" | controls if figures are produced (either as a window, saved as a png, or both)
     Returns:
         figure
     History:
@@ -465,7 +537,7 @@ def plot_source_tc_correlations(sources, mask, dem = None, dem_to_ic_comparisons
     elif figures == "png":
         f.savefig(f"{png_path}/{fig_title}.png")
         plt.close()
-    elif figures == 'png+window':
+    elif figures == 'both':
         f.savefig(f"{png_path}/{fig_title}.png")
     else:
         pass  
@@ -544,7 +616,7 @@ def plot_temporal_signals(signals, title = None, signal_names = None,
         signals | rank 2 array | signals as row vectors.  e.g. 1x100
         title | string | figure title.  
         signals_names | list of strings | names of each signal
-        figures | string,  "window" / "png" / "png+window" | controls if figures are produced (either as a window, saved as a png, or both)
+        figures | string,  "window" / "png" / "both" | controls if figures are produced (either as a window, saved as a png, or both)
         png_path | string | if a png is to be saved, a path to a folder can be supplied, or left as default to write to current directory.  
     Returns:
         Figure, either as a window or saved as a png
@@ -573,7 +645,7 @@ def plot_temporal_signals(signals, title = None, signal_names = None,
     elif figures == "png":
         fig1.savefig(f"{png_path}/{title}.png")
         plt.close()
-    elif figures == 'png+window':
+    elif figures == 'both':
         fig1.savefig(f"{png_path}/{title}.png")
     else:
         pass
@@ -589,7 +661,7 @@ def plot_pca_variance_line(pc_vals, title = '', figures = 'window', png_path = '
     Inputs:
         pc_vals | rank 1 array | variance in each dimension.  Most important dimension first.  
         title | string | figure title
-        figures | string,  "window" / "png" / "png+window" | controls if figures are produced (either as a window, saved as a png, or both)
+        figures | string,  "window" / "png" / "both" | controls if figures are produced (either as a window, saved as a png, or both)
         png_path | string or None | if a png is to be saved, a path to a folder can be supplied, or left as default to write to current directory.  
     Returns:
         figure, either as window or saved as a png
@@ -620,7 +692,7 @@ def plot_pca_variance_line(pc_vals, title = '', figures = 'window', png_path = '
     elif figures == "png":
         f.savefig(f"{png_path}/01_pca_variance_line.png")
         plt.close()
-    elif figures == 'png+window':
+    elif figures == 'both':
         f.savefig(f"{png_path}/01_pca_variance_line.png")
     else:
         pass
@@ -728,7 +800,7 @@ def r2_array_to_png(r2, filename, png_folder = './'):
     plt.close()
 
 
-#%%
+#%% prepare_point_colours_for_2d()
 
 def prepare_point_colours_for_2d(labels, cluster_order):
     """Given the label for each point (ie 1, 2 or 3 say, or -1 if noise) and the order of importance to the clusters 
@@ -772,7 +844,7 @@ def prepare_point_colours_for_2d(labels, cluster_order):
     return labels_chosen_colours
 
 
-#%%
+#%% prepare_legends_for_2d()
 
 def prepare_legends_for_2d(clusters_by_max_Iq_no_noise, Iq):
         """Given the cluster order and the cluster quality index (Iq), create a lenend ready for plot_2d_interactive_fig.  

@@ -13,6 +13,8 @@ import pdb
 def automatic_pixel_epoch_selection(displacement_r3, 
                                     tbaseline_info,
                                     baseline_end,
+                                    volcano_dir,
+                                    figures,
                                     interactive=False):
     """
     Given a time series with a time varying mask (i.e. pixels come 
@@ -20,7 +22,7 @@ def automatic_pixel_epoch_selection(displacement_r3,
     that uses only some of these acquisitions to build a compromise 
     between temporal resolution and number of pixels
     
-    
+    Inputs
     
     spatial_ICASAR_data = {'ifgs_dc'       : displacement_r2['mixtures_mc'][:(baseline_end.acq_n+1),],                             
                            'mask'          : displacement_r2['mask'],
@@ -30,14 +32,17 @@ def automatic_pixel_epoch_selection(displacement_r3,
                            
    'ifg_dates_dc'  : tbaseline_info['ifg_dates'][:(baseline_end.acq_n+1)]}                             
     
+    volcano_dir | Path | outdir for figures.  
+    
     """
     
     import numpy as np
     import numpy.ma as ma
     
     from licsalert.pixel_selection import calculate_optimal_n_epochs
-    from licsalert.pixel_selection import get_consistent_pixels_interactive
+    from licsalert.pixel_selection import consistent_pixels_plot
     from licsalert.aux import r3_to_r2
+
 
     # crop the input data in time
     cum_ma_baseline = displacement_r3['cum_ma'].original[:(baseline_end.acq_n+1)]
@@ -57,16 +62,26 @@ def automatic_pixel_epoch_selection(displacement_r3,
     
     # calculate optimal number of epochs
     epoch_values, optimal_epoch_n = calculate_optimal_n_epochs(
-        n_pix_epoch
+        n_pix_epoch,
+        volcano_dir,
+        figures,
         )
+    # tidy as not needed.  
+    del epoch_values
     
-    # possibly explore with interactive figure
-    if interactive:
-        get_consistent_pixels_interactive(
-            cum_ma_baseline,
-            acq_dates_baseline
-            )
+    
+    # Figure, which can be set to interactive for debugging.  
+    consistent_pixels_plot(
+        cum_ma_baseline,
+        acq_dates_baseline,
+        volcano_dir,
+        figures,
+        optimal_epoch_n,
+        interactive,
+        )
         
+    pdb.set_trace()
+    
     # build the time series that uses this number of epochs
     selected_epochs = sorted(list(n_pixels_idx[:optimal_epoch_n]))
     cum_ma_ica = cum_ma_baseline[selected_epochs, ]
@@ -114,9 +129,16 @@ def automatic_pixel_epoch_selection(displacement_r3,
 
 
 
-#%% get_consistent_pixels_interactive()
+#%% consistent_pixels_plot()
 
-def get_consistent_pixels_interactive(cum_r3, acq_dates):
+def consistent_pixels_plot(
+        cum_r3,
+        acq_dates,
+        volcano_dir,
+        figures,
+        optimal_epoch_n,
+        interactive=False,
+        ):
     """
     
     Allows a user to select the number of epochs that are included, and shows
@@ -256,18 +278,39 @@ def get_consistent_pixels_interactive(cum_r3, acq_dates):
     # Ensure date lables aren't lost
     plt.subplots_adjust(bottom=0.15)
     
-    # draw the plots at the start of the time series 
-    draw_plots(num_epochs = 1)
-    
-    def on_click(event):
-        if event.inaxes == ax_pixs:
-            draw_plots(num_epochs = int(event.xdata))
+    # either interactive to choose the number of epochs
+    if interactive:
+        draw_plots(num_epochs = 1)
+        def on_click(event):
+            if event.inaxes == ax_pixs:
+                draw_plots(num_epochs = int(event.xdata))
+                
+        fig.canvas.mpl_connect("button_press_event", on_click)
+        plt.show()
+        # keep interactive
+        plt.pause(999)
+                
+    # or draw figure with number of epochs passed as an argument.  
+    else:
+        draw_plots(optimal_epoch_n)
+        if figures == 'window':
+            pass
+        elif figures == "png":
+            try:
+                fig.savefig(volcano_dir / 'ICASAR_results' / "baseline_pixels_vs_epochs.png")
+                plt.close(fig)
+            except:
+                print(f"Failed to save the figure.  Trying to continue.  ")
+        elif figures == 'both':
+            try:
+                fig.savefig(volcano_dir / 'ICASAR_results' / "baseline_pixels_vs_epochs.png")
+            except:
+                print(f"Failed to save the figure.  Trying to continue.  ")
+
+        
         
 
-    fig.canvas.mpl_connect("button_press_event", on_click)
-    plt.show()
-    # keep interactive
-    plt.pause(999)
+
 
 #%% calculate_valid_pixels()
 
@@ -358,7 +401,11 @@ def intersect_valid_pixels(cum_r3, acq_dates, verbose = False):
 
 #%% calculate_optimal_n_epochs()
 
-def calculate_optimal_n_epochs(n_pix_epoch):
+def calculate_optimal_n_epochs(
+        n_pix_epoch,
+        volcano_dir,
+        figures,
+        ):
     """ 
     Given a list of the number of pixels valid at all times in a time series 
     as this grows in length, calculate the optimal length of time series
@@ -380,76 +427,9 @@ def calculate_optimal_n_epochs(n_pix_epoch):
                                 
     History:
         2025_04_09 | MEG | Written
-
     """
-    
     import numpy as np
         
-    def plot_ts_metric_vs_pixels(
-            epoch_metrics, n_pix_epoch, optimal_epoch_n=None
-            ):
-        """
-        Inputs:
-            epoch_metrics | list of ints | quality score for the time series 
-                                           when a certain number of epochs
-                                           have been added.  
-            n_pix_epoch | list of ints | number of pixels consistent throughout
-                                        time when a certrain number of epochs
-                                        have been added.  
-            optimal_epoch_n | int | time series is considered optimal when this
-                                    number of epochs have been added.  
-                
-        Returns:
-            figure
-            
-        History:
-            2025_04_09 | MEG | Written
-        
-        """
-        
-        import matplotlib.pyplot as plt
-
-        f, ax = plt.subplots()
-        
-        # **Define colours for each line**
-        color1 = 'tab:blue'
-        color2 = 'tab:orange'
-        
-        # Plot the first line on the primary y-axis
-        p1, = ax.plot(
-            np.arange(len(epoch_metrics)), epoch_metrics, color=color1, 
-            label='Epoch Values'
-            )
-        
-        # **Set label and tick colours for the left axis**
-        ax.set_ylabel('Epoch Metric Values', color=color1)
-        ax.tick_params(axis='y', labelcolor=color1)
-        
-        # Create a secondary y-axis
-        ax_pixels = ax.twinx()
-        p2, = ax_pixels.plot(
-            np.arange(len(n_pix_epoch)), n_pix_epoch, color=color2, 
-            label='Pixel Count'
-            )
-        
-        # **Set label and tick colours for the right axis**
-        ax_pixels.set_ylabel('Pixel Count', color=color2)
-        ax_pixels.tick_params(axis='y', labelcolor=color2)
-        
-        # **Combine legends from both axes and add a legend to the primary axis**
-        lines = [p1, p2]
-        labels = [line.get_label() for line in lines]
-        ax.legend(lines, labels, loc='upper right')
-        
-        # vertical line on optimal value
-        if optimal_epoch_n != None:
-            p3 = ax.axvline(
-                x=optimal_epoch_n, color='black', linestyle='--', 
-                label='Optimal Epoch ~'
-                )
-        
-        
-
     # stores the metric of how good the time series is with that many epochs
     # included.  
     epoch_metrics = []
@@ -467,6 +447,104 @@ def calculate_optimal_n_epochs(n_pix_epoch):
     optimal_epoch_n = np.argmax(epoch_metrics)
     
     # plot showing results
-    plot_ts_metric_vs_pixels(epoch_metrics, n_pix_epoch, optimal_epoch_n)
+    plot_ts_metric_vs_pixels(
+        epoch_metrics, 
+        n_pix_epoch,
+        volcano_dir,
+        figures,
+        optimal_epoch_n
+        )
         
     return epoch_metrics, int(optimal_epoch_n)
+
+
+#%% plot_ts_metric_vs_pixels()
+
+def plot_ts_metric_vs_pixels(
+        epoch_metrics, 
+        n_pix_epoch,
+        volcano_dir,
+        figures, 
+        optimal_epoch_n=None
+        ):
+    """
+    Inputs:
+        epoch_metrics | list of ints | quality score for the time series 
+                                       when a certain number of epochs
+                                       have been added.  
+        n_pix_epoch | list of ints | number of pixels consistent throughout
+                                    time when a certrain number of epochs
+                                    have been added.  
+        optimal_epoch_n | int | time series is considered optimal when this
+                                number of epochs have been added.  
+            
+    Returns:
+        figure
+        
+    History:
+        2025_04_09 | MEG | Written
+    
+    """
+    
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    f, ax = plt.subplots(constrained_layout=True)
+    
+    # **Define colours for each line**
+    color1 = 'tab:blue'
+    color2 = 'tab:orange'
+    
+    # Plot the first line on the primary y-axis
+    p1, = ax.plot(
+        np.arange(len(epoch_metrics)), 
+        epoch_metrics,
+        color=color1, 
+        label='Time series quality metric'
+        )
+    
+    # **Set label and tick colours for the left axis**
+    ax.set_ylabel('Time series quality metric', color=color1)
+    ax.tick_params(axis='y', labelcolor=color1)
+    
+    # Create a secondary y-axis
+    ax_pixels = ax.twinx()
+    p2, = ax_pixels.plot(
+        np.arange(len(n_pix_epoch)), 
+        n_pix_epoch,
+        color=color2, 
+        label='Pixel Count'
+        )
+    
+    # **Set label and tick colours for the right axis**
+    ax_pixels.set_ylabel('Pixel Count', color=color2)
+    ax_pixels.tick_params(axis='y', labelcolor=color2)
+    
+    # **Combine legends from both axes and add a legend to the primary axis**
+    lines = [p1, p2]
+    labels = [line.get_label() for line in lines]
+    ax.legend(lines, labels, loc='upper right')
+    
+    # vertical line on optimal value
+    if optimal_epoch_n != None:
+        p3 = ax.axvline(
+            x=optimal_epoch_n, color='black', linestyle='--', 
+            label='Optimal Epoch #'
+            )
+        
+        
+    # possibly save and close
+    outpath=volcano_dir/'ICASAR_results'/"baseline_pixels_vs_epochs_quality_metric.png"
+    if figures == 'window':
+        pass
+    elif figures == "png":
+        try:
+            f.savefig(outpath, bbox_inches='tight')
+            plt.close(f)
+        except:
+            print(f"Failed to save the figure.  Trying to continue.  ")
+    elif figures == 'both':
+        try:
+            f.savefig(outpath, bbox_inches='tight')
+        except:
+            print(f"Failed to save the figure.  Trying to continue.  ")
