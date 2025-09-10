@@ -185,15 +185,6 @@ def LiCSAlert_monitoring_mode(
     
     # add the temporal baselines (in days) for single master ifgs. relative
     # to the first acquisition
-    # old (jun 2025)
-    # tbaseline_info['baselines_cumulative'] = np.array(
-    #     baseline_from_names(
-    #         [f"{tbaseline_info['acq_dates'][0]}_{i}"
-    #          for i in tbaseline_info['acq_dates']
-    #          ]
-    #     )
-    # )
-    # new (jul 25)
     tbaseline_info=calculate_all_temporal_info(tbaseline_info)
     
     # 3b determine if the date provided happens to be an acquisition date 
@@ -233,52 +224,7 @@ def LiCSAlert_monitoring_mode(
     )
     
     if LiCSAlert_status['run_LiCSAlert']:
-        
-        #%% Debug data going into baseline stage
-        
-        # import numpy as np
-        # import matplotlib.pyplot as plt
-        # from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-        
-        # for ifg_n in range(27):
-        
-            
-        #     # --- main image -----------------------------------------------------------
-        #     f, ax = plt.subplots()
-            
-        #     #img_ma = displacement_r3['cum_ma'].mean_centered.space[ifg_n,]
-        #     img_ma = displacement_r3['cum_ma'].original[ifg_n,]
-            
-        #     im = ax.matshow(img_ma, cmap="viridis")
-        #     ax.set_title(tbaseline_info["ifg_dates"][ifg_n])
-        #     ax.axis("off")                    # optional: hide the main axes ticks
-            
-        #     # --- inset histogram ------------------------------------------------------
-        #     # get the numeric values you actually want to histogram
-        #     vals = img_ma.compressed()        # masked-array friendly; returns a 1-D np.ndarray
-            
-        #     ax_hist = inset_axes(
-        #         ax,
-        #         width="30%", height="30%",    # relative to the parent Axes
-        #         loc="upper right",            # corner choice
-        #         borderpad=0.8,                # space between image edge and inset
-        #     )
-        #     ax_hist.hist(vals, bins=30, color="slategray", alpha=0.85)
-        #     #ax_hist.set_xticks([]), ax_hist.set_yticks([])   # keep it clean
-        #     ax_hist.set_title("Histogram", fontsize=7)
-            
-        #     # optional: colour bar for the main image
-        #     f.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-            
-        #     plt.tight_layout()
-        #     plt.show()
-        #     plt.pause(1)
-        
-        #%%
-        
-        
-
-        
+   
         # determine the time series to be used for ICA.  Note that this is
         # no longer all epochs, and is instead a subset that compromises
         # temporal resolution and the number of pixels retained.  
@@ -296,49 +242,6 @@ def LiCSAlert_monitoring_mode(
             interactive=False,                # useful to set to True to debug
         )
         
-
-        
-        #%% Debug baseline data.
-        
-        # import numpy as np
-        # import matplotlib.pyplot as plt
-        # from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-        
-        # for ifg_n in range(5):
-        
-            
-        #     # --- main image -----------------------------------------------------------
-        #     f, ax = plt.subplots()
-            
-        #     img_ma = col_to_ma(
-        #         displacement_r2_ica["incremental_mc_space"][ifg_n],
-        #         displacement_r2_ica["mask"],
-        #     )
-        #     im = ax.matshow(img_ma, cmap="viridis")
-        #     ax.set_title(tbaseline_info_ica["ifg_dates"][ifg_n])
-        #     ax.axis("off")                    # optional: hide the main axes ticks
-            
-        #     # --- inset histogram ------------------------------------------------------
-        #     # get the numeric values you actually want to histogram
-        #     vals = img_ma.compressed()        # masked-array friendly; returns a 1-D np.ndarray
-            
-        #     ax_hist = inset_axes(
-        #         ax,
-        #         width="30%", height="30%",    # relative to the parent Axes
-        #         loc="upper right",            # corner choice
-        #         borderpad=0.8,                # space between image edge and inset
-        #     )
-        #     ax_hist.hist(vals, bins=30, color="slategray", alpha=0.85)
-        #     #ax_hist.set_xticks([]), ax_hist.set_yticks([])   # keep it clean
-        #     ax_hist.set_title("Histogram", fontsize=7)
-            
-        #     # optional: colour bar for the main image
-        #     f.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-            
-        #     plt.tight_layout()
-        #     plt.show()
-
-       
         # either load ICA from previous run, or compute it.  
         # note that displacement_r2_ica contains mixtures_mc, which are the 
         # input ifgs either mean centered in time or space, depending on 
@@ -354,9 +257,6 @@ def LiCSAlert_monitoring_mode(
         )        
         (icasar_sources, mask_icasar, ics_labels) = outputs; del outputs
 
-
-
-        
         # 4c: Loop through each monitoring date to run LiCSAlert
         processing_dates = []
         processing_dates.extend(LiCSAlert_status['dates_monitoring'].pending)
@@ -396,8 +296,6 @@ def LiCSAlert_monitoring_mode(
             )
             
             
-            
-            
             # compare datetimes to see if we are past baseline stage.  
             if processing_date.dt > licsalert_settings['baseline_end'].dt:
                 
@@ -409,12 +307,6 @@ def LiCSAlert_monitoring_mode(
                     displacement_r3['inc_ma'].mean_centered.space,
                     tbaseline_info['baselines_cumulative'],
                     licsalert_settings['baseline_end'],
-                    # ifgs_baseline = displacement_r2['incremental_mc_space'][
-                    #     :(licsalert_settings['baseline_end'].acq_n),],                             
-                    # ifgs_monitoring = displacement_r2['incremental_mc_space'][
-                    #     (licsalert_settings['baseline_end'].acq_n):
-                    #         processing_date.acq_n,], 
-                    # mask = displacement_r2['mask'],
                     t_recalculate=licsalert_settings['t_recalculate'], 
                     verbose=False,
                     residual_type=licsalert_settings['residual_type'],

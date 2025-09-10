@@ -134,6 +134,9 @@ def LiCSAlert(sources,
     )
     tcs_c_baseline, d_hat_baseline, d_resid_baseline = products; del products
     
+    f, ax = plt.subplots(1)
+    ax.matshow(d_hat_baseline[100,])
+    
     # create cumulative time courses (i.e. integrate in time):
     # note that tcs_c_baseline is now 1 longer than incremental input ifgs.  
     tcs_c_baseline = np.concatenate(
@@ -218,17 +221,18 @@ def LiCSAlert(sources,
     
     # 3: combine the reconsuction and residual for all ifg
     # reconstruction
-    d_hat = np.concatenate(
+    d_hat = ma.concatenate(
         (d_hat_baseline,
          d_hat_monitoring),
         axis = 0,
         )
     # residual                                                                  
-    d_resid = np.concatenate(
+    d_resid = ma.concatenate(
         (d_resid_baseline,
          d_resid_monitoring),
         axis = 0,
         )
+
 
     #if ifgs_monitoring is None:
     if False:
@@ -1329,6 +1333,12 @@ def bss_components_inversion_per_epoch(
         cumulative=True
         ):
     """
+    
+    Inputs:
+        sources | n_ics x n_pixels | sources to fit the ifgs with as row vectors
+        mask_sources | ny  x nx | to convert row vector IC to images.  
+        ifgs x n_times x ny x nx | ifgs as images.  
+    
     
     Returns:
         

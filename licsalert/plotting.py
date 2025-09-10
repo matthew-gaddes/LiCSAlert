@@ -1378,17 +1378,23 @@ def LiCSAlert_epoch_figures(
     if processing_date.acq_n == 0:
         zeros = np.zeros((1, displacement_r3_current['inc_ma'].shape[1]))
         inc_1 = zeros
-        recon_1 = zeros
-        residual_1 = zeros
-        residual_cum = zeros
+        # reconstruction and residual for incremental data
+        inc_recon_1 = zeros
+        inc_residual_1 = zeros
+        # reconstruction and residual for cumulative data
+        cum_recon_1=zeros
+        cum_residual_1 = zeros
     else:
         # note -1s here as no incremental data on epoch 0
         inc_1 = displacement_r3_current['inc_ma'].original[processing_date.acq_n-1,]
-        recon_1 = reconstructions[processing_date.acq_n-1,]
-        residual_1 = residuals[processing_date.acq_n-1,]
-        # sum all the residuals through time to get current cumulative
-        # residual
-        residual_cum = np.sum(residuals[:processing_date.acq_n-1,], axis = 0)
+        # reconstruction and residual for incremental data
+        inc_recon_1 = reconstructions[processing_date.acq_n-1,]
+        inc_residual_1 = residuals[processing_date.acq_n-1,]
+        # reconstruction and residual for cumulative data
+        cum_recon_1 = np.sum(reconstructions[:processing_date.acq_n-1,], axis = 0)
+        cum_residual_1 = np.sum(residuals[:processing_date.acq_n-1,], axis = 0)
+        
+
         
     # output each of the pngs
     plot_1_image(cum_1, f"01_cumulative_{cum_ifg_date}", 
@@ -1397,23 +1403,26 @@ def LiCSAlert_epoch_figures(
     plot_1_image(inc_1, f"02_incremental_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
     
-    plot_1_image(recon_1,  f"03_incremental_reconstruction_{inc_ifg_date}",
+    plot_1_image(inc_recon_1,  f"03_incremental_reconstruction_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
     
-    plot_1_image(residual_1, f"04_incremental_residual_{inc_ifg_date}",
+    plot_1_image(inc_residual_1, f"04_incremental_residual_{inc_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
     
-    plot_1_image(residual_cum,  f"05_cumulative_residual_{cum_ifg_date}",
+    plot_1_image(cum_recon_1,  f"05_cumulative_reconstruction_{cum_ifg_date}",
+                 figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
+    
+    plot_1_image(cum_residual_1,  f"06_cumulative_residual_{cum_ifg_date}",
                  figure_type, figure_out_dir, cmap = plt.get_cmap('coolwarm'))
 
     #  save the data that is plotted as png
     epoch_images = {
         'cumulative'     : cum_1,
         'incremental'    : inc_1,
-        'reconstruction' : recon_1,
-        'residual'       : residual_1,
+        'reconstruction' : inc_recon_1,
+        'residual'       : inc_residual_1,
         'mask'           : displacement_r3_current['cum_ma'].original.mask[processing_date.acq_n,],
-        'residual_cum'   : residual_cum
+        'cum_residual_1'   : cum_residual_1
     }
     with open(figure_out_dir / 'epoch_images_data.pkl', 'wb') as f:
         pickle.dump(epoch_images, f)

@@ -521,7 +521,7 @@ def plot_source_tc_correlations(
     # 3: The ICs colorbar
     axin = axes[0,0].inset_axes([0.5, 0, 0.1, 1])            
     cbar_2 = f.colorbar(im, cax=axin, orientation='vertical')
-    cbar_2.set_label('IC')
+    cbar_2.set_label('Source')
     axin.yaxis.set_ticks_position('left')
 
     # last tidying up
