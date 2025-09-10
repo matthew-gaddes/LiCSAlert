@@ -33,7 +33,8 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
         n_pca_comp_stop | int | and stop running it for every number of components
                                 until this value is reached.  
         spatial_data | dict or None | Required: 
-                                         ifgs_dc | rank 2 array | row vectors of the daisy chain (i.e incremental) ifgs
+                                         ifgs_dc | rank 2 array | row vectors of the daisy chain (i.e incremental) ifgs, 
+                                                     NOT MEAN CENTERED! 
                                          mask  | rank 2 array | mask to conver the row vectors to rank 2 masked arrays.  
                                          ifg_dates_dc | list | dates of the interferograms in the form YYYYMMDD_YYYYMMDD.  If supplied, IC strength vs temporal baseline plots will be produced.  
                                       Optional (ie don't have to exist in the dictionary):
@@ -224,7 +225,7 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
         print(f"Trying to convert the 'out_folder' arg which is a string to a pathlib Path.  ")
         out_folder = Path(out_folder)
     fig_kwargs = {"figures" : figures}
-    if figures == "png" or figures == "png+window":                                                         # if figures will be png, make 
+    if figures == "png" or figures == "both":
         fig_kwargs['png_path'] = out_folder                                                                  # this will be passed to various figure plotting functions
     elif figures == 'window' or figures == 'none':
         pass
@@ -273,12 +274,49 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
               "(incremental/daisy chain, cumulative, and all possible).  "
               )
         
+        # pdb.set_trace()
+        
+        # test = np.mean(spatial_data['ifgs_dc'], axis=1)
+        
+        #%% debug
+        # from licsalert.aux import col_to_ma
+        
+        # ifg_n = 1
+        
+        # im_r2 = col_to_ma(
+        #     spatial_data['ifgs_dc'][ifg_n], 
+        #     mask,
+        #     )
+        
+        # f, ax = plt.subplots()
+        # ax.matshow(im_r2)
+        # ax.set_title(ma.mean(im_r2))
+        
+        
+        
+        # f, ax = plt.subplots()
+        # # #############
+        # for ifg in spatial_data['ifgs_dc']:
+        #     ifg_r2=col_to_ma(ifg, mask)
+        #     args = np.unravel_index(ma.argmin(ifg_r2), ifg_r2.shape)
+        #     ax.scatter(
+        #         int(args[0]),
+        #         int(args[1])
+        #         )
+
+        
+        
+        #%%
+        
+        
         # create all ifgs between acquisitions, up to max_n_all_ifgs
         ifgs_all_r2, ifg_dates_all = create_all_ifgs(
             spatial_data['ifgs_dc'],
             spatial_data['ifg_dates_dc'], 
             max_n_all_ifgs,
             )
+        
+        
         
         # also create the cumualtive ifgs (relative to the first acq.  )
         ifgs_cum_r2, ifg_dates_cum = create_cumulative_ifgs(
@@ -298,7 +336,8 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
         ifgs_cum = ifg_timeseries(
             ifgs_cum_r2,
             ifg_dates_cum,
-            )                                                                           
+            )      
+        
         
         del ifgs_all_r2, ifg_dates_all, ifgs_cum_r2, ifg_dates_cum
         
@@ -394,7 +433,7 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
                     )
    
     
-                #%%
+                # #%% debug
                 # # maually draw round points on the temporal baseline 
                 # # correlation plot.  
                 # from licsalert.debugging import select_points
@@ -403,262 +442,19 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
                 #     A_pca_all[:,1],
                 #     )
                 
-                # from licsalert.aux import col_to_ma
-                
-                # n_plot=10
-                # f, axes = plt.subplots(1,n_plot)
-                # for i in range(n_plot):
-                #     axes[i].matshow(
-                #         col_to_ma(
-                #             ifgs_all.mixtures_mc_space[idx[i]],
-                #             mask,
-                #             )
-                #         )
-                    
-                # # 409 unusual
-                
-                # f, ax = plt.subplots(1)
-                # ax.scatter(
-                #     ifgs_all.mixtures_mc_space[409],
-                #     ifgs_all.mixtures_mc_space[161],
-                #     )
-                
-     
-     
+                # # debug
+                # from licsalert.debugging import interactive_tc_correlation_explorer
+                # fig = interactive_tc_correlation_explorer(
+                #     x=ifgs_all.t_baselines,
+                #     y=A_pca_all[:, 1],
+                #     imgs=ifgs_all.mixtures_mc_space,
+                #     imgs_reco=A_pca_all @ S_pca,
+                #     A=A_pca_all,
+                #     mask=mask,
+                #     sources=S_pca,
+                #     date_pairs=ifgs_all.ifg_dates,   # e.g. ["20240101_20240215", ...]
+                # )
 
-#%%
-
-                import numpy as np
-                import matplotlib.pyplot as plt
-                import matplotlib.dates as mdates
-                from matplotlib.widgets import Cursor
-                from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-                from datetime import datetime
-                from licsalert.aux import col_to_ma
-                
-                
-                def scatter_with_vector_preview(
-                    x,
-                    y,
-                    imgs,
-                    imgs_reco,
-                    A,
-                    mask,
-                    *,
-                    date_pairs,
-                    sources=None,
-                    thresh_frac: float = 0.01,
-                    scatter_kw: dict | None = None,
-                    cmap: str = "viridis",
-                    resid_cmap: str = "RdBu_r",
-                    highlight_kw: dict | None = None,
-                ):
-                    """
-                    Interactive PCA/ICA explorer with an extra subplot that shows each sample's
-                    (date₁, date₂) position.
-                
-                    Parameters
-                    ----------
-                    x, y           : 1-D arrays – coordinates for the primary scatter plot
-                    date_pairs     : list[str]  – strings "yyyymmdd_yyyymmdd", *one per row*
-                    imgs, imgs_reco
-                    A, mask, sources, thresh_frac, scatter_kw, cmap, resid_cmap
-                                    : same meaning as in the original function
-                    highlight_kw   : dict – style overrides for the highlight marker
-                    """
-                    # ── sanity checks ───────────────────────────────────────────────────────
-                    x = np.asarray(x)
-                    y = np.asarray(y)
-                    imgs       = np.asarray(imgs)
-                    imgs_reco  = np.asarray(imgs_reco)
-                    A          = np.asarray(A)
-                    date_pairs = np.asarray(date_pairs)
-                
-                    if len(date_pairs) != x.size:
-                        raise ValueError("`date_pairs` must have the same length as `x`/`y`.")
-                    if imgs.shape != imgs_reco.shape:
-                        raise ValueError("imgs and imgs_reco must have the same shape")
-                    if not (imgs.shape[0] == x.size == y.size == A.shape[0]):
-                        raise ValueError("First dimension of x, y, imgs and A must match")
-                    if imgs.ndim != 2:
-                        raise ValueError("imgs must be a 2-D array of row vectors (N, ny*nx)")
-                    if mask.ndim != 2:
-                        raise ValueError("mask must be a 2-D array (ny, nx)")
-                
-                    ny, nx      = mask.shape
-                    n_sources   = 0 if sources is None else sources.shape[0]
-                    highlight_kw = {"s": 60, "c": "crimson", "marker": "X", "zorder": 4,
-                                    **(highlight_kw or {})}
-                
-                    # ── parse dates once ----------------------------------------------------
-                    def _split(p):
-                        a, b = p.split("_")
-                        return (datetime.strptime(a, "%Y%m%d"),
-                                datetime.strptime(b, "%Y%m%d"))
-                    date1, date2 = zip(*map(_split, date_pairs))
-                    date1, date2 = np.array(date1), np.array(date2)
-                
-                    dmin, dmax = min(date1.min(), date2.min()), max(date1.max(), date2.max())
-                
-                    # ── figure & layout -----------------------------------------------------
-                    fig = plt.figure(figsize=(15, 6))
-                
-                    if n_sources:
-                        # Two-row grid: sources on top (full width) + bottom row with 3 panels
-                        gs_root = fig.add_gridspec(
-                            2, 1, height_ratios=[0.6, 2.4], hspace=0.15
-                        )
-                        gs_src   = gs_root[0].subgridspec(1, n_sources, wspace=0.05)
-                        gs_bottom = gs_root[1].subgridspec(
-                            1, 3, width_ratios=[1.3, 1.3, 2.6], wspace=0.30
-                        )
-                        # -- top sources -----------------------------------------------------
-                        for i in range(n_sources):
-                            ax = fig.add_subplot(gs_src[0, i])
-                            ax.set_xticks([]), ax.set_yticks([])
-                            ax.set_title(f"S{i}", fontsize=9)
-                            im_s = col_to_ma(sources[i], mask)
-                            im = ax.imshow(im_s, cmap=cmap, origin="upper")
-                            cax = inset_axes(
-                                ax, width="6%", height="70%", loc="lower right",
-                                bbox_to_anchor=(0, 0, 1, 1), bbox_transform=ax.transAxes,
-                                borderpad=0,
-                            )
-                            fig.colorbar(im, cax=cax)
-                    else:
-                        gs_bottom = fig.add_gridspec(
-                            1, 3, width_ratios=[1.3, 1.3, 2.6], wspace=0.30
-                        )
-                
-                    # LEFT: main scatter -----------------------------------------------------
-                    ax_sc = fig.add_subplot(gs_bottom[0, 0])
-                    skw = {"s": 22, "c": "tab:blue", "alpha": 0.8, **(scatter_kw or {})}
-                    ax_sc.scatter(x, y, **skw)
-                    ax_sc.axhline(0, color="k", linewidth=1)
-                    ax_sc.set_title("Hover a point to preview")
-                    Cursor(ax_sc, useblit=True, color="grey", linewidth=0.5)
-                
-                    # MIDDLE: date-pair scatter ---------------------------------------------
-                    ax_dt = fig.add_subplot(gs_bottom[0, 1])
-                    ax_dt.scatter(date1, date2, s=20, c="tab:green", alpha=0.75)
-                    ax_dt.set_xlim(dmin, dmax)
-                    ax_dt.set_ylim(dmax, dmin)      # invert y-axis (earlier dates at top)
-                    year_locator = mdates.YearLocator()
-                    year_fmt     = mdates.DateFormatter("%Y")
-                    for axis in (ax_dt.xaxis, ax_dt.yaxis):
-                        axis.set_major_locator(year_locator)
-                        axis.set_major_formatter(year_fmt)
-                    ax_dt.grid(True, linestyle=":", lw=0.6)
-                    ax_dt.set_xlabel("Date 1")
-                    ax_dt.set_ylabel("Date 2")
-                    ax_dt.set_title("Date pairs (yearly ticks, shared limits)")
-                    # highlight handle – created on first hover
-                    hl_dt = None
-                
-                    # RIGHT: per-point previews ---------------------------------------------
-                    gs_prev = gs_bottom[0, 2].subgridspec(2, 2, wspace=0.07, hspace=0.25)
-                    ax_orig = fig.add_subplot(gs_prev[0, 0])
-                    ax_reco = fig.add_subplot(gs_prev[0, 1])
-                    ax_resi = fig.add_subplot(gs_prev[1, 0])
-                    ax_bar  = fig.add_subplot(gs_prev[1, 1])
-                
-                    for a in (ax_orig, ax_reco, ax_resi):
-                        a.set_xticks([]), a.set_yticks([])
-                
-                    ax_orig.set_title("Original", fontsize=10)
-                    ax_reco.set_title("Reconstruction", fontsize=10)
-                    ax_resi.set_title("Residual", fontsize=10)
-                
-                    # placeholders (for fast updates) ---------------------------------------
-                    im_orig = im_reco = im_resi = None
-                    current_idx = None
-                    pick_radius = thresh_frac * np.hypot(np.ptp(x), np.ptp(y))
-                
-                    # ── hover callback ─────────────────────────────────────────────────────-
-                    def on_move(event):
-                        nonlocal current_idx, im_orig, im_reco, im_resi, hl_dt
-                        if event.inaxes is not ax_sc or event.xdata is None:
-                            return
-                
-                        dist = np.hypot(x - event.xdata, y - event.ydata)
-                        idx  = np.argmin(dist)
-                        if dist[idx] > pick_radius or idx == current_idx:
-                            return
-                        current_idx = idx
-                
-                        # -- update the three image panels ----------------------------------
-                        img_o = col_to_ma(imgs[idx], mask)
-                        img_r = col_to_ma(imgs_reco[idx], mask)
-                        img_s = img_o - img_r
-                
-                        if im_orig is None:
-                            im_orig = ax_orig.imshow(img_o, cmap=cmap, origin="upper")
-                            im_reco = ax_reco.imshow(img_r, cmap=cmap, origin="upper")
-                            im_resi = ax_resi.imshow(img_s, cmap=resid_cmap, origin="upper")
-                            for ax_i, im in zip(
-                                (ax_orig, ax_reco, ax_resi),
-                                (im_orig, im_reco, im_resi),
-                            ):
-                                cax = inset_axes(
-                                    ax_i, width="4%", height="70%", loc="lower right",
-                                    bbox_to_anchor=(0, 0, 1, 1), bbox_transform=ax_i.transAxes,
-                                    borderpad=0,
-                                )
-                                fig.colorbar(im, cax=cax)
-                        else:
-                            im_orig.set_data(img_o)
-                            im_reco.set_data(img_r)
-                            im_resi.set_data(img_s)
-                            im_orig.set_clim(np.nanmin(img_o), np.nanmax(img_o))
-                            im_reco.set_clim(np.nanmin(img_r), np.nanmax(img_r))
-                            im_resi.set_clim(np.nanmin(img_s), np.nanmax(img_s))
-                
-                        # -- update the weights bar plot ------------------------------------
-                        ax_bar.cla()
-                        ax_bar.bar(np.arange(A.shape[1]), A[idx], color="tab:orange")
-                        ax_bar.set_title("Mixing weights", fontsize=10)
-                        ax_bar.set_xlabel("Component", fontsize=8)
-                        ax_bar.set_ylabel("Weight", fontsize=8)
-                        ax_bar.tick_params(axis="both", labelsize=7)
-                        ax_bar.set_ylim(np.nanmin(A), np.nanmax(A))
-                
-                        # -- highlight the corresponding point in date scatter -------------
-                        if hl_dt is None:
-                            hl_dt = ax_dt.scatter(
-                                date1[idx], date2[idx], **highlight_kw
-                            )
-                        else:
-                            hl_dt.set_offsets([date1[idx], date2[idx]])
-                
-                        fig.canvas.draw_idle()
-                
-                    fig.canvas.mpl_connect("motion_notify_event", on_move)
-                    fig.tight_layout()
-                    return fig
-                
-                
-                # ── Example call (comment-in when running) ──────────────────────────────────
-                fig = scatter_with_vector_preview(
-                    x=ifgs_all.t_baselines,
-                    y=A_pca_all[:, 1],
-                    imgs=ifgs_all.mixtures_mc_space,
-                    imgs_reco=A_pca_all @ S_pca,
-                    A=A_pca_all,
-                    mask=mask,
-                    sources=S_pca,
-                    date_pairs=ifgs_all.ifg_dates,   # e.g. ["20240101_20240215", ...]
-                )
-
-
-
-                
-                
-                #%%
-                
-                pdb.set_trace()
-                
-                
-                
                 two_spatial_signals_plot(
                     S_pca, spatial_data['mask'], 
                     spatial_data['dem'], 

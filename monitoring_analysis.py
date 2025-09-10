@@ -646,567 +646,565 @@ from licsalert.plotting import status_fig_one_volc, status_fig_all_volcs
 #%% COMET summer 25
 
 
-## Generate the volc_names list
-volc_priorities_used = ["A1"]
-lists = comet_db_to_licsalert_volcs(
-    "./comet_volcano_database.pkl", 
-    volc_priorities_used
-    )
+# ## Generate the volc_names list
+# volc_priorities_used = ["A1"]
+# lists = comet_db_to_licsalert_volcs(
+#     "./comet_volcano_database.pkl", 
+#     volc_priorities_used
+#     )
 
-volc_names_a1 = []
-for sublist in lists:
-    volc_names_a1.extend(sublist)
-del lists
-
-
-
-# #v3, only status files, but for all volcs
-print(f"USING THE TEST DIR OF THE DATA CLONED FROM JASMIN")
-licsalert_dir = Path(
-    "/home/matthew/university_work/03_automatic_detection_algorithm/"
-    "06_LiCSAlert/05_jasmin_clones/2025_05_22_comet_2025/licsalert_sync_test/"
-    )
-
-
-# names of all comet frames.  
-#comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
-comet_volcano_frame_index_dir = Path('./comet_volcano_frames_fogo_edit/')
-
-
-d_start = "20140101"                
-d_stop = "20250219"
-#test_volcano = 'sabancaya*'
-regions = True
-volcs_omit = []
-generate_bash_dl_file = True
-
-
-#combined_status_method = 'previous'
-combined_status_method = 'window'               # old method uses 'previous'
+# volc_names_a1 = []
+# for sublist in lists:
+#     volc_names_a1.extend(sublist)
+# del lists
 
 
 
+# # #v3, only status files, but for all volcs
+# print(f"USING THE TEST DIR OF THE DATA CLONED FROM JASMIN")
+# licsalert_dir = Path(
+#     "/home/matthew/university_work/03_automatic_detection_algorithm/"
+#     "06_LiCSAlert/05_jasmin_clones/2025_05_22_comet_2025/licsalert_sync_test/"
+#     )
 
 
-#%%  #################  local test volcs (processed with LiCSBAS by me?  )
-# all_volcs_figs_dir = Path('monitoring_steps_all_volcs_test')
-# licsalert_dir = Path("/home/matthew/university_work/31_from_bright/2023_09_08/01a_LiCSAlert_batch_mode_2/")
-# regions = False
+# # names of all comet frames.  
+# #comet_volcano_frame_index_dir = Path('./comet_volcano_frames/')
+# comet_volcano_frame_index_dir = Path('./comet_volcano_frames_fogo_edit/')
 
-# # Option for the 1 volc we plot in detail.  
-# # option 1
-# out_dir = Path("./monitoring_test/one_volc/sierra_negra")
-# d_start = "20170101"
-# d_stop = "20230901"
-# test_volcano = '*sierra*'
 
-# # option 2
-# # out_dir = Path("./monitoring_test/one_volc/erta_ale")
-# # d_start = "20160601"
+# d_start = "20140101"                
+# d_stop = "20250219"
+# #test_volcano = 'sabancaya*'
+# regions = True
+# volcs_omit = []
+# generate_bash_dl_file = True
+
+
+# #combined_status_method = 'previous'
+# combined_status_method = 'window'               # old method uses 'previous'
+
+
+
+
+
+# #%%  #################  local test volcs (processed with LiCSBAS by me?  )
+# # all_volcs_figs_dir = Path('monitoring_steps_all_volcs_test')
+# # licsalert_dir = Path("/home/matthew/university_work/31_from_bright/2023_09_08/01a_LiCSAlert_batch_mode_2/")
+# # regions = False
+
+# # # Option for the 1 volc we plot in detail.  
+# # # option 1
+# # out_dir = Path("./monitoring_test/one_volc/sierra_negra")
+# # d_start = "20170101"
 # # d_stop = "20230901"
-# # test_volcano = '*erta*'
+# # test_volcano = '*sierra*'
 
-################# end local test volcs            
+# # # option 2
+# # # out_dir = Path("./monitoring_test/one_volc/erta_ale")
+# # # d_start = "20160601"
+# # # d_stop = "20230901"
+# # # test_volcano = '*erta*'
 
-#%% Step 00: volcano names:
+# ################# end local test volcs            
+
+# #%% Step 00: volcano names:
    
-# volc_names might be passed as a list of strings.  
-if "volc_names" not in locals():
+# # volc_names might be passed as a list of strings.  
+# if "volc_names" not in locals():
         
-    # if it's not, try and generate it.  
-    try:
-        volc_names_dir = get_volc_names_fron_dir_of_frames(
-            licsalert_dir, regions = regions
-            )
+#     # if it's not, try and generate it.  
+#     try:
+#         volc_names_dir = get_volc_names_fron_dir_of_frames(
+#             licsalert_dir, regions = regions
+#             )
         
-        print(
-            "Succesfully created a list of volcanoes (volc_names) from a "
-            "licsalert directory.  Continuing.  "
-            )
-    except:
-        print(
-            "Failed to get the volcano names from a licsalert directory.  Perhaps "
-            "this is the first time this has been run?  You could manually "
-            "provide a list of volc_names, but for now we'll try to generate "
-            "one from the volcanoes that are visible on the COMET volcano portal"
-            )
+#         print(
+#             "Succesfully created a list of volcanoes (volc_names) from a "
+#             "licsalert directory.  Continuing.  "
+#             )
+#     except:
+#         print(
+#             "Failed to get the volcano names from a licsalert directory.  Perhaps "
+#             "this is the first time this has been run?  You could manually "
+#             "provide a list of volc_names, but for now we'll try to generate "
+#             "one from the volcanoes that are visible on the COMET volcano portal"
+#             )
     
-        try:
-            # get the names of the COMET portal public volcanoes
-            volc_names = get_portal_public_volcanoes()
-            print(
-                "Succesfully generated a list of volcanoes that are visible "
-                "publicly on the COMET volcano portal.  Continuing.  "
-                )
-        except:
-            print(
-                "Failed to generate a list of volcanoes from the COMET volcano "
-                "portal.  Exiting.  ")
+#         try:
+#             # get the names of the COMET portal public volcanoes
+#             volc_names = get_portal_public_volcanoes()
+#             print(
+#                 "Succesfully generated a list of volcanoes that are visible "
+#                 "publicly on the COMET volcano portal.  Continuing.  "
+#                 )
+#         except:
+#             print(
+#                 "Failed to generate a list of volcanoes from the COMET volcano "
+#                 "portal.  Exiting.  ")
 
 
 
 
-# choose which volc_names to use.  
-volc_names = volc_names_a1
-# volc_names = volc_names_dir
-# print("SELECTING ONLY A SUBSET OF THE VOLC_NAMES")
-# volc_names = sorted(volc_names)[165:168]
+# # choose which volc_names to use.  
+# volc_names = volc_names_a1
+# # volc_names = volc_names_dir
+# # print("SELECTING ONLY A SUBSET OF THE VOLC_NAMES")
+# # volc_names = sorted(volc_names)[165:168]
 
-# open the info on COMET volcano frames and what region they're in.  
-# region is a key, and each value is a list of comet frames in that region
-comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir)
+# # open the info on COMET volcano frames and what region they're in.  
+# # region is a key, and each value is a list of comet frames in that region
+# comet_volcano_frame_index = open_comet_frame_files(comet_volcano_frame_index_dir)
 
-# convert volc_names to volcs, which is a list of comet_volcano objects
-# output is jasmin_sync_script.sh
-volcs = volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index)    
+# # convert volc_names to volcs, which is a list of comet_volcano objects
+# # output is jasmin_sync_script.sh
+# volcs = volcano_name_to_comet_frames(volc_names, comet_volcano_frame_index)    
 
-# tidy up.  
-del volc_names
-
-
-# for i, v in enumerate(volcs):
-#     print(f"{i} {v.name}")
+# # tidy up.  
+# del volc_names
 
 
-#%% Step 01: Generate bash file to copy selected data from Jasmin
+# # for i, v in enumerate(volcs):
+# #     print(f"{i} {v.name}")
+
+
+# #%% Step 01: Generate bash file to copy selected data from Jasmin
 
 
 
-# if generate_bash_dl_file:
-#     jasmin_dir = Path(
-#         "mgaddes@xfer-vm-03.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/"
-#         "projects/LiCS/volc-portal/processing_output/licsalert"
+# # if generate_bash_dl_file:
+# #     jasmin_dir = Path(
+# #         "mgaddes@xfer-vm-03.jasmin.ac.uk:/gws/nopw/j04/nceo_geohazards_vol1/"
+# #         "projects/LiCS/volc-portal/processing_output/licsalert"
+# #         )
+# #     local_dir = Path('./licsalert_sync/')
+# #     bash_sync_fle = "jasmin_sync_script.sh"
+    
+
+# #     # write a shell script to download the LiCSAlert data from jasmin 
+# #     write_jasmin_download_shell_script(
+# #         jasmin_dir, local_dir, bash_sync_fle, volcs, exclude_json_gz = True,
+# #         exclude_original_ts = False, exclude_ICASAR_data = True,
+# #         exclude_epoch_images = True, exclude_epoch_data = True)
+
+
+
+
+
+
+# #%% Step 02:
+    
+# # # run jasmin sync file on FOE-linux (to copy data from jasmin to school server)
+# # # copy from FOE-linux to local.  
+
+# #%% Step 02a: possibly move directories that don't have LiCSAlert results
+# # # to a different directory
+
+# # from licsalert.jasmin_tools import move_small_directories
+
+# # move_small_directories(
+# #     licsalert_dir, licsalert_dir.parent / "to_delete", n = 6)
+
+# # print("\n\n\nSELECTING ONLY A SUBSET OF THE DATA\n\n\n")
+# # volcs = volcs[0:5]
+
+
+# #%% Step 03: Compile licalert status for all frames at all times.  
+
+# # get path to licsalert frames for each volcano, and their names (snake case)
+# volc_frames, volc_frame_names = get_all_volcano_dirs(
+#     licsalert_dir, volcs_omit,regions
+#     )
+
+
+
+
+# # update volcs so it only contains volcanoes we have data for.  
+# # also  convert to a list with an entry for each volcano, with frame
+# # info accessed from the objects attributes.  
+# volcs = update_volcs_with_data(
+#     volcs, volc_frames, volc_frame_names,verbose=False, remove_all_nans=False
+#     )
+
+
+# #  add the lon lat info for each volcano
+# # Method 1: from data 
+# # volcs = get_lon_lat_of_volcs_from_ts_data(volcs)
+# # method 2: from comet database
+# get_lon_lat_of_volcs_from_db(
+#     volcs,
+#     pd.read_pickle("comet_volcano_database.pkl")
+#     )
+
+
+# # adjust the lon lats of the volcanoes so when plotted they don't overlap
+# offset_volc_lls(volcs,  threshold = 2., offset = 2.1, attempts = 200)
+
+# # simple list of datetime for each status day
+# day_list = create_day_list(d_start, d_stop)
+
+
+# # get the licsalert status for each volcano frame (update volcs)
+# extract_licsalert_status(volcs, day_list, combined_status_method)           
+
+# # tidy up
+# del volc_frames, volc_frame_names
+
+
+# #%%
+
+
+# #%% Step 04: figure for one volcano at all times.  
+# # (the one with the LiCSAlert inset bit?)
+
+# # name_and_indexes = find_volcano(volc_frame_names, test_volcano)
+
+
+
+# # out_dir_1_volc = out_dir / name_and_indexes[0][0]
+
+# # status_fig_one_volc(name_and_indexes[-1], licsalert_status, day_list, 
+# #                 fig_type = 'png', out_dir = out_dir_1_volc)
+
+# # status_fig_one_volc(name_and_indexes[-1], licsalert_status, day_list, 
+# #                     fig_type = 'gif', volc_dirs = volc_frame_dirs, 
+# #                     out_dir = out_dir_1_volc/ "gif") 
+# # #pngs_to_gif(out_dir / "gif", out_dir  / "gif" / "animation.gif", image_duration = 0.5)
+
+
+
+
+
+
+# #%% Step 05: 2D plot figure for all volcs at all times.  
+
+
+# # status_fig_all_volcs(licsalert_status, volc_frame_names, day_list,  
+# #                      out_dir = out_dir / "all_volcs", 
+# #                      figsize = (20  , 12), plot_frequency = 6, label_fs = 16)
+
+# # # # convert the directory of pngs to a single gif
+# # # pngs_to_gif(out_dir / "all_volcs", out_dir / "all_volcs" / "animation.gif",
+# # #             image_duration = 250)                                                 
+
+
+
+# #%% Step 06: New worldmap figure
+
+
+# """
+# This needs editing to show volcanoes in grey if they have no licsalert
+# status, and then colour by status.  
+
+# """
+
+# def licsalert_status_map(
+#         volcs, outdir,  sigma_min = 0., sigma_max = 10., 
+#         d_start = None, d_end = None,
+#         plot_frequency = "monthly",  figure_type = 'window',
+#         no_licsbas_c='tab:red',
+#         no_licsalert_c='tab:pink'
+#         ):
+#     """ Plot multiple volcano statuses on the worldmap.  Colour indicates
+#     status.  
+    
+#     Inputs:
+#         volcs | list of comet_volcanos | contains info such as lon_lat, 
+#                                          lon_lat_offset (as above, but shifted
+#                                          so points don't lie on top of each other)
+#          outdir | Path | ouput png files, if backed is 'agg'
+#          d_start | str | start date for period to plot daily / monthly yearly
+#          d_end | str | end date for period to plot daily / monthly yearly
+
+#          sigma_max | int or float | maximum number of sigmas for colourscale 
+#                                  i.e. if set to 10, any signal that is 10 sigmas
+#                                      or more will plot as maximum colour (yellow)
+#          plot_frequency | string | daily / monthly / yearly 
+#          backend | string | 'agg' if exporting pngs, 'qt5agg' for interactive. 
+#      Returns:
+#          Figure
+         
+#      History:
+#          2024_06_21 | MEG | Written.  
+         
+#     """
+    
+#     import matplotlib.pyplot as plt
+#     import matplotlib.colors as colors
+#     import matplotlib.cm as cm
+#     import cartopy.crs as ccrs
+#     import datetime as dt
+#     import math
+#     import warnings
+#     from copy import deepcopy
+    
+
+#     def plot_licsalert_result(volc, dayn_index):
+#         """ 
+#         """
+        
+#         existing_def = volc.status_combined['existing_defs'][dayn_index]
+#         new_def = volc.status_combined['new_defs'][dayn_index]
+        
+        
+#         # determine the maximum from the two unrest metrics
+#         combined_def = max(existing_def, new_def)
+        
+#         # only plot if larger than minimum threshold
+#         if combined_def > sigma_min:
+        
+#             # if we do, plot the max of existing or new deformation
+#             sc = ax.scatter(
+#                 volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
+#                 c=combined_def, s=50, transform=ccrs.PlateCarree(),
+#                 vmin = sigma_min, vmax = sigma_max
+#                 )
+#             scatter_objects.append((sc, volc.name))
+            
+#             # also plot the lines from the shifted points to their true point.  
+#             ax.plot(
+#                 [volc.lon_lat_offset[0], volc.lon_lat[0]],
+#                 [volc.lon_lat_offset[1], volc.lon_lat[1]],
+#                 c = 'k',  transform=ccrs.PlateCarree()
+#                 )
+            
+#     def plot_volc_manual_colour(volc, c):
+#         """
+#         """
+        
+#         sc = ax.scatter(
+#             volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
+#             c=c, s=50, transform=ccrs.PlateCarree(),
+#             )
+        
+#         # also plot the lines from the shifted points to their true point.  
+#         ax.plot(
+#             [volc.lon_lat_offset[0], volc.lon_lat[0]],
+#             [volc.lon_lat_offset[1], volc.lon_lat[1]],
+#             c = 'k',  transform=ccrs.PlateCarree()
+#             )
+    
+
+#     def add_status_legend(
+#             ax,
+#             *,
+#             colour_nolicsbas,
+#             colour_nolicsalert,
+#             bbox=(0.02, 0.05, 0.3, 0.08)   # (x0, y0, width, height) in axes fraction
+#         ):
+#         from matplotlib.lines import Line2D
+        
+#         """
+#         Add a two-row legend with coloured dots.
+    
+#         Parameters
+#         ----------
+#         ax : matplotlib Axes
+#             The map axes you plotted on.
+#         colour_nolicsbas : str
+#             Dot colour for “No LiCSBAS ts.”    (default 'tab:red')
+#         colour_nolicsalert : str
+#             Dot colour for “No LiCSAlert result” (default 'tab:pink')
+#         bbox : tuple
+#             (x0, y0, width, height) in **axes-fraction units** (0-1).
+#             Move/resize this to taste.
+    
+#         Returns
+#         -------
+#         legend : matplotlib Legend
+#             The legend handle (in case you want to tweak later).
+#         """
+#         handles = [
+#             Line2D([0], [0], marker='o', color='w',
+#                    markerfacecolor=colour_nolicsbas, markeredgecolor='k',
+#                    markersize=10, label="No LiCSBAS ts."),
+#             Line2D([0], [0], marker='o', color='w',
+#                    markerfacecolor=colour_nolicsalert, markeredgecolor='k',
+#                    markersize=10, label="No LiCSAlert result"),
+#         ]
+    
+#         legend = ax.legend(
+#             handles=handles,
+#             loc="lower left",
+#             bbox_to_anchor=bbox,
+#             borderpad=0.8,
+#             frameon=True,
+#             fancybox=True
 #         )
-#     local_dir = Path('./licsalert_sync/')
-#     bash_sync_fle = "jasmin_sync_script.sh"
+#         return legend
+
+
+#     # if plt.get_backend() != backend:   
+#     #     print(f"The matplotlib backend was previously {plt.get_backend()}, "
+#     #           f"but has been switched to ", end = '')
+#     #     plt.switch_backend(backend)
+#     #     print(f"{plt.get_backend()}")
     
+#     # Check matplotlib backend is set correctly 
+#     if figure_type == 'png':
+#         plt.switch_backend('Agg')                                                           
+#     else: 
+#         if plt.get_backend() != 'Qt5Agg':                                                               
+#             plt.switch_backend('Qt5Agg')                                                           
 
-#     # write a shell script to download the LiCSAlert data from jasmin 
-#     write_jasmin_download_shell_script(
-#         jasmin_dir, local_dir, bash_sync_fle, volcs, exclude_json_gz = True,
-#         exclude_original_ts = False, exclude_ICASAR_data = True,
-#         exclude_epoch_images = True, exclude_epoch_data = True)
-
-
-
-
-
-
-#%% Step 02:
+#     # 0: small steps to handle dates:    
+#     # all volcanoes should shre the same day list (list of datetimes, daily),
+#     # but it won't exist for some volcs that don't have a licsalert result
+#     day_list = next(
+#         (v.status_combined['dates'] for v in volcs 
+#          if hasattr(v, "status_combined")), None
+#         )
     
-# # run jasmin sync file on FOE-linux (to copy data from jasmin to school server)
-# # copy from FOE-linux to local.  
-
-#%% Step 02a: possibly move directories that don't have LiCSAlert results
-# # to a different directory
-
-# from licsalert.jasmin_tools import move_small_directories
-
-# move_small_directories(
-#     licsalert_dir, licsalert_dir.parent / "to_delete", n = 6)
-
-# print("\n\n\nSELECTING ONLY A SUBSET OF THE DATA\n\n\n")
-# volcs = volcs[0:5]
+#     d_start_dt = dt.datetime.strptime(d_start, "%Y%m%d")
+#     d_end_dt = dt.datetime.strptime(d_end, "%Y%m%d")
 
 
-#%% Step 03: Compile licalert status for all frames at all times.  
+#     # 1 figure for each day.
+#     for day_n, day in enumerate(day_list):
 
-# get path to licsalert frames for each volcano, and their names (snake case)
-volc_frames, volc_frame_names = get_all_volcano_dirs(
-    licsalert_dir, volcs_omit,regions
-    )
-
-
-
-
-# update volcs so it only contains volcanoes we have data for.  
-# also  convert to a list with an entry for each volcano, with frame
-# info accessed from the objects attributes.  
-volcs = update_volcs_with_data(
-    volcs, volc_frames, volc_frame_names,verbose=False, remove_all_nans=False
-    )
-
-
-#  add the lon lat info for each volcano
-# Method 1: from data 
-# volcs = get_lon_lat_of_volcs_from_ts_data(volcs)
-# method 2: from comet database
-get_lon_lat_of_volcs_from_db(
-    volcs,
-    pd.read_pickle("comet_volcano_database.pkl")
-    )
-
-
-# adjust the lon lats of the volcanoes so when plotted they don't overlap
-offset_volc_lls(volcs,  threshold = 2., offset = 2.1, attempts = 200)
-
-# simple list of datetime for each status day
-day_list = create_day_list(d_start, d_stop)
-
-
-# get the licsalert status for each volcano frame (update volcs)
-extract_licsalert_status(volcs, day_list, combined_status_method)           
-
-# tidy up
-del volc_frames, volc_frame_names
-
-
-#%%
-
-
-#%% Step 04: figure for one volcano at all times.  
-# (the one with the LiCSAlert inset bit?)
-
-# name_and_indexes = find_volcano(volc_frame_names, test_volcano)
-
-
-
-# out_dir_1_volc = out_dir / name_and_indexes[0][0]
-
-# status_fig_one_volc(name_and_indexes[-1], licsalert_status, day_list, 
-#                 fig_type = 'png', out_dir = out_dir_1_volc)
-
-# status_fig_one_volc(name_and_indexes[-1], licsalert_status, day_list, 
-#                     fig_type = 'gif', volc_dirs = volc_frame_dirs, 
-#                     out_dir = out_dir_1_volc/ "gif") 
-# #pngs_to_gif(out_dir / "gif", out_dir  / "gif" / "animation.gif", image_duration = 0.5)
-
-
-
-
-
-
-#%% Step 05: 2D plot figure for all volcs at all times.  
-
-
-# status_fig_all_volcs(licsalert_status, volc_frame_names, day_list,  
-#                      out_dir = out_dir / "all_volcs", 
-#                      figsize = (20  , 12), plot_frequency = 6, label_fs = 16)
-
-# # # convert the directory of pngs to a single gif
-# # pngs_to_gif(out_dir / "all_volcs", out_dir / "all_volcs" / "animation.gif",
-# #             image_duration = 250)                                                 
-
-
-
-#%% Step 06: New worldmap figure
-
-
-"""
-This needs editing to show volcanoes in grey if they have no licsalert
-status, and then colour by status.  
-
-"""
-
-def licsalert_status_map(
-        volcs, outdir,  sigma_min = 0., sigma_max = 10., 
-        d_start = None, d_end = None,
-        plot_frequency = "monthly",  figure_type = 'window',
-        no_licsbas_c='tab:red',
-        no_licsalert_c='tab:pink'
-        ):
-    """ Plot multiple volcano statuses on the worldmap.  Colour indicates
-    status.  
-    
-    Inputs:
-        volcs | list of comet_volcanos | contains info such as lon_lat, 
-                                         lon_lat_offset (as above, but shifted
-                                         so points don't lie on top of each other)
-         outdir | Path | ouput png files, if backed is 'agg'
-         d_start | str | start date for period to plot daily / monthly yearly
-         d_end | str | end date for period to plot daily / monthly yearly
-
-         sigma_max | int or float | maximum number of sigmas for colourscale 
-                                 i.e. if set to 10, any signal that is 10 sigmas
-                                     or more will plot as maximum colour (yellow)
-         plot_frequency | string | daily / monthly / yearly 
-         backend | string | 'agg' if exporting pngs, 'qt5agg' for interactive. 
-     Returns:
-         Figure
-         
-     History:
-         2024_06_21 | MEG | Written.  
-         
-    """
-    
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as colors
-    import matplotlib.cm as cm
-    import cartopy.crs as ccrs
-    import datetime as dt
-    import math
-    import warnings
-    from copy import deepcopy
-    
-
-    def plot_licsalert_result(volc, dayn_index):
-        """ 
-        """
         
-        existing_def = volc.status_combined['existing_defs'][dayn_index]
-        new_def = volc.status_combined['new_defs'][dayn_index]
+#         if (day > d_start_dt) and (day < d_end_dt):
+#             # check if we should plot this one
+#             if plot_frequency == "daily":
+#                 plot_today = True
+#             elif plot_frequency == 'monthly':
+#                 plot_today = day.day == 1
+#             elif plot_frequency == 'yearly':
+#                 plot_today = (day.day == 1) and (day.month == 1)
+#         else:
+#             plot_today = False
         
-        
-        # determine the maximum from the two unrest metrics
-        combined_def = max(existing_def, new_def)
-        
-        # only plot if larger than minimum threshold
-        if combined_def > sigma_min:
-        
-            # if we do, plot the max of existing or new deformation
-            sc = ax.scatter(
-                volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
-                c=combined_def, s=50, transform=ccrs.PlateCarree(),
-                vmin = sigma_min, vmax = sigma_max
-                )
-            scatter_objects.append((sc, volc.name))
+#         if plot_today:
             
-            # also plot the lines from the shifted points to their true point.  
-            ax.plot(
-                [volc.lon_lat_offset[0], volc.lon_lat[0]],
-                [volc.lon_lat_offset[1], volc.lon_lat[1]],
-                c = 'k',  transform=ccrs.PlateCarree()
-                )
+#             # get figure date as string
+#             day_str = dt.datetime.strftime(day, "%Y%m%d")
+#             print(
+#                 f"Creating a LiCSAlert status figure for {day_str}.  "
+#                 )
+
+#             fig = plt.figure(figsize=(20, 11))
+#             ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
             
-    def plot_volc_manual_colour(volc, c):
-        """
-        """
+#             # Make the map global
+#             ax.set_global()
+#             ax.stock_img()
+#             ax.coastlines()
         
-        sc = ax.scatter(
-            volc.lon_lat_offset[0], volc.lon_lat_offset[1], 
-            c=c, s=50, transform=ccrs.PlateCarree(),
-            )
-        
-        # also plot the lines from the shifted points to their true point.  
-        ax.plot(
-            [volc.lon_lat_offset[0], volc.lon_lat[0]],
-            [volc.lon_lat_offset[1], volc.lon_lat[1]],
-            c = 'k',  transform=ccrs.PlateCarree()
-            )
-    
-
-    def add_status_legend(
-            ax,
-            *,
-            colour_nolicsbas,
-            colour_nolicsalert,
-            bbox=(0.02, 0.05, 0.3, 0.08)   # (x0, y0, width, height) in axes fraction
-        ):
-        from matplotlib.lines import Line2D
-        
-        """
-        Add a two-row legend with coloured dots.
-    
-        Parameters
-        ----------
-        ax : matplotlib Axes
-            The map axes you plotted on.
-        colour_nolicsbas : str
-            Dot colour for “No LiCSBAS ts.”    (default 'tab:red')
-        colour_nolicsalert : str
-            Dot colour for “No LiCSAlert result” (default 'tab:pink')
-        bbox : tuple
-            (x0, y0, width, height) in **axes-fraction units** (0-1).
-            Move/resize this to taste.
-    
-        Returns
-        -------
-        legend : matplotlib Legend
-            The legend handle (in case you want to tweak later).
-        """
-        handles = [
-            Line2D([0], [0], marker='o', color='w',
-                   markerfacecolor=colour_nolicsbas, markeredgecolor='k',
-                   markersize=10, label="No LiCSBAS ts."),
-            Line2D([0], [0], marker='o', color='w',
-                   markerfacecolor=colour_nolicsalert, markeredgecolor='k',
-                   markersize=10, label="No LiCSAlert result"),
-        ]
-    
-        legend = ax.legend(
-            handles=handles,
-            loc="lower left",
-            bbox_to_anchor=bbox,
-            borderpad=0.8,
-            frameon=True,
-            fancybox=True
-        )
-        return legend
-
-
-    # if plt.get_backend() != backend:   
-    #     print(f"The matplotlib backend was previously {plt.get_backend()}, "
-    #           f"but has been switched to ", end = '')
-    #     plt.switch_backend(backend)
-    #     print(f"{plt.get_backend()}")
-    
-    # Check matplotlib backend is set correctly 
-    if figure_type == 'png':
-        plt.switch_backend('Agg')                                                           
-    else: 
-        if plt.get_backend() != 'Qt5Agg':                                                               
-            plt.switch_backend('Qt5Agg')                                                           
-
-    # 0: small steps to handle dates:    
-    # all volcanoes should shre the same day list (list of datetimes, daily),
-    # but it won't exist for some volcs that don't have a licsalert result
-    day_list = next(
-        (v.status_combined['dates'] for v in volcs 
-         if hasattr(v, "status_combined")), None
-        )
-    
-    d_start_dt = dt.datetime.strptime(d_start, "%Y%m%d")
-    d_end_dt = dt.datetime.strptime(d_end, "%Y%m%d")
-
-
-    # 1 figure for each day.
-    for day_n, day in enumerate(day_list):
-
-        
-        if (day > d_start_dt) and (day < d_end_dt):
-            # check if we should plot this one
-            if plot_frequency == "daily":
-                plot_today = True
-            elif plot_frequency == 'monthly':
-                plot_today = day.day == 1
-            elif plot_frequency == 'yearly':
-                plot_today = (day.day == 1) and (day.month == 1)
-        else:
-            plot_today = False
-        
-        if plot_today:
-            
-            # get figure date as string
-            day_str = dt.datetime.strftime(day, "%Y%m%d")
-            print(
-                f"Creating a LiCSAlert status figure for {day_str}.  "
-                )
-
-            fig = plt.figure(figsize=(20, 11))
-            ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
-            
-            # Make the map global
-            ax.set_global()
-            ax.stock_img()
-            ax.coastlines()
-        
-            scatter_objects = []
-            # loop through each volcano to plot it as a point on the map.
-            for volc_n, volc in enumerate(volcs):
+#             scatter_objects = []
+#             # loop through each volcano to plot it as a point on the map.
+#             for volc_n, volc in enumerate(volcs):
                 
-                # three options here.  Either no LiCSBAS ts, no licsalert result
-                # or a licsalert result
+#                 # three options here.  Either no LiCSBAS ts, no licsalert result
+#                 # or a licsalert result
         
-                if volc.processing_status.licsbas_ts == False:
-                    plot_volc_manual_colour(
-                        volc, no_licsbas_c
-                        )
-                if volc.processing_status.licsalert_result == False:    
-                    plot_volc_manual_colour(
-                        volc, no_licsalert_c
-                        )
-                else:
-                    dayn_index = volc.status_combined['dates'].index(day)
-                    plot_licsalert_result(volc, dayn_index)
+#                 if volc.processing_status.licsbas_ts == False:
+#                     plot_volc_manual_colour(
+#                         volc, no_licsbas_c
+#                         )
+#                 if volc.processing_status.licsalert_result == False:    
+#                     plot_volc_manual_colour(
+#                         volc, no_licsalert_c
+#                         )
+#                 else:
+#                     dayn_index = volc.status_combined['dates'].index(day)
+#                     plot_licsalert_result(volc, dayn_index)
         
                 
             
-            #colorbar (possibly with no sc created by ax.scatter)
-            cbar_ax = fig.add_axes([0.35, 0.15, 0.3, 0.01])  
-            norm = colors.Normalize(vmin=sigma_min, vmax=sigma_max)
-            cmap = cm.viridis  
-            sm = cm.ScalarMappable(norm=norm, cmap=cmap)
-            cbar = plt.colorbar(sm, cax=cbar_ax, orientation = 'horizontal')
-            cbar.set_label("# sigma from background")
+#             #colorbar (possibly with no sc created by ax.scatter)
+#             cbar_ax = fig.add_axes([0.35, 0.15, 0.3, 0.01])  
+#             norm = colors.Normalize(vmin=sigma_min, vmax=sigma_max)
+#             cmap = cm.viridis  
+#             sm = cm.ScalarMappable(norm=norm, cmap=cmap)
+#             cbar = plt.colorbar(sm, cax=cbar_ax, orientation = 'horizontal')
+#             cbar.set_label("# sigma from background")
             
-            # title, first make the date a string.  
-            date_str = dt.datetime.strftime(
-                next(
-                    (v.status_combined['dates'][dayn_index] for v in volcs 
-                     if hasattr(v, "status_combined")), None
-                    ),
-                "%Y/%m/%d")
-            fig.suptitle(date_str)
+#             # title, first make the date a string.  
+#             date_str = dt.datetime.strftime(
+#                 next(
+#                     (v.status_combined['dates'][dayn_index] for v in volcs 
+#                      if hasattr(v, "status_combined")), None
+#                     ),
+#                 "%Y/%m/%d")
+#             fig.suptitle(date_str)
 
     
-            ## save as a png and close the figure.                     
-            # Suppress warnings for tight_layout
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                plt.tight_layout()
+#             ## save as a png and close the figure.                     
+#             # Suppress warnings for tight_layout
+#             with warnings.catch_warnings():
+#                 warnings.simplefilter("ignore")
+#                 plt.tight_layout()
             
-            # start the interactive part of the figure
-            if (figure_type == 'window') or (figure_type == 'both'):
-                # Create an annotation object
-                annot = ax.annotate("", xy=(0,0), xytext=(10,10),
-                                    textcoords="offset points",
-                                    bbox=dict(boxstyle="round", fc="w"),
-                                    arrowprops=dict(arrowstyle="->"),
-                                    transform=ccrs.PlateCarree())
-                annot.set_visible(False)
+#             # start the interactive part of the figure
+#             if (figure_type == 'window') or (figure_type == 'both'):
+#                 # Create an annotation object
+#                 annot = ax.annotate("", xy=(0,0), xytext=(10,10),
+#                                     textcoords="offset points",
+#                                     bbox=dict(boxstyle="round", fc="w"),
+#                                     arrowprops=dict(arrowstyle="->"),
+#                                     transform=ccrs.PlateCarree())
+#                 annot.set_visible(False)
                 
-                # Function to update the annotation
-                def update_annot(ind, scatter_obj, label):
-                    pos = scatter_obj.get_offsets()[ind["ind"][0]]
-                    annot.xy = pos
-                    annot.set_text(label)
-                    annot.get_bbox_patch().set_alpha(0.4)
+#                 # Function to update the annotation
+#                 def update_annot(ind, scatter_obj, label):
+#                     pos = scatter_obj.get_offsets()[ind["ind"][0]]
+#                     annot.xy = pos
+#                     annot.set_text(label)
+#                     annot.get_bbox_patch().set_alpha(0.4)
                 
-                # Function to check if mouse is over a scatter point
-                def hover(event):
-                    vis = annot.get_visible()
-                    if event.inaxes == ax:
-                        for scatter_obj, label in scatter_objects:
-                            cont, ind = scatter_obj.contains(event)
-                            if cont:
-                                update_annot(ind, scatter_obj, label)
-                                annot.set_visible(True)
-                                fig.canvas.draw_idle()
-                                return
-                    if vis:
-                        annot.set_visible(False)
-                        fig.canvas.draw_idle()
+#                 # Function to check if mouse is over a scatter point
+#                 def hover(event):
+#                     vis = annot.get_visible()
+#                     if event.inaxes == ax:
+#                         for scatter_obj, label in scatter_objects:
+#                             cont, ind = scatter_obj.contains(event)
+#                             if cont:
+#                                 update_annot(ind, scatter_obj, label)
+#                                 annot.set_visible(True)
+#                                 fig.canvas.draw_idle()
+#                                 return
+#                     if vis:
+#                         annot.set_visible(False)
+#                         fig.canvas.draw_idle()
                 
-                # Connect the hover event to the hover function
-                fig.canvas.mpl_connect("motion_notify_event", hover)
+#                 # Connect the hover event to the hover function
+#                 fig.canvas.mpl_connect("motion_notify_event", hover)
 
-            # 8: Possible save output
-            if (figure_type == 'png') or (figure_type == 'both'):
-                fig.savefig(outdir / f"{day_str}.png")
-                print(f"Saved the LiCSAlert status map for {str}")
+#             # 8: Possible save output
+#             if (figure_type == 'png') or (figure_type == 'both'):
+#                 fig.savefig(outdir / f"{day_str}.png")
+#                 print(f"Saved the LiCSAlert status map for {str}")
             
-        else:
-            pass
+#         else:
+#             pass
         
     
     
 
-    add_status_legend(
-        ax,
-        colour_nolicsbas=no_licsbas_c,       # must match your plot_volc_manual_colour
-        colour_nolicsalert=no_licsalert_c,
-        bbox=(0.01, 0.01, 0.35, 0.1)      # tweak position/size as you like
-    )
+#     add_status_legend(
+#         ax,
+#         colour_nolicsbas=no_licsbas_c,       # must match your plot_volc_manual_colour
+#         colour_nolicsalert=no_licsalert_c,
+#         bbox=(0.01, 0.01, 0.35, 0.1)      # tweak position/size as you like
+#     )
 
     
-licsalert_status_map(
-    volcs, sigma_min = 0., sigma_max = 10.,
-    #d_start = '20151231', d_end = '20170101',
-    d_start = '20241231', d_end = '20251231',
-    outdir = Path("./status_outputs/03_comet/"),
-    plot_frequency = 'yearly', figure_type = 'window',
-    no_licsbas_c='tab:red',
-    no_licsalert_c='tab:pink'
-    )
+# licsalert_status_map(
+#     volcs, sigma_min = 0., sigma_max = 10.,
+#     #d_start = '20151231', d_end = '20170101',
+#     d_start = '20241231', d_end = '20251231',
+#     outdir = Path("./status_outputs/03_comet/"),
+#     plot_frequency = 'yearly', figure_type = 'window',
+#     no_licsbas_c='tab:red',
+#     no_licsalert_c='tab:pink'
+#     )
 
-# possibly create an animation from multiple frames
-# pngs_to_gif(out_dir / "short_status_map", out_dir / "status_map" / "status_map_animation.gif",
-#             image_duration = 750)                                                 
+# # possibly create an animation from multiple frames
+# # pngs_to_gif(out_dir / "short_status_map", out_dir / "status_map" / "status_map_animation.gif",
+# #             image_duration = 750)                                                 
     
     
 
-
-sys.exit()
 
 #%% Load / save before plotting
 
@@ -1221,11 +1219,11 @@ sys.exit()
 
 
 
-# print(f"\n\n OPENING A PICKLE OF 'volcs' AND 'day_list' \n\n ")
+print(f"\n\n OPENING A PICKLE OF 'volcs' AND 'day_list' \n\n ")
 # with open("monitoring_analysis_locals.pkl", 'rb') as f:    
-# with open("monitoring_analysis_locals_RSE_volcs.pkl", 'rb') as f:    
-#     volcs = cloudpickle.load(f)
-#     day_list = cloudpickle.load(f)
+with open("monitoring_analysis_locals_RSE_volcs.pkl", 'rb') as f:    
+    volcs = cloudpickle.load(f)
+    day_list = cloudpickle.load(f)
 
 
 

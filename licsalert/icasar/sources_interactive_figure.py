@@ -265,12 +265,12 @@ def plot_2d_interactive_fig(S_pca, S_hists, mask, spatial, sica_tica,
     # only save the figure if a png is selected.      
     if figures == 'window':
         pass
-    elif (figures == "png") or (figures == 'png+window'):
+    elif (figures == "png") or (figures == 'both'):
         fig.savefig(f"{png_path}/{fig_filename}.png")
         plt.close()
     else:
         raise Exception(f"'figures' was set incorrectly, and should be  "
-                        "'window', 'png', or 'png+window', but is {figures} "
+                        "'window', 'png', or 'both', but is {figures} "
                         "Exiting.")
     
     # return the ICA sources from the mutable they are stored in 

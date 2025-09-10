@@ -10,17 +10,20 @@ import pdb
 
 #%% automatic_pixel_epoch_selection()
 
-def automatic_pixel_epoch_selection(displacement_r3, 
-                                    tbaseline_info,
-                                    baseline_end,
-                                    volcano_dir,
-                                    figures,
-                                    interactive=False):
+def automatic_pixel_epoch_selection(
+        displacement_r3, 
+        tbaseline_info,
+        baseline_end,
+        volcano_dir,
+        figures,
+        interactive=False
+        ):
     """
     Given a time series with a time varying mask (i.e. pixels come 
     in and out of coherene), build a time series with a consistent mask
     that uses only some of these acquisitions to build a compromise 
     between temporal resolution and number of pixels
+    
     
     Inputs
     
@@ -80,10 +83,9 @@ def automatic_pixel_epoch_selection(displacement_r3,
         interactive,
         )
         
-    pdb.set_trace()
     
     # build the time series that uses this number of epochs
-    selected_epochs = sorted(list(n_pixels_idx[:optimal_epoch_n]))
+    selected_epochs = sorted(list(n_pixels_idx[:optimal_epoch_n]))    
     cum_ma_ica = cum_ma_baseline[selected_epochs, ]
     acq_dates_ica = [acq_dates_baseline[i] for i in selected_epochs]
     
@@ -293,24 +295,31 @@ def consistent_pixels_plot(
     # or draw figure with number of epochs passed as an argument.  
     else:
         draw_plots(optimal_epoch_n)
+        
+        #and then save or display
+        outpath=volcano_dir/'baseline_pixel_selection'
+        outpath.mkdir(parents=True, exist_ok=True)
         if figures == 'window':
             pass
         elif figures == "png":
             try:
-                fig.savefig(volcano_dir / 'ICASAR_results' / "baseline_pixels_vs_epochs.png")
+                fig.savefig(
+                    outpath/"baseline_pixels_vs_epochs.png",
+                    bbox_inches='tight'
+                    )
                 plt.close(fig)
             except:
                 print(f"Failed to save the figure.  Trying to continue.  ")
         elif figures == 'both':
             try:
-                fig.savefig(volcano_dir / 'ICASAR_results' / "baseline_pixels_vs_epochs.png")
+                fig.savefig(
+                    outpath/"baseline_pixels_vs_epochs.png",
+                    bbox_inches='tight'
+                    )
             except:
                 print(f"Failed to save the figure.  Trying to continue.  ")
-
-        
-        
-
-
+    
+    
 
 #%% calculate_valid_pixels()
 
@@ -534,17 +543,24 @@ def plot_ts_metric_vs_pixels(
         
         
     # possibly save and close
-    outpath=volcano_dir/'ICASAR_results'/"baseline_pixels_vs_epochs_quality_metric.png"
+    outpath=volcano_dir/'baseline_pixel_selection'
+    outpath.mkdir(parents=True, exist_ok=True)
     if figures == 'window':
         pass
     elif figures == "png":
         try:
-            f.savefig(outpath, bbox_inches='tight')
+            f.savefig(
+                outpath/"baseline_pixels_vs_epochs_quality_metric.png",
+                bbox_inches='tight'
+                )
             plt.close(f)
         except:
             print(f"Failed to save the figure.  Trying to continue.  ")
     elif figures == 'both':
         try:
-            f.savefig(outpath, bbox_inches='tight')
+            f.savefig(
+                outpath/"baseline_pixels_vs_epochs_quality_metric.png",
+                bbox_inches='tight'
+                )
         except:
             print(f"Failed to save the figure.  Trying to continue.  ")

@@ -184,8 +184,12 @@ def signals_to_master_signal_comparison(signals, master_signal, density = False)
 #%%
 
 def create_all_ifgs(ifgs_r2, ifg_dates, max_n_all_ifgs = 1000):
-    """Given a rank 2 of incremental ifgs, calculate all the possible ifgs that still step forward in time (i.e. if deformation is positive in all incremental ifgs, 
-    it remains positive in all the returned ifgs.)  If acquisition dates are provided, the tmeporal baselines of all the possible ifgs can also be found.  
+    """Given a rank 2 of incremental ifgs, calculate all the possible ifgs 
+    that still step forward in time (i.e. if deformation is positive in all 
+    incremental ifgs, it remains positive in all the returned ifgs.)  If 
+    acquisition dates are provided, the tmeporal baselines of all the possible 
+    ifgs can also be found.  
+    
     Inputs:
         ifgs_r2 | rank 2 array | Interferograms as row vectors.  
         ifg_dates | list of strings | dates in the form YYYYMMDD_YYYYMMDD.  As the interferograms are incremental, this should be the same length as the number of ifgs
@@ -328,9 +332,12 @@ def create_all_ifgs(ifgs_r2, ifg_dates, max_n_all_ifgs = 1000):
             n_acq = network['n_ifgs'] + 1
 
             # 1: Make the cumulative ifgs
-            acq1_def = np.zeros((1, n_pixs))                                                     # deformation is 0 at the first acquisition
-            ifgs_cs = np.cumsum(network['ifgs_r2'], axis = 0)                                          # convert from incremental to cumulative.  
-            ifgs_cs = np.vstack((acq1_def, ifgs_cs))                                             # add the 0 at first time ifg to the other cumulative ones.     
+            # deformation is 0 at the first acquisition
+            acq1_def = np.zeros((1, n_pixs))                                                   
+            # convert from incremental to cumulative.  
+            ifgs_cs = np.cumsum(network['ifgs_r2'], axis = 0)                                          
+            # add the 0 at first time ifg to the other cumulative ones.     
+            ifgs_cs = np.vstack((acq1_def, ifgs_cs))                                             
                    
             # 2: get the acquisition dates:
             acq_dates = acquisitions_from_ifg_dates(network['ifg_dates'])                                                         # get the acquisitions from the ifg dates.  

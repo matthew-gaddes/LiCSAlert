@@ -380,8 +380,6 @@ def dem_and_temporal_source_figure(
         **fig_kwargs
         )
     
-    pdb.set_trace()
-    
     print("Done.  ")
     return dem_to_sources_comparisons, tcs_to_tempbaselines_comparisons
 

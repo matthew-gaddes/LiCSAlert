@@ -32,7 +32,7 @@ def LiCSAlert(sources,
         t_recalculate | int | rolling lines of best fit are recalcaluted every X times (nb done in number of data points, not time between them)
         verbose | boolean | if True, various information is printed to screen.  
         n_pix_window | int | side length of square windows used for the window residual calculation.  
-        residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summer in time for each pixel, then averaged in space across each ifg.  )
+        residual_type | str | 'cumulative' or 'window'.  If cumulative, residual is the mean of the cumulative (ie summed in time for each pixel, then averaged in space across each ifg.  )
                                                         If window, the residual is the ratio of the max in a window (e.g. 20x20 pixels) over the mean for all windows for that time.  Value at each point is the cumulative.  
         
     Outputs
@@ -425,8 +425,9 @@ def construct_baseline_ts(
         ):
     """
     A function to prepare the baseline time series for ICA.  First step
-    is dropping some epochs that cause many pixels to be lost, followed by
-    mean centering 
+    is dropping some epochs that cause many pixels to be lost, 
+    
+    Note that data mustn't be mean centered.  
     
     Inputs:
         sica_tica | str | either 'sica' or 'tica'
@@ -459,6 +460,7 @@ def construct_baseline_ts(
     # 1: select a subset of the epochs to create a compromise between lots of 
     # pixels and lots of epochs (i.e. drop the epochs that cause lots of 
     # pixels to be lost when a consistent mask through time is sought)
+    # this returns cumulative displacements that are not mean centered
     displacement_r2_ica, tbaseline_info_ica = automatic_pixel_epoch_selection(
         displacement_r3,
         tbaseline_info,
@@ -475,6 +477,12 @@ def construct_baseline_ts(
     # rename the output to be more readable
     displacement_r2_ica['cumulative'] = displacement_r2_ica['ifgs']
     
+    del displacement_r2_ica['ifgs']
+    
+    # f, ax = plt.subplots()
+    # ax.matshow(displacement_r2_ica['cumulative'])
+    # ax.set_aspect('auto')
+    
     # create the incremental displacments
     displacement_r2_ica['incremental'] = np.diff(
         displacement_r2_ica['cumulative'],
@@ -487,50 +495,53 @@ def construct_baseline_ts(
     )
         
     
+    
+
+    
     # 2: mean centre in time or space, according to if sica or tica 
     # create a class (an ifg_timeseries) using the incremtnal measurements, 
     # and handle all mean centering (in time and space)
     
-    ifg_ts = ifg_timeseries(
-        displacement_r2_ica["incremental"],
-        tbaseline_info_ica['ifg_dates']
-    )
+    # ifg_ts = ifg_timeseries(
+    #     displacement_r2_ica["incremental"],
+    #     tbaseline_info_ica['ifg_dates']
+    # )
     
-    displacement_r2_ica['incremental_mc_space'] = ifg_ts.mixtures_mc_space
-    displacement_r2_ica['means_space'] = ifg_ts.means_space
+    # displacement_r2_ica['incremental_mc_space'] = ifg_ts.mixtures_mc_space
+    # displacement_r2_ica['means_space'] = ifg_ts.means_space
     
-    displacement_r2_ica['incremental_mc_time'] = ifg_ts.mixtures_mc_time
-    displacement_r2_ica['means_time'] = ifg_ts.means_time
+    # displacement_r2_ica['incremental_mc_time'] = ifg_ts.mixtures_mc_time
+    # displacement_r2_ica['means_time'] = ifg_ts.means_time
 
-    if sica_tica == 'sica':
-        displacement_r2_ica['mixtures_mc'] = ifg_ts.mixtures_mc_space
-        displacement_r2_ica['means'] = ifg_ts.means_space
-    elif sica_tica == 'tica':
-        displacement_r2_ica['mixtures_mc'] = ifg_ts.mixtures_mc_time
-        displacement_r2_ica['means'] = ifg_ts.means_time
-    else:
-        raise Exception(
-            f"'sica_tica' can be either 'sica' or 'tica', but not "
-            f"{sica_tica}.  Exiting.  "
-            )
+    # if sica_tica == 'sica':
+    #     displacement_r2_ica['mixtures_mc'] = ifg_ts.mixtures_mc_space
+    #     displacement_r2_ica['means'] = ifg_ts.means_space
+    # elif sica_tica == 'tica':
+    #     displacement_r2_ica['mixtures_mc'] = ifg_ts.mixtures_mc_time
+    #     displacement_r2_ica['means'] = ifg_ts.means_time
+    # else:
+    #     raise Exception(
+    #         f"'sica_tica' can be either 'sica' or 'tica', but not "
+    #         f"{sica_tica}.  Exiting.  "
+    #         )
         
-    # check sizes of things
-    n_acq = len(tbaseline_info_ica['acq_dates'])
+    # # check sizes of things
+    # n_acq = len(tbaseline_info_ica['acq_dates'])
     
-    print(
-        f"\nChecking the size of the baseline data that has been created for"
-        f"use with ICA:  ")
+    # print(
+    #     f"\nChecking the size of the baseline data that has been created for"
+    #     f"use with ICA:  ")
     
-    for key, value in tbaseline_info_ica.items():
-        print(f"    {key} : {len(value)}")
+    # for key, value in tbaseline_info_ica.items():
+    #     print(f"    {key} : {len(value)}")
         
-    for key, value in displacement_r2_ica.items():
-        try:
-            print(f"    {key} : {value.shape}")
-        except:
-            pass
+    # for key, value in displacement_r2_ica.items():
+    #     try:
+    #         print(f"    {key} : {value.shape}")
+    #     except:
+    #         pass
    
-    print(f"\n\n")
+    # print(f"\n\n")
     
     return displacement_r2_ica, tbaseline_info_ica
     
@@ -1244,23 +1255,23 @@ def LiCSAlert_preprocessing(
                 displacement_r3['lons_mg'][0,0], 
                 displacement_r3['lons_mg'][-1,-1], 
                 displacement_r3['cum_ma'].shape[2]
-            )
+                )
             displacement_r3['lons_mg'] = np.repeat(
                 lons[np.newaxis, :], 
                 displacement_r3['cum_ma'].shape[1],
                 axis = 0
-            )                       
+                )                       
             
             lats = np.linspace(
                 displacement_r3['lats_mg'][0,0], 
                 displacement_r3['lats_mg'][-1,-1], 
                 displacement_r3['cum_ma'].shape[1]
-            )
+                )
             displacement_r3['lats_mg'] = np.repeat(
-                lats[np.newaxis, :], 
-                displacement_r3['cum_ma'].shape[1],
-                axis = 0
-            )                       
+                lats[:, np.newaxis], 
+                displacement_r3['cum_ma'].shape[2],
+                axis = 1
+                )                       
             
             # poor quality check to ensure that lats aren't upside down            
             if displacement_r3['lats_mg'][0,0] < displacement_r3['lats_mg'][-1,0]:                                        
@@ -1779,7 +1790,7 @@ def load_or_create_ICASAR_results(
     Inputs:
         run_ICASAR | boolean | whether ICASAR should be run, or the results from a previous run loaded.  
         displacment_r2 | dict | interferograms and associated data that are used by the ICASAR algorithm  
-                                mixtures_mc (mean centered) are extracted from this.  
+                                Note that this expects data that are not mean centered.  
         tbaseline_info | dict | various temporal information, such as ifg_dates
         # baseline_end | string | YYYYMMDD that the baseline ends on.  
     Returns:
@@ -1817,7 +1828,7 @@ def load_or_create_ICASAR_results(
         # index the data, note +1 so that the chosen ifg_n is included.  
         # mean centered data has already been mean centered in time or space, as required.  
         spatial_ICASAR_data = {
-            'ifgs_dc'       : displacement_r2['mixtures_mc'][:(baseline_end.acq_n+1),],                             
+            'ifgs_dc'       : displacement_r2['incremental'][:(baseline_end.acq_n+1),],                             
             'mask'          : displacement_r2['mask'],
             'lons'          : displacement_r2['lons_mg'],
             'lats'          : displacement_r2['lats_mg'],
@@ -1826,9 +1837,6 @@ def load_or_create_ICASAR_results(
         if 'dem' in displacement_r2.keys():
             spatial_ICASAR_data['dem'] = displacement_r2['dem']
         
-        if ICASAR_settings['figures'] == 'both':
-            ICASAR_settings['figures'] = 'png+window'                                                                                  # update licsalert name to ICASAR name.  
-            
         # Run ICASAR (slow). tcs are incremental (i.e. not cumulative)
         outputs = ICASAR(
             spatial_data=spatial_ICASAR_data,

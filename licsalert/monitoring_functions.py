@@ -10,11 +10,17 @@ import matplotlib.pyplot as plt
 
 #%% LiCSAlert_monitoring_mode()
 
-def LiCSAlert_monitoring_mode(outdir, region, volcano,                                              
-                              licsbas_dir = None, licsbas_jasmin_dir = None, 
-                              data_as_arg = None, alignsar_dc = None,
-                              licsalert_settings = None, icasar_settings = None, 
-                              licsbas_settings = None, licsalert_pkg_dir = None):                   
+def LiCSAlert_monitoring_mode(
+        outdir, region, volcano,                                              
+        licsbas_dir = None,
+        licsbas_jasmin_dir = None,
+        data_as_arg = None,
+        alignsar_dc = None,
+        licsalert_settings = None, 
+        icasar_settings = None, 
+        licsbas_settings = None,
+        licsalert_pkg_dir = None,
+        ):                   
     """The main function for running LiCSAlert is monitoring mode.  It was designed to work with LiCSAR interferograms, but could be used with 
     any product that creates interfegorams that LiCSBAS can use (which is used for the time series calculation.  )
     
@@ -126,17 +132,32 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         (licsalert_settings, icasar_settings, licsbas_settings) = outputs
         del outputs
 
+
     # 2: Open the data
-    displacement_r3, tbaseline_info = import_insar_data(volcano, 
-            volcano_dir, region, licsalert_settings, icasar_settings, 
-            licsbas_settings,
-            licsbas_jasmin_dir, licsbas_dir, alignsar_dc, data_as_arg
-            )
+    displacement_r3, tbaseline_info = import_insar_data(
+        volcano, 
+        volcano_dir,
+        region,
+        licsalert_settings,
+        icasar_settings, 
+        licsbas_settings,
+        licsbas_jasmin_dir,
+        licsbas_dir,
+        alignsar_dc,
+        data_as_arg,
+        )
+    
+    
+    # debug
+    # from licsalert.debugging import interactive_ts_viewer
+    # interactive_ts_viewer(displacement_r3['cum_ma'])
     
     # 3: Possibly draw a mask manually (and apply it to displacement_r2)
     if 'draw_manual_mask' in licsbas_settings.keys():
         displacement_r3 = manual_mask_wrapper(
-            volcano_dir, licsbas_settings['draw_manual_mask'], displacement_r3
+            volcano_dir,
+            licsbas_settings['draw_manual_mask'],
+            displacement_r3
             )        
     
     # check for the unusual case that there are fewer pixels than pca_comps 
@@ -150,9 +171,10 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     #             "{displacement_r2['incremental'].shape[1]} than ")
 
 
-    # mixtures_mc and means contains the daisy chain of ifgs mean centered either 
-    # in space or time, depending on whther sica or tica
-    
+    # Downsample the data in space once for use (to increase speed)
+    # and once for plotting (to make very small images)
+    # also mean centre in time and space, making 'cum_ma' a mean centered array
+    # (a custom LiCSAlert object)
     displacement_r3 = LiCSAlert_preprocessing(
         displacement_r3,
         tbaseline_info,
@@ -211,6 +233,52 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
     )
     
     if LiCSAlert_status['run_LiCSAlert']:
+        
+        #%% Debug data going into baseline stage
+        
+        # import numpy as np
+        # import matplotlib.pyplot as plt
+        # from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+        
+        # for ifg_n in range(27):
+        
+            
+        #     # --- main image -----------------------------------------------------------
+        #     f, ax = plt.subplots()
+            
+        #     #img_ma = displacement_r3['cum_ma'].mean_centered.space[ifg_n,]
+        #     img_ma = displacement_r3['cum_ma'].original[ifg_n,]
+            
+        #     im = ax.matshow(img_ma, cmap="viridis")
+        #     ax.set_title(tbaseline_info["ifg_dates"][ifg_n])
+        #     ax.axis("off")                    # optional: hide the main axes ticks
+            
+        #     # --- inset histogram ------------------------------------------------------
+        #     # get the numeric values you actually want to histogram
+        #     vals = img_ma.compressed()        # masked-array friendly; returns a 1-D np.ndarray
+            
+        #     ax_hist = inset_axes(
+        #         ax,
+        #         width="30%", height="30%",    # relative to the parent Axes
+        #         loc="upper right",            # corner choice
+        #         borderpad=0.8,                # space between image edge and inset
+        #     )
+        #     ax_hist.hist(vals, bins=30, color="slategray", alpha=0.85)
+        #     #ax_hist.set_xticks([]), ax_hist.set_yticks([])   # keep it clean
+        #     ax_hist.set_title("Histogram", fontsize=7)
+            
+        #     # optional: colour bar for the main image
+        #     f.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+            
+        #     plt.tight_layout()
+        #     plt.show()
+        #     plt.pause(1)
+        
+        #%%
+        
+        
+
+        
         # determine the time series to be used for ICA.  Note that this is
         # no longer all epochs, and is instead a subset that compromises
         # temporal resolution and the number of pixels retained.  
@@ -230,10 +298,52 @@ def LiCSAlert_monitoring_mode(outdir, region, volcano,
         
 
         
+        #%% Debug baseline data.
+        
+        # import numpy as np
+        # import matplotlib.pyplot as plt
+        # from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+        
+        # for ifg_n in range(5):
+        
+            
+        #     # --- main image -----------------------------------------------------------
+        #     f, ax = plt.subplots()
+            
+        #     img_ma = col_to_ma(
+        #         displacement_r2_ica["incremental_mc_space"][ifg_n],
+        #         displacement_r2_ica["mask"],
+        #     )
+        #     im = ax.matshow(img_ma, cmap="viridis")
+        #     ax.set_title(tbaseline_info_ica["ifg_dates"][ifg_n])
+        #     ax.axis("off")                    # optional: hide the main axes ticks
+            
+        #     # --- inset histogram ------------------------------------------------------
+        #     # get the numeric values you actually want to histogram
+        #     vals = img_ma.compressed()        # masked-array friendly; returns a 1-D np.ndarray
+            
+        #     ax_hist = inset_axes(
+        #         ax,
+        #         width="30%", height="30%",    # relative to the parent Axes
+        #         loc="upper right",            # corner choice
+        #         borderpad=0.8,                # space between image edge and inset
+        #     )
+        #     ax_hist.hist(vals, bins=30, color="slategray", alpha=0.85)
+        #     #ax_hist.set_xticks([]), ax_hist.set_yticks([])   # keep it clean
+        #     ax_hist.set_title("Histogram", fontsize=7)
+            
+        #     # optional: colour bar for the main image
+        #     f.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+            
+        #     plt.tight_layout()
+        #     plt.show()
+
+       
         # either load ICA from previous run, or compute it.  
         # note that displacement_r2_ica contains mixtures_mc, which are the 
         # input ifgs either mean centered in time or space, depending on 
         # how the sica_tica flag is set
+        # note that this now only accepts non-mean-centered data
         outputs = load_or_create_ICASAR_results(
             LiCSAlert_status['run_ICASAR'],
             displacement_r2_ica,

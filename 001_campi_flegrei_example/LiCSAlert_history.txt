@@ -3,359 +3,386 @@
 
 
 
-LiCSAlert is being run for 001_campi_flegrei_example at 20/09/2024 17:09:44
+LiCSAlert is being run for 001_campi_flegrei_example at 05/09/2025 13:42:55
 All the required arguments were found in the dictionary.  
 All the required arguments were found in the dictionary.  
 All the required arguments were found in the dictionary.  
 LiCSAlert is opening a LiCSBAS directory.  
 Opening the LiCSBAS unfiltered results.  
-Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
-LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects only the incremental displacements.  
-This interferogram timeseries has 326 times and 7873 pixels.  
-Interferogram were originally (181, 281) (31766 unmasked pixels), but have been downsampled to (90, 140) (7873 unmasked pixels) for use with LiCSAlert, and have been downsampled to (45, 70) (1965 unmasked pixels) for figures.  
+Starting to reference the LiCSBAS time series...Done.  
+[ 838   55   37   45   32   20   47   57  122   84   79  125  104   91
+  182  397  272  276  310  128   68   26    3   41  105  364  180   53
+   33   17   34  119   87  127  153  141   81   46   74  218  960  911
+ 4281 4280 4279 4278 1169  220   22   21   35   74   91   14   12    8
+    6   68   64   78   16   21    5    7    7   37  131  228   61   22
+    3    9   27   46   19   17   12    2   12   14   24   31   29   23
+    4   12    6   52   52   59    9    9   17   10    6    5    6   10
+    4   10   14    0    0    4   11   18    9   16   44   27   34   67
+   91   89  334   79   45   23   43   18   24   10   28   30   30  104
+   76   71   39   16   24   68   38   16   14   14   22   44   55   97
+  151  104   48   25    8   14   12   12   15   25   21   11    6    9
+   25   52   44   38  138   74  148   99  104   29   30   81   33   56
+   75   32   57   59   69  148   93  302  848  809  661  274  455  351
+   21   37    4   12   34   48  265  262   65   37   55  171   63   31
+   11    6    9   12   17   34   11   11   14    9   23   35   46   46
+   37   31   22   62  375  478  280  147  133   91   87   50   63   63
+    6    7    6    4    1    0    0    2   13   24   37  146 6031 6029
+  485   94   94   85   46   20   56   59   42   16    7    0    0    0
+    0    0    0    0    0    0    0    0    0    0    0    0    0    0
+    0    5    6   10   11    9    1    1    1    1   13   11    6   25
+   68   33    8   73   73   73   73   73   73   73   73   73 6033 6033
+ 6045 6044 6047 6044 6044 6037 6040 6050 6065 6082 6075 6076 6068 6051
+ 6046 6051 6045 6032 6038 6066 6041 6035 6036 6045 6055 6047 6047 6050
+ 6041 6041 6051 6072]
+Failed to open the E N U files (look vector components), but trying to continue anyway.
+REMOVED THE CHECK FOR FEWER PIXELS THAN PCA COMPONENTS
+The cumulative time series was size (327, 181, 281) and has been downsampled in space to (327, 90, 140) 
 
 As the baseline_end date did not lie on an acquisition date, it has been updated so that it does.  Previously, it was 20170101, but it is now 20161231
-LiCSBAS date    Past baseline    LiCSAlert      
-20141031          no              not requested
-20141218          no              not requested
-20150111          no              not requested
-20150123          no              not requested
-20150216          no              not requested
-20150228          no              not requested
-20150312          no              not requested
-20150324          no              not requested
-20150405          no              not requested
-20150429          no              not requested
-20150511          no              not requested
-20150523          no              not requested
-20150604          no              not requested
-20150710          no              not requested
-20150722          no              not requested
-20150815          no              not requested
-20150920          no              not requested
-20151002          no              not requested
-20151014          no              not requested
-20151107          no              not requested
-20151119          no              not requested
-20151201          no              not requested
-20151213          no              not requested
-20151225          no              not requested
-20160106          no              not requested
-20160118          no              not requested
-20160211          no              not requested
-20160223          no              not requested
-20160306          no              not requested
-20160318          no              not requested
-20160330          no              not requested
-20160411          no              not requested
-20160505          no              not requested
-20160517          no              not requested
-20160529          no              not requested
-20160610          no              not requested
-20160704          no              not requested
-20160716          no              not requested
-20160728          no              not requested
-20160809          no              not requested
-20160821          no              not requested
-20160902          no              not requested
-20160914          no              not requested
-20160926          no              not requested
-20161002          no              not requested
-20161008          no              not requested
-20161014          no              not requested
-20161020          no              not requested
-20161026          no              not requested
-20161101          no              not requested
-20161107          no              not requested
-20161113          no              not requested
-20161119          no              not requested
-20161201          no              not requested
-20161207          no              not requested
-20161213          no              not requested
-20161219          no              not requested
-20161225          no              not requested
-20161231          no              not requested
-20170112          yes             not requested
-20170118          yes             not requested
-20170124          yes             not requested
-20170130          yes             not requested
-20170205          yes             not requested
-20170211          yes             not requested
-20170223          yes             not requested
-20170301          yes             not requested
-20170307          yes             not requested
-20170313          yes             not requested
-20170319          yes             not requested
-20170325          yes             not requested
-20170331          yes             not requested
-20170406          yes             not requested
-20170412          yes             not requested
-20170418          yes             not requested
-20170424          yes             not requested
-20170430          yes             not requested
-20170506          yes             not requested
-20170512          yes             not requested
-20170518          yes             not requested
-20170524          yes             not requested
-20170530          yes             not requested
-20170605          yes             not requested
-20170611          yes             not requested
-20170617          yes             not requested
-20170623          yes             not requested
-20170629          yes             not requested
-20170705          yes             not requested
-20170711          yes             not requested
-20170717          yes             not requested
-20170723          yes             not requested
-20170729          yes             not requested
-20170804          yes             not requested
-20170816          yes             not requested
-20170822          yes             not requested
-20170828          yes             not requested
-20170903          yes             not requested
-20170909          yes             not requested
-20170915          yes             not requested
-20170921          yes             not requested
-20170927          yes             not requested
-20171009          yes             not requested
-20171015          yes             not requested
-20171021          yes             not requested
-20171027          yes             not requested
-20171102          yes             not requested
-20171108          yes             not requested
-20171114          yes             not requested
-20171120          yes             not requested
-20171202          yes             not requested
-20171208          yes             not requested
-20171214          yes             not requested
-20171226          yes             not requested
-20180101          yes             not requested
-20180107          yes             not requested
-20180113          yes             not requested
-20180119          yes             not requested
-20180125          yes             not requested
-20180131          yes             not requested
-20180206          yes             not requested
-20180218          yes             not requested
-20180224          yes             not requested
-20180302          yes             not requested
-20180308          yes             not requested
-20180314          yes             not requested
-20180320          yes             not requested
-20180326          yes             not requested
-20180401          yes             not requested
-20180407          yes             not requested
-20180413          yes             not requested
-20180419          yes             not requested
-20180425          yes             not requested
-20180501          yes             not requested
-20180507          yes             not requested
-20180513          yes             not requested
-20180519          yes             not requested
-20180525          yes             not requested
-20180531          yes             not requested
-20180606          yes             not requested
-20180612          yes             not requested
-20180618          yes             not requested
-20180630          yes             not requested
-20180712          yes             not requested
-20180718          yes             not requested
-20180724          yes             not requested
-20180730          yes             not requested
-20180805          yes             not requested
-20180811          yes             not requested
-20180817          yes             not requested
-20180823          yes             not requested
-20180829          yes             not requested
-20180904          yes             not requested
-20180910          yes             not requested
-20180916          yes             not requested
-20180922          yes             not requested
-20180928          yes             not requested
-20181004          yes             not requested
-20181010          yes             not requested
-20181016          yes             not requested
-20181022          yes             not requested
-20181028          yes             not requested
-20181109          yes             not requested
-20181115          yes             not requested
-20181121          yes             not requested
-20181127          yes             not requested
-20181203          yes             not requested
-20181209          yes             not requested
-20181215          yes             not requested
-20181221          yes             not requested
-20181227          yes             not requested
-20190102          yes             not requested
-20190108          yes             not requested
-20190114          yes             not requested
-20190120          yes             not requested
-20190126          yes             not requested
-20190201          yes             not requested
-20190207          yes             not requested
-20190213          yes             not requested
-20190225          yes             not requested
-20190303          yes             not requested
-20190309          yes             not requested
-20190321          yes             not requested
-20190402          yes             not requested
-20190408          yes             not requested
-20190414          yes             not requested
-20190420          yes             not requested
-20190426          yes             not requested
-20190502          yes             not requested
-20190508          yes             not requested
-20190520          yes             not requested
-20190526          yes             not requested
-20190601          yes             not requested
-20190607          yes             not requested
-20190613          yes             not requested
-20190625          yes             not requested
-20190701          yes             not requested
-20190707          yes             not requested
-20190713          yes             not requested
-20190719          yes             not requested
-20190725          yes             not requested
-20190731          yes             not requested
-20190806          yes             not requested
-20190812          yes             not requested
-20190818          yes             not requested
-20190824          yes             not requested
-20190830          yes             not requested
-20190905          yes             not requested
-20190911          yes             not requested
-20190917          yes             not requested
-20190923          yes             not requested
-20191005          yes             not requested
-20191011          yes             not requested
-20191017          yes             not requested
-20191023          yes             not requested
-20191029          yes             not requested
-20191104          yes             not requested
-20191116          yes             not requested
-20191122          yes             not requested
-20191128          yes             not requested
-20191204          yes             not requested
-20191210          yes             not requested
-20191216          yes             not requested
-20191222          yes             not requested
-20191228          yes             not requested
-20200103          yes             not requested
-20200109          yes             not requested
-20200115          yes             not requested
-20200121          yes             not requested
-20200127          yes             not requested
-20200202          yes             not requested
-20200208          yes             not requested
-20200214          yes             not requested
-20200220          yes             not requested
-20200226          yes             not requested
-20200303          yes             not requested
-20200309          yes             not requested
-20200315          yes             not requested
-20200321          yes             not requested
-20200402          yes             not requested
-20200408          yes             not requested
-20200414          yes             not requested
-20200420          yes             not requested
-20200426          yes             not requested
-20200502          yes             not requested
-20200508          yes             not requested
-20200514          yes             not requested
-20200520          yes             not requested
-20200526          yes             not requested
-20200601          yes             not requested
-20200607          yes             not requested
-20200613          yes             not requested
-20200619          yes             not requested
-20200625          yes             not requested
-20200701          yes             not requested
-20200707          yes             not requested
-20200713          yes             not requested
-20200719          yes             not requested
-20200725          yes             not requested
-20200731          yes             not requested
-20200806          yes             not requested
-20200812          yes             not requested
-20200818          yes             not requested
-20200824          yes             not requested
-20200830          yes             not requested
-20200905          yes             not requested
-20200911          yes             not requested
-20200917          yes             not requested
-20200923          yes             not requested
-20200929          yes             not requested
-20201005          yes             not requested
-20201011          yes             not requested
-20201017          yes             not requested
-20201023          yes             not requested
-20201029          yes             not requested
-20201104          yes             not requested
-20201110          yes             not requested
-20201116          yes             not requested
-20201122          yes             not requested
-20201128          yes             not requested
-20201204          yes             not requested
-20201210          yes             not requested
-20201216          yes             not requested
-20201222          yes             not requested
-20201228          yes             not requested
-20210103          yes             not requested
-20210109          yes             not requested
-20210115          yes             not requested
-20210121          yes             not requested
-20210127          yes             not requested
-20210202          yes             not requested
-20210208          yes             not requested
-20210214          yes             not requested
-20210220          yes             not requested
-20210226          yes             not requested
-20210304          yes             not requested
-20210310          yes             not requested
-20210316          yes             not requested
-20210322          yes             not requested
-20210328          yes             not requested
-20210403          yes             not requested
-20210409          yes             not requested
-20210415          yes             not requested
-20210421          yes             not requested
-20210427          yes             not requested
-20210503          yes             not requested
-20210509          yes             not requested
-20210515          yes             not requested
-20210521          yes             not requested
-20210527          yes             not requested
-20210602          yes             not requested
-20210608          yes             not requested
-20210614          yes             not requested
-20210620          yes             not requested
-20210626          yes             not requested
-20210702          yes             not requested
-20210708          yes             not requested
-20210714          yes             not requested
-20210720          yes             not requested
-20210726          yes             not requested
-20210801          yes             not requested
-20210807          yes             not requested
-20210813          yes             not requested
-20210819          yes             not requested
-20210825          yes             not requested
-20210831          yes             not requested
-20210906          yes             not requested
-20210912          yes             pending 
-LiCSAlert status:  1) Run ICASAR: True  2) Run LiCSAlert: True
+Epoch #    LiCSBAS date    Past baseline    LiCSAlert      
+0            20141031          no              not requested
+1            20141218          no              not requested
+2            20150111          no              not requested
+3            20150123          no              not requested
+4            20150216          no              not requested
+5            20150228          no              not requested
+6            20150312          no              not requested
+7            20150324          no              not requested
+8            20150405          no              not requested
+9            20150429          no              not requested
+10            20150511          no              not requested
+11            20150523          no              not requested
+12            20150604          no              not requested
+13            20150710          no              not requested
+14            20150722          no              not requested
+15            20150815          no              not requested
+16            20150920          no              not requested
+17            20151002          no              not requested
+18            20151014          no              not requested
+19            20151107          no              not requested
+20            20151119          no              not requested
+21            20151201          no              not requested
+22            20151213          no              not requested
+23            20151225          no              not requested
+24            20160106          no              not requested
+25            20160118          no              not requested
+26            20160211          no              not requested
+27            20160223          no              not requested
+28            20160306          no              not requested
+29            20160318          no              not requested
+30            20160330          no              not requested
+31            20160411          no              not requested
+32            20160505          no              not requested
+33            20160517          no              not requested
+34            20160529          no              not requested
+35            20160610          no              not requested
+36            20160704          no              not requested
+37            20160716          no              not requested
+38            20160728          no              not requested
+39            20160809          no              not requested
+40            20160821          no              not requested
+41            20160902          no              not requested
+42            20160914          no              not requested
+43            20160926          no              not requested
+44            20161002          no              not requested
+45            20161008          no              not requested
+46            20161014          no              not requested
+47            20161020          no              not requested
+48            20161026          no              not requested
+49            20161101          no              not requested
+50            20161107          no              not requested
+51            20161113          no              not requested
+52            20161119          no              not requested
+53            20161201          no              not requested
+54            20161207          no              not requested
+55            20161213          no              not requested
+56            20161219          no              not requested
+57            20161225          no              not requested
+58            20161231          no              not requested
+59            20170112          yes             not requested
+60            20170118          yes             not requested
+61            20170124          yes             not requested
+62            20170130          yes             not requested
+63            20170205          yes             not requested
+64            20170211          yes             not requested
+65            20170223          yes             not requested
+66            20170301          yes             not requested
+67            20170307          yes             not requested
+68            20170313          yes             not requested
+69            20170319          yes             not requested
+70            20170325          yes             not requested
+71            20170331          yes             not requested
+72            20170406          yes             not requested
+73            20170412          yes             not requested
+74            20170418          yes             not requested
+75            20170424          yes             not requested
+76            20170430          yes             not requested
+77            20170506          yes             not requested
+78            20170512          yes             not requested
+79            20170518          yes             not requested
+80            20170524          yes             not requested
+81            20170530          yes             not requested
+82            20170605          yes             not requested
+83            20170611          yes             not requested
+84            20170617          yes             not requested
+85            20170623          yes             not requested
+86            20170629          yes             not requested
+87            20170705          yes             not requested
+88            20170711          yes             not requested
+89            20170717          yes             not requested
+90            20170723          yes             not requested
+91            20170729          yes             not requested
+92            20170804          yes             not requested
+93            20170816          yes             not requested
+94            20170822          yes             not requested
+95            20170828          yes             not requested
+96            20170903          yes             not requested
+97            20170909          yes             not requested
+98            20170915          yes             not requested
+99            20170921          yes             not requested
+100            20170927          yes             not requested
+101            20171009          yes             not requested
+102            20171015          yes             not requested
+103            20171021          yes             not requested
+104            20171027          yes             not requested
+105            20171102          yes             not requested
+106            20171108          yes             not requested
+107            20171114          yes             not requested
+108            20171120          yes             not requested
+109            20171202          yes             not requested
+110            20171208          yes             not requested
+111            20171214          yes             not requested
+112            20171226          yes             not requested
+113            20180101          yes             not requested
+114            20180107          yes             not requested
+115            20180113          yes             not requested
+116            20180119          yes             not requested
+117            20180125          yes             not requested
+118            20180131          yes             not requested
+119            20180206          yes             not requested
+120            20180218          yes             not requested
+121            20180224          yes             not requested
+122            20180302          yes             not requested
+123            20180308          yes             not requested
+124            20180314          yes             not requested
+125            20180320          yes             not requested
+126            20180326          yes             not requested
+127            20180401          yes             not requested
+128            20180407          yes             not requested
+129            20180413          yes             not requested
+130            20180419          yes             not requested
+131            20180425          yes             not requested
+132            20180501          yes             not requested
+133            20180507          yes             not requested
+134            20180513          yes             not requested
+135            20180519          yes             not requested
+136            20180525          yes             not requested
+137            20180531          yes             not requested
+138            20180606          yes             not requested
+139            20180612          yes             not requested
+140            20180618          yes             not requested
+141            20180630          yes             not requested
+142            20180712          yes             not requested
+143            20180718          yes             not requested
+144            20180724          yes             not requested
+145            20180730          yes             not requested
+146            20180805          yes             not requested
+147            20180811          yes             not requested
+148            20180817          yes             not requested
+149            20180823          yes             not requested
+150            20180829          yes             not requested
+151            20180904          yes             not requested
+152            20180910          yes             not requested
+153            20180916          yes             not requested
+154            20180922          yes             not requested
+155            20180928          yes             not requested
+156            20181004          yes             not requested
+157            20181010          yes             not requested
+158            20181016          yes             not requested
+159            20181022          yes             not requested
+160            20181028          yes             not requested
+161            20181109          yes             not requested
+162            20181115          yes             not requested
+163            20181121          yes             not requested
+164            20181127          yes             not requested
+165            20181203          yes             not requested
+166            20181209          yes             not requested
+167            20181215          yes             not requested
+168            20181221          yes             not requested
+169            20181227          yes             not requested
+170            20190102          yes             not requested
+171            20190108          yes             not requested
+172            20190114          yes             not requested
+173            20190120          yes             not requested
+174            20190126          yes             not requested
+175            20190201          yes             not requested
+176            20190207          yes             not requested
+177            20190213          yes             not requested
+178            20190225          yes             not requested
+179            20190303          yes             not requested
+180            20190309          yes             not requested
+181            20190321          yes             not requested
+182            20190402          yes             not requested
+183            20190408          yes             not requested
+184            20190414          yes             not requested
+185            20190420          yes             not requested
+186            20190426          yes             not requested
+187            20190502          yes             not requested
+188            20190508          yes             not requested
+189            20190520          yes             not requested
+190            20190526          yes             not requested
+191            20190601          yes             not requested
+192            20190607          yes             not requested
+193            20190613          yes             not requested
+194            20190625          yes             not requested
+195            20190701          yes             not requested
+196            20190707          yes             not requested
+197            20190713          yes             not requested
+198            20190719          yes             not requested
+199            20190725          yes             not requested
+200            20190731          yes             not requested
+201            20190806          yes             not requested
+202            20190812          yes             not requested
+203            20190818          yes             not requested
+204            20190824          yes             not requested
+205            20190830          yes             not requested
+206            20190905          yes             not requested
+207            20190911          yes             not requested
+208            20190917          yes             not requested
+209            20190923          yes             not requested
+210            20191005          yes             not requested
+211            20191011          yes             not requested
+212            20191017          yes             not requested
+213            20191023          yes             not requested
+214            20191029          yes             not requested
+215            20191104          yes             not requested
+216            20191116          yes             not requested
+217            20191122          yes             not requested
+218            20191128          yes             not requested
+219            20191204          yes             not requested
+220            20191210          yes             not requested
+221            20191216          yes             not requested
+222            20191222          yes             not requested
+223            20191228          yes             not requested
+224            20200103          yes             not requested
+225            20200109          yes             not requested
+226            20200115          yes             not requested
+227            20200121          yes             not requested
+228            20200127          yes             not requested
+229            20200202          yes             not requested
+230            20200208          yes             not requested
+231            20200214          yes             not requested
+232            20200220          yes             not requested
+233            20200226          yes             not requested
+234            20200303          yes             not requested
+235            20200309          yes             not requested
+236            20200315          yes             not requested
+237            20200321          yes             not requested
+238            20200402          yes             not requested
+239            20200408          yes             not requested
+240            20200414          yes             not requested
+241            20200420          yes             not requested
+242            20200426          yes             not requested
+243            20200502          yes             not requested
+244            20200508          yes             not requested
+245            20200514          yes             not requested
+246            20200520          yes             not requested
+247            20200526          yes             not requested
+248            20200601          yes             not requested
+249            20200607          yes             not requested
+250            20200613          yes             not requested
+251            20200619          yes             not requested
+252            20200625          yes             not requested
+253            20200701          yes             not requested
+254            20200707          yes             not requested
+255            20200713          yes             not requested
+256            20200719          yes             not requested
+257            20200725          yes             not requested
+258            20200731          yes             not requested
+259            20200806          yes             not requested
+260            20200812          yes             not requested
+261            20200818          yes             not requested
+262            20200824          yes             not requested
+263            20200830          yes             not requested
+264            20200905          yes             not requested
+265            20200911          yes             not requested
+266            20200917          yes             not requested
+267            20200923          yes             not requested
+268            20200929          yes             not requested
+269            20201005          yes             not requested
+270            20201011          yes             not requested
+271            20201017          yes             not requested
+272            20201023          yes             not requested
+273            20201029          yes             not requested
+274            20201104          yes             not requested
+275            20201110          yes             not requested
+276            20201116          yes             not requested
+277            20201122          yes             not requested
+278            20201128          yes             not requested
+279            20201204          yes             not requested
+280            20201210          yes             not requested
+281            20201216          yes             not requested
+282            20201222          yes             not requested
+283            20201228          yes             not requested
+284            20210103          yes             not requested
+285            20210109          yes             not requested
+286            20210115          yes             not requested
+287            20210121          yes             not requested
+288            20210127          yes             not requested
+289            20210202          yes             not requested
+290            20210208          yes             not requested
+291            20210214          yes             not requested
+292            20210220          yes             not requested
+293            20210226          yes             not requested
+294            20210304          yes             not requested
+295            20210310          yes             not requested
+296            20210316          yes             not requested
+297            20210322          yes             not requested
+298            20210328          yes             not requested
+299            20210403          yes             not requested
+300            20210409          yes             not requested
+301            20210415          yes             not requested
+302            20210421          yes             not requested
+303            20210427          yes             not requested
+304            20210503          yes             not requested
+305            20210509          yes             not requested
+306            20210515          yes             not requested
+307            20210521          yes             not requested
+308            20210527          yes             not requested
+309            20210602          yes             not requested
+310            20210608          yes             not requested
+311            20210614          yes             not requested
+312            20210620          yes             not requested
+313            20210626          yes             not requested
+314            20210702          yes             not requested
+315            20210708          yes             not requested
+316            20210714          yes             not requested
+317            20210720          yes             not requested
+318            20210726          yes             not requested
+319            20210801          yes             not requested
+320            20210807          yes             not requested
+321            20210813          yes             not requested
+322            20210819          yes             not requested
+323            20210825          yes             not requested
+324            20210831          yes             not requested
+325            20210906          yes             not requested
+326            20210912          yes             pending 
+LiCSAlert status: 
+    1) Run ICASAR: True
+    2) Run LiCSAlert: True
+Updating the figure to 58 epochs... Done.
 
 Running ICASAR.
 From the data passed to ICASAR, I understand it to be spatial data (e.g. time series of images)
 As 'lons' and 'lats' have been provided, the ICs will be geocoded.  
 Spatial patterns will be statitically independent and The cumulative (single master) interferograms will be used.  
 Creating all possible variations of the time series (incremental/daisy chain, cumulative, and all possible).  
-When creating all interferograms, 59 were passed to the function, and these were found to make 1 connected networks.  From these, 1000 interferograms were created.  
-This interferogram timeseries has 59 times and 7873 pixels.  
-This interferogram timeseries has 1000 times and 7873 pixels.  
-This interferogram timeseries has 59 times and 7873 pixels.  
+When creating all interferograms, 57 were passed to the function, and these were found to make 1 connected networks.  From these, 1000 interferograms were created.  
+This interferogram timeseries has 57 times and 9139 pixels.  
+This interferogram timeseries has 1000 times and 9139 pixels.  
+This interferogram timeseries has 57 times and 9139 pixels.  
 Performing PCA to whiten the data....Starting to create the 02_PCA_7_components_correlations figure:
-Updating the masks for the two sources.  Of the 7873 in data1 and 8278 in data2, 7645 are in both and can be used.  
+Updating the masks for the two sources.  Of the 9139 in data1 and 8278 in data2, 8274 are in both and can be used.  
     Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 6 
 
     Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 6 
@@ -367,475 +394,450 @@ No results were found for the multiple ICA runs, so these will now be performed.
 
 
 Starting the multiple ICA runs with 6 principal components
-FastICA progress with bootstrapping: FastICA algorithm converged in 6 iterations.  
-0% FastICA algorithm converged in 9 iterations.  
-1% FastICA algorithm converged in 66 iterations.  
+FastICA progress with bootstrapping: FastICA algorithm didn't converge in 149 iterations.  
+0% FastICA algorithm converged in 5 iterations.  
+0% FastICA algorithm converged in 15 iterations.  
+1% FastICA algorithm converged in 7 iterations.  
 1% FastICA algorithm didn't converge in 149 iterations.  
 1% FastICA algorithm converged in 5 iterations.  
+2% FastICA algorithm converged in 5 iterations.  
 2% FastICA algorithm converged in 7 iterations.  
-2% FastICA algorithm converged in 6 iterations.  
-3% FastICA algorithm converged in 17 iterations.  
+3% FastICA algorithm didn't converge in 149 iterations.  
+3% FastICA algorithm converged in 23 iterations.  
 3% FastICA algorithm converged in 6 iterations.  
-4% FastICA algorithm converged in 10 iterations.  
-4% FastICA algorithm converged in 8 iterations.  
-5% FastICA algorithm converged in 9 iterations.  
-5% FastICA algorithm converged in 10 iterations.  
-6% FastICA algorithm converged in 9 iterations.  
-6% FastICA algorithm converged in 7 iterations.  
-7% FastICA algorithm converged in 17 iterations.  
-7% FastICA algorithm didn't converge in 149 iterations.  
-7% FastICA algorithm converged in 5 iterations.  
-8% FastICA algorithm didn't converge in 149 iterations.  
-8% FastICA algorithm converged in 4 iterations.  
-8% FastICA algorithm converged in 6 iterations.  
-9% FastICA algorithm converged in 6 iterations.  
-9% FastICA algorithm converged in 9 iterations.  
-10% FastICA algorithm converged in 71 iterations.  
-10% FastICA algorithm converged in 9 iterations.  
-11% FastICA algorithm converged in 8 iterations.  
-11% FastICA algorithm converged in 45 iterations.  
-12% FastICA algorithm converged in 7 iterations.  
-12% FastICA algorithm didn't converge in 149 iterations.  
-12% FastICA algorithm converged in 10 iterations.  
-13% FastICA algorithm didn't converge in 149 iterations.  
-13% FastICA algorithm converged in 13 iterations.  
-13% FastICA algorithm didn't converge in 149 iterations.  
-13% FastICA algorithm converged in 6 iterations.  
-14% FastICA algorithm didn't converge in 149 iterations.  
-14% FastICA algorithm converged in 8 iterations.  
-14% FastICA algorithm converged in 7 iterations.  
-15% FastICA algorithm converged in 80 iterations.  
-15% FastICA algorithm converged in 33 iterations.  
-16% FastICA algorithm converged in 8 iterations.  
-16% FastICA algorithm converged in 12 iterations.  
-17% FastICA algorithm converged in 7 iterations.  
-17% FastICA algorithm converged in 88 iterations.  
-18% FastICA algorithm converged in 4 iterations.  
-18% FastICA algorithm didn't converge in 149 iterations.  
-18% FastICA algorithm converged in 5 iterations.  
-19% FastICA algorithm converged in 4 iterations.  
-19% FastICA algorithm converged in 7 iterations.  
-20% FastICA algorithm converged in 6 iterations.  
-20% FastICA algorithm converged in 6 iterations.  
-21% FastICA algorithm converged in 5 iterations.  
-21% FastICA algorithm converged in 7 iterations.  
-22% FastICA algorithm converged in 9 iterations.  
-22% FastICA algorithm converged in 6 iterations.  
-23% FastICA algorithm converged in 5 iterations.  
-23% FastICA algorithm didn't converge in 149 iterations.  
-23% FastICA algorithm converged in 6 iterations.  
-24% FastICA algorithm converged in 5 iterations.  
-24% FastICA algorithm converged in 33 iterations.  
-25% FastICA algorithm converged in 54 iterations.  
-25% FastICA algorithm didn't converge in 149 iterations.  
-25% FastICA algorithm converged in 4 iterations.  
-26% FastICA algorithm converged in 5 iterations.  
-26% FastICA algorithm converged in 6 iterations.  
-27% FastICA algorithm didn't converge in 149 iterations.  
-27% FastICA algorithm converged in 61 iterations.  
-27% FastICA algorithm converged in 33 iterations.  
-28% FastICA algorithm converged in 8 iterations.  
-28% FastICA algorithm didn't converge in 149 iterations.  
-28% FastICA algorithm converged in 6 iterations.  
-28% FastICA algorithm converged in 5 iterations.  
-29% FastICA algorithm converged in 28 iterations.  
-30% FastICA algorithm converged in 19 iterations.  
-30% FastICA algorithm didn't converge in 149 iterations.  
-30% FastICA algorithm converged in 7 iterations.  
-31% FastICA algorithm converged in 5 iterations.  
-31% FastICA algorithm converged in 5 iterations.  
-32% FastICA algorithm converged in 38 iterations.  
-32% FastICA algorithm converged in 4 iterations.  
-33% FastICA algorithm converged in 90 iterations.  
-33% FastICA algorithm converged in 6 iterations.  
-34% FastICA algorithm converged in 15 iterations.  
-34% FastICA algorithm converged in 14 iterations.  
-35% FastICA algorithm converged in 13 iterations.  
-35% FastICA algorithm converged in 8 iterations.  
-36% FastICA algorithm converged in 5 iterations.  
-36% FastICA algorithm converged in 5 iterations.  
-37% FastICA algorithm converged in 4 iterations.  
-37% FastICA algorithm converged in 49 iterations.  
-38% FastICA algorithm converged in 7 iterations.  
-38% FastICA algorithm converged in 7 iterations.  
-39% FastICA algorithm didn't converge in 149 iterations.  
-39% FastICA algorithm converged in 11 iterations.  
-39% FastICA algorithm converged in 4 iterations.  
-40% FastICA algorithm converged in 45 iterations.  
-40% FastICA algorithm didn't converge in 149 iterations.  
-40% FastICA algorithm converged in 5 iterations.  
-41% FastICA algorithm didn't converge in 149 iterations.  
-41% FastICA algorithm converged in 7 iterations.  
-41% FastICA algorithm converged in 10 iterations.  
-42% FastICA algorithm converged in 6 iterations.  
-42% FastICA algorithm converged in 6 iterations.  
-43% FastICA algorithm converged in 5 iterations.  
-43% FastICA algorithm converged in 57 iterations.  
-44% FastICA algorithm converged in 8 iterations.  
-44% FastICA algorithm didn't converge in 149 iterations.  
-44% FastICA algorithm converged in 5 iterations.  
-45% FastICA algorithm converged in 27 iterations.  
-45% FastICA algorithm converged in 72 iterations.  
-46% FastICA algorithm converged in 18 iterations.  
-46% FastICA algorithm converged in 10 iterations.  
-47% FastICA algorithm converged in 8 iterations.  
-47% FastICA algorithm converged in 9 iterations.  
-48% FastICA algorithm didn't converge in 149 iterations.  
-48% FastICA algorithm converged in 9 iterations.  
-48% FastICA algorithm converged in 104 iterations.  
-49% FastICA algorithm converged in 32 iterations.  
-49% FastICA algorithm converged in 20 iterations.  
-50% FastICA algorithm converged in 54 iterations.  
-50% FastICA algorithm converged in 6 iterations.  
-51% FastICA algorithm converged in 6 iterations.  
-51% FastICA algorithm converged in 5 iterations.  
-52% FastICA algorithm converged in 10 iterations.  
-52% FastICA algorithm converged in 7 iterations.  
-53% FastICA algorithm converged in 8 iterations.  
-53% FastICA algorithm converged in 18 iterations.  
-54% FastICA algorithm converged in 6 iterations.  
-54% FastICA algorithm converged in 11 iterations.  
-55% FastICA algorithm didn't converge in 149 iterations.  
-55% FastICA algorithm converged in 25 iterations.  
-55% FastICA algorithm converged in 79 iterations.  
-56% FastICA algorithm converged in 6 iterations.  
-56% FastICA algorithm converged in 16 iterations.  
-56% FastICA algorithm converged in 5 iterations.  
-57% FastICA algorithm converged in 7 iterations.  
-57% FastICA algorithm converged in 8 iterations.  
-58% FastICA algorithm converged in 10 iterations.  
-59% FastICA algorithm converged in 3 iterations.  
-59% FastICA algorithm converged in 61 iterations.  
-60% FastICA algorithm didn't converge in 149 iterations.  
-60% FastICA algorithm converged in 18 iterations.  
-60% FastICA algorithm converged in 8 iterations.  
-61% FastICA algorithm converged in 4 iterations.  
-61% FastICA algorithm converged in 23 iterations.  
-62% FastICA algorithm converged in 12 iterations.  
-62% FastICA algorithm converged in 8 iterations.  
-63% FastICA algorithm converged in 11 iterations.  
-63% FastICA algorithm didn't converge in 149 iterations.  
-63% FastICA algorithm converged in 5 iterations.  
-64% FastICA algorithm converged in 6 iterations.  
-64% FastICA algorithm converged in 13 iterations.  
-65% FastICA algorithm converged in 5 iterations.  
-65% FastICA algorithm converged in 5 iterations.  
-66% FastICA algorithm converged in 5 iterations.  
-66% FastICA algorithm converged in 6 iterations.  
-67% FastICA algorithm converged in 4 iterations.  
-67% FastICA algorithm converged in 5 iterations.  
-68% FastICA algorithm converged in 4 iterations.  
-68% FastICA algorithm converged in 7 iterations.  
-69% FastICA algorithm didn't converge in 149 iterations.  
-69% FastICA algorithm converged in 10 iterations.  
-69% FastICA algorithm converged in 6 iterations.  
-70% FastICA algorithm converged in 49 iterations.  
-70% FastICA algorithm converged in 4 iterations.  
-71% FastICA algorithm converged in 4 iterations.  
-71% FastICA algorithm didn't converge in 149 iterations.  
-71% FastICA algorithm converged in 5 iterations.  
-72% FastICA algorithm didn't converge in 149 iterations.  
-72% FastICA algorithm didn't converge in 149 iterations.  
-72% FastICA algorithm converged in 5 iterations.  
-72% FastICA algorithm converged in 8 iterations.  
-73% FastICA algorithm converged in 27 iterations.  
-73% FastICA algorithm converged in 8 iterations.  
-74% FastICA algorithm converged in 33 iterations.  
-74% FastICA algorithm converged in 61 iterations.  
-75% FastICA algorithm converged in 108 iterations.  
-75% FastICA algorithm didn't converge in 149 iterations.  
-75% FastICA algorithm didn't converge in 149 iterations.  
-75% FastICA algorithm converged in 148 iterations.  
-76% FastICA algorithm converged in 5 iterations.  
-76% FastICA algorithm converged in 7 iterations.  
-77% FastICA algorithm converged in 13 iterations.  
-77% FastICA algorithm didn't converge in 149 iterations.  
-77% FastICA algorithm converged in 3 iterations.  
-78% FastICA algorithm converged in 14 iterations.  
-78% FastICA algorithm didn't converge in 149 iterations.  
-78% FastICA algorithm converged in 4 iterations.  
-79% FastICA algorithm didn't converge in 149 iterations.  
-79% FastICA algorithm converged in 8 iterations.  
-79% FastICA algorithm converged in 9 iterations.  
-80% FastICA algorithm converged in 14 iterations.  
-80% FastICA algorithm converged in 7 iterations.  
-81% FastICA algorithm converged in 8 iterations.  
-81% FastICA algorithm converged in 8 iterations.  
-82% FastICA algorithm converged in 7 iterations.  
-82% FastICA algorithm converged in 58 iterations.  
-83% FastICA algorithm converged in 10 iterations.  
-83% FastICA algorithm converged in 8 iterations.  
-84% FastICA algorithm converged in 5 iterations.  
-84% FastICA algorithm converged in 37 iterations.  
-85% FastICA algorithm converged in 4 iterations.  
-85% FastICA algorithm converged in 9 iterations.  
-86% FastICA algorithm converged in 5 iterations.  
-86% FastICA algorithm converged in 4 iterations.  
-87% FastICA algorithm converged in 6 iterations.  
-87% FastICA algorithm didn't converge in 149 iterations.  
-87% FastICA algorithm converged in 113 iterations.  
-88% FastICA algorithm converged in 6 iterations.  
-88% FastICA algorithm didn't converge in 149 iterations.  
-88% FastICA algorithm didn't converge in 149 iterations.  
-88% FastICA algorithm converged in 5 iterations.  
-89% FastICA algorithm converged in 12 iterations.  
-89% FastICA algorithm converged in 3 iterations.  
-90% FastICA algorithm converged in 10 iterations.  
-90% FastICA algorithm converged in 6 iterations.  
-91% FastICA algorithm converged in 15 iterations.  
-91% FastICA algorithm didn't converge in 149 iterations.  
-91% FastICA algorithm converged in 32 iterations.  
-92% FastICA algorithm converged in 14 iterations.  
-92% FastICA algorithm converged in 9 iterations.  
-93% FastICA algorithm converged in 55 iterations.  
-93% FastICA algorithm converged in 47 iterations.  
-94% FastICA algorithm converged in 25 iterations.  
-94% FastICA algorithm didn't converge in 149 iterations.  
-94% FastICA algorithm converged in 65 iterations.  
-95% FastICA algorithm converged in 7 iterations.  
-95% FastICA algorithm converged in 9 iterations.  
-96% FastICA algorithm converged in 6 iterations.  
-96% FastICA algorithm converged in 11 iterations.  
-97% FastICA algorithm converged in 6 iterations.  
-97% FastICA algorithm converged in 7 iterations.  
-98% FastICA algorithm converged in 7 iterations.  
-98% FastICA algorithm converged in 3 iterations.  
-99% FastICA algorithm converged in 7 iterations.  
-99% FastICA algorithm converged in 10 iterations.  
-100% 
-
-Starting the multiple ICA runs with 7 principal components
-FastICA progress with bootstrapping: FastICA algorithm converged in 6 iterations.  
-0% FastICA algorithm converged in 5 iterations.  
-1% FastICA algorithm converged in 10 iterations.  
-1% FastICA algorithm converged in 23 iterations.  
-2% FastICA algorithm converged in 19 iterations.  
-2% FastICA algorithm converged in 11 iterations.  
-3% FastICA algorithm converged in 11 iterations.  
-3% FastICA algorithm converged in 6 iterations.  
-4% FastICA algorithm converged in 6 iterations.  
-4% FastICA algorithm converged in 7 iterations.  
-5% FastICA algorithm converged in 6 iterations.  
+4% FastICA algorithm converged in 92 iterations.  
+4% FastICA algorithm didn't converge in 149 iterations.  
+4% FastICA algorithm converged in 9 iterations.  
+5% FastICA algorithm converged in 4 iterations.  
 5% FastICA algorithm converged in 7 iterations.  
-6% FastICA algorithm converged in 11 iterations.  
-6% FastICA algorithm converged in 9 iterations.  
-7% FastICA algorithm converged in 7 iterations.  
-7% FastICA algorithm converged in 8 iterations.  
-8% FastICA algorithm converged in 5 iterations.  
-8% FastICA algorithm converged in 7 iterations.  
-9% FastICA algorithm converged in 6 iterations.  
-9% FastICA algorithm converged in 24 iterations.  
-10% FastICA algorithm converged in 9 iterations.  
-10% FastICA algorithm didn't converge in 149 iterations.  
+6% FastICA algorithm converged in 6 iterations.  
+6% FastICA algorithm converged in 6 iterations.  
+7% FastICA algorithm converged in 12 iterations.  
+7% FastICA algorithm converged in 6 iterations.  
+8% FastICA algorithm converged in 9 iterations.  
+8% FastICA algorithm converged in 12 iterations.  
+9% FastICA algorithm converged in 17 iterations.  
+9% FastICA algorithm converged in 7 iterations.  
 10% FastICA algorithm converged in 6 iterations.  
+10% FastICA algorithm converged in 6 iterations.  
+11% FastICA algorithm didn't converge in 149 iterations.  
 11% FastICA algorithm converged in 6 iterations.  
-11% FastICA algorithm converged in 5 iterations.  
-12% FastICA algorithm converged in 6 iterations.  
-12% FastICA algorithm converged in 83 iterations.  
-13% FastICA algorithm converged in 8 iterations.  
-13% FastICA algorithm converged in 29 iterations.  
-14% FastICA algorithm converged in 11 iterations.  
+11% FastICA algorithm converged in 17 iterations.  
+12% FastICA algorithm converged in 18 iterations.  
+12% FastICA algorithm converged in 8 iterations.  
+13% FastICA algorithm converged in 5 iterations.  
+13% FastICA algorithm converged in 6 iterations.  
+14% FastICA algorithm converged in 5 iterations.  
 14% FastICA algorithm converged in 9 iterations.  
-15% FastICA algorithm converged in 7 iterations.  
-15% FastICA algorithm didn't converge in 149 iterations.  
 15% FastICA algorithm didn't converge in 149 iterations.  
 15% FastICA algorithm converged in 7 iterations.  
-16% FastICA algorithm converged in 7 iterations.  
-16% FastICA algorithm converged in 54 iterations.  
-17% FastICA algorithm converged in 28 iterations.  
-17% FastICA algorithm converged in 8 iterations.  
-18% FastICA algorithm didn't converge in 149 iterations.  
-18% FastICA algorithm converged in 6 iterations.  
-18% FastICA algorithm converged in 10 iterations.  
-19% FastICA algorithm converged in 9 iterations.  
+15% FastICA algorithm converged in 5 iterations.  
+16% FastICA algorithm converged in 8 iterations.  
+16% FastICA algorithm didn't converge in 149 iterations.  
+16% FastICA algorithm converged in 29 iterations.  
+17% FastICA algorithm converged in 9 iterations.  
+17% FastICA algorithm converged in 5 iterations.  
+18% FastICA algorithm converged in 113 iterations.  
+18% FastICA algorithm converged in 4 iterations.  
+19% FastICA algorithm converged in 7 iterations.  
 19% FastICA algorithm converged in 11 iterations.  
 20% FastICA algorithm converged in 4 iterations.  
 20% FastICA algorithm converged in 9 iterations.  
-21% FastICA algorithm converged in 55 iterations.  
-21% FastICA algorithm converged in 37 iterations.  
-22% FastICA algorithm converged in 16 iterations.  
-22% FastICA algorithm converged in 6 iterations.  
-23% FastICA algorithm converged in 6 iterations.  
-23% FastICA algorithm converged in 35 iterations.  
-24% FastICA algorithm converged in 4 iterations.  
-24% FastICA algorithm converged in 8 iterations.  
+21% FastICA algorithm converged in 6 iterations.  
+21% FastICA algorithm converged in 12 iterations.  
+22% FastICA algorithm converged in 15 iterations.  
+22% FastICA algorithm converged in 11 iterations.  
+23% FastICA algorithm converged in 5 iterations.  
+23% FastICA algorithm converged in 67 iterations.  
+24% FastICA algorithm didn't converge in 149 iterations.  
+24% FastICA algorithm converged in 5 iterations.  
+24% FastICA algorithm converged in 9 iterations.  
 25% FastICA algorithm converged in 5 iterations.  
-25% FastICA algorithm converged in 11 iterations.  
-26% FastICA algorithm converged in 5 iterations.  
-26% FastICA algorithm converged in 12 iterations.  
-27% FastICA algorithm converged in 7 iterations.  
-27% FastICA algorithm converged in 6 iterations.  
-28% FastICA algorithm converged in 7 iterations.  
-28% FastICA algorithm converged in 8 iterations.  
-28% FastICA algorithm converged in 77 iterations.  
-29% FastICA algorithm converged in 8 iterations.  
+25% FastICA algorithm converged in 78 iterations.  
+26% FastICA algorithm converged in 8 iterations.  
+26% FastICA algorithm converged in 137 iterations.  
+27% FastICA algorithm didn't converge in 149 iterations.  
+27% FastICA algorithm converged in 14 iterations.  
+27% FastICA algorithm didn't converge in 149 iterations.  
+27% FastICA algorithm converged in 9 iterations.  
+28% FastICA algorithm converged in 20 iterations.  
+28% FastICA algorithm converged in 10 iterations.  
+28% FastICA algorithm converged in 9 iterations.  
+29% FastICA algorithm didn't converge in 149 iterations.  
+29% FastICA algorithm converged in 5 iterations.  
+30% FastICA algorithm converged in 8 iterations.  
 30% FastICA algorithm converged in 6 iterations.  
-30% FastICA algorithm converged in 7 iterations.  
 31% FastICA algorithm converged in 6 iterations.  
-31% FastICA algorithm converged in 20 iterations.  
-32% FastICA algorithm converged in 6 iterations.  
-32% FastICA algorithm converged in 12 iterations.  
-33% FastICA algorithm converged in 20 iterations.  
-33% FastICA algorithm converged in 9 iterations.  
-34% FastICA algorithm converged in 101 iterations.  
-34% FastICA algorithm converged in 5 iterations.  
-35% FastICA algorithm converged in 4 iterations.  
-35% FastICA algorithm didn't converge in 149 iterations.  
-35% FastICA algorithm converged in 13 iterations.  
-36% FastICA algorithm didn't converge in 149 iterations.  
-36% FastICA algorithm didn't converge in 149 iterations.  
-36% FastICA algorithm converged in 6 iterations.  
-36% FastICA algorithm converged in 12 iterations.  
-37% FastICA algorithm converged in 9 iterations.  
-37% FastICA algorithm converged in 18 iterations.  
-38% FastICA algorithm didn't converge in 149 iterations.  
-38% FastICA algorithm converged in 10 iterations.  
+31% FastICA algorithm converged in 10 iterations.  
+32% FastICA algorithm converged in 5 iterations.  
+32% FastICA algorithm converged in 5 iterations.  
+33% FastICA algorithm converged in 19 iterations.  
+33% FastICA algorithm converged in 7 iterations.  
+34% FastICA algorithm converged in 8 iterations.  
+34% FastICA algorithm converged in 12 iterations.  
+35% FastICA algorithm converged in 5 iterations.  
+35% FastICA algorithm converged in 10 iterations.  
+36% FastICA algorithm converged in 8 iterations.  
+36% FastICA algorithm converged in 8 iterations.  
+37% FastICA algorithm converged in 36 iterations.  
+37% FastICA algorithm converged in 21 iterations.  
 38% FastICA algorithm converged in 6 iterations.  
-39% FastICA algorithm converged in 32 iterations.  
-39% FastICA algorithm converged in 6 iterations.  
+38% FastICA algorithm converged in 15 iterations.  
+39% FastICA algorithm didn't converge in 149 iterations.  
+39% FastICA algorithm converged in 23 iterations.  
+39% FastICA algorithm converged in 57 iterations.  
+40% FastICA algorithm converged in 8 iterations.  
 40% FastICA algorithm converged in 11 iterations.  
-40% FastICA algorithm converged in 5 iterations.  
 41% FastICA algorithm converged in 6 iterations.  
-41% FastICA algorithm converged in 7 iterations.  
-42% FastICA algorithm converged in 4 iterations.  
-42% FastICA algorithm converged in 15 iterations.  
-43% FastICA algorithm converged in 7 iterations.  
+41% FastICA algorithm converged in 72 iterations.  
+42% FastICA algorithm didn't converge in 149 iterations.  
+42% FastICA algorithm converged in 3 iterations.  
+42% FastICA algorithm converged in 22 iterations.  
 43% FastICA algorithm converged in 5 iterations.  
+43% FastICA algorithm converged in 5 iterations.  
+44% FastICA algorithm converged in 5 iterations.  
 44% FastICA algorithm converged in 10 iterations.  
-44% FastICA algorithm converged in 8 iterations.  
-45% FastICA algorithm converged in 31 iterations.  
-45% FastICA algorithm converged in 7 iterations.  
-46% FastICA algorithm converged in 6 iterations.  
-46% FastICA algorithm converged in 53 iterations.  
+45% FastICA algorithm converged in 80 iterations.  
+45% FastICA algorithm converged in 8 iterations.  
+46% FastICA algorithm converged in 9 iterations.  
+46% FastICA algorithm converged in 8 iterations.  
 47% FastICA algorithm converged in 5 iterations.  
 47% FastICA algorithm converged in 7 iterations.  
-48% FastICA algorithm converged in 6 iterations.  
-48% FastICA algorithm converged in 5 iterations.  
-49% FastICA algorithm converged in 14 iterations.  
-49% FastICA algorithm converged in 8 iterations.  
-50% FastICA algorithm converged in 17 iterations.  
-50% FastICA algorithm converged in 4 iterations.  
-51% FastICA algorithm converged in 8 iterations.  
+48% FastICA algorithm converged in 7 iterations.  
+48% FastICA algorithm converged in 4 iterations.  
+49% FastICA algorithm converged in 7 iterations.  
+49% FastICA algorithm converged in 4 iterations.  
+50% FastICA algorithm converged in 19 iterations.  
+50% FastICA algorithm converged in 9 iterations.  
+51% FastICA algorithm converged in 69 iterations.  
 51% FastICA algorithm didn't converge in 149 iterations.  
-51% FastICA algorithm converged in 8 iterations.  
-52% FastICA algorithm converged in 25 iterations.  
-52% FastICA algorithm didn't converge in 149 iterations.  
-52% FastICA algorithm converged in 15 iterations.  
+51% FastICA algorithm converged in 14 iterations.  
+52% FastICA algorithm converged in 8 iterations.  
+52% FastICA algorithm converged in 5 iterations.  
+53% FastICA algorithm converged in 6 iterations.  
 53% FastICA algorithm converged in 5 iterations.  
-53% FastICA algorithm converged in 4 iterations.  
 54% FastICA algorithm converged in 6 iterations.  
-54% FastICA algorithm converged in 11 iterations.  
-55% FastICA algorithm converged in 31 iterations.  
+54% FastICA algorithm converged in 10 iterations.  
 55% FastICA algorithm didn't converge in 149 iterations.  
-55% FastICA algorithm converged in 7 iterations.  
-56% FastICA algorithm converged in 46 iterations.  
+55% FastICA algorithm converged in 11 iterations.  
+55% FastICA algorithm converged in 4 iterations.  
 56% FastICA algorithm converged in 8 iterations.  
-56% FastICA algorithm converged in 5 iterations.  
-57% FastICA algorithm converged in 8 iterations.  
+56% FastICA algorithm converged in 9 iterations.  
+56% FastICA algorithm converged in 41 iterations.  
+57% FastICA algorithm converged in 10 iterations.  
 57% FastICA algorithm converged in 6 iterations.  
-58% FastICA algorithm converged in 24 iterations.  
-59% FastICA algorithm converged in 7 iterations.  
-59% FastICA algorithm converged in 6 iterations.  
-60% FastICA algorithm converged in 7 iterations.  
+58% FastICA algorithm converged in 5 iterations.  
+59% FastICA algorithm converged in 78 iterations.  
+59% FastICA algorithm converged in 5 iterations.  
+60% FastICA algorithm converged in 9 iterations.  
 60% FastICA algorithm converged in 8 iterations.  
-61% FastICA algorithm converged in 20 iterations.  
-61% FastICA algorithm converged in 7 iterations.  
-62% FastICA algorithm converged in 13 iterations.  
-62% FastICA algorithm converged in 14 iterations.  
-63% FastICA algorithm converged in 13 iterations.  
-63% FastICA algorithm converged in 11 iterations.  
-64% FastICA algorithm converged in 6 iterations.  
-64% FastICA algorithm converged in 6 iterations.  
+61% FastICA algorithm converged in 33 iterations.  
+61% FastICA algorithm didn't converge in 149 iterations.  
+61% FastICA algorithm converged in 15 iterations.  
+62% FastICA algorithm converged in 6 iterations.  
+62% FastICA algorithm didn't converge in 149 iterations.  
+62% FastICA algorithm didn't converge in 149 iterations.  
+62% FastICA algorithm converged in 6 iterations.  
+63% FastICA algorithm converged in 17 iterations.  
+63% FastICA algorithm converged in 6 iterations.  
+64% FastICA algorithm converged in 9 iterations.  
+64% FastICA algorithm converged in 5 iterations.  
+65% FastICA algorithm didn't converge in 149 iterations.  
 65% FastICA algorithm converged in 6 iterations.  
-65% FastICA algorithm converged in 8 iterations.  
-66% FastICA algorithm converged in 8 iterations.  
-66% FastICA algorithm converged in 10 iterations.  
-67% FastICA algorithm converged in 6 iterations.  
+65% FastICA algorithm converged in 7 iterations.  
+66% FastICA algorithm converged in 5 iterations.  
+66% FastICA algorithm converged in 18 iterations.  
 67% FastICA algorithm didn't converge in 149 iterations.  
-67% FastICA algorithm converged in 6 iterations.  
-68% FastICA algorithm converged in 6 iterations.  
-68% FastICA algorithm converged in 5 iterations.  
-69% FastICA algorithm converged in 8 iterations.  
-69% FastICA algorithm didn't converge in 149 iterations.  
-69% FastICA algorithm converged in 18 iterations.  
-70% FastICA algorithm converged in 5 iterations.  
-70% FastICA algorithm converged in 19 iterations.  
-71% FastICA algorithm converged in 6 iterations.  
+67% FastICA algorithm converged in 7 iterations.  
+67% FastICA algorithm converged in 11 iterations.  
+68% FastICA algorithm converged in 21 iterations.  
+68% FastICA algorithm didn't converge in 149 iterations.  
+68% FastICA algorithm converged in 143 iterations.  
+69% FastICA algorithm converged in 7 iterations.  
+69% FastICA algorithm converged in 5 iterations.  
+70% FastICA algorithm converged in 9 iterations.  
+70% FastICA algorithm converged in 20 iterations.  
+71% FastICA algorithm converged in 8 iterations.  
 71% FastICA algorithm converged in 17 iterations.  
-72% FastICA algorithm didn't converge in 149 iterations.  
-72% FastICA algorithm converged in 8 iterations.  
-72% FastICA algorithm converged in 6 iterations.  
-73% FastICA algorithm converged in 49 iterations.  
+72% FastICA algorithm converged in 7 iterations.  
+72% FastICA algorithm converged in 63 iterations.  
 73% FastICA algorithm converged in 5 iterations.  
-74% FastICA algorithm converged in 8 iterations.  
-74% FastICA algorithm converged in 110 iterations.  
-75% FastICA algorithm converged in 6 iterations.  
-75% FastICA algorithm converged in 31 iterations.  
-76% FastICA algorithm converged in 52 iterations.  
-76% FastICA algorithm converged in 19 iterations.  
+73% FastICA algorithm converged in 9 iterations.  
+74% FastICA algorithm converged in 6 iterations.  
+74% FastICA algorithm converged in 4 iterations.  
+75% FastICA algorithm converged in 37 iterations.  
+75% FastICA algorithm converged in 10 iterations.  
+76% FastICA algorithm converged in 8 iterations.  
+76% FastICA algorithm converged in 10 iterations.  
+77% FastICA algorithm converged in 96 iterations.  
 77% FastICA algorithm didn't converge in 149 iterations.  
-77% FastICA algorithm converged in 13 iterations.  
-77% FastICA algorithm converged in 58 iterations.  
-78% FastICA algorithm converged in 6 iterations.  
-78% FastICA algorithm converged in 6 iterations.  
-79% FastICA algorithm converged in 8 iterations.  
-79% FastICA algorithm didn't converge in 149 iterations.  
+77% FastICA algorithm converged in 7 iterations.  
+78% FastICA algorithm converged in 5 iterations.  
+78% FastICA algorithm converged in 62 iterations.  
+79% FastICA algorithm converged in 6 iterations.  
 79% FastICA algorithm converged in 5 iterations.  
-80% FastICA algorithm converged in 11 iterations.  
-80% FastICA algorithm converged in 28 iterations.  
-81% FastICA algorithm converged in 7 iterations.  
-81% FastICA algorithm didn't converge in 149 iterations.  
-81% FastICA algorithm converged in 13 iterations.  
-82% FastICA algorithm converged in 6 iterations.  
-82% FastICA algorithm converged in 6 iterations.  
-83% FastICA algorithm converged in 12 iterations.  
+80% FastICA algorithm converged in 8 iterations.  
+80% FastICA algorithm converged in 10 iterations.  
+81% FastICA algorithm converged in 4 iterations.  
+81% FastICA algorithm converged in 12 iterations.  
+82% FastICA algorithm converged in 28 iterations.  
+82% FastICA algorithm didn't converge in 149 iterations.  
+82% FastICA algorithm converged in 9 iterations.  
+83% FastICA algorithm converged in 23 iterations.  
 83% FastICA algorithm converged in 7 iterations.  
-84% FastICA algorithm converged in 28 iterations.  
-84% FastICA algorithm converged in 6 iterations.  
-85% FastICA algorithm converged in 9 iterations.  
-85% FastICA algorithm converged in 4 iterations.  
-86% FastICA algorithm converged in 18 iterations.  
-86% FastICA algorithm converged in 9 iterations.  
-87% FastICA algorithm converged in 4 iterations.  
-87% FastICA algorithm converged in 54 iterations.  
-88% FastICA algorithm converged in 45 iterations.  
-88% FastICA algorithm converged in 31 iterations.  
-89% FastICA algorithm converged in 35 iterations.  
-89% FastICA algorithm converged in 6 iterations.  
-90% FastICA algorithm converged in 6 iterations.  
+84% FastICA algorithm converged in 15 iterations.  
+84% FastICA algorithm converged in 7 iterations.  
+85% FastICA algorithm converged in 11 iterations.  
+85% FastICA algorithm converged in 6 iterations.  
+86% FastICA algorithm converged in 7 iterations.  
+86% FastICA algorithm converged in 5 iterations.  
+87% FastICA algorithm converged in 7 iterations.  
+87% FastICA algorithm converged in 99 iterations.  
+88% FastICA algorithm converged in 4 iterations.  
+88% FastICA algorithm converged in 11 iterations.  
+89% FastICA algorithm didn't converge in 149 iterations.  
+89% FastICA algorithm converged in 5 iterations.  
+89% FastICA algorithm converged in 5 iterations.  
+90% FastICA algorithm converged in 4 iterations.  
 90% FastICA algorithm converged in 7 iterations.  
-91% FastICA algorithm converged in 6 iterations.  
-91% FastICA algorithm converged in 12 iterations.  
+91% FastICA algorithm converged in 8 iterations.  
+91% FastICA algorithm converged in 11 iterations.  
 92% FastICA algorithm converged in 6 iterations.  
-92% FastICA algorithm converged in 15 iterations.  
-93% FastICA algorithm converged in 4 iterations.  
-93% FastICA algorithm converged in 4 iterations.  
-94% FastICA algorithm converged in 5 iterations.  
-94% FastICA algorithm didn't converge in 149 iterations.  
-94% FastICA algorithm didn't converge in 149 iterations.  
-94% FastICA algorithm converged in 11 iterations.  
-95% FastICA algorithm converged in 6 iterations.  
-95% FastICA algorithm converged in 6 iterations.  
-96% FastICA algorithm converged in 25 iterations.  
-96% FastICA algorithm converged in 30 iterations.  
+92% FastICA algorithm converged in 26 iterations.  
+93% FastICA algorithm converged in 6 iterations.  
+93% FastICA algorithm converged in 5 iterations.  
+94% FastICA algorithm converged in 10 iterations.  
+94% FastICA algorithm converged in 9 iterations.  
+95% FastICA algorithm converged in 5 iterations.  
+95% FastICA algorithm converged in 11 iterations.  
+96% FastICA algorithm converged in 11 iterations.  
+96% FastICA algorithm converged in 10 iterations.  
 97% FastICA algorithm converged in 5 iterations.  
-97% FastICA algorithm converged in 44 iterations.  
-98% FastICA algorithm converged in 4 iterations.  
-98% FastICA algorithm converged in 11 iterations.  
+97% FastICA algorithm converged in 5 iterations.  
+98% FastICA algorithm converged in 12 iterations.  
+98% FastICA algorithm converged in 20 iterations.  
 99% FastICA algorithm converged in 8 iterations.  
 99% FastICA algorithm converged in 6 iterations.  
+100% 
+
+Starting the multiple ICA runs with 7 principal components
+FastICA progress with bootstrapping: FastICA algorithm converged in 18 iterations.  
+0% FastICA algorithm converged in 5 iterations.  
+1% FastICA algorithm converged in 6 iterations.  
+1% FastICA algorithm converged in 9 iterations.  
+2% FastICA algorithm converged in 9 iterations.  
+2% FastICA algorithm converged in 24 iterations.  
+3% FastICA algorithm converged in 6 iterations.  
+3% FastICA algorithm converged in 19 iterations.  
+4% FastICA algorithm converged in 8 iterations.  
+4% FastICA algorithm converged in 6 iterations.  
+5% FastICA algorithm converged in 13 iterations.  
+5% FastICA algorithm converged in 6 iterations.  
+6% FastICA algorithm converged in 8 iterations.  
+6% FastICA algorithm converged in 4 iterations.  
+7% FastICA algorithm converged in 12 iterations.  
+7% FastICA algorithm converged in 5 iterations.  
+8% FastICA algorithm converged in 128 iterations.  
+8% FastICA algorithm converged in 7 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+9% FastICA algorithm converged in 4 iterations.  
+10% FastICA algorithm converged in 63 iterations.  
+10% FastICA algorithm converged in 6 iterations.  
+11% FastICA algorithm converged in 10 iterations.  
+11% FastICA algorithm converged in 5 iterations.  
+12% FastICA algorithm converged in 19 iterations.  
+12% FastICA algorithm converged in 6 iterations.  
+13% FastICA algorithm converged in 5 iterations.  
+13% FastICA algorithm converged in 8 iterations.  
+14% FastICA algorithm converged in 6 iterations.  
+14% FastICA algorithm converged in 128 iterations.  
+15% FastICA algorithm didn't converge in 149 iterations.  
+15% FastICA algorithm converged in 17 iterations.  
+15% FastICA algorithm converged in 6 iterations.  
+16% FastICA algorithm converged in 28 iterations.  
+16% FastICA algorithm converged in 8 iterations.  
+17% FastICA algorithm converged in 6 iterations.  
+17% FastICA algorithm converged in 8 iterations.  
+18% FastICA algorithm converged in 11 iterations.  
+18% FastICA algorithm converged in 12 iterations.  
+19% FastICA algorithm converged in 8 iterations.  
+19% FastICA algorithm converged in 12 iterations.  
+20% FastICA algorithm converged in 20 iterations.  
+20% FastICA algorithm converged in 8 iterations.  
+21% FastICA algorithm converged in 12 iterations.  
+21% FastICA algorithm converged in 6 iterations.  
+22% FastICA algorithm didn't converge in 149 iterations.  
+22% FastICA algorithm converged in 141 iterations.  
+22% FastICA algorithm converged in 10 iterations.  
+23% FastICA algorithm converged in 16 iterations.  
+23% FastICA algorithm converged in 7 iterations.  
+24% FastICA algorithm converged in 4 iterations.  
+24% FastICA algorithm converged in 4 iterations.  
+25% FastICA algorithm converged in 40 iterations.  
+25% FastICA algorithm converged in 6 iterations.  
+26% FastICA algorithm converged in 64 iterations.  
+26% FastICA algorithm didn't converge in 149 iterations.  
+26% FastICA algorithm converged in 15 iterations.  
+27% FastICA algorithm converged in 5 iterations.  
+27% FastICA algorithm converged in 6 iterations.  
+28% FastICA algorithm converged in 3 iterations.  
+28% FastICA algorithm converged in 36 iterations.  
+28% FastICA algorithm converged in 6 iterations.  
+29% FastICA algorithm converged in 9 iterations.  
+30% FastICA algorithm converged in 4 iterations.  
+30% FastICA algorithm converged in 62 iterations.  
+31% FastICA algorithm converged in 7 iterations.  
+31% FastICA algorithm converged in 7 iterations.  
+32% FastICA algorithm converged in 8 iterations.  
+32% FastICA algorithm converged in 11 iterations.  
+33% FastICA algorithm converged in 5 iterations.  
+33% FastICA algorithm converged in 7 iterations.  
+34% FastICA algorithm converged in 20 iterations.  
+34% FastICA algorithm converged in 13 iterations.  
+35% FastICA algorithm didn't converge in 149 iterations.  
+35% FastICA algorithm converged in 6 iterations.  
+35% FastICA algorithm converged in 9 iterations.  
+36% FastICA algorithm converged in 6 iterations.  
+36% FastICA algorithm converged in 81 iterations.  
+37% FastICA algorithm converged in 7 iterations.  
+37% FastICA algorithm converged in 14 iterations.  
+38% FastICA algorithm converged in 9 iterations.  
+38% FastICA algorithm converged in 7 iterations.  
+39% FastICA algorithm converged in 6 iterations.  
+39% FastICA algorithm converged in 5 iterations.  
+40% FastICA algorithm converged in 6 iterations.  
+40% FastICA algorithm converged in 5 iterations.  
+41% FastICA algorithm converged in 5 iterations.  
+41% FastICA algorithm converged in 102 iterations.  
+42% FastICA algorithm converged in 29 iterations.  
+42% FastICA algorithm converged in 10 iterations.  
+43% FastICA algorithm converged in 5 iterations.  
+43% FastICA algorithm converged in 17 iterations.  
+44% FastICA algorithm converged in 9 iterations.  
+44% FastICA algorithm converged in 6 iterations.  
+45% FastICA algorithm converged in 7 iterations.  
+45% FastICA algorithm converged in 7 iterations.  
+46% FastICA algorithm converged in 14 iterations.  
+46% FastICA algorithm converged in 6 iterations.  
+47% FastICA algorithm converged in 8 iterations.  
+47% FastICA algorithm converged in 5 iterations.  
+48% FastICA algorithm converged in 15 iterations.  
+48% FastICA algorithm converged in 39 iterations.  
+49% FastICA algorithm converged in 6 iterations.  
+49% FastICA algorithm converged in 5 iterations.  
+50% FastICA algorithm converged in 5 iterations.  
+50% FastICA algorithm converged in 9 iterations.  
+51% FastICA algorithm converged in 5 iterations.  
+51% FastICA algorithm converged in 13 iterations.  
+52% FastICA algorithm converged in 9 iterations.  
+52% FastICA algorithm converged in 8 iterations.  
+53% FastICA algorithm converged in 22 iterations.  
+53% FastICA algorithm converged in 19 iterations.  
+54% FastICA algorithm converged in 19 iterations.  
+54% FastICA algorithm converged in 5 iterations.  
+55% FastICA algorithm converged in 10 iterations.  
+55% FastICA algorithm converged in 12 iterations.  
+56% FastICA algorithm converged in 7 iterations.  
+56% FastICA algorithm converged in 10 iterations.  
+56% FastICA algorithm converged in 28 iterations.  
+57% FastICA algorithm converged in 8 iterations.  
+57% FastICA algorithm converged in 15 iterations.  
+58% FastICA algorithm converged in 11 iterations.  
+59% FastICA algorithm converged in 15 iterations.  
+59% FastICA algorithm converged in 40 iterations.  
+60% FastICA algorithm converged in 7 iterations.  
+60% FastICA algorithm converged in 6 iterations.  
+61% FastICA algorithm converged in 7 iterations.  
+61% FastICA algorithm converged in 103 iterations.  
+62% FastICA algorithm converged in 5 iterations.  
+62% FastICA algorithm converged in 6 iterations.  
+63% FastICA algorithm converged in 11 iterations.  
+63% FastICA algorithm converged in 9 iterations.  
+64% FastICA algorithm converged in 8 iterations.  
+64% FastICA algorithm converged in 12 iterations.  
+65% FastICA algorithm converged in 5 iterations.  
+65% FastICA algorithm converged in 62 iterations.  
+66% FastICA algorithm converged in 148 iterations.  
+66% FastICA algorithm converged in 83 iterations.  
+67% FastICA algorithm didn't converge in 149 iterations.  
+67% FastICA algorithm converged in 4 iterations.  
+67% FastICA algorithm converged in 11 iterations.  
+68% FastICA algorithm converged in 7 iterations.  
+68% FastICA algorithm converged in 4 iterations.  
+69% FastICA algorithm converged in 4 iterations.  
+69% FastICA algorithm converged in 9 iterations.  
+70% FastICA algorithm converged in 8 iterations.  
+70% FastICA algorithm didn't converge in 149 iterations.  
+70% FastICA algorithm converged in 5 iterations.  
+71% FastICA algorithm converged in 14 iterations.  
+71% FastICA algorithm didn't converge in 149 iterations.  
+71% FastICA algorithm converged in 4 iterations.  
+72% FastICA algorithm converged in 15 iterations.  
+72% FastICA algorithm converged in 9 iterations.  
+73% FastICA algorithm converged in 9 iterations.  
+73% FastICA algorithm converged in 8 iterations.  
+74% FastICA algorithm didn't converge in 149 iterations.  
+74% FastICA algorithm converged in 24 iterations.  
+74% FastICA algorithm converged in 5 iterations.  
+75% FastICA algorithm converged in 6 iterations.  
+75% FastICA algorithm converged in 97 iterations.  
+76% FastICA algorithm converged in 8 iterations.  
+76% FastICA algorithm converged in 4 iterations.  
+77% FastICA algorithm converged in 12 iterations.  
+77% FastICA algorithm converged in 4 iterations.  
+78% FastICA algorithm converged in 4 iterations.  
+78% FastICA algorithm converged in 9 iterations.  
+79% FastICA algorithm converged in 10 iterations.  
+79% FastICA algorithm converged in 47 iterations.  
+80% FastICA algorithm converged in 38 iterations.  
+80% FastICA algorithm converged in 6 iterations.  
+81% FastICA algorithm converged in 5 iterations.  
+81% FastICA algorithm converged in 78 iterations.  
+82% FastICA algorithm converged in 13 iterations.  
+82% FastICA algorithm converged in 10 iterations.  
+83% FastICA algorithm converged in 6 iterations.  
+83% FastICA algorithm converged in 7 iterations.  
+84% FastICA algorithm converged in 6 iterations.  
+84% FastICA algorithm converged in 6 iterations.  
+85% FastICA algorithm converged in 9 iterations.  
+85% FastICA algorithm converged in 7 iterations.  
+86% FastICA algorithm converged in 95 iterations.  
+86% FastICA algorithm converged in 42 iterations.  
+87% FastICA algorithm converged in 6 iterations.  
+87% FastICA algorithm converged in 8 iterations.  
+88% FastICA algorithm converged in 11 iterations.  
+88% FastICA algorithm converged in 14 iterations.  
+89% FastICA algorithm converged in 6 iterations.  
+89% FastICA algorithm converged in 13 iterations.  
+90% FastICA algorithm converged in 29 iterations.  
+90% FastICA algorithm converged in 5 iterations.  
+91% FastICA algorithm converged in 19 iterations.  
+91% FastICA algorithm converged in 5 iterations.  
+92% FastICA algorithm converged in 8 iterations.  
+92% FastICA algorithm converged in 8 iterations.  
+93% FastICA algorithm converged in 8 iterations.  
+93% FastICA algorithm converged in 7 iterations.  
+94% FastICA algorithm converged in 5 iterations.  
+94% FastICA algorithm converged in 8 iterations.  
+95% FastICA algorithm converged in 37 iterations.  
+95% FastICA algorithm didn't converge in 149 iterations.  
+95% FastICA algorithm converged in 18 iterations.  
+96% FastICA algorithm converged in 6 iterations.  
+96% FastICA algorithm converged in 16 iterations.  
+97% FastICA algorithm converged in 8 iterations.  
+97% FastICA algorithm converged in 6 iterations.  
+98% FastICA algorithm converged in 7 iterations.  
+98% FastICA algorithm converged in 11 iterations.  
+99% FastICA algorithm converged in 8 iterations.  
+99% FastICA algorithm converged in 21 iterations.  
 100% 
 Starting to compute the pairwise distance matrices....Done!
 Starting to cluster the sources using HDBSCAN....Done!
 Starting to calculate the 2D manifold representation....Done!
 Calculating the centrotypes and associated time courses...Done!
-Waiting for the user to select the ICA sources using the interactive window.  
-Waiting for the user to select the ICA sources using the interactive window.  
-Waiting for the user to select the ICA sources using the interactive window.  
-Waiting for the user to select the ICA sources using the interactive window.  
-5 ICA sources have been chosen by the user. Continuing
+5 ICA sources have been chosen automatically.Continuing
 Starting to create the 03_ICA_sources_correlations figure:
-Updating the masks for the two sources.  Of the 7873 in data1 and 8278 in data2, 7645 are in both and can be used.  
+Updating the masks for the two sources.  Of the 9139 in data1 and 8278 in data2, 8274 are in both and can be used.  
     Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
 
     Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
@@ -852,489 +854,28 @@ Source 4: turbulent_APS
 
 
 Saving the key results as a .pkl file... Done!
-Updating the masks for the two sources.  Of the 7873 in data1 and 7873 in data2, 7873 are in both and can be used.  
 Running LiCSAlert for 20210912  (acquisition # 326 of 326) : monitoring date
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(305)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
-[1;32m    303 [1;33m        [0mprocessing_dates[0m[1;33m.[0m[0mextend[0m[1;33m([0m[0mLiCSAlert_status[0m[1;33m[[0m[1;34m'dates_baseline'[0m[1;33m][0m[1;33m.[0m[0mprocessed_with_errors[0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    304 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 305 [1;33m        [1;32mfor[0m [0mprocessing_date[0m [1;32min[0m [0mprocessing_dates[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    306 [1;33m[1;33m[0m[0m
-[0m[1;32m    307 [1;33m            processing_date = licsalert_date_obj(
-[0m
-
-
-
-
-
-LiCSAlert is being run for 001_campi_flegrei_example at 30/10/2024 15:54:45
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is opening a LiCSBAS directory.  
-Opening the LiCSBAS unfiltered results.  
-Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(199)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
-[1;32m    197 [1;33m            [0mdisplacement_r2[0m[1;33m,[0m [0mtbaseline_info[0m [1;33m=[0m [0mts[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    198 [1;33m            [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 199 [1;33m            [1;32mdel[0m [0mts[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    200 [1;33m[1;33m[0m[0m
-[0m[1;32m    201 [1;33m        [1;31m# 3.3: Data processed with users own approach/software.[0m[1;33m[0m[1;33m[0m[0m
-[0m
-*** KeyError: 'baselines_cs'
-*** KeyError: 'baselines_cs'
-
-
-
-
-
-LiCSAlert is being run for 001_campi_flegrei_example at 22/01/2025 10:48:18
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is opening a LiCSBAS directory.  
-Opening the LiCSBAS unfiltered results.  
-Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
-Failed to open the E N U files (look vector components), but trying to continue anyway.
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(231)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
-[1;32m    229 [1;33m    [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    230 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 231 [1;33m    [1;32mtry[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    232 [1;33m        [1;32mdel[0m [0mdisplacement_r2[0m[1;33m[[0m[1;34m'cumulative'[0m[1;33m][0m                                                                                                                 [1;31m#  this is not needed and is deleted for safety.[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    233 [1;33m        print(f"LiCSAlert removed 'cumulative' from 'displacement_r2' as it expects "
-[0m
-*** NameError: name 'acq0_dt' is not defined
-[4;33mReloaded modules[24m: licsalert, licsalert.plotting, licsalert.licsalert, licsalert.data_exporting, licsalert.downsample_ifgs, licsalert.icasar, licsalert.icasar.aux, licsalert.monitoring_functions, licsalert.data_importing, licsalert.aux[0m
-
-
-
-
-
-LiCSAlert is being run for 001_campi_flegrei_example at 22/01/2025 12:40:35
-
-
-
-
-LiCSAlert is being run for 001_campi_flegrei_example at 22/01/2025 12:40:35
-
-All the required arguments were found in the dictionary.  All the required arguments were found in the dictionary.  
-
-All the required arguments were found in the dictionary.  All the required arguments were found in the dictionary.  
-
-All the required arguments were found in the dictionary.  All the required arguments were found in the dictionary.  
-
-LiCSAlert is opening a LiCSBAS directory.  LiCSAlert is opening a LiCSBAS directory.  
-
-Opening the LiCSBAS unfiltered results.  Opening the LiCSBAS unfiltered results.  
-
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/data_importing.py[0m(658)[0;36mLiCSBAS_to_LiCSAlert[1;34m()[0m
-[1;32m    656 [1;33m[1;33m[0m[0m
-[0m[1;32m    657 [1;33m    [1;31m# 2: Reference the time series[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 658 [1;33m    [0mref_str[0m [1;33m=[0m [0mcumh5[0m[1;33m[[0m[1;34m'refarea'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[1;33m)[0m[1;33m][0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    659 [1;33m    [1;32mif[0m [1;32mnot[0m [0misinstance[0m[1;33m([0m[0mref_str[0m[1;33m,[0m [0mstr[0m[1;33m)[0m[1;33m:[0m                                                                           [1;31m# ref_str is sometimes a string, sometimes not (dependent on LiCSBAS version perhaps? )[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    660 [1;33m        [0mref_str[0m [1;33m=[0m [0mref_str[0m[1;33m.[0m[0mdecode[0m[1;33m([0m[1;33m)[0m                                                                             [1;31m# assume that if not a string, a bytes object that can be decoded.[0m[1;33m[0m[1;33m[0m[0m
-[0m> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/data_importing.py[0m(658)[0;36mLiCSBAS_to_LiCSAlert[1;34m()[0m
-[1;32m    656 [1;33m[1;33m[0m[0m
-[0m[1;32m    657 [1;33m    [1;31m# 2: Reference the time series[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 658 [1;33m    [0mref_str[0m [1;33m=[0m [0mcumh5[0m[1;33m[[0m[1;34m'refarea'[0m[1;33m][0m[1;33m[[0m[1;33m([0m[1;33m)[0m[1;33m][0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    659 [1;33m    [1;32mif[0m [1;32mnot[0m [0misinstance[0m[1;33m([0m[0mref_str[0m[1;33m,[0m [0mstr[0m[1;33m)[0m[1;33m:[0m                                                                           [1;31m# ref_str is sometimes a string, sometimes not (dependent on LiCSBAS version perhaps? )[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    660 [1;33m        [0mref_str[0m [1;33m=[0m [0mref_str[0m[1;33m.[0m[0mdecode[0m[1;33m([0m[1;33m)[0m                                                                             [1;31m# assume that if not a string, a bytes object that can be decoded.[0m[1;33m[0m[1;33m[0m[0m
-[0m
-
-
-
-
-
-
-LiCSAlert is being run for 001_campi_flegrei_example at 22/06/2025 10:51:55
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is opening a LiCSBAS directory.  
-Opening the LiCSBAS unfiltered results.  
-Succesfully referenced the LiCSBAS time series using the pixel/area selected by LiCSBAS.  
-Failed to open the E N U files (look vector components), but trying to continue anyway.
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.licsalert, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.downsample_ifgs, licsalert.temporal, licsalert.icasar, licsalert.icasar.aux[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 10:52:24
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS
 ****************************************
 Entering post mortem debugging...
 ****************************************
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(151)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
-[1;32m    149 [1;33m[1;33m[0m[0m
-[0m[1;32m    150 [1;33m    displacement_r2 = LiCSAlert_preprocessing(
-[0m[1;32m--> 151 [1;33m        [0mdisplacement_r2[0m[1;33m,[0m [0mtbaseline_info[0m[1;33m,[0m  [0micasar_settings[0m[1;33m[[0m[1;34m'sica_tica'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    152 [1;33m        [0mlicsalert_settings[0m[1;33m[[0m[1;34m'downsample_run'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    153 [1;33m        [0mlicsalert_settings[0m[1;33m[[0m[1;34m'downsample_plot'[0m[1;33m][0m[1;33m[0m[1;33m[0m[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(412)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    410 [1;33m                    [0micasar_sources[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    411 [1;33m                    [0mmask_icasar[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m--> 412 [1;33m                    [0mdisplacement_r3[0m[1;33m[[0m[1;34m'inc_ma'[0m[1;33m][0m[1;33m.[0m[0mmean_centered[0m[1;33m.[0m[0mspace[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    413 [1;33m                    [0mtbaseline_info[0m[1;33m[[0m[1;34m'baselines_cumulative'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    414 [1;33m                    [0mlicsalert_settings[0m[1;33m[[0m[1;34m'baseline_end'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
 [0m
-[4;33mReloaded modules[24m: licsalert, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.downsample_ifgs, licsalert.monitoring_functions, licsalert.licsalert[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 11:34:46
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(605)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    603 [1;33m[1;33m[0m[0m
-[0m[1;32m    604 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 605 [1;33m    [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    606 [1;33m[1;33m[0m[0m
-[0m[1;32m    607 [1;33m    [0mn_pixs_start[0m [1;33m=[0m [0mdisplacement_r2[0m[1;33m[[0m[1;34m"incremental"[0m[1;33m][0m[1;33m.[0m[0mshape[0m[1;33m[[0m[1;36m1[0m[1;33m][0m                                          [1;31m# as ifgs are row vectors, this is the number of pixels we start with[0m[1;33m[0m[1;33m[0m[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/LiCSAlert_examples.py[0m(69)[0;36m<module>[1;34m()[0m
+[1;32m     67 [1;33m[1;33m[0m[0m
+[0m[1;32m     68 [1;33m[1;33m[0m[0m
+[0m[1;32m---> 69 [1;33mLiCSAlert_monitoring_mode(outdir = outdir, region = None, volcano = volcano,
+[0m[1;32m     70 [1;33m                          [0mlicsbas_dir[0m [1;33m=[0m [0mlicsbas_dir[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m     71 [1;33m                          [0mlicsalert_settings[0m [1;33m=[0m [0mlicsalert_settings[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
 [0m
-****************************************
-Entering post mortem debugging...
-****************************************
-> [1;32m/home/matthew/anaconda3/envs/licsalert2/lib/python3.13/bdb.py[0m(216)[0;36mdispatch_opcode[1;34m()[0m
-[1;32m    214 [1;33m        [1;32mif[0m [0mself[0m[1;33m.[0m[0mstop_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m [1;32mor[0m [0mself[0m[1;33m.[0m[0mbreak_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    215 [1;33m            [0mself[0m[1;33m.[0m[0muser_opcode[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 216 [1;33m            [1;32mif[0m [0mself[0m[1;33m.[0m[0mquitting[0m[1;33m:[0m [1;32mraise[0m [0mBdbQuit[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    217 [1;33m        [1;32mreturn[0m [0mself[0m[1;33m.[0m[0mtrace_dispatch[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    218 [1;33m[1;33m[0m[0m
+> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(412)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
+[1;32m    410 [1;33m                    [0micasar_sources[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    411 [1;33m                    [0mmask_icasar[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m--> 412 [1;33m                    [0mdisplacement_r3[0m[1;33m[[0m[1;34m'inc_ma'[0m[1;33m][0m[1;33m.[0m[0mmean_centered[0m[1;33m.[0m[0mspace[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    413 [1;33m                    [0mtbaseline_info[0m[1;33m[[0m[1;34m'baselines_cumulative'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
+[0m[1;32m    414 [1;33m                    [0mlicsalert_settings[0m[1;33m[[0m[1;34m'baseline_end'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
 [0m
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.downsample_ifgs, licsalert.licsalert[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 11:35:40
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(605)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    603 [1;33m[1;33m[0m[0m
-[0m[1;32m    604 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 605 [1;33m    [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    606 [1;33m[1;33m[0m[0m
-[0m[1;32m    607 [1;33m    [1;31m# n_pixs_start = displacement_r2["incremental"].shape[1][0m[1;33m[0m[1;33m[0m[0m
-[0m
-*** KeyError: 'cum_ma'
-****************************************
-Entering post mortem debugging...
-****************************************
-> [1;32m/home/matthew/anaconda3/envs/licsalert2/lib/python3.13/bdb.py[0m(216)[0;36mdispatch_opcode[1;34m()[0m
-[1;32m    214 [1;33m        [1;32mif[0m [0mself[0m[1;33m.[0m[0mstop_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m [1;32mor[0m [0mself[0m[1;33m.[0m[0mbreak_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    215 [1;33m            [0mself[0m[1;33m.[0m[0muser_opcode[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 216 [1;33m            [1;32mif[0m [0mself[0m[1;33m.[0m[0mquitting[0m[1;33m:[0m [1;32mraise[0m [0mBdbQuit[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    217 [1;33m        [1;32mreturn[0m [0mself[0m[1;33m.[0m[0mtrace_dispatch[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    218 [1;33m[1;33m[0m[0m
-[0m
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.licsalert, licsalert.downsample_ifgs[0m
-Succesfully started
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-****************************************
-Entering post mortem debugging...
-****************************************
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(95)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
-[1;32m     93 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0maux[0m [1;32mimport[0m [0mTee[0m[1;33m,[0m [0mfind_nearest_date[0m[1;33m,[0m [0mcol_to_ma[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m     94 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0maux[0m [1;32mimport[0m [0mupdate_mask[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m---> 95 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0mdownsample_ifgs[0m [1;32mimport[0m [0mdownsample_ifgs[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m     96 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0mplotting[0m [1;32mimport[0m [0mLiCSAlert_figure[0m[1;33m,[0m [0mLiCSAlert_epoch_figures[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m     97 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0mplotting[0m [1;32mimport[0m [0mLiCSAlert_aux_figures[0m[1;33m,[0m [0mLiCSAlert_mask_figure[0m[1;33m[0m[1;33m[0m[0m
-[0m
-[4;33mReloaded modules[24m: licsalert, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.downsample_ifgs, licsalert.licsalert, licsalert.monitoring_functions[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 11:51:57
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-****************************************
-Entering post mortem debugging...
-****************************************
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/data_importing.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/data_importing.py[0m(198)[0;36mcheck_input_data[1;34m()[0m
-[1;32m    196 [1;33m[1;33m[0m[0m
-[0m[1;32m    197 [1;33m    [1;31m# check for nans[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 198 [1;33m    [1;32mif[0m [0mnp[0m[1;33m.[0m[0misnan[0m[1;33m([0m[0mdisplacement_r3[0m[1;33m[[0m[1;34m'cum_ma_r3'[0m[1;33m][0m[1;33m)[0m[1;33m.[0m[0many[0m[1;33m([0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    199 [1;33m        raise Exception(
-[0m[1;32m    200 [1;33m            [1;34m"'displacement_r2['incremental']' (i.e. the displacments "[0m[1;33m[0m[1;33m[0m[0m
-[0m
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.licsalert, licsalert.data_exporting, licsalert.aux, licsalert.data_importing[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 11:52:20
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS
-****************************************
-Entering post mortem debugging...
-****************************************
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(611)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    609 [1;33m    """
-[0m[1;32m    610 [1;33m    [1;32mimport[0m [0mnumpy[0m [1;32mas[0m [0mnp[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 611 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0mdownsample_ifgs[0m [1;32mimport[0m [0mdownsample_ifgs[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    612 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0maux[0m [1;32mimport[0m [0mcol_to_ma[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    613 [1;33m    [1;32mfrom[0m [0mlicsalert[0m[1;33m.[0m[0mdata_importing[0m [1;32mimport[0m [0mifg_timeseries[0m[1;33m[0m[1;33m[0m[0m
-[0m
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.downsample_ifgs, licsalert.licsalert[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 11:52:38
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(618)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    616 [1;33m[1;33m[0m[0m
-[0m[1;32m    617 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 618 [1;33m    [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    619 [1;33m[1;33m[0m[0m
-[0m[1;32m    620 [1;33m    [1;31m# n_pixs_start = displacement_r2["incremental"].shape[1][0m[1;33m[0m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(625)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    623 [1;33m    [1;31m# 1: Downsample the ifgs for use in all following functions.[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    624 [1;33m    [1;31m# if we're not actually downsampling, skip for speed[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 625 [1;33m    [1;32mif[0m [0mdownsample_run[0m [1;33m!=[0m [1;36m1.0[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    626 [1;33m[1;33m[0m[0m
-[0m[1;32m    627 [1;33m        [1;31m# downsample the cumulative masked array[0m[1;33m[0m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(629)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    627 [1;33m        [1;31m# downsample the cumulative masked array[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    628 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 629 [1;33m        displacement_r3['cum_ma'] = rescale(
-[0m[1;32m    630 [1;33m            [0mdisplacement_r3[0m[1;33m[[0m[1;34m'cum_ma'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    631 [1;33m            [0mscale[0m[1;33m=[0m[0mdownsample_run[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(630)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    628 [1;33m[1;33m[0m[0m
-[0m[1;32m    629 [1;33m        displacement_r3['cum_ma'] = rescale(
-[0m[1;32m--> 630 [1;33m            [0mdisplacement_r3[0m[1;33m[[0m[1;34m'cum_ma'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    631 [1;33m            [0mscale[0m[1;33m=[0m[0mdownsample_run[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    632 [1;33m            [0morder[0m[1;33m=[0m[0morder[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(631)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    629 [1;33m        displacement_r3['cum_ma'] = rescale(
-[0m[1;32m    630 [1;33m            [0mdisplacement_r3[0m[1;33m[[0m[1;34m'cum_ma'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 631 [1;33m            [0mscale[0m[1;33m=[0m[0mdownsample_run[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    632 [1;33m            [0morder[0m[1;33m=[0m[0morder[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    633 [1;33m            [0manti_aliasing[0m[1;33m=[0m[0manti_aliasing[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(632)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    630 [1;33m            [0mdisplacement_r3[0m[1;33m[[0m[1;34m'cum_ma'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    631 [1;33m            [0mscale[0m[1;33m=[0m[0mdownsample_run[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 632 [1;33m            [0morder[0m[1;33m=[0m[0morder[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    633 [1;33m            [0manti_aliasing[0m[1;33m=[0m[0manti_aliasing[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    634 [1;33m            [0mpreserve_range[0m[1;33m=[0m[1;32mTrue[0m  [1;31m# keeps original data range/dtype[0m[1;33m[0m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(633)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    631 [1;33m            [0mscale[0m[1;33m=[0m[0mdownsample_run[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    632 [1;33m            [0morder[0m[1;33m=[0m[0morder[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 633 [1;33m            [0manti_aliasing[0m[1;33m=[0m[0manti_aliasing[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    634 [1;33m            [0mpreserve_range[0m[1;33m=[0m[1;32mTrue[0m  [1;31m# keeps original data range/dtype[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    635 [1;33m        [1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(634)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    632 [1;33m            [0morder[0m[1;33m=[0m[0morder[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    633 [1;33m            [0manti_aliasing[0m[1;33m=[0m[0manti_aliasing[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 634 [1;33m            [0mpreserve_range[0m[1;33m=[0m[1;32mTrue[0m  [1;31m# keeps original data range/dtype[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    635 [1;33m        [1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    636 [1;33m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(629)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    627 [1;33m        [1;31m# downsample the cumulative masked array[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    628 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 629 [1;33m        displacement_r3['cum_ma'] = rescale(
-[0m[1;32m    630 [1;33m            [0mdisplacement_r3[0m[1;33m[[0m[1;34m'cum_ma'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    631 [1;33m            [0mscale[0m[1;33m=[0m[0mdownsample_run[0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(640)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    638 [1;33m        [1;31m# remake lons and lats at new resolution[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    639 [1;33m        [1;31m# check if we have lon lat data as not alway strictly necessary.[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 640 [1;33m        [1;32mif[0m [1;33m([0m[1;34m'lons'[0m [1;32min[0m [0mdisplacement_r3[0m[1;33m)[0m [1;32mand[0m [1;33m([0m[1;34m'lats'[0m [1;32min[0m [0mdisplacement_r3[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    641 [1;33m            [1;31m# ifg1 = col_to_ma(displacement_r2['incremental'][0,:],[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    642 [1;33m            [1;31m#                  pixel_mask = displacement_r2['mask'])[0m[1;33m[0m[1;33m[0m[0m
-[0m
-****************************************
-Entering post mortem debugging...
-****************************************
-> [1;32m/home/matthew/anaconda3/envs/licsalert2/lib/python3.13/bdb.py[0m(129)[0;36mdispatch_line[1;34m()[0m
-[1;32m    127 [1;33m        [1;32mif[0m [0mself[0m[1;33m.[0m[0mstop_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m [1;32mor[0m [0mself[0m[1;33m.[0m[0mbreak_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    128 [1;33m            [0mself[0m[1;33m.[0m[0muser_line[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 129 [1;33m            [1;32mif[0m [0mself[0m[1;33m.[0m[0mquitting[0m[1;33m:[0m [1;32mraise[0m [0mBdbQuit[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    130 [1;33m        [1;32mreturn[0m [0mself[0m[1;33m.[0m[0mtrace_dispatch[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    131 [1;33m[1;33m[0m[0m
-[0m
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.licsalert[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 11:55:30
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS
-The cumulative time series was size {displacement_r3['cum_ma'].shape} and has been downsampled in space to {displacement_r3['cum_ma'].shape} 
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(652)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    650 [1;33m        [1;32mif[0m [1;33m([0m[1;34m'lons_mg'[0m [1;32min[0m [0mdisplacement_r3[0m[1;33m)[0m [1;32mand[0m [1;33m([0m[1;34m'lats_mg'[0m [1;32min[0m [0mdisplacement_r3[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    651 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 652 [1;33m            [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    653 [1;33m[1;33m[0m[0m
-[0m[1;32m    654 [1;33m            [1;31m# ifg1 = col_to_ma(displacement_r2['incremental'][0,:],[0m[1;33m[0m[1;33m[0m[0m
-[0m
-****************************************
-Entering post mortem debugging...
-****************************************
-> [1;32m/home/matthew/anaconda3/envs/licsalert2/lib/python3.13/bdb.py[0m(216)[0;36mdispatch_opcode[1;34m()[0m
-[1;32m    214 [1;33m        [1;32mif[0m [0mself[0m[1;33m.[0m[0mstop_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m [1;32mor[0m [0mself[0m[1;33m.[0m[0mbreak_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    215 [1;33m            [0mself[0m[1;33m.[0m[0muser_opcode[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 216 [1;33m            [1;32mif[0m [0mself[0m[1;33m.[0m[0mquitting[0m[1;33m:[0m [1;32mraise[0m [0mBdbQuit[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    217 [1;33m        [1;32mreturn[0m [0mself[0m[1;33m.[0m[0mtrace_dispatch[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    218 [1;33m[1;33m[0m[0m
-[0m
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.licsalert[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 11:56:08
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS
-The cumulative time series was size (239, 556, 556) and has been downsampled in space to (120, 278, 278) 
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(652)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    650 [1;33m        [1;32mif[0m [1;33m([0m[1;34m'lons_mg'[0m [1;32min[0m [0mdisplacement_r3[0m[1;33m)[0m [1;32mand[0m [1;33m([0m[1;34m'lats_mg'[0m [1;32min[0m [0mdisplacement_r3[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    651 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 652 [1;33m            [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    653 [1;33m[1;33m[0m[0m
-[0m[1;32m    654 [1;33m            [1;31m# ifg1 = col_to_ma(displacement_r2['incremental'][0,:],[0m[1;33m[0m[1;33m[0m[0m
-[0m
-****************************************
-Entering post mortem debugging...
-****************************************
-> [1;32m/home/matthew/anaconda3/envs/licsalert2/lib/python3.13/bdb.py[0m(216)[0;36mdispatch_opcode[1;34m()[0m
-[1;32m    214 [1;33m        [1;32mif[0m [0mself[0m[1;33m.[0m[0mstop_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m [1;32mor[0m [0mself[0m[1;33m.[0m[0mbreak_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    215 [1;33m            [0mself[0m[1;33m.[0m[0muser_opcode[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 216 [1;33m            [1;32mif[0m [0mself[0m[1;33m.[0m[0mquitting[0m[1;33m:[0m [1;32mraise[0m [0mBdbQuit[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    217 [1;33m        [1;32mreturn[0m [0mself[0m[1;33m.[0m[0mtrace_dispatch[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    218 [1;33m[1;33m[0m[0m
-[0m
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.licsalert[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 11:58:39
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS
-The cumulative time series was size (239, 556, 556) and has been downsampled in space to (239, 278, 278) 
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(652)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    650 [1;33m        [1;32mif[0m [1;33m([0m[1;34m'lons_mg'[0m [1;32min[0m [0mdisplacement_r3[0m[1;33m)[0m [1;32mand[0m [1;33m([0m[1;34m'lats_mg'[0m [1;32min[0m [0mdisplacement_r3[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    651 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 652 [1;33m            [0mpdb[0m[1;33m.[0m[0mset_trace[0m[1;33m([0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    653 [1;33m[1;33m[0m[0m
-[0m[1;32m    654 [1;33m            [1;31m# ifg1 = col_to_ma(displacement_r2['incremental'][0,:],[0m[1;33m[0m[1;33m[0m[0m
-[0m
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py[0m(150)[0;36mLiCSAlert_monitoring_mode[1;34m()[0m
-[1;32m    148 [1;33m    [1;31m# in space or time, depending on whther sica or tica[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    149 [1;33m[1;33m[0m[0m
-[0m[1;32m--> 150 [1;33m    displacement_r2 = LiCSAlert_preprocessing(
-[0m[1;32m    151 [1;33m        [0mdisplacement_r3[0m[1;33m,[0m [0mtbaseline_info[0m[1;33m,[0m  [0micasar_settings[0m[1;33m[[0m[1;34m'sica_tica'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    152 [1;33m        [0mlicsalert_settings[0m[1;33m[[0m[1;34m'downsample_run'[0m[1;33m][0m[1;33m,[0m[1;33m[0m[1;33m[0m[0m
-[0m
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/monitoring_functions.py' was edited, running stale code until the program is rerun
-****************************************
-Entering post mortem debugging...
-****************************************
-> [1;32m/home/matthew/anaconda3/envs/licsalert2/lib/python3.13/bdb.py[0m(216)[0;36mdispatch_opcode[1;34m()[0m
-[1;32m    214 [1;33m        [1;32mif[0m [0mself[0m[1;33m.[0m[0mstop_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m [1;32mor[0m [0mself[0m[1;33m.[0m[0mbreak_here[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    215 [1;33m            [0mself[0m[1;33m.[0m[0muser_opcode[0m[1;33m([0m[0mframe[0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 216 [1;33m            [1;32mif[0m [0mself[0m[1;33m.[0m[0mquitting[0m[1;33m:[0m [1;32mraise[0m [0mBdbQuit[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    217 [1;33m        [1;32mreturn[0m [0mself[0m[1;33m.[0m[0mtrace_dispatch[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    218 [1;33m[1;33m[0m[0m
-[0m
-[4;33mReloaded modules[24m: licsalert, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.monitoring_functions, licsalert.licsalert[0m
-Succesfully started
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting[0m
-Succesfully started
-['bperp', 'coh_avg', 'corner_lat', 'corner_lon', 'cum', 'gap', 'hgt', 'imdates', 'maxTlen', 'n_gap', 'n_ifg_noloop', 'n_loop_err', 'n_unw', 'post_lat', 'post_lon', 'refarea', 'resid_rms', 'vel', 'vintercept']
-
-
-
-
-
-LiCSAlert is being run for laguna_del_maule_testing at 22/06/2025 12:05:45
-All the required arguments were found in the dictionary.  
-All the required arguments were found in the dictionary.  
-LiCSAlert is using data that was passed to the function as an argument  
-'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
-REMOVED THE CHECK FOR FEW PIXELS THAN PCA COMPONENTS
-The cumulative time series was size (239, 556, 556) and has been downsampled in space to (239, 278, 278) 
-****************************************
-Entering post mortem debugging...
-****************************************
-*** WARNING: file '/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py' was edited, running stale code until the program is rerun
-> [1;32m/home/matthew/university_work/03_automatic_detection_algorithm/06_LiCSAlert/00_LiCSAlert_GitHub/licsalert/licsalert.py[0m(677)[0;36mLiCSAlert_preprocessing[1;34m()[0m
-[1;32m    675 [1;33m[1;33m[0m[0m
-[0m[1;32m    676 [1;33m            [1;31m# poor quality check to ensure that lats aren't upside down[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m--> 677 [1;33m            [1;32mif[0m [0mdisplacement_r2[0m[1;33m[[0m[1;34m'lats'[0m[1;33m][0m[1;33m[[0m[1;36m0[0m[1;33m,[0m[1;36m0[0m[1;33m][0m [1;33m<[0m [0mdisplacement_r2[0m[1;33m[[0m[1;34m'lats'[0m[1;33m][0m[1;33m[[0m[1;33m-[0m[1;36m1[0m[1;33m,[0m[1;36m0[0m[1;33m][0m[1;33m:[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    678 [1;33m                [0mdisplacement_r2[0m[1;33m[[0m[1;34m'lats'[0m[1;33m][0m [1;33m=[0m [0mnp[0m[1;33m.[0m[0mflipud[0m[1;33m([0m[0mdisplacement_r2[0m[1;33m[[0m[1;34m'lats'[0m[1;33m][0m[1;33m)[0m[1;33m[0m[1;33m[0m[0m
-[0m[1;32m    679 [1;33m[1;33m[0m[0m
-[0m
-[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.plotting, licsalert.data_importing, licsalert.data_exporting, licsalert.aux, licsalert.licsalert[0m
