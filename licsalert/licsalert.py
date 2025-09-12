@@ -15,10 +15,11 @@ def LiCSAlert(sources,
               inc_mc_space,
               baselines_cs,
               baseline_end,
+              processing_date,
               t_recalculate = 10,
               verbose=False, 
               n_pix_window = 20,
-              residual_type = 'cumulative'
+              residual_type = 'cumulative',
               ):
     
     """ Main LiCSAlert algorithm for a daisy-chain timeseries of interferograms.  
@@ -170,18 +171,15 @@ def LiCSAlert(sources,
 
 
     #2: Calculate time courses/distances etc for the monitoring data
-    #if ifgs_monitoring is not None:
-    # manually force into the indent
-    print(f"FUNCTIONALITY REMVOED IN licsalert. needs fixing")
-    if True:
-    
+    if processing_date.dt > baseline_end.dt:
+
         # do the inversion to fit the monitoring ifgs with the sources    
         # compute cumulative time courses for monitoring interferograms (ie
         # simple inversion to fit each ifg in ifgs_baseline using sources.  )
         products = bss_components_inversion_per_epoch(
             sources,
             mask_sources,
-            inc_mc_space[baseline_end.acq_n: ],
+            inc_mc_space[baseline_end.acq_n:processing_date.acq_n ],
             cumulative=False
         )
         (tcs_c_monitoring, d_hat_monitoring, d_resid_monitoring) = products
@@ -194,7 +192,7 @@ def LiCSAlert(sources,
         sources_tcs_monitor = tcs_monitoring(
             tcs_c_monitoring,
             sources_tcs, 
-            baselines_cs
+            baselines_cs[:processing_date.acq_n+1 ]
         )                          
         
         
@@ -215,7 +213,7 @@ def LiCSAlert(sources,
         residual_tcs_monitor = tcs_monitoring(
             residual_bm,
             residual_tcs,
-            baselines_cs,
+            baselines_cs[:processing_date.acq_n+1],
             residual=True,
         )       
 

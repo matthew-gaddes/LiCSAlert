@@ -299,7 +299,6 @@ def LiCSAlert_monitoring_mode(
             # compare datetimes to see if we are past baseline stage.  
             if processing_date.dt > licsalert_settings['baseline_end'].dt:
                 
-                
                 # if not in baseline, run LiCSAlert
                 licsalert_result = LiCSAlert(
                     icasar_sources, 
@@ -310,6 +309,7 @@ def LiCSAlert_monitoring_mode(
                     t_recalculate=licsalert_settings['t_recalculate'], 
                     verbose=False,
                     residual_type=licsalert_settings['residual_type'],
+                    processing_date=processing_date,
                 )                                                                                 
                     
                 (sources_tcs, residual_tcs, reconstructions, residuals
