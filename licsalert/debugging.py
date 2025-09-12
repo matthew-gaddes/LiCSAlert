@@ -6,10 +6,57 @@ Created on Fri Aug  1 15:14:02 2025
 @author: matthew
 """
 
+#%% plot_tcs()
+
+def plot_tcs(tcs, baselines_cs):
+    """
+    Plot a cumulative time course and the lines of best fit.  
+    
+    Inputs:
+        tcs is a list of tc items, which are all dicts with:
+            dict_keys(['cumulative_tc',
+                       'gradient',
+                       'lines',
+                       'sigma',
+                       'distances',
+                       't_recalculate']
+                      )
+            
+    Returns:
+        Figure
+        
+    History:
+        2025_09_10 | MEG | Written.  
+        
+    """
+    import numpy as np
+    import matplotlib.pyplot as plt
+    
+    
+    f, ax = plt.subplots()
+    
+    for tc in tcs:
+    
+        ax.scatter(
+            baselines_cs[:tc['cumulative_tc'].shape[0]],
+            tc['cumulative_tc']
+            )
+        # iterate and plot all lines of best fit.  
+        for line_n, line in enumerate(tc['lines']):
+            #print(len(line))
+            x_stop = line_n+1
+            x_start = x_stop - tc['t_recalculate']
+            if x_start < 0:
+                x_start = 0
+            ax.plot(
+                baselines_cs[x_start:x_stop],
+                line,
+                #c='k',
+                )
+            plt.pause(0.01)
+
 
 #%% interactive_mask_explorer()
-
-
 
 
 def interactive_mask_explorer(stack, dates, *, cmap="viridis"):
