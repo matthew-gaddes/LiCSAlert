@@ -274,50 +274,13 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
               "(incremental/daisy chain, cumulative, and all possible).  "
               )
         
-        # pdb.set_trace()
-        
-        # test = np.mean(spatial_data['ifgs_dc'], axis=1)
-        
-        #%% debug
-        # from licsalert.aux import col_to_ma
-        
-        # ifg_n = 1
-        
-        # im_r2 = col_to_ma(
-        #     spatial_data['ifgs_dc'][ifg_n], 
-        #     mask,
-        #     )
-        
-        # f, ax = plt.subplots()
-        # ax.matshow(im_r2)
-        # ax.set_title(ma.mean(im_r2))
-        
-        
-        
-        # f, ax = plt.subplots()
-        # # #############
-        # for ifg in spatial_data['ifgs_dc']:
-        #     ifg_r2=col_to_ma(ifg, mask)
-        #     args = np.unravel_index(ma.argmin(ifg_r2), ifg_r2.shape)
-        #     ax.scatter(
-        #         int(args[0]),
-        #         int(args[1])
-        #         )
-
-        
-        
-        #%%
-        
-        
         # create all ifgs between acquisitions, up to max_n_all_ifgs
         ifgs_all_r2, ifg_dates_all = create_all_ifgs(
             spatial_data['ifgs_dc'],
             spatial_data['ifg_dates_dc'], 
             max_n_all_ifgs,
             )
-        
-        
-        
+
         # also create the cumualtive ifgs (relative to the first acq.  )
         ifgs_cum_r2, ifg_dates_cum = create_cumulative_ifgs(
             spatial_data['ifgs_dc'],
@@ -337,7 +300,6 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
             ifgs_cum_r2,
             ifg_dates_cum,
             )      
-        
         
         del ifgs_all_r2, ifg_dates_all, ifgs_cum_r2, ifg_dates_cum
         
@@ -425,36 +387,6 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
                 A_pca_dc = inversion_results[0]['tcs'].T                                                                                
                 A_pca_all = inversion_results[1]['tcs'].T
                 
-                # debug
-                f, ax=plt.subplots()
-                ax.scatter(
-                    ifgs_all.t_baselines,
-                    A_pca_all[:,1],
-                    )
-   
-    
-                # #%% debug
-                # # maually draw round points on the temporal baseline 
-                # # correlation plot.  
-                # from licsalert.debugging import select_points
-                # idx = select_points(
-                #     ifgs_all.t_baselines,
-                #     A_pca_all[:,1],
-                #     )
-                
-                # # debug
-                # from licsalert.debugging import interactive_tc_correlation_explorer
-                # fig = interactive_tc_correlation_explorer(
-                #     x=ifgs_all.t_baselines,
-                #     y=A_pca_all[:, 1],
-                #     imgs=ifgs_all.mixtures_mc_space,
-                #     imgs_reco=A_pca_all @ S_pca,
-                #     A=A_pca_all,
-                #     mask=mask,
-                #     sources=S_pca,
-                #     date_pairs=ifgs_all.ifg_dates,   # e.g. ["20240101_20240215", ...]
-                # )
-
                 two_spatial_signals_plot(
                     S_pca, spatial_data['mask'], 
                     spatial_data['dem'], 
@@ -560,12 +492,19 @@ def ICASAR(n_pca_comp_start, n_pca_comp_stop,
         #     pickle.dump(inset_axes_side, f)
             
         
-        
-        S_ica, source_outputs = plot_2d_interactive_fig(
-            S_pca, S_hists, mask, spatial, sica_tica, hdbscan_param,
-            tsne_param, n_converge_bootstrapping, n_converge_no_bootstrapping,
-            inset_axes_side = inset_axes_side, 
-            fig_filename = plot_2d_labels['title'], **fig_kwargs)
+        if sica_tica == 'sica':
+            S_ica, source_outputs = plot_2d_interactive_fig(
+                S_pca, S_hists, mask, spatial, sica_tica, hdbscan_param,
+                tsne_param, n_converge_bootstrapping, n_converge_no_bootstrapping,
+                inset_axes_side = inset_axes_side, 
+                fig_filename = plot_2d_labels['title'], **fig_kwargs)
+        elif sica_tica == 'tica':
+                S_ica, source_outputs = plot_2d_interactive_fig(
+                    A_pca, S_hists, mask, spatial, sica_tica, hdbscan_param,
+                    tsne_param, n_converge_bootstrapping, n_converge_no_bootstrapping,
+                    inset_axes_side = inset_axes_side, 
+                    fig_filename = plot_2d_labels['title'], **fig_kwargs)
+            
         
         # unpack to use the previous naming convention.  
         labels_hdbscan = source_outputs['labels']
@@ -844,7 +783,10 @@ def tsne_and_cluster(S_hist, mask, spatial, sica_tica, n_comp,
                                                   np.ones((1, n_comp*n_converge_no_bootstrapping)))))}        
     marker_dict['styles'] = ['o', 'x']
     
-    return sources_all_r3, S_ica, labels_hdbscan, xy_tsne, marker_dict, legend_dict, labels_colours, Iq_sorted, n_clusters
+    if sica_tica == 'sica':
+        return sources_all_r3, S_ica, labels_hdbscan, xy_tsne, marker_dict, legend_dict, labels_colours, Iq_sorted, n_clusters
+    elif sica_tica == 'tica':
+        return sources_all_r2, S_ica, labels_hdbscan, xy_tsne, marker_dict, legend_dict, labels_colours, Iq_sorted, n_clusters
    
 
 

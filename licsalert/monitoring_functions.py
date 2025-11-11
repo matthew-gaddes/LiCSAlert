@@ -82,7 +82,6 @@ def LiCSAlert_monitoring_mode(
             os.mkdir(outdir)                                             # and remake the folder
     
 
-    
 
     
     # if a directory for the package has been provided, assume not on path.
@@ -132,6 +131,9 @@ def LiCSAlert_monitoring_mode(
         (licsalert_settings, icasar_settings, licsbas_settings) = outputs
         del outputs
 
+    #  tica is no longer supported.  
+    icasar_settings['sica_tica']='sica'
+
 
     # 2: Open the data
     displacement_r3, tbaseline_info = import_insar_data(
@@ -160,16 +162,6 @@ def LiCSAlert_monitoring_mode(
             displacement_r3
             )        
     
-    # check for the unusual case that there are fewer pixels than pca_comps 
-    # requested
-    print(f"REMOVED THE CHECK FOR FEWER PIXELS THAN PCA COMPONENTS")
-    # if icasar_settings['sica_tica'] == 'sica':
-    #     if (displacement_r2['incremental'].shape[1] < 
-    #         icasar_settings['n_pca_comp_start']):
-    #         raise Exception(
-    #             "There are fewer pixels "
-    #             "{displacement_r2['incremental'].shape[1]} than ")
-
 
     # Downsample the data in space once for use (to increase speed)
     # and once for plotting (to make very small images)
@@ -182,6 +174,28 @@ def LiCSAlert_monitoring_mode(
         licsalert_settings['downsample_run'], 
         licsalert_settings['downsample_plot']
         )
+    
+    
+    
+    # save minimal data for example
+    # import pickle
+    # displacement_r3_example = {}
+    # displacement_r3_example['mask']=displacement_r3['mask']
+    # displacement_r3_example['dem']=displacement_r3['dem']
+    # displacement_r3_example['lons_mg']=displacement_r3['lons_mg']
+    # displacement_r3_example['lats_mg']=displacement_r3['lats_mg']
+    # displacement_r3_example['cum_ma']=displacement_r3['cum_ma'].original
+    # with open('cordon_culle_ts.pkl', 'wb') as f:
+    #     pickle.dump(displacement_r3_example, f)
+    #     pickle.dump(tbaseline_info, f)
+    
+    # pdb.set_trace()
+    
+    # # save all the data
+    # import cloudpickle
+    # with open('cordon_culle_ts.pkl', 'wb') as f:
+    #     cloudpickle.dump(displacement_r3, f)
+    #     cloudpickle.dump(tbaseline_info, f)
     
     # add the temporal baselines (in days) for single master ifgs. relative
     # to the first acquisition
@@ -241,6 +255,18 @@ def LiCSAlert_monitoring_mode(
             licsalert_settings['figure_type'],
             interactive=False,                # useful to set to True to debug
         )
+        
+        # check for the unusual case that there are fewer pixels than pca_comps 
+        # requested
+        if icasar_settings['sica_tica'] == 'sica':
+            if (displacement_r2_ica['incremental'].shape[1] < 
+                icasar_settings['n_pca_comp_start']):
+                raise Exception(
+                    "There are fewer pixels "
+                    "{displacement_r2['incremental'].shape[1]} than principal"
+                    "components.  The suggest there are very, very few "
+                    "coherent pixels.  "
+                    )
         
         # either load ICA from previous run, or compute it.  
         # note that displacement_r2_ica contains mixtures_mc, which are the 
@@ -319,15 +345,16 @@ def LiCSAlert_monitoring_mode(
                 if 'sources_tcs' not in locals().keys():
                     licsalert_result = LiCSAlert(
                         icasar_sources, 
-                        tbaseline_info['baselines_cumulative'],                                               
-                        ifgs_baseline = displacement_r2['incremental_mc_space'][
-                            :(licsalert_settings['baseline_end'].acq_n),],                             
-                        ifgs_monitoring = displacement_r2['incremental_mc_space'][
-                            (licsalert_settings['baseline_end'].acq_n):,], 
-                        mask = displacement_r2['mask'],
+                        mask_icasar,
+                        displacement_r3['inc_ma'].mean_centered.space,
+                        tbaseline_info['baselines_cumulative'],
+                        licsalert_settings['baseline_end'],
                         t_recalculate=licsalert_settings['t_recalculate'], 
-                        verbose=False
-                        )                                                                                 
+                        verbose=False,
+                        residual_type=licsalert_settings['residual_type'],
+                        processing_date=processing_date,
+                    )                                                                                 
+                        
                     (sources_tcs, residual_tcs, reconstructions, residuals
                      )  = licsalert_result; del licsalert_result
                     
@@ -379,7 +406,12 @@ def LiCSAlert_monitoring_mode(
         ) 
         
         # also plot some info (e.g. DEM, input data), once.  
-        save_licsalert_aux_data(volcano_dir, displacement_r3, tbaseline_info)
+        save_licsalert_aux_data(
+            volcano_dir,
+            displacement_r3,
+            tbaseline_info,
+            icasar_settings['sica_tica']
+            )
 
     sys.stdout = original                                                                                                                                      # return stdout to be normal.  
     f_run_log.close()                                                                                                                                          # and close the log file.  
@@ -606,7 +638,7 @@ def LiCSBAS_json_to_LiCSAlert(json_file):
         def dimension_unpacker_recursive(nested_list, dims):
             """Given nested lists, determine how many items are in each list.  Recursive!  
             Inputs:
-                nested_list | list of lists (of lists?) \ nested list.  
+                nested_list | list of lists (of lists?) nested list.  
                 dims | empty list | will be filled with number of entres in each dimension
             returns:
                 dims | list | number of entries in each dimension.  
@@ -955,7 +987,9 @@ def run_LiCSAlert_status(
                                 '02_incremental*.png',
                                 '03_incremental_reconstruction*.png',
                                 '04_incremental_residual*.png',
-                                '05_cumulative_residual*.png']
+                                '05_cumulative_reconstruction*.png',
+                                '06_cumulative_residual*.png',
+                                ]
 
             
             self.processed_with_errors = []
@@ -963,13 +997,14 @@ def run_LiCSAlert_status(
             
             for processed_date in self.processed:
                 
+                
+                
                 # create a path to the current directory                
                 date_dir = self.licsalert_dir / processed_date                                     
                 # get names of the files in this folder (no paths)
                 date_dir_files = sorted([f.name for f in os.scandir(date_dir)])                  
                 all_products_complete = True                                                                                 # initiate as True
-                
-                
+
                 for constant_output in constant_outputs:                                                                     
                     all_products_complete = (all_products_complete) and (constant_output in date_dir_files)            
                 
@@ -1118,7 +1153,7 @@ def read_config_file(config_file):
     Returns:
         LiCSAR_settings | dict | 
         licsbas_settings | dict | as per used by map_profile_wrapper
-        icasar_settings | dict | as per used by map_profile_wrapper
+        icasar_settings | dict | as per used by map_profqile_wrapper
        
     History:
         2020/05/29 | MEG | Written
@@ -1152,6 +1187,7 @@ def read_config_file(config_file):
     licsalert_settings['figure_type'] =  config.get('LiCSAlert', 'figure_type')            
     licsalert_settings['t_recalculate'] =  int(config.get('LiCSAlert', 't_recalculate'))
     licsalert_settings['inset_ifgs_scaling'] =  int(config.get('LiCSAlert', 'inset_ifgs_scaling'))
+    licsalert_settings['residual_type'] = config.get('LiCSAlert', 'residual_type')
     
     
     # ICASAR settings
@@ -1180,7 +1216,7 @@ def read_config_file(config_file):
     icasar_settings['ica_param'] = (ica_tolerance, ica_max_iterations)
     
     icasar_settings['ifgs_format'] =  config.get('ICASAR', 'ifgs_format')            
-    icasar_settings['sica_tica'] =  config.get('ICASAR', 'sica_tica')            
+    #icasar_settings['sica_tica'] =  config.get('ICASAR', 'sica_tica')            
     
     
     # LiCSBAS settings

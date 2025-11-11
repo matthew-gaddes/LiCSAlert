@@ -6,6 +6,7 @@ figure_intermediate = True
 figure_type = png
 t_recalculate = 40
 inset_ifgs_scaling = 15
+residual_type = cumulative
 
 [ICASAR]
 n_pca_comp_start = 6
@@ -19,7 +20,7 @@ tsne_early_exaggeration = 12
 ica_tolerance = 0.01
 ica_max_iterations = 150
 ifgs_format = cum
-sica_tica = sica
+
 
 [LiCSBAS]
 crop_side_length = 30000

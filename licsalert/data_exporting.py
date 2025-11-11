@@ -11,7 +11,12 @@ import pdb
 
 #%%
 
-def save_licsalert_aux_data(out_dir, displacement_r3, tbaseline_info):
+def save_licsalert_aux_data(
+        out_dir,
+        displacement_r3,
+        tbaseline_info,
+        sica_tica,
+        ):
     """ Save the displacment_r2 dict containing all the time series 
     data that was used by LiCSAlert.
     
@@ -21,6 +26,7 @@ def save_licsalert_aux_data(out_dir, displacement_r3, tbaseline_info):
                         (['dem', 'mask', 'inc_ma', 'lons', 'lats', 'E', 'N',
                           'U', 'inc_ma_downsampled', 'cum_ma', 'cum_ma_downsampled'])
         tbaseline_info | dict | contains dict_keys(['acq_dates', 'ifg_dates', 'baselines', 'baselines_cumulative'])
+        sica_tica | str | record how ICA was performed 
     Returns:
         pickle file
     History:
@@ -45,6 +51,7 @@ def save_licsalert_aux_data(out_dir, displacement_r3, tbaseline_info):
     #     pickle.dump(displacement_r3_out, f)
     #     pickle.dump(tbaseline_info, f)
     # f.close()    
+    displacement_r3['sica_tica']=sica_tica
     
     import cloudpickle
     

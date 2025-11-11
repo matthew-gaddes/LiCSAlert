@@ -70,9 +70,11 @@ def import_insar_data(
             licsbas_settings['mask_type']
             )          
         
-        (displacement_r2, _, tbaseline_info, ref_xy, 
+        (displacement_r3, tbaseline_info, ref_xy, 
           licsbas_json_creation_time) = products
         
+        # # this is no longer needed.  
+        # del displacement_r2
         
         # #pdb.set_trace()
         # ############################# Begin debug of imported data
@@ -142,7 +144,7 @@ def import_insar_data(
         elif alignsar_dc is not None:
             print(f"LiCSAlert is opening a an AlignSAR data cube.  ")
             ts = AlignSAR_to_LiCSAlert(alignsar_dc, )
-            displacement_r2, tbaseline_info = ts
+            displacement_r3, tbaseline_info = ts
             
 
         # 3.3: Data processed with users own approach/software.  
@@ -183,7 +185,7 @@ def AlignSAR_to_LiCSAlert(alignsar_dc):
     
     
     # initialise
-    displacement_r2 = {}
+    displacement_r3 = {}
     tbaseline_info = {}
     
     # Open the .nc (data cube) file 
@@ -208,14 +210,24 @@ def AlignSAR_to_LiCSAlert(alignsar_dc):
     # 3: Open the mask and DEM
     # Alignsar is 1 for valid data, 0 for masked
     # switch to LiCSAlert of 1 for masked, 0 for not.  
+    # also note that this is r2.  
     mask_AS = 1 - np.flipud(cumh5['mask'][:])
     
     # also mask any pixels that ever go to nan (1 for masked)
     mask_cum = np.isnan(cumulative)                                                                       
-    mask_cum = (np.sum(mask_cum, axis = 0) > 0)                                                             
+    #mask_cum = (np.sum(mask_cum, axis = 0) > 0)                                                             
+
+    # 3a apply the mask to the data
+    displacement_r3['cum_ma']=ma.array(
+        data=cumulative,
+        mask=mask_cum
+        )
+
+    # also record the r2 mask     
+    displacement_r3['mask']=mask_AS
 
     # combine the masks
-    mask = np.logical_or(mask_AS, mask_cum)
+    #mask = np.logical_or(mask_AS, mask_cum)
 
     
     # debug plot
@@ -225,42 +237,28 @@ def AlignSAR_to_LiCSAlert(alignsar_dc):
     
     # apply the mask to the DEM
     dem = np.flipud(cumh5['DEM'][:])
-    dem_ma = ma.array(dem, mask = mask)
-    displacement_r2['dem'] = dem_ma
+    dem_ma = ma.array(dem)
+    displacement_r3['dem'] = dem_ma
     
-    # 3a apply the mask to the data
-    cum_r3 = ma.array(
-        cumulative, mask=np.repeat(mask[np.newaxis,], cumulative.shape[0], 0)
-        )
     
-    # convert the data to rank 2
-    r2_data = r3_to_r2(cum_r3)
-    displacement_r2['cumulative'] = r2_data['ifgs']
-    displacement_r2['mask'] = r2_data['mask']
-    del r2_data
-    
-    # also calculate incremental displacements
-    displacement_r2['incremental'] = np.diff(
-        displacement_r2['cumulative'], axis = 0
-        )
     
     # 5: get the lons and lats of each pixel in the ifgs
     # lon and lat are stored as row vectors so expand to LiCSAlert meshgrids.  
     lons, lats = np.meshgrid(cumh5['lon'][:], cumh5['lat'][:])
     lats = np.flipud(lats)
-    displacement_r2['lats'] = lats
-    displacement_r2['lons'] = lons
+    displacement_r3['lats_mg'] = lats
+    displacement_r3['lons_mg'] = lons
     
     # 6 Get ENU look vector info N/A - not available.  
     
     # 7 Get the time info
     # open as array, then convert to list of ints
-    tbaseline_info['baselines_cumulative'] = cumh5['time'][:].astype(float)
+    baselines_cumulative = cumh5['time'][:].astype(float)
      
     # calculate the shortest temporal baselines between these.  
-    tbaseline_info['baselines'] = np.diff(
-        tbaseline_info['baselines_cumulative']
-        ).tolist()
+    # baselines = np.diff(
+    #     tbaseline_info['baselines_cumulative']
+    #     ).tolist()
     
     # get the date of the first acquisition (as a string and a datetime) 
     acq0_date_str = str(cumh5['time'].attrs['units']).split(' ')[2]
@@ -269,20 +267,20 @@ def AlignSAR_to_LiCSAlert(alignsar_dc):
     # and the dates of all subsequent acquisitions (as a list of strings)
     tbaseline_info['acq_dates'] = [
         (acq0_dt + timedelta(i)).strftime('%Y%m%d') for
-        i in tbaseline_info['baselines_cumulative']
+        i in baselines_cumulative
         ]
 
     # and also the names of the daisy chain of ifgs.  
-    tbaseline_info['ifg_dates'] = daisy_chain_from_acquisitions(
-        tbaseline_info['acq_dates']
-        )
+    # tbaseline_info['ifg_dates'] = daisy_chain_from_acquisitions(
+    #     tbaseline_info['acq_dates']
+    #     )
     
     # Debug: test output sizes
     # for key, value in tbaseline_info.items():
     #     print(f"{key} : {len(value)}")
        
     
-    return displacement_r2, tbaseline_info
+    return displacement_r3, tbaseline_info
 
 #%%
 
@@ -995,7 +993,8 @@ def LiCSBAS_to_LiCSAlert(LiCSBAS_out_folder, filtered = False, figures = False,
             
 
 
-#%%
+#%% LiCSBAS_json_to_LiCSAlert()
+
 def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     """Given a licsbas .json file (as produced by the processing on Jasmin), 
     extract all the information in it
@@ -1185,7 +1184,6 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
             
             return ref_xy
     
-        
         # get the offset between the reference pixel/area and 0 for each time
         ifg_offsets = np.nanmean(
             cumulative_r3[:, ref_xy['y_start']: ref_xy['y_stop'],
@@ -1258,7 +1256,6 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     #         nan_count[np.isnan(images[t,])] += 1
     #     return nan_mask, nan_count
 
-    
     # initiliase
     displacement_r3 = {}
     tbaseline_info = {}
@@ -1291,8 +1288,8 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
         # flip the lats
         lats_mg = np.flipud(lats_mg)                                                                            
 
-    displacement_r3['lons'] = lons_mg
-    displacement_r3['lats'] = lats_mg
+    displacement_r3['lons_mg'] = lons_mg
+    displacement_r3['lats_mg'] = lats_mg
     
    
     
@@ -1336,17 +1333,18 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
     
     
     # 3.4 and mask the data, same mask at all times
-    displacement_r3["cumulative"]  = ma.array(cumulative_r3, mask=mask_r3)
+    displacement_r3["cum_ma"]  = ma.array(cumulative_r3, mask=mask_r3)
     
-    # difference these to get the incremental ifgs, 
-    # should be one less in time dimension than previous.  
-    displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], 
-                                             axis = 0)                   
-    # in the case where no pixels are masked, the mask can disappear
-    if displacement_r3["incremental"].mask.shape == ():                                                 
-        # add a new mask, note that we omit the first one (1:)
-        # as we have one less ifg when handling incremental
-        displacement_r3["incremental"].mask = mask_r3[1:]                                        
+    displacement_r3['mask']=mask_r3
+    # # difference these to get the incremental ifgs, 
+    # # should be one less in time dimension than previous.  
+    # displacement_r3["incremental"] = np.diff(displacement_r3['cumulative'], 
+    #                                          axis = 0)                   
+    # # in the case where no pixels are masked, the mask can disappear
+    # if displacement_r3["incremental"].mask.shape == ():                                                 
+    #     # add a new mask, note that we omit the first one (1:)
+    #     # as we have one less ifg when handling incremental
+    #     displacement_r3["incremental"].mask = mask_r3[1:]                                        
         
     ######### debug
     # pdb.set_trace()
@@ -1373,39 +1371,39 @@ def LiCSBAS_json_to_LiCSAlert(json_file, crop_side_length, mask_type):
                                                        crop_side_length)
 
     # 7: make r2 data from r3 data.          
-    displacement_r2 = {}
-    displacement_r2['lons'] = displacement_r3['lons']
-    displacement_r2['lats'] = displacement_r3['lats']
-    displacement_r2['dem'] = displacement_r3['dem']
+    # displacement_r2 = {}
+    # displacement_r2['lons'] = displacement_r3['lons']
+    # displacement_r2['lats'] = displacement_r3['lats']
+    # displacement_r2['dem'] = displacement_r3['dem']
     
-    # we can only make the r2 data if the mask doesn't vary with time
-    if mask_type != 'nan_variable':
+    # # we can only make the r2 data if the mask doesn't vary with time
+    # if mask_type != 'nan_variable':
         
-        # returns a dict of an array of ifgs as row (ifgs) and the mask (mask)
-        r2_data = r3_to_r2(displacement_r3['cumulative'])
+    #     # returns a dict of an array of ifgs as row (ifgs) and the mask (mask)
+    #     r2_data = r3_to_r2(displacement_r3['cumulative'])
  
-        # unpack
-        displacement_r2['cumulative'] = r2_data['ifgs']
-        displacement_r2['mask'] = r2_data['mask']
-        del r2_data
+    #     # unpack
+    #     displacement_r2['cumulative'] = r2_data['ifgs']
+    #     displacement_r2['mask'] = r2_data['mask']
+    #     del r2_data
         
-        # same for the incremental, but mask is the same as cumualtive so omit
-        r2_data = r3_to_r2(displacement_r3['incremental'])                          
-        displacement_r2['incremental'] = r2_data['ifgs']
-        del r2_data
+    #     # same for the incremental, but mask is the same as cumualtive so omit
+    #     # r2_data = r3_to_r2(displacement_r3['incremental'])                          
+    #     # displacement_r2['incremental'] = r2_data['ifgs']
+    #     del r2_data
         
         
-        return displacement_r2, displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
+    #     return displacement_r2, displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
 
-    # if the mask does, just return r3 data
-    else:
-        return None, displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
+    # # if the mask does, just return r3 data
+    # else:
+    return displacement_r3, tbaseline_info, ref_xy, licsbas_json_creation_time
     
     
     
     
 
-#%%
+#%% square_crop_r3_data_in_space()
 
 def square_crop_r3_data_in_space(displacement_r3, crop_side_length = 20000):
     """ Given r3 data, crop it to be square with a given side length.  
@@ -1472,21 +1470,21 @@ def square_crop_r3_data_in_space(displacement_r3, crop_side_length = 20000):
           f"{crop_side_length} m.  ")
     
     # size of current image in pixels
-    ny, nx = displacement_r3['lons'].shape
+    ny, nx = displacement_r3['lons_mg'].shape
     
     # get the size of the image in metres.  
     image_size = {}
     # size in metres from bottom left to bottom right
-    image_size['x'] = int(distance.distance((displacement_r3['lats'][-1,0], 
-                                             displacement_r3['lons'][-1,0]),
-                                            (displacement_r3['lats'][-1,-1],
-                                             displacement_r3['lons'][-1,-1])).meters )      
+    image_size['x'] = int(distance.distance((displacement_r3['lats_mg'][-1,0], 
+                                             displacement_r3['lons_mg'][-1,0]),
+                                            (displacement_r3['lats_mg'][-1,-1],
+                                             displacement_r3['lons_mg'][-1,-1])).meters )      
     
     # and from bottom left to top left
-    image_size['y'] = int(distance.distance((displacement_r3['lats'][-1,0],
-                                             displacement_r3['lons'][-1,0]),
-                                            (displacement_r3['lats'][0,0], 
-                                             displacement_r3['lons'][0,0])).meters)              
+    image_size['y'] = int(distance.distance((displacement_r3['lats_mg'][-1,0],
+                                             displacement_r3['lons_mg'][-1,0]),
+                                            (displacement_r3['lats_mg'][0,0], 
+                                             displacement_r3['lons_mg'][0,0])).meters)              
     
     if (((image_size['x']) < crop_side_length) or 
         (((image_size['y']) < crop_side_length))):
@@ -1498,8 +1496,8 @@ def square_crop_r3_data_in_space(displacement_r3, crop_side_length = 20000):
                 
     # get the size of a pixel in metres.  
     pixel_size = {}
-    pixel_size['x'] = image_size['x'] / displacement_r3['lons'].shape[1]
-    pixel_size['y'] = image_size['y'] / displacement_r3['lats'].shape[0]
+    pixel_size['x'] = image_size['x'] / displacement_r3['lons_mg'].shape[1]
+    pixel_size['y'] = image_size['y'] / displacement_r3['lats_mg'].shape[0]
     
     # determine how many pixels new image will be.          
     ny_new = int((crop_side_length) / pixel_size['y'])
@@ -1514,16 +1512,16 @@ def square_crop_r3_data_in_space(displacement_r3, crop_side_length = 20000):
 
     # crop each item in space
     displacement_r3_crop = {}
-    displacement_r3_crop['lons'] = displacement_r3['lons'][y_start:y_stop,
+    displacement_r3_crop['lons_mg'] = displacement_r3['lons_mg'][y_start:y_stop,
                                                            x_start:x_stop]
-    displacement_r3_crop['lats'] = displacement_r3['lats'][y_start:y_stop,
+    displacement_r3_crop['lats_mg'] = displacement_r3['lats_mg'][y_start:y_stop,
                                                            x_start:x_stop]
     displacement_r3_crop['dem'] = displacement_r3['dem'][y_start:y_stop,
                                                            x_start:x_stop]
-    displacement_r3_crop['cumulative'] = displacement_r3['cumulative'][:, y_start:y_stop,
+    displacement_r3_crop['cum_ma'] = displacement_r3['cum_ma'][:, y_start:y_stop,
                                                                            x_start:x_stop]
-    displacement_r3_crop['incremental'] = displacement_r3['incremental'][:, y_start:y_stop,
-                                                                            x_start:x_stop]
+    # displacement_r3_crop['incremental'] = displacement_r3['incremental'][:, y_start:y_stop,
+    #                                                                         x_start:x_stop]
     
     return displacement_r3_crop
 

@@ -314,12 +314,7 @@ def dem_and_temporal_source_figure(
         for r2_array in r2_arrays:
             r2_arrays_new.append(r2_array[:, index])
         return r2_arrays_new
-    
-    # debug plot
-    import matplotlib.pyplot as plt
-    f, ax = plt.subplots()
-    ax.plot(np.cumsum(temporal_data['temporal_baselines']))
-    
+        
     if fig_title is not None:
         print(f"Starting to create the {fig_title} figure:")
     

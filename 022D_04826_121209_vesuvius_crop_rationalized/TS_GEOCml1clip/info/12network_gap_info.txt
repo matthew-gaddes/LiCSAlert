@@ -1,3 +1,0 @@
-
-Connected network (year, n_image):
-20141031-20211223 (7.15, 344)

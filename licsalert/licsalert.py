@@ -223,27 +223,34 @@ def LiCSAlert(sources,
     #     baselines_cs
     #     )        
     
+
     # 3: combine the reconsuction and residual for all ifg
-    # reconstruction
-    d_hat = ma.concatenate(
-        (d_hat_baseline,
-         d_hat_monitoring),
-        axis = 0,
-        )
-    # residual                                                                  
-    d_resid = ma.concatenate(
-        (d_resid_baseline,
-         d_resid_monitoring),
-        axis = 0,
-        )
+    # reconstruction    
+    # if in monitoring, need to combine baseline and monitoring
+    if processing_date.dt > baseline_end.dt:
+        d_hat = ma.concatenate(
+            (d_hat_baseline,
+             d_hat_monitoring),
+            axis = 0,
+            )
+        # residual                                                                  
+        d_resid = ma.concatenate(
+            (d_resid_baseline,
+             d_resid_monitoring),
+            axis = 0,
+            )
+    # if still in the baseline stage
+    else:
+        d_hat=d_hat_baseline
+        d_resid=d_resid_baseline
 
 
     #if ifgs_monitoring is None:
-    if False:
-        
-        return sources_tcs, residual_tcs
-    else:
+    if processing_date.dt > baseline_end.dt:
         return sources_tcs_monitor, residual_tcs_monitor, d_hat, d_resid
+    else:
+        return sources_tcs, residual_tcs, d_hat, d_resid
+        
     
 
 
@@ -1459,7 +1466,12 @@ def reconstruct_ts_from_dir(ics_one_hot, licsalert_out_dir):
 
 #%%
 
-def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
+def reconstruct_ts(
+        ics_one_hot,
+        sources_tcs,
+        aux_data,
+        displacement_r3,
+        ):
     """ Reconstruct a LiCSAlert cumulative time series form the ICs and 
     cumulative time course using a choice of components.
     Automatically detects if sICA or tICA was run and handles mean centering accordingly.  
@@ -1481,6 +1493,7 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
     History:
         2023_10_26 | MEG | Written
         2024_01_06 | MEG | Return both cumualtive and incremental displacements.  
+        2025_09_12 | MEG | Update to work with r3 data.  
         
     """
     import numpy as np
@@ -1491,7 +1504,7 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
         
     n_sources = len(sources_tcs)
     n_acqs = sources_tcs[0]['cumulative_tc'].shape[0]
-    n_pixels = displacement_r2['incremental'].shape[1]
+    #n_pixels = displacement_r2['incremental'].shape[1]
     
     # make the cumulative time courses
     A_cum = np.zeros((n_acqs, n_sources))                                                                                                      
@@ -1502,18 +1515,18 @@ def reconstruct_ts(ics_one_hot, sources_tcs, aux_data, displacement_r2):
     # the daisy chain ifgs are just the different between each succesive cumulative ifgs.  
     A_inc = np.diff(A_cum, axis = 0)    
     S = aux_data['icasar_sources']
+    n_pixels = S.shape[1]
     
     # mean for each incremental ifg (n_acq - 1) means sICA was run
-    if displacement_r2['means'].shape[0] == n_acqs-1:                                   
-        means_r2 = np.repeat(displacement_r2['means'][:,np.newaxis], n_pixels, axis = 1 )
-    
-    # mean for each pixel means tICA was run
-    elif displacement_r2['means'].shape[0] == n_pixels:                                   
-        means_r2 = np.repeat(displacement_r2['means'][np.newaxis, :], n_acqs-1, axis = 0)
+    if displacement_r3['sica_tica']=='sica':
+        means=displacement_r3['inc_ma'].means.space
+        means_r2 = np.repeat(means[:,np.newaxis], n_pixels, axis = 1 )
+    elif displacement_r3['sica_tica']=='tica':
+        means=displacement_r3['inc_ma'].means.time
+        means_r2 = np.repeat(means[np.newaxis, :], n_acqs-1, axis = 0)
     else:
-        raise Exception(f"The number of acquisitions in the time courses ({n_acqs}) "
-                        f"does not match the number of times in the interferogams "
-                        f"({displacement_r2['means'].shape[0]}).  Exiting.  ")
+        raise Exception("sica_tica isn't sica or tica.  ")
+        
     
     # reconstruct the daisy chain of short temporal baseline ifgs.  
     X_inc = A_inc@S + means_r2

@@ -450,7 +450,11 @@ def update(val, fig, axes1, slider_a, slider_b, slider_c, slider_d, slider_e,
     source_outputs['Iq_sorted'] = Iq_sorted
     source_outputs['n_clusters'] = n_clusters
     # get all the sources for the 2d points (depends on n_pca) as row vectors
-    sources_all_r2, _ = sources_list_to_r2_r3(S_hists[S_index], mask)           
+    if sica_tica == 'sica':
+        sources_all_r2, _ = sources_list_to_r2_r3(S_hists[S_index], mask)           
+    elif sica_tica == 'tica':
+        raise Exception("Functionality removed.  ")
+    
     source_outputs['sources_all_r2'] = sources_all_r2
 
 
