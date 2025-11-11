@@ -1,18 +1,28 @@
-not_in_repo/
+# compiled python
 licsalert/__pycache__/*
 licsalert/icasar/__pycache__/
 
-001_campi_flegrei_example/ICASAR_results/FastICA_results.pkl
-002_campi_flegrei_example_all_figures/ICASAR_results/FastICA_results.pkl
-003_vesuvius_example_tica/ICASAR_results/FastICA_results.pkl
-004_vesuvius_example_sica/ICASAR_results/FastICA_results.pkl
+# files over 100MB assocaited with LiCSAlert intermediate steps.  
+001_cordon_caulle_example/aux_data_figs/original_ts_data.pkl
+001_cordon_caulle_example/ICASAR_results/FastICA_results.pkl
 
+002_campi_flegrei_example/aux_data_figs/original_ts_data.pkl
+002_campi_flegrei_example/ICASAR_results/FastICA_results.pkl
+
+
+003_campi_flegrei_example_all_figures/aux_data_figs/original_ts_data.pkl
+003_campi_flegrei_example_all_figures/ICASAR_results/FastICA_results.pkl
+
+004_AlignSAR_data_cube_example/aux_data_figs/original_ts_data.pkl
+004_AlignSAR_data_cube_example/alignsar_campi_flegrei/ICASAR_results/FastICA_results.pkl
+
+005_COMET_portal_example/africa/erta_ale_014A_07688_131313/aux_data_figs/original_ts_data.pkl
+005_COMET_portal_example/africa/erta_ale_014A_07688_131313/ICASAR_results/FastICA_results.pkl
+
+# smaller files left from other projects
+not_in_repo/
 status_outputs/
-
 issue_testing/
-
 figure_inputs.pkl
-
 monitoring_analysis_locals*.pkl
 comet_volcano_frames_fogo_edit/
-
