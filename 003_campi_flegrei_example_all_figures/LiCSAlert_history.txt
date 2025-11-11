@@ -1,0 +1,2980 @@
+
+
+
+
+
+LiCSAlert is being run for 003_campi_flegrei_example_all_figures at 24/10/2025 20:36:40
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+LiCSAlert is opening a LiCSBAS directory.  
+Opening the LiCSBAS unfiltered results.  
+Starting to reference the LiCSBAS time series...Done.  
+Failed to open the E N U files (look vector components), but trying to continue anyway.
+The cumulative time series was size (327, 181, 281) and has been downsampled in space to (327, 90, 140) 
+
+As the baseline_end date did not lie on an acquisition date, it has been updated so that it does.  Previously, it was 20170101, but it is now 20161231
+Epoch #    LiCSBAS date    Past baseline    LiCSAlert      
+0            20141031          no              pending (figure only)
+1            20141218          no              pending (figure only)
+2            20150111          no              pending (figure only)
+3            20150123          no              pending (figure only)
+4            20150216          no              pending (figure only)
+5            20150228          no              pending (figure only)
+6            20150312          no              pending (figure only)
+7            20150324          no              pending (figure only)
+8            20150405          no              pending (figure only)
+9            20150429          no              pending (figure only)
+10            20150511          no              pending (figure only)
+11            20150523          no              pending (figure only)
+12            20150604          no              pending (figure only)
+13            20150710          no              pending (figure only)
+14            20150722          no              pending (figure only)
+15            20150815          no              pending (figure only)
+16            20150920          no              pending (figure only)
+17            20151002          no              pending (figure only)
+18            20151014          no              pending (figure only)
+19            20151107          no              pending (figure only)
+20            20151119          no              pending (figure only)
+21            20151201          no              pending (figure only)
+22            20151213          no              pending (figure only)
+23            20151225          no              pending (figure only)
+24            20160106          no              pending (figure only)
+25            20160118          no              pending (figure only)
+26            20160211          no              pending (figure only)
+27            20160223          no              pending (figure only)
+28            20160306          no              pending (figure only)
+29            20160318          no              pending (figure only)
+30            20160330          no              pending (figure only)
+31            20160411          no              pending (figure only)
+32            20160505          no              pending (figure only)
+33            20160517          no              pending (figure only)
+34            20160529          no              pending (figure only)
+35            20160610          no              pending (figure only)
+36            20160704          no              pending (figure only)
+37            20160716          no              pending (figure only)
+38            20160728          no              pending (figure only)
+39            20160809          no              pending (figure only)
+40            20160821          no              pending (figure only)
+41            20160902          no              pending (figure only)
+42            20160914          no              pending (figure only)
+43            20160926          no              pending (figure only)
+44            20161002          no              pending (figure only)
+45            20161008          no              pending (figure only)
+46            20161014          no              pending (figure only)
+47            20161020          no              pending (figure only)
+48            20161026          no              pending (figure only)
+49            20161101          no              pending (figure only)
+50            20161107          no              pending (figure only)
+51            20161113          no              pending (figure only)
+52            20161119          no              pending (figure only)
+53            20161201          no              pending (figure only)
+54            20161207          no              pending (figure only)
+55            20161213          no              pending (figure only)
+56            20161219          no              pending (figure only)
+57            20161225          no              pending (figure only)
+58            20161231          no              pending (figure only)
+59            20170112          yes             pending 
+60            20170118          yes             pending 
+61            20170124          yes             pending 
+62            20170130          yes             pending 
+63            20170205          yes             pending 
+64            20170211          yes             pending 
+65            20170223          yes             pending 
+66            20170301          yes             pending 
+67            20170307          yes             pending 
+68            20170313          yes             pending 
+69            20170319          yes             pending 
+70            20170325          yes             pending 
+71            20170331          yes             pending 
+72            20170406          yes             pending 
+73            20170412          yes             pending 
+74            20170418          yes             pending 
+75            20170424          yes             pending 
+76            20170430          yes             pending 
+77            20170506          yes             pending 
+78            20170512          yes             pending 
+79            20170518          yes             pending 
+80            20170524          yes             pending 
+81            20170530          yes             pending 
+82            20170605          yes             pending 
+83            20170611          yes             pending 
+84            20170617          yes             pending 
+85            20170623          yes             pending 
+86            20170629          yes             pending 
+87            20170705          yes             pending 
+88            20170711          yes             pending 
+89            20170717          yes             pending 
+90            20170723          yes             pending 
+91            20170729          yes             pending 
+92            20170804          yes             pending 
+93            20170816          yes             pending 
+94            20170822          yes             pending 
+95            20170828          yes             pending 
+96            20170903          yes             pending 
+97            20170909          yes             pending 
+98            20170915          yes             pending 
+99            20170921          yes             pending 
+100            20170927          yes             pending 
+101            20171009          yes             pending 
+102            20171015          yes             pending 
+103            20171021          yes             pending 
+104            20171027          yes             pending 
+105            20171102          yes             pending 
+106            20171108          yes             pending 
+107            20171114          yes             pending 
+108            20171120          yes             pending 
+109            20171202          yes             pending 
+110            20171208          yes             pending 
+111            20171214          yes             pending 
+112            20171226          yes             pending 
+113            20180101          yes             pending 
+114            20180107          yes             pending 
+115            20180113          yes             pending 
+116            20180119          yes             pending 
+117            20180125          yes             pending 
+118            20180131          yes             pending 
+119            20180206          yes             pending 
+120            20180218          yes             pending 
+121            20180224          yes             pending 
+122            20180302          yes             pending 
+123            20180308          yes             pending 
+124            20180314          yes             pending 
+125            20180320          yes             pending 
+126            20180326          yes             pending 
+127            20180401          yes             pending 
+128            20180407          yes             pending 
+129            20180413          yes             pending 
+130            20180419          yes             pending 
+131            20180425          yes             pending 
+132            20180501          yes             pending 
+133            20180507          yes             pending 
+134            20180513          yes             pending 
+135            20180519          yes             pending 
+136            20180525          yes             pending 
+137            20180531          yes             pending 
+138            20180606          yes             pending 
+139            20180612          yes             pending 
+140            20180618          yes             pending 
+141            20180630          yes             pending 
+142            20180712          yes             pending 
+143            20180718          yes             pending 
+144            20180724          yes             pending 
+145            20180730          yes             pending 
+146            20180805          yes             pending 
+147            20180811          yes             pending 
+148            20180817          yes             pending 
+149            20180823          yes             pending 
+150            20180829          yes             pending 
+151            20180904          yes             pending 
+152            20180910          yes             pending 
+153            20180916          yes             pending 
+154            20180922          yes             pending 
+155            20180928          yes             pending 
+156            20181004          yes             pending 
+157            20181010          yes             pending 
+158            20181016          yes             pending 
+159            20181022          yes             pending 
+160            20181028          yes             pending 
+161            20181109          yes             pending 
+162            20181115          yes             pending 
+163            20181121          yes             pending 
+164            20181127          yes             pending 
+165            20181203          yes             pending 
+166            20181209          yes             pending 
+167            20181215          yes             pending 
+168            20181221          yes             pending 
+169            20181227          yes             pending 
+170            20190102          yes             pending 
+171            20190108          yes             pending 
+172            20190114          yes             pending 
+173            20190120          yes             pending 
+174            20190126          yes             pending 
+175            20190201          yes             pending 
+176            20190207          yes             pending 
+177            20190213          yes             pending 
+178            20190225          yes             pending 
+179            20190303          yes             pending 
+180            20190309          yes             pending 
+181            20190321          yes             pending 
+182            20190402          yes             pending 
+183            20190408          yes             pending 
+184            20190414          yes             pending 
+185            20190420          yes             pending 
+186            20190426          yes             pending 
+187            20190502          yes             pending 
+188            20190508          yes             pending 
+189            20190520          yes             pending 
+190            20190526          yes             pending 
+191            20190601          yes             pending 
+192            20190607          yes             pending 
+193            20190613          yes             pending 
+194            20190625          yes             pending 
+195            20190701          yes             pending 
+196            20190707          yes             pending 
+197            20190713          yes             pending 
+198            20190719          yes             pending 
+199            20190725          yes             pending 
+200            20190731          yes             pending 
+201            20190806          yes             pending 
+202            20190812          yes             pending 
+203            20190818          yes             pending 
+204            20190824          yes             pending 
+205            20190830          yes             pending 
+206            20190905          yes             pending 
+207            20190911          yes             pending 
+208            20190917          yes             pending 
+209            20190923          yes             pending 
+210            20191005          yes             pending 
+211            20191011          yes             pending 
+212            20191017          yes             pending 
+213            20191023          yes             pending 
+214            20191029          yes             pending 
+215            20191104          yes             pending 
+216            20191116          yes             pending 
+217            20191122          yes             pending 
+218            20191128          yes             pending 
+219            20191204          yes             pending 
+220            20191210          yes             pending 
+221            20191216          yes             pending 
+222            20191222          yes             pending 
+223            20191228          yes             pending 
+224            20200103          yes             pending 
+225            20200109          yes             pending 
+226            20200115          yes             pending 
+227            20200121          yes             pending 
+228            20200127          yes             pending 
+229            20200202          yes             pending 
+230            20200208          yes             pending 
+231            20200214          yes             pending 
+232            20200220          yes             pending 
+233            20200226          yes             pending 
+234            20200303          yes             pending 
+235            20200309          yes             pending 
+236            20200315          yes             pending 
+237            20200321          yes             pending 
+238            20200402          yes             pending 
+239            20200408          yes             pending 
+240            20200414          yes             pending 
+241            20200420          yes             pending 
+242            20200426          yes             pending 
+243            20200502          yes             pending 
+244            20200508          yes             pending 
+245            20200514          yes             pending 
+246            20200520          yes             pending 
+247            20200526          yes             pending 
+248            20200601          yes             pending 
+249            20200607          yes             pending 
+250            20200613          yes             pending 
+251            20200619          yes             pending 
+252            20200625          yes             pending 
+253            20200701          yes             pending 
+254            20200707          yes             pending 
+255            20200713          yes             pending 
+256            20200719          yes             pending 
+257            20200725          yes             pending 
+258            20200731          yes             pending 
+259            20200806          yes             pending 
+260            20200812          yes             pending 
+261            20200818          yes             pending 
+262            20200824          yes             pending 
+263            20200830          yes             pending 
+264            20200905          yes             pending 
+265            20200911          yes             pending 
+266            20200917          yes             pending 
+267            20200923          yes             pending 
+268            20200929          yes             pending 
+269            20201005          yes             pending 
+270            20201011          yes             pending 
+271            20201017          yes             pending 
+272            20201023          yes             pending 
+273            20201029          yes             pending 
+274            20201104          yes             pending 
+275            20201110          yes             pending 
+276            20201116          yes             pending 
+277            20201122          yes             pending 
+278            20201128          yes             pending 
+279            20201204          yes             pending 
+280            20201210          yes             pending 
+281            20201216          yes             pending 
+282            20201222          yes             pending 
+283            20201228          yes             pending 
+284            20210103          yes             pending 
+285            20210109          yes             pending 
+286            20210115          yes             pending 
+287            20210121          yes             pending 
+288            20210127          yes             pending 
+289            20210202          yes             pending 
+290            20210208          yes             pending 
+291            20210214          yes             pending 
+292            20210220          yes             pending 
+293            20210226          yes             pending 
+294            20210304          yes             pending 
+295            20210310          yes             pending 
+296            20210316          yes             pending 
+297            20210322          yes             pending 
+298            20210328          yes             pending 
+299            20210403          yes             pending 
+300            20210409          yes             pending 
+301            20210415          yes             pending 
+302            20210421          yes             pending 
+303            20210427          yes             pending 
+304            20210503          yes             pending 
+305            20210509          yes             pending 
+306            20210515          yes             pending 
+307            20210521          yes             pending 
+308            20210527          yes             pending 
+309            20210602          yes             pending 
+310            20210608          yes             pending 
+311            20210614          yes             pending 
+312            20210620          yes             pending 
+313            20210626          yes             pending 
+314            20210702          yes             pending 
+315            20210708          yes             pending 
+316            20210714          yes             pending 
+317            20210720          yes             pending 
+318            20210726          yes             pending 
+319            20210801          yes             pending 
+320            20210807          yes             pending 
+321            20210813          yes             pending 
+322            20210819          yes             pending 
+323            20210825          yes             pending 
+324            20210831          yes             pending 
+325            20210906          yes             pending 
+326            20210912          yes             pending 
+LiCSAlert status: 
+    1) Run ICASAR: True
+    2) Run LiCSAlert: True
+Updating the figure to 58 epochs... Done.
+
+Running ICASAR.
+From the data passed to ICASAR, I understand it to be spatial data (e.g. time series of images)
+As 'lons' and 'lats' have been provided, the ICs will be geocoded.  
+Spatial patterns will be statitically independent and The cumulative (single master) interferograms will be used.  
+Creating all possible variations of the time series (incremental/daisy chain, cumulative, and all possible).  
+When creating all interferograms, 57 were passed to the function, and these were found to make 1 connected networks.  From these, 1000 interferograms were created.  
+This interferogram timeseries has 57 times and 9139 pixels.  
+This interferogram timeseries has 1000 times and 9139 pixels.  
+This interferogram timeseries has 57 times and 9139 pixels.  
+Performing PCA to whiten the data....Starting to create the 02_PCA_7_components_correlations figure:
+Updating the masks for the two sources.  Of the 9139 in data1 and 8278 in data2, 8274 are in both and can be used.  
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 6 
+
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 6 
+
+Done.  
+No results were found for the multiple ICA runs, so these will now be performed.  
+
+
+Starting the multiple ICA runs with 6 principal components
+FastICA progress with bootstrapping: FastICA algorithm converged in 17 iterations.  
+0% FastICA algorithm converged in 4 iterations.  
+1% FastICA algorithm converged in 4 iterations.  
+1% FastICA algorithm converged in 6 iterations.  
+2% FastICA algorithm converged in 10 iterations.  
+2% FastICA algorithm converged in 17 iterations.  
+3% FastICA algorithm converged in 8 iterations.  
+3% FastICA algorithm converged in 11 iterations.  
+4% FastICA algorithm converged in 4 iterations.  
+4% FastICA algorithm converged in 10 iterations.  
+5% FastICA algorithm converged in 4 iterations.  
+5% FastICA algorithm converged in 13 iterations.  
+6% FastICA algorithm converged in 7 iterations.  
+6% FastICA algorithm converged in 4 iterations.  
+7% FastICA algorithm converged in 11 iterations.  
+7% FastICA algorithm converged in 13 iterations.  
+8% FastICA algorithm converged in 36 iterations.  
+8% FastICA algorithm converged in 6 iterations.  
+9% FastICA algorithm didn't converge in 149 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+10% FastICA algorithm converged in 84 iterations.  
+10% FastICA algorithm converged in 16 iterations.  
+11% FastICA algorithm converged in 11 iterations.  
+11% FastICA algorithm converged in 12 iterations.  
+12% FastICA algorithm converged in 5 iterations.  
+12% FastICA algorithm converged in 7 iterations.  
+13% FastICA algorithm converged in 7 iterations.  
+13% FastICA algorithm converged in 11 iterations.  
+14% FastICA algorithm converged in 135 iterations.  
+14% FastICA algorithm converged in 4 iterations.  
+15% FastICA algorithm didn't converge in 149 iterations.  
+15% FastICA algorithm converged in 6 iterations.  
+15% FastICA algorithm converged in 5 iterations.  
+16% FastICA algorithm converged in 7 iterations.  
+16% FastICA algorithm converged in 8 iterations.  
+17% FastICA algorithm converged in 4 iterations.  
+17% FastICA algorithm converged in 31 iterations.  
+18% FastICA algorithm converged in 6 iterations.  
+18% FastICA algorithm converged in 6 iterations.  
+19% FastICA algorithm converged in 7 iterations.  
+19% FastICA algorithm converged in 5 iterations.  
+20% FastICA algorithm converged in 112 iterations.  
+20% FastICA algorithm converged in 11 iterations.  
+21% FastICA algorithm converged in 34 iterations.  
+21% FastICA algorithm converged in 5 iterations.  
+22% FastICA algorithm converged in 6 iterations.  
+22% FastICA algorithm converged in 16 iterations.  
+23% FastICA algorithm converged in 6 iterations.  
+23% FastICA algorithm didn't converge in 149 iterations.  
+23% FastICA algorithm converged in 7 iterations.  
+24% FastICA algorithm converged in 9 iterations.  
+24% FastICA algorithm didn't converge in 149 iterations.  
+24% FastICA algorithm converged in 10 iterations.  
+25% FastICA algorithm converged in 13 iterations.  
+25% FastICA algorithm converged in 7 iterations.  
+26% FastICA algorithm converged in 6 iterations.  
+26% FastICA algorithm converged in 7 iterations.  
+27% FastICA algorithm converged in 21 iterations.  
+27% FastICA algorithm converged in 4 iterations.  
+28% FastICA algorithm converged in 10 iterations.  
+28% FastICA algorithm converged in 6 iterations.  
+28% FastICA algorithm didn't converge in 149 iterations.  
+28% FastICA algorithm didn't converge in 149 iterations.  
+28% FastICA algorithm didn't converge in 149 iterations.  
+28% FastICA algorithm converged in 6 iterations.  
+29% FastICA algorithm converged in 7 iterations.  
+30% FastICA algorithm didn't converge in 149 iterations.  
+30% FastICA algorithm converged in 6 iterations.  
+30% FastICA algorithm converged in 9 iterations.  
+31% FastICA algorithm converged in 5 iterations.  
+31% FastICA algorithm converged in 13 iterations.  
+32% FastICA algorithm didn't converge in 149 iterations.  
+32% FastICA algorithm converged in 55 iterations.  
+32% FastICA algorithm didn't converge in 149 iterations.  
+32% FastICA algorithm converged in 6 iterations.  
+33% FastICA algorithm converged in 4 iterations.  
+33% FastICA algorithm converged in 5 iterations.  
+34% FastICA algorithm converged in 10 iterations.  
+34% FastICA algorithm didn't converge in 149 iterations.  
+34% FastICA algorithm converged in 6 iterations.  
+35% FastICA algorithm converged in 8 iterations.  
+35% FastICA algorithm converged in 38 iterations.  
+36% FastICA algorithm converged in 5 iterations.  
+36% FastICA algorithm didn't converge in 149 iterations.  
+36% FastICA algorithm converged in 5 iterations.  
+37% FastICA algorithm converged in 5 iterations.  
+37% FastICA algorithm converged in 5 iterations.  
+38% FastICA algorithm converged in 8 iterations.  
+38% FastICA algorithm converged in 24 iterations.  
+39% FastICA algorithm converged in 7 iterations.  
+39% FastICA algorithm converged in 6 iterations.  
+40% FastICA algorithm converged in 6 iterations.  
+40% FastICA algorithm converged in 4 iterations.  
+41% FastICA algorithm converged in 5 iterations.  
+41% FastICA algorithm converged in 12 iterations.  
+42% FastICA algorithm converged in 5 iterations.  
+42% FastICA algorithm converged in 4 iterations.  
+43% FastICA algorithm converged in 6 iterations.  
+43% FastICA algorithm converged in 25 iterations.  
+44% FastICA algorithm converged in 11 iterations.  
+44% FastICA algorithm converged in 9 iterations.  
+45% FastICA algorithm converged in 21 iterations.  
+45% FastICA algorithm didn't converge in 149 iterations.  
+45% FastICA algorithm converged in 5 iterations.  
+46% FastICA algorithm converged in 5 iterations.  
+46% FastICA algorithm converged in 5 iterations.  
+47% FastICA algorithm converged in 8 iterations.  
+47% FastICA algorithm converged in 7 iterations.  
+48% FastICA algorithm didn't converge in 149 iterations.  
+48% FastICA algorithm converged in 15 iterations.  
+48% FastICA algorithm converged in 11 iterations.  
+49% FastICA algorithm converged in 4 iterations.  
+49% FastICA algorithm converged in 13 iterations.  
+50% FastICA algorithm converged in 10 iterations.  
+50% FastICA algorithm converged in 4 iterations.  
+51% FastICA algorithm converged in 16 iterations.  
+51% FastICA algorithm didn't converge in 149 iterations.  
+51% FastICA algorithm converged in 146 iterations.  
+52% FastICA algorithm converged in 5 iterations.  
+52% FastICA algorithm converged in 41 iterations.  
+53% FastICA algorithm converged in 4 iterations.  
+53% FastICA algorithm converged in 8 iterations.  
+54% FastICA algorithm converged in 7 iterations.  
+54% FastICA algorithm converged in 15 iterations.  
+55% FastICA algorithm converged in 8 iterations.  
+55% FastICA algorithm converged in 106 iterations.  
+56% FastICA algorithm converged in 9 iterations.  
+56% FastICA algorithm converged in 15 iterations.  
+56% FastICA algorithm converged in 26 iterations.  
+57% FastICA algorithm converged in 6 iterations.  
+57% FastICA algorithm converged in 12 iterations.  
+58% FastICA algorithm converged in 4 iterations.  
+59% FastICA algorithm converged in 7 iterations.  
+59% FastICA algorithm converged in 9 iterations.  
+60% FastICA algorithm converged in 108 iterations.  
+60% FastICA algorithm converged in 5 iterations.  
+61% FastICA algorithm converged in 21 iterations.  
+61% FastICA algorithm converged in 3 iterations.  
+62% FastICA algorithm converged in 7 iterations.  
+62% FastICA algorithm converged in 5 iterations.  
+63% FastICA algorithm converged in 5 iterations.  
+63% FastICA algorithm converged in 8 iterations.  
+64% FastICA algorithm converged in 8 iterations.  
+64% FastICA algorithm converged in 7 iterations.  
+65% FastICA algorithm converged in 10 iterations.  
+65% FastICA algorithm converged in 4 iterations.  
+66% FastICA algorithm converged in 13 iterations.  
+66% FastICA algorithm converged in 7 iterations.  
+67% FastICA algorithm converged in 14 iterations.  
+67% FastICA algorithm converged in 72 iterations.  
+68% FastICA algorithm converged in 92 iterations.  
+68% FastICA algorithm didn't converge in 149 iterations.  
+68% FastICA algorithm converged in 7 iterations.  
+69% FastICA algorithm converged in 26 iterations.  
+69% FastICA algorithm converged in 4 iterations.  
+70% FastICA algorithm didn't converge in 149 iterations.  
+70% FastICA algorithm converged in 8 iterations.  
+70% FastICA algorithm converged in 6 iterations.  
+71% FastICA algorithm converged in 6 iterations.  
+71% FastICA algorithm converged in 42 iterations.  
+72% FastICA algorithm converged in 8 iterations.  
+72% FastICA algorithm converged in 4 iterations.  
+73% FastICA algorithm converged in 10 iterations.  
+73% FastICA algorithm converged in 6 iterations.  
+74% FastICA algorithm converged in 8 iterations.  
+74% FastICA algorithm converged in 10 iterations.  
+75% FastICA algorithm converged in 47 iterations.  
+75% FastICA algorithm converged in 10 iterations.  
+76% FastICA algorithm converged in 16 iterations.  
+76% FastICA algorithm converged in 8 iterations.  
+77% FastICA algorithm converged in 6 iterations.  
+77% FastICA algorithm converged in 6 iterations.  
+78% FastICA algorithm converged in 145 iterations.  
+78% FastICA algorithm converged in 4 iterations.  
+79% FastICA algorithm converged in 8 iterations.  
+79% FastICA algorithm converged in 10 iterations.  
+80% FastICA algorithm converged in 14 iterations.  
+80% FastICA algorithm converged in 5 iterations.  
+81% FastICA algorithm didn't converge in 149 iterations.  
+81% FastICA algorithm didn't converge in 149 iterations.  
+81% FastICA algorithm converged in 28 iterations.  
+81% FastICA algorithm converged in 8 iterations.  
+82% FastICA algorithm converged in 7 iterations.  
+82% FastICA algorithm converged in 10 iterations.  
+83% FastICA algorithm converged in 10 iterations.  
+83% FastICA algorithm converged in 15 iterations.  
+84% FastICA algorithm converged in 6 iterations.  
+84% FastICA algorithm converged in 8 iterations.  
+85% FastICA algorithm converged in 7 iterations.  
+85% FastICA algorithm converged in 5 iterations.  
+86% FastICA algorithm didn't converge in 149 iterations.  
+86% FastICA algorithm didn't converge in 149 iterations.  
+86% FastICA algorithm converged in 49 iterations.  
+86% FastICA algorithm converged in 15 iterations.  
+87% FastICA algorithm converged in 17 iterations.  
+87% FastICA algorithm converged in 7 iterations.  
+88% FastICA algorithm converged in 7 iterations.  
+88% FastICA algorithm converged in 6 iterations.  
+89% FastICA algorithm didn't converge in 149 iterations.  
+89% FastICA algorithm converged in 6 iterations.  
+89% FastICA algorithm converged in 18 iterations.  
+90% FastICA algorithm converged in 13 iterations.  
+90% FastICA algorithm didn't converge in 149 iterations.  
+90% FastICA algorithm didn't converge in 149 iterations.  
+90% FastICA algorithm converged in 20 iterations.  
+91% FastICA algorithm converged in 12 iterations.  
+91% FastICA algorithm converged in 9 iterations.  
+92% FastICA algorithm converged in 8 iterations.  
+92% FastICA algorithm converged in 10 iterations.  
+93% FastICA algorithm converged in 5 iterations.  
+93% FastICA algorithm didn't converge in 149 iterations.  
+93% FastICA algorithm converged in 4 iterations.  
+94% FastICA algorithm converged in 4 iterations.  
+94% FastICA algorithm converged in 23 iterations.  
+95% FastICA algorithm converged in 9 iterations.  
+95% FastICA algorithm converged in 7 iterations.  
+96% FastICA algorithm converged in 8 iterations.  
+96% FastICA algorithm converged in 7 iterations.  
+97% FastICA algorithm converged in 5 iterations.  
+97% FastICA algorithm converged in 4 iterations.  
+98% FastICA algorithm didn't converge in 149 iterations.  
+98% FastICA algorithm converged in 9 iterations.  
+98% FastICA algorithm converged in 140 iterations.  
+99% FastICA algorithm converged in 6 iterations.  
+99% FastICA algorithm converged in 5 iterations.  
+100% 
+
+Starting the multiple ICA runs with 7 principal components
+FastICA progress with bootstrapping: FastICA algorithm converged in 4 iterations.  
+0% FastICA algorithm converged in 5 iterations.  
+1% FastICA algorithm converged in 8 iterations.  
+1% FastICA algorithm converged in 4 iterations.  
+2% FastICA algorithm converged in 13 iterations.  
+2% FastICA algorithm converged in 4 iterations.  
+3% FastICA algorithm converged in 6 iterations.  
+3% FastICA algorithm converged in 4 iterations.  
+4% FastICA algorithm converged in 5 iterations.  
+4% FastICA algorithm converged in 7 iterations.  
+5% FastICA algorithm converged in 12 iterations.  
+5% FastICA algorithm converged in 7 iterations.  
+6% FastICA algorithm converged in 19 iterations.  
+6% FastICA algorithm converged in 5 iterations.  
+7% FastICA algorithm converged in 134 iterations.  
+7% FastICA algorithm converged in 7 iterations.  
+8% FastICA algorithm converged in 112 iterations.  
+8% FastICA algorithm converged in 4 iterations.  
+9% FastICA algorithm converged in 7 iterations.  
+9% FastICA algorithm converged in 3 iterations.  
+10% FastICA algorithm converged in 5 iterations.  
+10% FastICA algorithm converged in 4 iterations.  
+11% FastICA algorithm converged in 9 iterations.  
+11% FastICA algorithm converged in 6 iterations.  
+12% FastICA algorithm converged in 6 iterations.  
+12% FastICA algorithm converged in 7 iterations.  
+13% FastICA algorithm converged in 8 iterations.  
+13% FastICA algorithm converged in 53 iterations.  
+14% FastICA algorithm converged in 13 iterations.  
+14% FastICA algorithm converged in 6 iterations.  
+15% FastICA algorithm converged in 11 iterations.  
+15% FastICA algorithm converged in 14 iterations.  
+16% FastICA algorithm converged in 4 iterations.  
+16% FastICA algorithm converged in 18 iterations.  
+17% FastICA algorithm converged in 6 iterations.  
+17% FastICA algorithm converged in 99 iterations.  
+18% FastICA algorithm converged in 8 iterations.  
+18% FastICA algorithm converged in 13 iterations.  
+19% FastICA algorithm converged in 4 iterations.  
+19% FastICA algorithm converged in 6 iterations.  
+20% FastICA algorithm converged in 7 iterations.  
+20% FastICA algorithm converged in 20 iterations.  
+21% FastICA algorithm converged in 11 iterations.  
+21% FastICA algorithm converged in 7 iterations.  
+22% FastICA algorithm converged in 7 iterations.  
+22% FastICA algorithm converged in 31 iterations.  
+23% FastICA algorithm converged in 12 iterations.  
+23% FastICA algorithm converged in 12 iterations.  
+24% FastICA algorithm converged in 6 iterations.  
+24% FastICA algorithm converged in 10 iterations.  
+25% FastICA algorithm converged in 8 iterations.  
+25% FastICA algorithm converged in 5 iterations.  
+26% FastICA algorithm converged in 5 iterations.  
+26% FastICA algorithm converged in 6 iterations.  
+27% FastICA algorithm converged in 7 iterations.  
+27% FastICA algorithm converged in 14 iterations.  
+28% FastICA algorithm converged in 7 iterations.  
+28% FastICA algorithm converged in 7 iterations.  
+28% FastICA algorithm converged in 11 iterations.  
+29% FastICA algorithm converged in 5 iterations.  
+30% FastICA algorithm converged in 6 iterations.  
+30% FastICA algorithm converged in 8 iterations.  
+31% FastICA algorithm converged in 8 iterations.  
+31% FastICA algorithm converged in 10 iterations.  
+32% FastICA algorithm converged in 63 iterations.  
+32% FastICA algorithm converged in 8 iterations.  
+33% FastICA algorithm converged in 37 iterations.  
+33% FastICA algorithm converged in 7 iterations.  
+34% FastICA algorithm converged in 7 iterations.  
+34% FastICA algorithm converged in 7 iterations.  
+35% FastICA algorithm converged in 5 iterations.  
+35% FastICA algorithm converged in 5 iterations.  
+36% FastICA algorithm converged in 7 iterations.  
+36% FastICA algorithm converged in 6 iterations.  
+37% FastICA algorithm converged in 57 iterations.  
+37% FastICA algorithm converged in 6 iterations.  
+38% FastICA algorithm converged in 7 iterations.  
+38% FastICA algorithm converged in 15 iterations.  
+39% FastICA algorithm converged in 9 iterations.  
+39% FastICA algorithm converged in 6 iterations.  
+40% FastICA algorithm converged in 8 iterations.  
+40% FastICA algorithm converged in 7 iterations.  
+41% FastICA algorithm converged in 8 iterations.  
+41% FastICA algorithm converged in 8 iterations.  
+42% FastICA algorithm converged in 7 iterations.  
+42% FastICA algorithm converged in 19 iterations.  
+43% FastICA algorithm converged in 6 iterations.  
+43% FastICA algorithm converged in 87 iterations.  
+44% FastICA algorithm converged in 6 iterations.  
+44% FastICA algorithm converged in 26 iterations.  
+45% FastICA algorithm converged in 15 iterations.  
+45% FastICA algorithm converged in 10 iterations.  
+46% FastICA algorithm converged in 11 iterations.  
+46% FastICA algorithm converged in 6 iterations.  
+47% FastICA algorithm converged in 6 iterations.  
+47% FastICA algorithm converged in 8 iterations.  
+48% FastICA algorithm converged in 65 iterations.  
+48% FastICA algorithm converged in 15 iterations.  
+49% FastICA algorithm converged in 9 iterations.  
+49% FastICA algorithm converged in 10 iterations.  
+50% FastICA algorithm converged in 8 iterations.  
+50% FastICA algorithm converged in 6 iterations.  
+51% FastICA algorithm converged in 5 iterations.  
+51% FastICA algorithm converged in 15 iterations.  
+52% FastICA algorithm converged in 25 iterations.  
+52% FastICA algorithm converged in 8 iterations.  
+53% FastICA algorithm converged in 20 iterations.  
+53% FastICA algorithm converged in 7 iterations.  
+54% FastICA algorithm converged in 6 iterations.  
+54% FastICA algorithm converged in 6 iterations.  
+55% FastICA algorithm converged in 9 iterations.  
+55% FastICA algorithm converged in 36 iterations.  
+56% FastICA algorithm converged in 6 iterations.  
+56% FastICA algorithm converged in 142 iterations.  
+56% FastICA algorithm converged in 4 iterations.  
+57% FastICA algorithm converged in 10 iterations.  
+57% FastICA algorithm converged in 6 iterations.  
+58% FastICA algorithm converged in 9 iterations.  
+59% FastICA algorithm converged in 7 iterations.  
+59% FastICA algorithm converged in 7 iterations.  
+60% FastICA algorithm converged in 10 iterations.  
+60% FastICA algorithm converged in 15 iterations.  
+61% FastICA algorithm converged in 4 iterations.  
+61% FastICA algorithm converged in 12 iterations.  
+62% FastICA algorithm converged in 7 iterations.  
+62% FastICA algorithm converged in 20 iterations.  
+63% FastICA algorithm converged in 5 iterations.  
+63% FastICA algorithm converged in 17 iterations.  
+64% FastICA algorithm converged in 5 iterations.  
+64% FastICA algorithm converged in 7 iterations.  
+65% FastICA algorithm converged in 8 iterations.  
+65% FastICA algorithm converged in 13 iterations.  
+66% FastICA algorithm converged in 8 iterations.  
+66% FastICA algorithm converged in 7 iterations.  
+67% FastICA algorithm converged in 6 iterations.  
+67% FastICA algorithm converged in 5 iterations.  
+68% FastICA algorithm converged in 5 iterations.  
+68% FastICA algorithm didn't converge in 149 iterations.  
+68% FastICA algorithm converged in 8 iterations.  
+69% FastICA algorithm converged in 4 iterations.  
+69% FastICA algorithm converged in 52 iterations.  
+70% FastICA algorithm converged in 8 iterations.  
+70% FastICA algorithm converged in 6 iterations.  
+71% FastICA algorithm converged in 5 iterations.  
+71% FastICA algorithm converged in 15 iterations.  
+72% FastICA algorithm converged in 12 iterations.  
+72% FastICA algorithm converged in 6 iterations.  
+73% FastICA algorithm converged in 7 iterations.  
+73% FastICA algorithm converged in 7 iterations.  
+74% FastICA algorithm didn't converge in 149 iterations.  
+74% FastICA algorithm converged in 5 iterations.  
+74% FastICA algorithm converged in 51 iterations.  
+75% FastICA algorithm converged in 43 iterations.  
+75% FastICA algorithm converged in 6 iterations.  
+76% FastICA algorithm converged in 12 iterations.  
+76% FastICA algorithm converged in 6 iterations.  
+77% FastICA algorithm converged in 19 iterations.  
+77% FastICA algorithm converged in 7 iterations.  
+78% FastICA algorithm converged in 6 iterations.  
+78% FastICA algorithm converged in 7 iterations.  
+79% FastICA algorithm converged in 8 iterations.  
+79% FastICA algorithm converged in 15 iterations.  
+80% FastICA algorithm converged in 5 iterations.  
+80% FastICA algorithm converged in 9 iterations.  
+81% FastICA algorithm converged in 6 iterations.  
+81% FastICA algorithm converged in 5 iterations.  
+82% FastICA algorithm converged in 122 iterations.  
+82% FastICA algorithm converged in 6 iterations.  
+83% FastICA algorithm converged in 10 iterations.  
+83% FastICA algorithm converged in 10 iterations.  
+84% FastICA algorithm converged in 13 iterations.  
+84% FastICA algorithm converged in 12 iterations.  
+85% FastICA algorithm converged in 9 iterations.  
+85% FastICA algorithm converged in 5 iterations.  
+86% FastICA algorithm converged in 10 iterations.  
+86% FastICA algorithm didn't converge in 149 iterations.  
+86% FastICA algorithm converged in 5 iterations.  
+87% FastICA algorithm converged in 4 iterations.  
+87% FastICA algorithm converged in 6 iterations.  
+88% FastICA algorithm converged in 8 iterations.  
+88% FastICA algorithm converged in 39 iterations.  
+89% FastICA algorithm converged in 7 iterations.  
+89% FastICA algorithm converged in 19 iterations.  
+90% FastICA algorithm converged in 4 iterations.  
+90% FastICA algorithm converged in 5 iterations.  
+91% FastICA algorithm converged in 5 iterations.  
+91% FastICA algorithm converged in 7 iterations.  
+92% FastICA algorithm converged in 23 iterations.  
+92% FastICA algorithm converged in 5 iterations.  
+93% FastICA algorithm converged in 9 iterations.  
+93% FastICA algorithm converged in 8 iterations.  
+94% FastICA algorithm converged in 6 iterations.  
+94% FastICA algorithm converged in 9 iterations.  
+95% FastICA algorithm converged in 25 iterations.  
+95% FastICA algorithm didn't converge in 149 iterations.  
+95% FastICA algorithm converged in 5 iterations.  
+96% FastICA algorithm converged in 6 iterations.  
+96% FastICA algorithm converged in 7 iterations.  
+97% FastICA algorithm converged in 9 iterations.  
+97% FastICA algorithm converged in 7 iterations.  
+98% FastICA algorithm converged in 12 iterations.  
+98% FastICA algorithm converged in 29 iterations.  
+99% FastICA algorithm converged in 5 iterations.  
+99% FastICA algorithm converged in 8 iterations.  
+100% 
+Starting to compute the pairwise distance matrices....Done!
+Starting to cluster the sources using HDBSCAN....Done!
+Starting to calculate the 2D manifold representation....Done!
+Calculating the centrotypes and associated time courses...Done!
+5 ICA sources have been chosen automatically.Continuing
+Starting to create the 03_ICA_sources_correlations figure:
+Updating the masks for the two sources.  Of the 9139 in data1 and 8278 in data2, 8274 are in both and can be used.  
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
+
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
+
+Done.  
+Creating a Google Earth .kmz of the geocoded independent components... Done!
+
+
+Source 0: deformation
+Source 1: topo_cor_APS
+Source 2: turbulent_APS
+Source 3: turbulent_APS
+Source 4: turbulent_APS
+
+
+Saving the key results as a .pkl file... Done!
+Running LiCSAlert for 20170112  (acquisition # 59 of 326) : monitoring date
+Running LiCSAlert for 20170118  (acquisition # 60 of 326) : monitoring date
+Running LiCSAlert for 20170124  (acquisition # 61 of 326) : monitoring date
+Running LiCSAlert for 20170130  (acquisition # 62 of 326) : monitoring date
+Running LiCSAlert for 20170205  (acquisition # 63 of 326) : monitoring date
+Running LiCSAlert for 20170211  (acquisition # 64 of 326) : monitoring date
+Running LiCSAlert for 20170223  (acquisition # 65 of 326) : monitoring date
+Running LiCSAlert for 20170301  (acquisition # 66 of 326) : monitoring date
+Running LiCSAlert for 20170307  (acquisition # 67 of 326) : monitoring date
+Running LiCSAlert for 20170313  (acquisition # 68 of 326) : monitoring date
+Running LiCSAlert for 20170319  (acquisition # 69 of 326) : monitoring date
+Running LiCSAlert for 20170325  (acquisition # 70 of 326) : monitoring date
+Running LiCSAlert for 20170331  (acquisition # 71 of 326) : monitoring date
+Running LiCSAlert for 20170406  (acquisition # 72 of 326) : monitoring date
+Running LiCSAlert for 20170412  (acquisition # 73 of 326) : monitoring date
+Running LiCSAlert for 20170418  (acquisition # 74 of 326) : monitoring date
+Running LiCSAlert for 20170424  (acquisition # 75 of 326) : monitoring date
+Running LiCSAlert for 20170430  (acquisition # 76 of 326) : monitoring date
+Running LiCSAlert for 20170506  (acquisition # 77 of 326) : monitoring date
+Running LiCSAlert for 20170512  (acquisition # 78 of 326) : monitoring date
+Running LiCSAlert for 20170518  (acquisition # 79 of 326) : monitoring date
+Running LiCSAlert for 20170524  (acquisition # 80 of 326) : monitoring date
+Running LiCSAlert for 20170530  (acquisition # 81 of 326) : monitoring date
+Running LiCSAlert for 20170605  (acquisition # 82 of 326) : monitoring date
+Running LiCSAlert for 20170611  (acquisition # 83 of 326) : monitoring date
+Running LiCSAlert for 20170617  (acquisition # 84 of 326) : monitoring date
+Running LiCSAlert for 20170623  (acquisition # 85 of 326) : monitoring date
+Running LiCSAlert for 20170629  (acquisition # 86 of 326) : monitoring date
+Running LiCSAlert for 20170705  (acquisition # 87 of 326) : monitoring date
+Running LiCSAlert for 20170711  (acquisition # 88 of 326) : monitoring date
+Running LiCSAlert for 20170717  (acquisition # 89 of 326) : monitoring date
+Running LiCSAlert for 20170723  (acquisition # 90 of 326) : monitoring date
+Running LiCSAlert for 20170729  (acquisition # 91 of 326) : monitoring date
+Running LiCSAlert for 20170804  (acquisition # 92 of 326) : monitoring date
+Running LiCSAlert for 20170816  (acquisition # 93 of 326) : monitoring date
+Running LiCSAlert for 20170822  (acquisition # 94 of 326) : monitoring date
+Running LiCSAlert for 20170828  (acquisition # 95 of 326) : monitoring date
+Running LiCSAlert for 20170903  (acquisition # 96 of 326) : monitoring date
+Running LiCSAlert for 20170909  (acquisition # 97 of 326) : monitoring date
+Running LiCSAlert for 20170915  (acquisition # 98 of 326) : monitoring date
+Running LiCSAlert for 20170921  (acquisition # 99 of 326) : monitoring date
+Running LiCSAlert for 20170927  (acquisition # 100 of 326) : monitoring date
+Running LiCSAlert for 20171009  (acquisition # 101 of 326) : monitoring date
+Running LiCSAlert for 20171015  (acquisition # 102 of 326) : monitoring date
+Running LiCSAlert for 20171021  (acquisition # 103 of 326) : monitoring date
+Running LiCSAlert for 20171027  (acquisition # 104 of 326) : monitoring date
+Running LiCSAlert for 20171102  (acquisition # 105 of 326) : monitoring date
+Running LiCSAlert for 20171108  (acquisition # 106 of 326) : monitoring date
+Running LiCSAlert for 20171114  (acquisition # 107 of 326) : monitoring date
+Running LiCSAlert for 20171120  (acquisition # 108 of 326) : monitoring date
+Running LiCSAlert for 20171202  (acquisition # 109 of 326) : monitoring date
+Running LiCSAlert for 20171208  (acquisition # 110 of 326) : monitoring date
+Running LiCSAlert for 20171214  (acquisition # 111 of 326) : monitoring date
+Running LiCSAlert for 20171226  (acquisition # 112 of 326) : monitoring date
+Running LiCSAlert for 20180101  (acquisition # 113 of 326) : monitoring date
+Running LiCSAlert for 20180107  (acquisition # 114 of 326) : monitoring date
+Running LiCSAlert for 20180113  (acquisition # 115 of 326) : monitoring date
+Running LiCSAlert for 20180119  (acquisition # 116 of 326) : monitoring date
+Running LiCSAlert for 20180125  (acquisition # 117 of 326) : monitoring date
+Running LiCSAlert for 20180131  (acquisition # 118 of 326) : monitoring date
+Running LiCSAlert for 20180206  (acquisition # 119 of 326) : monitoring date
+Running LiCSAlert for 20180218  (acquisition # 120 of 326) : monitoring date
+Running LiCSAlert for 20180224  (acquisition # 121 of 326) : monitoring date
+Running LiCSAlert for 20180302  (acquisition # 122 of 326) : monitoring date
+Running LiCSAlert for 20180308  (acquisition # 123 of 326) : monitoring date
+Running LiCSAlert for 20180314  (acquisition # 124 of 326) : monitoring date
+Running LiCSAlert for 20180320  (acquisition # 125 of 326) : monitoring date
+Running LiCSAlert for 20180326  (acquisition # 126 of 326) : monitoring date
+Running LiCSAlert for 20180401  (acquisition # 127 of 326) : monitoring date
+Running LiCSAlert for 20180407  (acquisition # 128 of 326) : monitoring date
+Running LiCSAlert for 20180413  (acquisition # 129 of 326) : monitoring date
+Running LiCSAlert for 20180419  (acquisition # 130 of 326) : monitoring date
+Running LiCSAlert for 20180425  (acquisition # 131 of 326) : monitoring date
+Running LiCSAlert for 20180501  (acquisition # 132 of 326) : monitoring date
+Running LiCSAlert for 20180507  (acquisition # 133 of 326) : monitoring date
+Running LiCSAlert for 20180513  (acquisition # 134 of 326) : monitoring date
+Running LiCSAlert for 20180519  (acquisition # 135 of 326) : monitoring date
+Running LiCSAlert for 20180525  (acquisition # 136 of 326) : monitoring date
+Running LiCSAlert for 20180531  (acquisition # 137 of 326) : monitoring date
+Running LiCSAlert for 20180606  (acquisition # 138 of 326) : monitoring date
+Running LiCSAlert for 20180612  (acquisition # 139 of 326) : monitoring date
+Running LiCSAlert for 20180618  (acquisition # 140 of 326) : monitoring date
+Running LiCSAlert for 20180630  (acquisition # 141 of 326) : monitoring date
+Running LiCSAlert for 20180712  (acquisition # 142 of 326) : monitoring date
+Running LiCSAlert for 20180718  (acquisition # 143 of 326) : monitoring date
+Running LiCSAlert for 20180724  (acquisition # 144 of 326) : monitoring date
+Running LiCSAlert for 20180730  (acquisition # 145 of 326) : monitoring date
+Running LiCSAlert for 20180805  (acquisition # 146 of 326) : monitoring date
+Running LiCSAlert for 20180811  (acquisition # 147 of 326) : monitoring date
+Running LiCSAlert for 20180817  (acquisition # 148 of 326) : monitoring date
+Running LiCSAlert for 20180823  (acquisition # 149 of 326) : monitoring date
+Running LiCSAlert for 20180829  (acquisition # 150 of 326) : monitoring date
+Running LiCSAlert for 20180904  (acquisition # 151 of 326) : monitoring date
+Running LiCSAlert for 20180910  (acquisition # 152 of 326) : monitoring date
+Running LiCSAlert for 20180916  (acquisition # 153 of 326) : monitoring date
+Running LiCSAlert for 20180922  (acquisition # 154 of 326) : monitoring date
+Running LiCSAlert for 20180928  (acquisition # 155 of 326) : monitoring date
+Running LiCSAlert for 20181004  (acquisition # 156 of 326) : monitoring date
+Running LiCSAlert for 20181010  (acquisition # 157 of 326) : monitoring date
+Running LiCSAlert for 20181016  (acquisition # 158 of 326) : monitoring date
+Running LiCSAlert for 20181022  (acquisition # 159 of 326) : monitoring date
+Running LiCSAlert for 20181028  (acquisition # 160 of 326) : monitoring date
+Running LiCSAlert for 20181109  (acquisition # 161 of 326) : monitoring date
+Running LiCSAlert for 20181115  (acquisition # 162 of 326) : monitoring date
+Running LiCSAlert for 20181121  (acquisition # 163 of 326) : monitoring date
+Running LiCSAlert for 20181127  (acquisition # 164 of 326) : monitoring date
+Running LiCSAlert for 20181203  (acquisition # 165 of 326) : monitoring date
+Running LiCSAlert for 20181209  (acquisition # 166 of 326) : monitoring date
+Running LiCSAlert for 20181215  (acquisition # 167 of 326) : monitoring date
+Running LiCSAlert for 20181221  (acquisition # 168 of 326) : monitoring date
+Running LiCSAlert for 20181227  (acquisition # 169 of 326) : monitoring date
+Running LiCSAlert for 20190102  (acquisition # 170 of 326) : monitoring date
+Running LiCSAlert for 20190108  (acquisition # 171 of 326) : monitoring date
+Running LiCSAlert for 20190114  (acquisition # 172 of 326) : monitoring date
+Running LiCSAlert for 20190120  (acquisition # 173 of 326) : monitoring date
+Running LiCSAlert for 20190126  (acquisition # 174 of 326) : monitoring date
+Running LiCSAlert for 20190201  (acquisition # 175 of 326) : monitoring date
+Running LiCSAlert for 20190207  (acquisition # 176 of 326) : monitoring date
+Running LiCSAlert for 20190213  (acquisition # 177 of 326) : monitoring date
+Running LiCSAlert for 20190225  (acquisition # 178 of 326) : monitoring date
+Running LiCSAlert for 20190303  (acquisition # 179 of 326) : monitoring date
+Running LiCSAlert for 20190309  (acquisition # 180 of 326) : monitoring date
+Running LiCSAlert for 20190321  (acquisition # 181 of 326) : monitoring date
+Running LiCSAlert for 20190402  (acquisition # 182 of 326) : monitoring date
+Running LiCSAlert for 20190408  (acquisition # 183 of 326) : monitoring date
+Running LiCSAlert for 20190414  (acquisition # 184 of 326) : monitoring date
+Running LiCSAlert for 20190420  (acquisition # 185 of 326) : monitoring date
+Running LiCSAlert for 20190426  (acquisition # 186 of 326) : monitoring date
+Running LiCSAlert for 20190502  (acquisition # 187 of 326) : monitoring date
+Running LiCSAlert for 20190508  (acquisition # 188 of 326) : monitoring date
+Running LiCSAlert for 20190520  (acquisition # 189 of 326) : monitoring date
+Running LiCSAlert for 20190526  (acquisition # 190 of 326) : monitoring date
+Running LiCSAlert for 20190601  (acquisition # 191 of 326) : monitoring date
+Running LiCSAlert for 20190607  (acquisition # 192 of 326) : monitoring date
+Running LiCSAlert for 20190613  (acquisition # 193 of 326) : monitoring date
+Running LiCSAlert for 20190625  (acquisition # 194 of 326) : monitoring date
+Running LiCSAlert for 20190701  (acquisition # 195 of 326) : monitoring date
+Running LiCSAlert for 20190707  (acquisition # 196 of 326) : monitoring date
+Running LiCSAlert for 20190713  (acquisition # 197 of 326) : monitoring date
+Running LiCSAlert for 20190719  (acquisition # 198 of 326) : monitoring date
+Running LiCSAlert for 20190725  (acquisition # 199 of 326) : monitoring date
+Running LiCSAlert for 20190731  (acquisition # 200 of 326) : monitoring date
+Running LiCSAlert for 20190806  (acquisition # 201 of 326) : monitoring date
+Running LiCSAlert for 20190812  (acquisition # 202 of 326) : monitoring date
+Running LiCSAlert for 20190818  (acquisition # 203 of 326) : monitoring date
+Running LiCSAlert for 20190824  (acquisition # 204 of 326) : monitoring date
+Running LiCSAlert for 20190830  (acquisition # 205 of 326) : monitoring date
+Running LiCSAlert for 20190905  (acquisition # 206 of 326) : monitoring date
+Running LiCSAlert for 20190911  (acquisition # 207 of 326) : monitoring date
+Running LiCSAlert for 20190917  (acquisition # 208 of 326) : monitoring date
+Running LiCSAlert for 20190923  (acquisition # 209 of 326) : monitoring date
+Running LiCSAlert for 20191005  (acquisition # 210 of 326) : monitoring date
+Running LiCSAlert for 20191011  (acquisition # 211 of 326) : monitoring date
+Running LiCSAlert for 20191017  (acquisition # 212 of 326) : monitoring date
+Running LiCSAlert for 20191023  (acquisition # 213 of 326) : monitoring date
+Running LiCSAlert for 20191029  (acquisition # 214 of 326) : monitoring date
+Running LiCSAlert for 20191104  (acquisition # 215 of 326) : monitoring date
+Running LiCSAlert for 20191116  (acquisition # 216 of 326) : monitoring date
+Running LiCSAlert for 20191122  (acquisition # 217 of 326) : monitoring date
+Running LiCSAlert for 20191128  (acquisition # 218 of 326) : monitoring date
+Running LiCSAlert for 20191204  (acquisition # 219 of 326) : monitoring date
+Running LiCSAlert for 20191210  (acquisition # 220 of 326) : monitoring date
+Running LiCSAlert for 20191216  (acquisition # 221 of 326) : monitoring date
+Running LiCSAlert for 20191222  (acquisition # 222 of 326) : monitoring date
+Running LiCSAlert for 20191228  (acquisition # 223 of 326) : monitoring date
+Running LiCSAlert for 20200103  (acquisition # 224 of 326) : monitoring date
+Running LiCSAlert for 20200109  (acquisition # 225 of 326) : monitoring date
+Running LiCSAlert for 20200115  (acquisition # 226 of 326) : monitoring date
+Running LiCSAlert for 20200121  (acquisition # 227 of 326) : monitoring date
+Running LiCSAlert for 20200127  (acquisition # 228 of 326) : monitoring date
+Running LiCSAlert for 20200202  (acquisition # 229 of 326) : monitoring date
+Running LiCSAlert for 20200208  (acquisition # 230 of 326) : monitoring date
+Running LiCSAlert for 20200214  (acquisition # 231 of 326) : monitoring date
+Running LiCSAlert for 20200220  (acquisition # 232 of 326) : monitoring date
+Running LiCSAlert for 20200226  (acquisition # 233 of 326) : monitoring date
+Running LiCSAlert for 20200303  (acquisition # 234 of 326) : monitoring date
+Running LiCSAlert for 20200309  (acquisition # 235 of 326) : monitoring date
+Running LiCSAlert for 20200315  (acquisition # 236 of 326) : monitoring date
+Running LiCSAlert for 20200321  (acquisition # 237 of 326) : monitoring date
+Running LiCSAlert for 20200402  (acquisition # 238 of 326) : monitoring date
+Running LiCSAlert for 20200408  (acquisition # 239 of 326) : monitoring date
+Running LiCSAlert for 20200414  (acquisition # 240 of 326) : monitoring date
+Running LiCSAlert for 20200420  (acquisition # 241 of 326) : monitoring date
+Running LiCSAlert for 20200426  (acquisition # 242 of 326) : monitoring date
+Running LiCSAlert for 20200502  (acquisition # 243 of 326) : monitoring date
+Running LiCSAlert for 20200508  (acquisition # 244 of 326) : monitoring date
+Running LiCSAlert for 20200514  (acquisition # 245 of 326) : monitoring date
+Running LiCSAlert for 20200520  (acquisition # 246 of 326) : monitoring date
+Running LiCSAlert for 20200526  (acquisition # 247 of 326) : monitoring date
+Running LiCSAlert for 20200601  (acquisition # 248 of 326) : monitoring date
+Running LiCSAlert for 20200607  (acquisition # 249 of 326) : monitoring date
+Running LiCSAlert for 20200613  (acquisition # 250 of 326) : monitoring date
+Running LiCSAlert for 20200619  (acquisition # 251 of 326) : monitoring date
+Running LiCSAlert for 20200625  (acquisition # 252 of 326) : monitoring date
+Running LiCSAlert for 20200701  (acquisition # 253 of 326) : monitoring date
+Running LiCSAlert for 20200707  (acquisition # 254 of 326) : monitoring date
+
+
+
+
+
+LiCSAlert is being run for 003_campi_flegrei_example_all_figures at 10/11/2025 16:14:19
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+LiCSAlert is opening a LiCSBAS directory.  
+Opening the LiCSBAS unfiltered results.  
+Starting to reference the LiCSBAS time series...Done.  
+Failed to open the E N U files (look vector components), but trying to continue anyway.
+The cumulative time series was size (327, 181, 281) and has been downsampled in space to (327, 90, 140) 
+
+As the baseline_end date did not lie on an acquisition date, it has been updated so that it does.  Previously, it was 20170101, but it is now 20161231
+Epoch #    LiCSBAS date    Past baseline    LiCSAlert      
+0            20141031          no              pending (figure only)
+1            20141218          no              pending (figure only)
+2            20150111          no              pending (figure only)
+3            20150123          no              pending (figure only)
+4            20150216          no              pending (figure only)
+5            20150228          no              pending (figure only)
+6            20150312          no              pending (figure only)
+7            20150324          no              pending (figure only)
+8            20150405          no              pending (figure only)
+9            20150429          no              pending (figure only)
+10            20150511          no              pending (figure only)
+11            20150523          no              pending (figure only)
+12            20150604          no              pending (figure only)
+13            20150710          no              pending (figure only)
+14            20150722          no              pending (figure only)
+15            20150815          no              pending (figure only)
+16            20150920          no              pending (figure only)
+17            20151002          no              pending (figure only)
+18            20151014          no              pending (figure only)
+19            20151107          no              pending (figure only)
+20            20151119          no              pending (figure only)
+21            20151201          no              pending (figure only)
+22            20151213          no              pending (figure only)
+23            20151225          no              pending (figure only)
+24            20160106          no              pending (figure only)
+25            20160118          no              pending (figure only)
+26            20160211          no              pending (figure only)
+27            20160223          no              pending (figure only)
+28            20160306          no              pending (figure only)
+29            20160318          no              pending (figure only)
+30            20160330          no              pending (figure only)
+31            20160411          no              pending (figure only)
+32            20160505          no              pending (figure only)
+33            20160517          no              pending (figure only)
+34            20160529          no              pending (figure only)
+35            20160610          no              pending (figure only)
+36            20160704          no              pending (figure only)
+37            20160716          no              pending (figure only)
+38            20160728          no              pending (figure only)
+39            20160809          no              pending (figure only)
+40            20160821          no              pending (figure only)
+41            20160902          no              pending (figure only)
+42            20160914          no              pending (figure only)
+43            20160926          no              pending (figure only)
+44            20161002          no              pending (figure only)
+45            20161008          no              pending (figure only)
+46            20161014          no              pending (figure only)
+47            20161020          no              pending (figure only)
+48            20161026          no              pending (figure only)
+49            20161101          no              pending (figure only)
+50            20161107          no              pending (figure only)
+51            20161113          no              pending (figure only)
+52            20161119          no              pending (figure only)
+53            20161201          no              pending (figure only)
+54            20161207          no              pending (figure only)
+55            20161213          no              pending (figure only)
+56            20161219          no              pending (figure only)
+57            20161225          no              pending (figure only)
+58            20161231          no              pending (figure only)
+59            20170112          yes             processed succesfuly
+60            20170118          yes             processed succesfuly
+61            20170124          yes             processed succesfuly
+62            20170130          yes             processed succesfuly
+63            20170205          yes             processed succesfuly
+64            20170211          yes             processed succesfuly
+65            20170223          yes             processed succesfuly
+66            20170301          yes             processed succesfuly
+67            20170307          yes             processed succesfuly
+68            20170313          yes             processed succesfuly
+69            20170319          yes             processed succesfuly
+70            20170325          yes             processed succesfuly
+71            20170331          yes             processed succesfuly
+72            20170406          yes             processed succesfuly
+73            20170412          yes             processed succesfuly
+74            20170418          yes             processed succesfuly
+75            20170424          yes             processed succesfuly
+76            20170430          yes             processed succesfuly
+77            20170506          yes             processed succesfuly
+78            20170512          yes             processed succesfuly
+79            20170518          yes             processed succesfuly
+80            20170524          yes             processed succesfuly
+81            20170530          yes             processed succesfuly
+82            20170605          yes             processed succesfuly
+83            20170611          yes             processed succesfuly
+84            20170617          yes             processed succesfuly
+85            20170623          yes             processed succesfuly
+86            20170629          yes             processed succesfuly
+87            20170705          yes             processed succesfuly
+88            20170711          yes             processed succesfuly
+89            20170717          yes             processed succesfuly
+90            20170723          yes             processed succesfuly
+91            20170729          yes             processed succesfuly
+92            20170804          yes             processed succesfuly
+93            20170816          yes             processed succesfuly
+94            20170822          yes             processed succesfuly
+95            20170828          yes             processed succesfuly
+96            20170903          yes             processed succesfuly
+97            20170909          yes             processed succesfuly
+98            20170915          yes             processed succesfuly
+99            20170921          yes             processed succesfuly
+100            20170927          yes             processed succesfuly
+101            20171009          yes             processed succesfuly
+102            20171015          yes             processed succesfuly
+103            20171021          yes             processed succesfuly
+104            20171027          yes             processed succesfuly
+105            20171102          yes             processed succesfuly
+106            20171108          yes             processed succesfuly
+107            20171114          yes             processed succesfuly
+108            20171120          yes             processed succesfuly
+109            20171202          yes             processed succesfuly
+110            20171208          yes             processed succesfuly
+111            20171214          yes             processed succesfuly
+112            20171226          yes             processed succesfuly
+113            20180101          yes             processed succesfuly
+114            20180107          yes             processed succesfuly
+115            20180113          yes             processed succesfuly
+116            20180119          yes             processed succesfuly
+117            20180125          yes             processed succesfuly
+118            20180131          yes             processed succesfuly
+119            20180206          yes             processed succesfuly
+120            20180218          yes             processed succesfuly
+121            20180224          yes             processed succesfuly
+122            20180302          yes             processed succesfuly
+123            20180308          yes             processed succesfuly
+124            20180314          yes             processed succesfuly
+125            20180320          yes             processed succesfuly
+126            20180326          yes             processed succesfuly
+127            20180401          yes             processed succesfuly
+128            20180407          yes             processed succesfuly
+129            20180413          yes             processed succesfuly
+130            20180419          yes             processed succesfuly
+131            20180425          yes             processed succesfuly
+132            20180501          yes             processed succesfuly
+133            20180507          yes             processed succesfuly
+134            20180513          yes             processed succesfuly
+135            20180519          yes             processed succesfuly
+136            20180525          yes             processed succesfuly
+137            20180531          yes             processed succesfuly
+138            20180606          yes             processed succesfuly
+139            20180612          yes             processed succesfuly
+140            20180618          yes             processed succesfuly
+141            20180630          yes             processed succesfuly
+142            20180712          yes             processed succesfuly
+143            20180718          yes             processed succesfuly
+144            20180724          yes             processed succesfuly
+145            20180730          yes             processed succesfuly
+146            20180805          yes             processed succesfuly
+147            20180811          yes             processed succesfuly
+148            20180817          yes             processed succesfuly
+149            20180823          yes             processed succesfuly
+150            20180829          yes             processed succesfuly
+151            20180904          yes             processed succesfuly
+152            20180910          yes             processed succesfuly
+153            20180916          yes             processed succesfuly
+154            20180922          yes             processed succesfuly
+155            20180928          yes             processed succesfuly
+156            20181004          yes             processed succesfuly
+157            20181010          yes             processed succesfuly
+158            20181016          yes             processed succesfuly
+159            20181022          yes             processed succesfuly
+160            20181028          yes             processed succesfuly
+161            20181109          yes             processed succesfuly
+162            20181115          yes             processed succesfuly
+163            20181121          yes             processed succesfuly
+164            20181127          yes             processed succesfuly
+165            20181203          yes             processed succesfuly
+166            20181209          yes             processed succesfuly
+167            20181215          yes             processed succesfuly
+168            20181221          yes             processed succesfuly
+169            20181227          yes             processed succesfuly
+170            20190102          yes             processed succesfuly
+171            20190108          yes             processed succesfuly
+172            20190114          yes             processed succesfuly
+173            20190120          yes             processed succesfuly
+174            20190126          yes             processed succesfuly
+175            20190201          yes             processed succesfuly
+176            20190207          yes             processed succesfuly
+177            20190213          yes             processed succesfuly
+178            20190225          yes             processed succesfuly
+179            20190303          yes             processed succesfuly
+180            20190309          yes             processed succesfuly
+181            20190321          yes             processed succesfuly
+182            20190402          yes             processed succesfuly
+183            20190408          yes             processed succesfuly
+184            20190414          yes             processed succesfuly
+185            20190420          yes             processed succesfuly
+186            20190426          yes             processed succesfuly
+187            20190502          yes             processed succesfuly
+188            20190508          yes             processed succesfuly
+189            20190520          yes             processed succesfuly
+190            20190526          yes             processed succesfuly
+191            20190601          yes             processed succesfuly
+192            20190607          yes             processed succesfuly
+193            20190613          yes             processed succesfuly
+194            20190625          yes             processed succesfuly
+195            20190701          yes             processed succesfuly
+196            20190707          yes             processed succesfuly
+197            20190713          yes             processed succesfuly
+198            20190719          yes             processed succesfuly
+199            20190725          yes             processed succesfuly
+200            20190731          yes             processed succesfuly
+201            20190806          yes             processed succesfuly
+202            20190812          yes             processed succesfuly
+203            20190818          yes             processed succesfuly
+204            20190824          yes             processed succesfuly
+205            20190830          yes             processed succesfuly
+206            20190905          yes             processed succesfuly
+207            20190911          yes             processed succesfuly
+208            20190917          yes             processed succesfuly
+209            20190923          yes             processed succesfuly
+210            20191005          yes             processed succesfuly
+211            20191011          yes             processed succesfuly
+212            20191017          yes             processed succesfuly
+213            20191023          yes             processed succesfuly
+214            20191029          yes             processed succesfuly
+215            20191104          yes             processed succesfuly
+216            20191116          yes             processed succesfuly
+217            20191122          yes             processed succesfuly
+218            20191128          yes             processed succesfuly
+219            20191204          yes             processed succesfuly
+220            20191210          yes             processed succesfuly
+221            20191216          yes             processed succesfuly
+222            20191222          yes             processed succesfuly
+223            20191228          yes             processed succesfuly
+224            20200103          yes             processed succesfuly
+225            20200109          yes             processed succesfuly
+226            20200115          yes             processed succesfuly
+227            20200121          yes             processed succesfuly
+228            20200127          yes             processed succesfuly
+229            20200202          yes             processed succesfuly
+230            20200208          yes             processed succesfuly
+231            20200214          yes             processed succesfuly
+232            20200220          yes             processed succesfuly
+233            20200226          yes             processed succesfuly
+234            20200303          yes             processed succesfuly
+235            20200309          yes             processed succesfuly
+236            20200315          yes             processed succesfuly
+237            20200321          yes             processed succesfuly
+238            20200402          yes             processed succesfuly
+239            20200408          yes             processed succesfuly
+240            20200414          yes             processed succesfuly
+241            20200420          yes             processed succesfuly
+242            20200426          yes             processed succesfuly
+243            20200502          yes             processed succesfuly
+244            20200508          yes             processed succesfuly
+245            20200514          yes             processed succesfuly
+246            20200520          yes             processed succesfuly
+247            20200526          yes             processed succesfuly
+248            20200601          yes             processed succesfuly
+249            20200607          yes             processed succesfuly
+250            20200613          yes             processed succesfuly
+251            20200619          yes             processed succesfuly
+252            20200625          yes             processed succesfuly
+253            20200701          yes             processed succesfuly
+254            20200707          yes             processed with errors           
+255            20200713          yes             pending 
+256            20200719          yes             pending 
+257            20200725          yes             pending 
+258            20200731          yes             pending 
+259            20200806          yes             pending 
+260            20200812          yes             pending 
+261            20200818          yes             pending 
+262            20200824          yes             pending 
+263            20200830          yes             pending 
+264            20200905          yes             pending 
+265            20200911          yes             pending 
+266            20200917          yes             pending 
+267            20200923          yes             pending 
+268            20200929          yes             pending 
+269            20201005          yes             pending 
+270            20201011          yes             pending 
+271            20201017          yes             pending 
+272            20201023          yes             pending 
+273            20201029          yes             pending 
+274            20201104          yes             pending 
+275            20201110          yes             pending 
+276            20201116          yes             pending 
+277            20201122          yes             pending 
+278            20201128          yes             pending 
+279            20201204          yes             pending 
+280            20201210          yes             pending 
+281            20201216          yes             pending 
+282            20201222          yes             pending 
+283            20201228          yes             pending 
+284            20210103          yes             pending 
+285            20210109          yes             pending 
+286            20210115          yes             pending 
+287            20210121          yes             pending 
+288            20210127          yes             pending 
+289            20210202          yes             pending 
+290            20210208          yes             pending 
+291            20210214          yes             pending 
+292            20210220          yes             pending 
+293            20210226          yes             pending 
+294            20210304          yes             pending 
+295            20210310          yes             pending 
+296            20210316          yes             pending 
+297            20210322          yes             pending 
+298            20210328          yes             pending 
+299            20210403          yes             pending 
+300            20210409          yes             pending 
+301            20210415          yes             pending 
+302            20210421          yes             pending 
+303            20210427          yes             pending 
+304            20210503          yes             pending 
+305            20210509          yes             pending 
+306            20210515          yes             pending 
+307            20210521          yes             pending 
+308            20210527          yes             pending 
+309            20210602          yes             pending 
+310            20210608          yes             pending 
+311            20210614          yes             pending 
+312            20210620          yes             pending 
+313            20210626          yes             pending 
+314            20210702          yes             pending 
+315            20210708          yes             pending 
+316            20210714          yes             pending 
+317            20210720          yes             pending 
+318            20210726          yes             pending 
+319            20210801          yes             pending 
+320            20210807          yes             pending 
+321            20210813          yes             pending 
+322            20210819          yes             pending 
+323            20210825          yes             pending 
+324            20210831          yes             pending 
+325            20210906          yes             pending 
+326            20210912          yes             pending 
+LiCSAlert status: 
+    1) Run ICASAR: False
+    2) Run LiCSAlert: True
+Updating the figure to 58 epochs... Done.
+Running LiCSAlert for 20200713  (acquisition # 255 of 326) : monitoring date
+Running LiCSAlert for 20200719  (acquisition # 256 of 326) : monitoring date
+[4;33mReloaded modules[24m: licsalert, licsalert.monitoring_functions, licsalert.licsalert, licsalert.data_importing, licsalert.data_exporting, licsalert.temporal, licsalert.aux, licsalert.plotting, licsalert.icasar, licsalert.icasar.aux, licsalert.pixel_selection, licsalert.icasar.icasar_funcs[0m
+
+
+
+
+
+LiCSAlert is being run for 003_campi_flegrei_example_all_figures at 10/11/2025 16:15:21
+
+
+
+
+LiCSAlert is being run for 003_campi_flegrei_example_all_figures at 10/11/2025 16:15:21
+
+All the required arguments were found in the dictionary.  All the required arguments were found in the dictionary.  
+
+All the required arguments were found in the dictionary.  All the required arguments were found in the dictionary.  
+
+All the required arguments were found in the dictionary.  All the required arguments were found in the dictionary.  
+
+LiCSAlert is opening a LiCSBAS directory.  LiCSAlert is opening a LiCSBAS directory.  
+
+Opening the LiCSBAS unfiltered results.  Opening the LiCSBAS unfiltered results.  
+
+Starting to reference the LiCSBAS time series...Starting to reference the LiCSBAS time series...Done.  Done.  
+
+Failed to open the E N U files (look vector components), but trying to continue anyway.Failed to open the E N U files (look vector components), but trying to continue anyway.
+
+The cumulative time series was size (327, 181, 281) The cumulative time series was size (327, 181, 281) and has been downsampled in space to (327, 90, 140) and has been downsampled in space to (327, 90, 140) 
+
+
+As the baseline_end date did not lie on an acquisition date, it has been updated so that it does.  Previously, it was 20170101, but it is now 20161231
+As the baseline_end date did not lie on an acquisition date, it has been updated so that it does.  Previously, it was 20170101, but it is now 20161231
+
+Epoch #    LiCSBAS date    Past baseline    LiCSAlert      Epoch #    LiCSBAS date    Past baseline    LiCSAlert      
+
+0            20141031          0            20141031          no              no              pending (figure only)pending (figure only)
+
+1            20141218          1            20141218          no              no              pending (figure only)pending (figure only)
+
+2            20150111          2            20150111          no              no              pending (figure only)pending (figure only)
+
+3            20150123          3            20150123          no              no              pending (figure only)pending (figure only)
+
+4            20150216          4            20150216          no              no              pending (figure only)pending (figure only)
+
+5            20150228          5            20150228          no              no              pending (figure only)pending (figure only)
+
+6            20150312          6            20150312          no              no              pending (figure only)pending (figure only)
+
+7            20150324          7            20150324          no              no              pending (figure only)pending (figure only)
+
+8            20150405          8            20150405          no              no              pending (figure only)pending (figure only)
+
+9            20150429          9            20150429          no              no              pending (figure only)pending (figure only)
+
+10            20150511          10            20150511          no              no              pending (figure only)pending (figure only)
+
+11            20150523          11            20150523          no              no              pending (figure only)pending (figure only)
+
+12            20150604          12            20150604          no              no              pending (figure only)pending (figure only)
+
+13            20150710          13            20150710          no              no              pending (figure only)pending (figure only)
+
+14            20150722          14            20150722          no              no              pending (figure only)pending (figure only)
+
+15            20150815          15            20150815          no              no              pending (figure only)pending (figure only)
+
+16            20150920          16            20150920          no              no              pending (figure only)pending (figure only)
+
+17            20151002          17            20151002          no              no              pending (figure only)pending (figure only)
+
+18            20151014          18            20151014          no              no              pending (figure only)pending (figure only)
+
+19            20151107          19            20151107          no              no              pending (figure only)pending (figure only)
+
+20            20151119          20            20151119          no              no              pending (figure only)pending (figure only)
+
+21            20151201          21            20151201          no              no              pending (figure only)pending (figure only)
+
+22            20151213          22            20151213          no              no              pending (figure only)pending (figure only)
+
+23            20151225          23            20151225          no              no              pending (figure only)pending (figure only)
+
+24            20160106          24            20160106          no              no              pending (figure only)pending (figure only)
+
+25            20160118          25            20160118          no              no              pending (figure only)pending (figure only)
+
+26            20160211          26            20160211          no              no              pending (figure only)pending (figure only)
+
+27            20160223          27            20160223          no              no              pending (figure only)pending (figure only)
+
+28            20160306          28            20160306          no              no              pending (figure only)pending (figure only)
+
+29            20160318          29            20160318          no              no              pending (figure only)pending (figure only)
+
+30            20160330          30            20160330          no              no              pending (figure only)pending (figure only)
+
+31            20160411          31            20160411          no              no              pending (figure only)pending (figure only)
+
+32            20160505          32            20160505          no              no              pending (figure only)pending (figure only)
+
+33            20160517          33            20160517          no              no              pending (figure only)pending (figure only)
+
+34            20160529          34            20160529          no              no              pending (figure only)pending (figure only)
+
+35            20160610          35            20160610          no              no              pending (figure only)pending (figure only)
+
+36            20160704          36            20160704          no              no              pending (figure only)pending (figure only)
+
+37            20160716          37            20160716          no              no              pending (figure only)pending (figure only)
+
+38            20160728          38            20160728          no              no              pending (figure only)pending (figure only)
+
+39            20160809          39            20160809          no              no              pending (figure only)pending (figure only)
+
+40            20160821          40            20160821          no              no              pending (figure only)pending (figure only)
+
+41            20160902          41            20160902          no              no              pending (figure only)pending (figure only)
+
+42            20160914          42            20160914          no              no              pending (figure only)pending (figure only)
+
+43            20160926          43            20160926          no              no              pending (figure only)pending (figure only)
+
+44            20161002          44            20161002          no              no              pending (figure only)pending (figure only)
+
+45            20161008          45            20161008          no              no              pending (figure only)pending (figure only)
+
+46            20161014          46            20161014          no              no              pending (figure only)pending (figure only)
+
+47            20161020          47            20161020          no              no              pending (figure only)pending (figure only)
+
+48            20161026          48            20161026          no              no              pending (figure only)pending (figure only)
+
+49            20161101          49            20161101          no              no              pending (figure only)pending (figure only)
+
+50            20161107          50            20161107          no              no              pending (figure only)pending (figure only)
+
+51            20161113          51            20161113          no              no              pending (figure only)pending (figure only)
+
+52            20161119          52            20161119          no              no              pending (figure only)pending (figure only)
+
+53            20161201          53            20161201          no              no              pending (figure only)pending (figure only)
+
+54            20161207          54            20161207          no              no              pending (figure only)pending (figure only)
+
+55            20161213          55            20161213          no              no              pending (figure only)pending (figure only)
+
+56            20161219          56            20161219          no              no              pending (figure only)pending (figure only)
+
+57            20161225          57            20161225          no              no              pending (figure only)pending (figure only)
+
+58            20161231          58            20161231          no              no              pending (figure only)pending (figure only)
+
+59            20170112          59            20170112          yes             yes             processed succesfulyprocessed succesfuly
+
+60            20170118          60            20170118          yes             yes             processed succesfulyprocessed succesfuly
+
+61            20170124          61            20170124          yes             yes             processed succesfulyprocessed succesfuly
+
+62            20170130          62            20170130          yes             yes             processed succesfulyprocessed succesfuly
+
+63            20170205          63            20170205          yes             yes             processed succesfulyprocessed succesfuly
+
+64            20170211          64            20170211          yes             yes             processed succesfulyprocessed succesfuly
+
+65            20170223          65            20170223          yes             yes             processed succesfulyprocessed succesfuly
+
+66            20170301          66            20170301          yes             yes             processed succesfulyprocessed succesfuly
+
+67            20170307          67            20170307          yes             yes             processed succesfulyprocessed succesfuly
+
+68            20170313          68            20170313          yes             yes             processed succesfulyprocessed succesfuly
+
+69            20170319          69            20170319          yes             yes             processed succesfulyprocessed succesfuly
+
+70            20170325          70            20170325          yes             yes             processed succesfulyprocessed succesfuly
+
+71            20170331          71            20170331          yes             yes             processed succesfulyprocessed succesfuly
+
+72            20170406          72            20170406          yes             yes             processed succesfulyprocessed succesfuly
+
+73            20170412          73            20170412          yes             yes             processed succesfulyprocessed succesfuly
+
+74            20170418          74            20170418          yes             yes             processed succesfulyprocessed succesfuly
+
+75            20170424          75            20170424          yes             yes             processed succesfulyprocessed succesfuly
+
+76            20170430          76            20170430          yes             yes             processed succesfulyprocessed succesfuly
+
+77            20170506          77            20170506          yes             yes             processed succesfulyprocessed succesfuly
+
+78            20170512          78            20170512          yes             yes             processed succesfulyprocessed succesfuly
+
+79            20170518          79            20170518          yes             yes             processed succesfulyprocessed succesfuly
+
+80            20170524          80            20170524          yes             yes             processed succesfulyprocessed succesfuly
+
+81            20170530          81            20170530          yes             yes             processed succesfulyprocessed succesfuly
+
+82            20170605          82            20170605          yes             yes             processed succesfulyprocessed succesfuly
+
+83            20170611          83            20170611          yes             yes             processed succesfulyprocessed succesfuly
+
+84            20170617          84            20170617          yes             yes             processed succesfulyprocessed succesfuly
+
+85            20170623          85            20170623          yes             yes             processed succesfulyprocessed succesfuly
+
+86            20170629          86            20170629          yes             yes             processed succesfulyprocessed succesfuly
+
+87            20170705          87            20170705          yes             yes             processed succesfulyprocessed succesfuly
+
+88            20170711          88            20170711          yes             yes             processed succesfulyprocessed succesfuly
+
+89            20170717          89            20170717          yes             yes             processed succesfulyprocessed succesfuly
+
+90            20170723          90            20170723          yes             yes             processed succesfulyprocessed succesfuly
+
+91            20170729          91            20170729          yes             yes             processed succesfulyprocessed succesfuly
+
+92            20170804          92            20170804          yes             yes             processed succesfulyprocessed succesfuly
+
+93            20170816          93            20170816          yes             yes             processed succesfulyprocessed succesfuly
+
+94            20170822          94            20170822          yes             yes             processed succesfulyprocessed succesfuly
+
+95            20170828          95            20170828          yes             yes             processed succesfulyprocessed succesfuly
+
+96            20170903          96            20170903          yes             yes             processed succesfulyprocessed succesfuly
+
+97            20170909          97            20170909          yes             yes             processed succesfulyprocessed succesfuly
+
+98            20170915          98            20170915          yes             yes             processed succesfulyprocessed succesfuly
+
+99            20170921          99            20170921          yes             yes             processed succesfulyprocessed succesfuly
+
+100            20170927          100            20170927          yes             yes             processed succesfulyprocessed succesfuly
+
+101            20171009          101            20171009          yes             yes             processed succesfulyprocessed succesfuly
+
+102            20171015          102            20171015          yes             yes             processed succesfulyprocessed succesfuly
+
+103            20171021          103            20171021          yes             yes             processed succesfulyprocessed succesfuly
+
+104            20171027          104            20171027          yes             yes             processed succesfulyprocessed succesfuly
+
+105            20171102          105            20171102          yes             yes             processed succesfulyprocessed succesfuly
+
+106            20171108          106            20171108          yes             yes             processed succesfulyprocessed succesfuly
+
+107            20171114          107            20171114          yes             yes             processed succesfulyprocessed succesfuly
+
+108            20171120          108            20171120          yes             yes             processed succesfulyprocessed succesfuly
+
+109            20171202          109            20171202          yes             yes             processed succesfulyprocessed succesfuly
+
+110            20171208          110            20171208          yes             yes             processed succesfulyprocessed succesfuly
+
+111            20171214          111            20171214          yes             yes             processed succesfulyprocessed succesfuly
+
+112            20171226          112            20171226          yes             yes             processed succesfulyprocessed succesfuly
+
+113            20180101          113            20180101          yes             yes             processed succesfulyprocessed succesfuly
+
+114            20180107          114            20180107          yes             yes             processed succesfulyprocessed succesfuly
+
+115            20180113          115            20180113          yes             yes             processed succesfulyprocessed succesfuly
+
+116            20180119          116            20180119          yes             yes             processed succesfulyprocessed succesfuly
+
+117            20180125          117            20180125          yes             yes             processed succesfulyprocessed succesfuly
+
+118            20180131          118            20180131          yes             yes             processed succesfulyprocessed succesfuly
+
+119            20180206          119            20180206          yes             yes             processed succesfulyprocessed succesfuly
+
+120            20180218          120            20180218          yes             yes             processed succesfulyprocessed succesfuly
+
+121            20180224          121            20180224          yes             yes             processed succesfulyprocessed succesfuly
+
+122            20180302          122            20180302          yes             yes             processed succesfulyprocessed succesfuly
+
+123            20180308          123            20180308          yes             yes             processed succesfulyprocessed succesfuly
+
+124            20180314          124            20180314          yes             yes             processed succesfulyprocessed succesfuly
+
+125            20180320          125            20180320          yes             yes             processed succesfulyprocessed succesfuly
+
+126            20180326          126            20180326          yes             yes             processed succesfulyprocessed succesfuly
+
+127            20180401          127            20180401          yes             yes             processed succesfulyprocessed succesfuly
+
+128            20180407          128            20180407          yes             yes             processed succesfulyprocessed succesfuly
+
+129            20180413          129            20180413          yes             yes             processed succesfulyprocessed succesfuly
+
+130            20180419          130            20180419          yes             yes             processed succesfulyprocessed succesfuly
+
+131            20180425          131            20180425          yes             yes             processed succesfulyprocessed succesfuly
+
+132            20180501          132            20180501          yes             yes             processed succesfulyprocessed succesfuly
+
+133            20180507          133            20180507          yes             yes             processed succesfulyprocessed succesfuly
+
+134            20180513          134            20180513          yes             yes             processed succesfulyprocessed succesfuly
+
+135            20180519          135            20180519          yes             yes             processed succesfulyprocessed succesfuly
+
+136            20180525          136            20180525          yes             yes             processed succesfulyprocessed succesfuly
+
+137            20180531          137            20180531          yes             yes             processed succesfulyprocessed succesfuly
+
+138            20180606          138            20180606          yes             yes             processed succesfulyprocessed succesfuly
+
+139            20180612          139            20180612          yes             yes             processed succesfulyprocessed succesfuly
+
+140            20180618          140            20180618          yes             yes             processed succesfulyprocessed succesfuly
+
+141            20180630          141            20180630          yes             yes             processed succesfulyprocessed succesfuly
+
+142            20180712          142            20180712          yes             yes             processed succesfulyprocessed succesfuly
+
+143            20180718          143            20180718          yes             yes             processed succesfulyprocessed succesfuly
+
+144            20180724          144            20180724          yes             yes             processed succesfulyprocessed succesfuly
+
+145            20180730          145            20180730          yes             yes             processed succesfulyprocessed succesfuly
+
+146            20180805          146            20180805          yes             yes             processed succesfulyprocessed succesfuly
+
+147            20180811          147            20180811          yes             yes             processed succesfulyprocessed succesfuly
+
+148            20180817          148            20180817          yes             yes             processed succesfulyprocessed succesfuly
+
+149            20180823          149            20180823          yes             yes             processed succesfulyprocessed succesfuly
+
+150            20180829          150            20180829          yes             yes             processed succesfulyprocessed succesfuly
+
+151            20180904          151            20180904          yes             yes             processed succesfulyprocessed succesfuly
+
+152            20180910          152            20180910          yes             yes             processed succesfulyprocessed succesfuly
+
+153            20180916          153            20180916          yes             yes             processed succesfulyprocessed succesfuly
+
+154            20180922          154            20180922          yes             yes             processed succesfulyprocessed succesfuly
+
+155            20180928          155            20180928          yes             yes             processed succesfulyprocessed succesfuly
+
+156            20181004          156            20181004          yes             yes             processed succesfulyprocessed succesfuly
+
+157            20181010          157            20181010          yes             yes             processed succesfulyprocessed succesfuly
+
+158            20181016          158            20181016          yes             yes             processed succesfulyprocessed succesfuly
+
+159            20181022          159            20181022          yes             yes             processed succesfulyprocessed succesfuly
+
+160            20181028          160            20181028          yes             yes             processed succesfulyprocessed succesfuly
+
+161            20181109          161            20181109          yes             yes             processed succesfulyprocessed succesfuly
+
+162            20181115          162            20181115          yes             yes             processed succesfulyprocessed succesfuly
+
+163            20181121          163            20181121          yes             yes             processed succesfulyprocessed succesfuly
+
+164            20181127          164            20181127          yes             yes             processed succesfulyprocessed succesfuly
+
+165            20181203          165            20181203          yes             yes             processed succesfulyprocessed succesfuly
+
+166            20181209          166            20181209          yes             yes             processed succesfulyprocessed succesfuly
+
+167            20181215          167            20181215          yes             yes             processed succesfulyprocessed succesfuly
+
+168            20181221          168            20181221          yes             yes             processed succesfulyprocessed succesfuly
+
+169            20181227          169            20181227          yes             yes             processed succesfulyprocessed succesfuly
+
+170            20190102          170            20190102          yes             yes             processed succesfulyprocessed succesfuly
+
+171            20190108          171            20190108          yes             yes             processed succesfulyprocessed succesfuly
+
+172            20190114          172            20190114          yes             yes             processed succesfulyprocessed succesfuly
+
+173            20190120          173            20190120          yes             yes             processed succesfulyprocessed succesfuly
+
+174            20190126          174            20190126          yes             yes             processed succesfulyprocessed succesfuly
+
+175            20190201          175            20190201          yes             yes             processed succesfulyprocessed succesfuly
+
+176            20190207          176            20190207          yes             yes             processed succesfulyprocessed succesfuly
+
+177            20190213          177            20190213          yes             yes             processed succesfulyprocessed succesfuly
+
+178            20190225          178            20190225          yes             yes             processed succesfulyprocessed succesfuly
+
+179            20190303          179            20190303          yes             yes             processed succesfulyprocessed succesfuly
+
+180            20190309          180            20190309          yes             yes             processed succesfulyprocessed succesfuly
+
+181            20190321          181            20190321          yes             yes             processed succesfulyprocessed succesfuly
+
+182            20190402          182            20190402          yes             yes             processed succesfulyprocessed succesfuly
+
+183            20190408          183            20190408          yes             yes             processed succesfulyprocessed succesfuly
+
+184            20190414          184            20190414          yes             yes             processed succesfulyprocessed succesfuly
+
+185            20190420          185            20190420          yes             yes             processed succesfulyprocessed succesfuly
+
+186            20190426          186            20190426          yes             yes             processed succesfulyprocessed succesfuly
+
+187            20190502          187            20190502          yes             yes             processed succesfulyprocessed succesfuly
+
+188            20190508          188            20190508          yes             yes             processed succesfulyprocessed succesfuly
+
+189            20190520          189            20190520          yes             yes             processed succesfulyprocessed succesfuly
+
+190            20190526          190            20190526          yes             yes             processed succesfulyprocessed succesfuly
+
+191            20190601          191            20190601          yes             yes             processed succesfulyprocessed succesfuly
+
+192            20190607          192            20190607          yes             yes             processed succesfulyprocessed succesfuly
+
+193            20190613          193            20190613          yes             yes             processed succesfulyprocessed succesfuly
+
+194            20190625          194            20190625          yes             yes             processed succesfulyprocessed succesfuly
+
+195            20190701          195            20190701          yes             yes             processed succesfulyprocessed succesfuly
+
+196            20190707          196            20190707          yes             yes             processed succesfulyprocessed succesfuly
+
+197            20190713          197            20190713          yes             yes             processed succesfulyprocessed succesfuly
+
+198            20190719          198            20190719          yes             yes             processed succesfulyprocessed succesfuly
+
+199            20190725          199            20190725          yes             yes             processed succesfulyprocessed succesfuly
+
+200            20190731          200            20190731          yes             yes             processed succesfulyprocessed succesfuly
+
+201            20190806          201            20190806          yes             yes             processed succesfulyprocessed succesfuly
+
+202            20190812          202            20190812          yes             yes             processed succesfulyprocessed succesfuly
+
+203            20190818          203            20190818          yes             yes             processed succesfulyprocessed succesfuly
+
+204            20190824          204            20190824          yes             yes             processed succesfulyprocessed succesfuly
+
+205            20190830          205            20190830          yes             yes             processed succesfulyprocessed succesfuly
+
+206            20190905          206            20190905          yes             yes             processed succesfulyprocessed succesfuly
+
+207            20190911          207            20190911          yes             yes             processed succesfulyprocessed succesfuly
+
+208            20190917          208            20190917          yes             yes             processed succesfulyprocessed succesfuly
+
+209            20190923          209            20190923          yes             yes             processed succesfulyprocessed succesfuly
+
+210            20191005          210            20191005          yes             yes             processed succesfulyprocessed succesfuly
+
+211            20191011          211            20191011          yes             yes             processed succesfulyprocessed succesfuly
+
+212            20191017          212            20191017          yes             yes             processed succesfulyprocessed succesfuly
+
+213            20191023          213            20191023          yes             yes             processed succesfulyprocessed succesfuly
+
+214            20191029          214            20191029          yes             yes             processed succesfulyprocessed succesfuly
+
+215            20191104          215            20191104          yes             yes             processed succesfulyprocessed succesfuly
+
+216            20191116          216            20191116          yes             yes             processed succesfulyprocessed succesfuly
+
+217            20191122          217            20191122          yes             yes             processed succesfulyprocessed succesfuly
+
+218            20191128          218            20191128          yes             yes             processed succesfulyprocessed succesfuly
+
+219            20191204          219            20191204          yes             yes             processed succesfulyprocessed succesfuly
+
+220            20191210          220            20191210          yes             yes             processed succesfulyprocessed succesfuly
+
+221            20191216          221            20191216          yes             yes             processed succesfulyprocessed succesfuly
+
+222            20191222          222            20191222          yes             yes             processed succesfulyprocessed succesfuly
+
+223            20191228          223            20191228          yes             yes             processed succesfulyprocessed succesfuly
+
+224            20200103          224            20200103          yes             yes             processed succesfulyprocessed succesfuly
+
+225            20200109          225            20200109          yes             yes             processed succesfulyprocessed succesfuly
+
+226            20200115          226            20200115          yes             yes             processed succesfulyprocessed succesfuly
+
+227            20200121          227            20200121          yes             yes             processed succesfulyprocessed succesfuly
+
+228            20200127          228            20200127          yes             yes             processed succesfulyprocessed succesfuly
+
+229            20200202          229            20200202          yes             yes             processed succesfulyprocessed succesfuly
+
+230            20200208          230            20200208          yes             yes             processed succesfulyprocessed succesfuly
+
+231            20200214          231            20200214          yes             yes             processed succesfulyprocessed succesfuly
+
+232            20200220          232            20200220          yes             yes             processed succesfulyprocessed succesfuly
+
+233            20200226          233            20200226          yes             yes             processed succesfulyprocessed succesfuly
+
+234            20200303          234            20200303          yes             yes             processed succesfulyprocessed succesfuly
+
+235            20200309          235            20200309          yes             yes             processed succesfulyprocessed succesfuly
+
+236            20200315          236            20200315          yes             yes             processed succesfulyprocessed succesfuly
+
+237            20200321          237            20200321          yes             yes             processed succesfulyprocessed succesfuly
+
+238            20200402          238            20200402          yes             yes             processed succesfulyprocessed succesfuly
+
+239            20200408          239            20200408          yes             yes             processed succesfulyprocessed succesfuly
+
+240            20200414          240            20200414          yes             yes             processed succesfulyprocessed succesfuly
+
+241            20200420          241            20200420          yes             yes             processed succesfulyprocessed succesfuly
+
+242            20200426          242            20200426          yes             yes             processed succesfulyprocessed succesfuly
+
+243            20200502          243            20200502          yes             yes             processed succesfulyprocessed succesfuly
+
+244            20200508          244            20200508          yes             yes             processed succesfulyprocessed succesfuly
+
+245            20200514          245            20200514          yes             yes             processed succesfulyprocessed succesfuly
+
+246            20200520          246            20200520          yes             yes             processed succesfulyprocessed succesfuly
+
+247            20200526          247            20200526          yes             yes             processed succesfulyprocessed succesfuly
+
+248            20200601          248            20200601          yes             yes             processed succesfulyprocessed succesfuly
+
+249            20200607          249            20200607          yes             yes             processed succesfulyprocessed succesfuly
+
+250            20200613          250            20200613          yes             yes             processed succesfulyprocessed succesfuly
+
+251            20200619          251            20200619          yes             yes             processed succesfulyprocessed succesfuly
+
+252            20200625          252            20200625          yes             yes             processed succesfulyprocessed succesfuly
+
+253            20200701          253            20200701          yes             yes             processed succesfulyprocessed succesfuly
+
+254            20200707          254            20200707          yes             yes             pending pending 
+
+255            20200713          255            20200713          yes             yes             pending pending 
+
+256            20200719          256            20200719          yes             yes             pending pending 
+
+257            20200725          257            20200725          yes             yes             pending pending 
+
+258            20200731          258            20200731          yes             yes             pending pending 
+
+259            20200806          259            20200806          yes             yes             pending pending 
+
+260            20200812          260            20200812          yes             yes             pending pending 
+
+261            20200818          261            20200818          yes             yes             pending pending 
+
+262            20200824          262            20200824          yes             yes             pending pending 
+
+263            20200830          263            20200830          yes             yes             pending pending 
+
+264            20200905          264            20200905          yes             yes             pending pending 
+
+265            20200911          265            20200911          yes             yes             pending pending 
+
+266            20200917          266            20200917          yes             yes             pending pending 
+
+267            20200923          267            20200923          yes             yes             pending pending 
+
+268            20200929          268            20200929          yes             yes             pending pending 
+
+269            20201005          269            20201005          yes             yes             pending pending 
+
+270            20201011          270            20201011          yes             yes             pending pending 
+
+271            20201017          271            20201017          yes             yes             pending pending 
+
+272            20201023          272            20201023          yes             yes             pending pending 
+
+273            20201029          273            20201029          yes             yes             pending pending 
+
+274            20201104          274            20201104          yes             yes             pending pending 
+
+275            20201110          275            20201110          yes             yes             pending pending 
+
+276            20201116          276            20201116          yes             yes             pending pending 
+
+277            20201122          277            20201122          yes             yes             pending pending 
+
+278            20201128          278            20201128          yes             yes             pending pending 
+
+279            20201204          279            20201204          yes             yes             pending pending 
+
+280            20201210          280            20201210          yes             yes             pending pending 
+
+281            20201216          281            20201216          yes             yes             pending pending 
+
+282            20201222          282            20201222          yes             yes             pending pending 
+
+283            20201228          283            20201228          yes             yes             pending pending 
+
+284            20210103          284            20210103          yes             yes             pending pending 
+
+285            20210109          285            20210109          yes             yes             pending pending 
+
+286            20210115          286            20210115          yes             yes             pending pending 
+
+287            20210121          287            20210121          yes             yes             pending pending 
+
+288            20210127          288            20210127          yes             yes             pending pending 
+
+289            20210202          289            20210202          yes             yes             pending pending 
+
+290            20210208          290            20210208          yes             yes             pending pending 
+
+291            20210214          291            20210214          yes             yes             pending pending 
+
+292            20210220          292            20210220          yes             yes             pending pending 
+
+293            20210226          293            20210226          yes             yes             pending pending 
+
+294            20210304          294            20210304          yes             yes             pending pending 
+
+295            20210310          295            20210310          yes             yes             pending pending 
+
+296            20210316          296            20210316          yes             yes             pending pending 
+
+297            20210322          297            20210322          yes             yes             pending pending 
+
+298            20210328          298            20210328          yes             yes             pending pending 
+
+299            20210403          299            20210403          yes             yes             pending pending 
+
+300            20210409          300            20210409          yes             yes             pending pending 
+
+301            20210415          301            20210415          yes             yes             pending pending 
+
+302            20210421          302            20210421          yes             yes             pending pending 
+
+303            20210427          303            20210427          yes             yes             pending pending 
+
+304            20210503          304            20210503          yes             yes             pending pending 
+
+305            20210509          305            20210509          yes             yes             pending pending 
+
+306            20210515          306            20210515          yes             yes             pending pending 
+
+307            20210521          307            20210521          yes             yes             pending pending 
+
+308            20210527          308            20210527          yes             yes             pending pending 
+
+309            20210602          309            20210602          yes             yes             pending pending 
+
+310            20210608          310            20210608          yes             yes             pending pending 
+
+311            20210614          311            20210614          yes             yes             pending pending 
+
+312            20210620          312            20210620          yes             yes             pending pending 
+
+313            20210626          313            20210626          yes             yes             pending pending 
+
+314            20210702          314            20210702          yes             yes             pending pending 
+
+315            20210708          315            20210708          yes             yes             pending pending 
+
+316            20210714          316            20210714          yes             yes             pending pending 
+
+317            20210720          317            20210720          yes             yes             pending pending 
+
+318            20210726          318            20210726          yes             yes             pending pending 
+
+319            20210801          319            20210801          yes             yes             pending pending 
+
+320            20210807          320            20210807          yes             yes             pending pending 
+
+321            20210813          321            20210813          yes             yes             pending pending 
+
+322            20210819          322            20210819          yes             yes             pending pending 
+
+323            20210825          323            20210825          yes             yes             pending pending 
+
+324            20210831          324            20210831          yes             yes             pending pending 
+
+325            20210906          325            20210906          yes             yes             pending pending 
+
+326            20210912          326            20210912          yes             yes             pending pending 
+
+LiCSAlert status: 
+    1) Run ICASAR: False
+    2) Run LiCSAlert: TrueLiCSAlert status: 
+    1) Run ICASAR: False
+    2) Run LiCSAlert: True
+
+Updating the figure to 58 epochs...Updating the figure to 58 epochs... Done. Done.
+
+Running LiCSAlert for 20200707  (acquisition # 254 of 326)Running LiCSAlert for 20200707  (acquisition # 254 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200713  (acquisition # 255 of 326)Running LiCSAlert for 20200713  (acquisition # 255 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200719  (acquisition # 256 of 326)Running LiCSAlert for 20200719  (acquisition # 256 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200725  (acquisition # 257 of 326)Running LiCSAlert for 20200725  (acquisition # 257 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200731  (acquisition # 258 of 326)Running LiCSAlert for 20200731  (acquisition # 258 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200806  (acquisition # 259 of 326)Running LiCSAlert for 20200806  (acquisition # 259 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200812  (acquisition # 260 of 326)Running LiCSAlert for 20200812  (acquisition # 260 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200818  (acquisition # 261 of 326)Running LiCSAlert for 20200818  (acquisition # 261 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200824  (acquisition # 262 of 326)Running LiCSAlert for 20200824  (acquisition # 262 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200830  (acquisition # 263 of 326)Running LiCSAlert for 20200830  (acquisition # 263 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200905  (acquisition # 264 of 326)Running LiCSAlert for 20200905  (acquisition # 264 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200911  (acquisition # 265 of 326)Running LiCSAlert for 20200911  (acquisition # 265 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200917  (acquisition # 266 of 326)Running LiCSAlert for 20200917  (acquisition # 266 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200923  (acquisition # 267 of 326)Running LiCSAlert for 20200923  (acquisition # 267 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20200929  (acquisition # 268 of 326)Running LiCSAlert for 20200929  (acquisition # 268 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201005  (acquisition # 269 of 326)Running LiCSAlert for 20201005  (acquisition # 269 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201011  (acquisition # 270 of 326)Running LiCSAlert for 20201011  (acquisition # 270 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201017  (acquisition # 271 of 326)Running LiCSAlert for 20201017  (acquisition # 271 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201023  (acquisition # 272 of 326)Running LiCSAlert for 20201023  (acquisition # 272 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201029  (acquisition # 273 of 326)Running LiCSAlert for 20201029  (acquisition # 273 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201104  (acquisition # 274 of 326)Running LiCSAlert for 20201104  (acquisition # 274 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201110  (acquisition # 275 of 326)Running LiCSAlert for 20201110  (acquisition # 275 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201116  (acquisition # 276 of 326)Running LiCSAlert for 20201116  (acquisition # 276 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201122  (acquisition # 277 of 326)Running LiCSAlert for 20201122  (acquisition # 277 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201128  (acquisition # 278 of 326)Running LiCSAlert for 20201128  (acquisition # 278 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201204  (acquisition # 279 of 326)Running LiCSAlert for 20201204  (acquisition # 279 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201210  (acquisition # 280 of 326)Running LiCSAlert for 20201210  (acquisition # 280 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201216  (acquisition # 281 of 326)Running LiCSAlert for 20201216  (acquisition # 281 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201222  (acquisition # 282 of 326)Running LiCSAlert for 20201222  (acquisition # 282 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20201228  (acquisition # 283 of 326)Running LiCSAlert for 20201228  (acquisition # 283 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210103  (acquisition # 284 of 326)Running LiCSAlert for 20210103  (acquisition # 284 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210109  (acquisition # 285 of 326)Running LiCSAlert for 20210109  (acquisition # 285 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210115  (acquisition # 286 of 326)Running LiCSAlert for 20210115  (acquisition # 286 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210121  (acquisition # 287 of 326)Running LiCSAlert for 20210121  (acquisition # 287 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210127  (acquisition # 288 of 326)Running LiCSAlert for 20210127  (acquisition # 288 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210202  (acquisition # 289 of 326)Running LiCSAlert for 20210202  (acquisition # 289 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210208  (acquisition # 290 of 326)Running LiCSAlert for 20210208  (acquisition # 290 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210214  (acquisition # 291 of 326)Running LiCSAlert for 20210214  (acquisition # 291 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210220  (acquisition # 292 of 326)Running LiCSAlert for 20210220  (acquisition # 292 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210226  (acquisition # 293 of 326)Running LiCSAlert for 20210226  (acquisition # 293 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210304  (acquisition # 294 of 326)Running LiCSAlert for 20210304  (acquisition # 294 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210310  (acquisition # 295 of 326)Running LiCSAlert for 20210310  (acquisition # 295 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210316  (acquisition # 296 of 326)Running LiCSAlert for 20210316  (acquisition # 296 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210322  (acquisition # 297 of 326)Running LiCSAlert for 20210322  (acquisition # 297 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210328  (acquisition # 298 of 326)Running LiCSAlert for 20210328  (acquisition # 298 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210403  (acquisition # 299 of 326)Running LiCSAlert for 20210403  (acquisition # 299 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210409  (acquisition # 300 of 326)Running LiCSAlert for 20210409  (acquisition # 300 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210415  (acquisition # 301 of 326)Running LiCSAlert for 20210415  (acquisition # 301 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210421  (acquisition # 302 of 326)Running LiCSAlert for 20210421  (acquisition # 302 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210427  (acquisition # 303 of 326)Running LiCSAlert for 20210427  (acquisition # 303 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210503  (acquisition # 304 of 326)Running LiCSAlert for 20210503  (acquisition # 304 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210509  (acquisition # 305 of 326)Running LiCSAlert for 20210509  (acquisition # 305 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210515  (acquisition # 306 of 326)Running LiCSAlert for 20210515  (acquisition # 306 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210521  (acquisition # 307 of 326)Running LiCSAlert for 20210521  (acquisition # 307 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210527  (acquisition # 308 of 326)Running LiCSAlert for 20210527  (acquisition # 308 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210602  (acquisition # 309 of 326)Running LiCSAlert for 20210602  (acquisition # 309 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210608  (acquisition # 310 of 326)Running LiCSAlert for 20210608  (acquisition # 310 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210614  (acquisition # 311 of 326)Running LiCSAlert for 20210614  (acquisition # 311 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210620  (acquisition # 312 of 326)Running LiCSAlert for 20210620  (acquisition # 312 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210626  (acquisition # 313 of 326)Running LiCSAlert for 20210626  (acquisition # 313 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210702  (acquisition # 314 of 326)Running LiCSAlert for 20210702  (acquisition # 314 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210708  (acquisition # 315 of 326)Running LiCSAlert for 20210708  (acquisition # 315 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210714  (acquisition # 316 of 326)Running LiCSAlert for 20210714  (acquisition # 316 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210720  (acquisition # 317 of 326)Running LiCSAlert for 20210720  (acquisition # 317 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210726  (acquisition # 318 of 326)Running LiCSAlert for 20210726  (acquisition # 318 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210801  (acquisition # 319 of 326)Running LiCSAlert for 20210801  (acquisition # 319 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210807  (acquisition # 320 of 326)Running LiCSAlert for 20210807  (acquisition # 320 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210813  (acquisition # 321 of 326)Running LiCSAlert for 20210813  (acquisition # 321 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210819  (acquisition # 322 of 326)Running LiCSAlert for 20210819  (acquisition # 322 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210825  (acquisition # 323 of 326)Running LiCSAlert for 20210825  (acquisition # 323 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210831  (acquisition # 324 of 326)Running LiCSAlert for 20210831  (acquisition # 324 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210906  (acquisition # 325 of 326)Running LiCSAlert for 20210906  (acquisition # 325 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20210912  (acquisition # 326 of 326)Running LiCSAlert for 20210912  (acquisition # 326 of 326) : monitoring date : monitoring date
+
+Running LiCSAlert for 20141031  (acquisition # 0 of 326)Running LiCSAlert for 20141031  (acquisition # 0 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20141218  (acquisition # 1 of 326)Running LiCSAlert for 20141218  (acquisition # 1 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150111  (acquisition # 2 of 326)Running LiCSAlert for 20150111  (acquisition # 2 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150123  (acquisition # 3 of 326)Running LiCSAlert for 20150123  (acquisition # 3 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150216  (acquisition # 4 of 326)Running LiCSAlert for 20150216  (acquisition # 4 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150228  (acquisition # 5 of 326)Running LiCSAlert for 20150228  (acquisition # 5 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150312  (acquisition # 6 of 326)Running LiCSAlert for 20150312  (acquisition # 6 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150324  (acquisition # 7 of 326)Running LiCSAlert for 20150324  (acquisition # 7 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150405  (acquisition # 8 of 326)Running LiCSAlert for 20150405  (acquisition # 8 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150429  (acquisition # 9 of 326)Running LiCSAlert for 20150429  (acquisition # 9 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150511  (acquisition # 10 of 326)Running LiCSAlert for 20150511  (acquisition # 10 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150523  (acquisition # 11 of 326)Running LiCSAlert for 20150523  (acquisition # 11 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150604  (acquisition # 12 of 326)Running LiCSAlert for 20150604  (acquisition # 12 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150710  (acquisition # 13 of 326)Running LiCSAlert for 20150710  (acquisition # 13 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150722  (acquisition # 14 of 326)Running LiCSAlert for 20150722  (acquisition # 14 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150815  (acquisition # 15 of 326)Running LiCSAlert for 20150815  (acquisition # 15 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20150920  (acquisition # 16 of 326)Running LiCSAlert for 20150920  (acquisition # 16 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20151002  (acquisition # 17 of 326)Running LiCSAlert for 20151002  (acquisition # 17 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20151014  (acquisition # 18 of 326)Running LiCSAlert for 20151014  (acquisition # 18 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20151107  (acquisition # 19 of 326)Running LiCSAlert for 20151107  (acquisition # 19 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20151119  (acquisition # 20 of 326)Running LiCSAlert for 20151119  (acquisition # 20 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20151201  (acquisition # 21 of 326)Running LiCSAlert for 20151201  (acquisition # 21 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20151213  (acquisition # 22 of 326)Running LiCSAlert for 20151213  (acquisition # 22 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20151225  (acquisition # 23 of 326)Running LiCSAlert for 20151225  (acquisition # 23 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160106  (acquisition # 24 of 326)Running LiCSAlert for 20160106  (acquisition # 24 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160118  (acquisition # 25 of 326)Running LiCSAlert for 20160118  (acquisition # 25 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160211  (acquisition # 26 of 326)Running LiCSAlert for 20160211  (acquisition # 26 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160223  (acquisition # 27 of 326)Running LiCSAlert for 20160223  (acquisition # 27 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160306  (acquisition # 28 of 326)Running LiCSAlert for 20160306  (acquisition # 28 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160318  (acquisition # 29 of 326)Running LiCSAlert for 20160318  (acquisition # 29 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160330  (acquisition # 30 of 326)Running LiCSAlert for 20160330  (acquisition # 30 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160411  (acquisition # 31 of 326)Running LiCSAlert for 20160411  (acquisition # 31 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160505  (acquisition # 32 of 326)Running LiCSAlert for 20160505  (acquisition # 32 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160517  (acquisition # 33 of 326)Running LiCSAlert for 20160517  (acquisition # 33 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160529  (acquisition # 34 of 326)Running LiCSAlert for 20160529  (acquisition # 34 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160610  (acquisition # 35 of 326)Running LiCSAlert for 20160610  (acquisition # 35 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160704  (acquisition # 36 of 326)Running LiCSAlert for 20160704  (acquisition # 36 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160716  (acquisition # 37 of 326)Running LiCSAlert for 20160716  (acquisition # 37 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160728  (acquisition # 38 of 326)Running LiCSAlert for 20160728  (acquisition # 38 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160809  (acquisition # 39 of 326)Running LiCSAlert for 20160809  (acquisition # 39 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160821  (acquisition # 40 of 326)Running LiCSAlert for 20160821  (acquisition # 40 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160902  (acquisition # 41 of 326)Running LiCSAlert for 20160902  (acquisition # 41 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160914  (acquisition # 42 of 326)Running LiCSAlert for 20160914  (acquisition # 42 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20160926  (acquisition # 43 of 326)Running LiCSAlert for 20160926  (acquisition # 43 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161002  (acquisition # 44 of 326)Running LiCSAlert for 20161002  (acquisition # 44 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161008  (acquisition # 45 of 326)Running LiCSAlert for 20161008  (acquisition # 45 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161014  (acquisition # 46 of 326)Running LiCSAlert for 20161014  (acquisition # 46 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161020  (acquisition # 47 of 326)Running LiCSAlert for 20161020  (acquisition # 47 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161026  (acquisition # 48 of 326)Running LiCSAlert for 20161026  (acquisition # 48 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161101  (acquisition # 49 of 326)Running LiCSAlert for 20161101  (acquisition # 49 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161107  (acquisition # 50 of 326)Running LiCSAlert for 20161107  (acquisition # 50 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161113  (acquisition # 51 of 326)Running LiCSAlert for 20161113  (acquisition # 51 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161119  (acquisition # 52 of 326)Running LiCSAlert for 20161119  (acquisition # 52 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161201  (acquisition # 53 of 326)Running LiCSAlert for 20161201  (acquisition # 53 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161207  (acquisition # 54 of 326)Running LiCSAlert for 20161207  (acquisition # 54 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161213  (acquisition # 55 of 326)Running LiCSAlert for 20161213  (acquisition # 55 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161219  (acquisition # 56 of 326)Running LiCSAlert for 20161219  (acquisition # 56 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161225  (acquisition # 57 of 326)Running LiCSAlert for 20161225  (acquisition # 57 of 326) : baseline date : baseline date
+
+Running LiCSAlert for 20161231  (acquisition # 58 of 326)Running LiCSAlert for 20161231  (acquisition # 58 of 326) : baseline date : baseline date
+
+
+
+
+
+
+LiCSAlert is being run for alignsar_campi_flegrei at 10/11/2025 16:53:41
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+LiCSAlert is opening a an AlignSAR data cube.  
+The cumulative time series was size (167, 225, 225) and has been downsampled in space to (167, 112, 112) 
+
+As the baseline_end date did not lie on an acquisition date, it has been updated so that it does.  Previously, it was 20220101, but it is now 20211229
+Epoch #    LiCSBAS date    Past baseline    LiCSAlert      
+0            20200601          no              not requested
+1            20200607          no              not requested
+2            20200613          no              not requested
+3            20200619          no              not requested
+4            20200625          no              not requested
+5            20200701          no              not requested
+6            20200707          no              not requested
+7            20200713          no              not requested
+8            20200719          no              not requested
+9            20200725          no              not requested
+10            20200731          no              not requested
+11            20200806          no              not requested
+12            20200812          no              not requested
+13            20200818          no              not requested
+14            20200824          no              not requested
+15            20200830          no              not requested
+16            20200905          no              not requested
+17            20200911          no              not requested
+18            20200917          no              not requested
+19            20200923          no              not requested
+20            20200929          no              not requested
+21            20201005          no              not requested
+22            20201011          no              not requested
+23            20201017          no              not requested
+24            20201023          no              not requested
+25            20201029          no              not requested
+26            20201104          no              not requested
+27            20201110          no              not requested
+28            20201116          no              not requested
+29            20201122          no              not requested
+30            20201128          no              not requested
+31            20201204          no              not requested
+32            20201210          no              not requested
+33            20201216          no              not requested
+34            20201222          no              not requested
+35            20201228          no              not requested
+36            20210103          no              not requested
+37            20210109          no              not requested
+38            20210115          no              not requested
+39            20210121          no              not requested
+40            20210127          no              not requested
+41            20210202          no              not requested
+42            20210208          no              not requested
+43            20210214          no              not requested
+44            20210220          no              not requested
+45            20210226          no              not requested
+46            20210304          no              not requested
+47            20210310          no              not requested
+48            20210316          no              not requested
+49            20210322          no              not requested
+50            20210403          no              not requested
+51            20210409          no              not requested
+52            20210415          no              not requested
+53            20210421          no              not requested
+54            20210427          no              not requested
+55            20210503          no              not requested
+56            20210509          no              not requested
+57            20210515          no              not requested
+58            20210521          no              not requested
+59            20210527          no              not requested
+60            20210602          no              not requested
+61            20210608          no              not requested
+62            20210614          no              not requested
+63            20210620          no              not requested
+64            20210626          no              not requested
+65            20210702          no              not requested
+66            20210708          no              not requested
+67            20210714          no              not requested
+68            20210720          no              not requested
+69            20210726          no              not requested
+70            20210807          no              not requested
+71            20210813          no              not requested
+72            20210819          no              not requested
+73            20210825          no              not requested
+74            20210831          no              not requested
+75            20210906          no              not requested
+76            20210912          no              not requested
+77            20210918          no              not requested
+78            20210924          no              not requested
+79            20210930          no              not requested
+80            20211006          no              not requested
+81            20211012          no              not requested
+82            20211018          no              not requested
+83            20211024          no              not requested
+84            20211030          no              not requested
+85            20211105          no              not requested
+86            20211111          no              not requested
+87            20211117          no              not requested
+88            20211123          no              not requested
+89            20211129          no              not requested
+90            20211205          no              not requested
+91            20211211          no              not requested
+92            20211217          no              not requested
+93            20211223          no              not requested
+94            20211229          no              not requested
+95            20220110          yes             not requested
+96            20220122          yes             not requested
+97            20220203          yes             not requested
+98            20220215          yes             not requested
+99            20220227          yes             not requested
+100            20220311          yes             not requested
+101            20220323          yes             not requested
+102            20220404          yes             not requested
+103            20220416          yes             not requested
+104            20220428          yes             not requested
+105            20220510          yes             not requested
+106            20220522          yes             not requested
+107            20220603          yes             not requested
+108            20220615          yes             not requested
+109            20220627          yes             not requested
+110            20220709          yes             not requested
+111            20220721          yes             not requested
+112            20220802          yes             not requested
+113            20220814          yes             not requested
+114            20220826          yes             not requested
+115            20220907          yes             not requested
+116            20220919          yes             not requested
+117            20221001          yes             not requested
+118            20221013          yes             not requested
+119            20221025          yes             not requested
+120            20221106          yes             not requested
+121            20221118          yes             not requested
+122            20221130          yes             not requested
+123            20221212          yes             not requested
+124            20221224          yes             not requested
+125            20230105          yes             not requested
+126            20230117          yes             not requested
+127            20230129          yes             not requested
+128            20230210          yes             not requested
+129            20230222          yes             not requested
+130            20230318          yes             not requested
+131            20230330          yes             not requested
+132            20230411          yes             not requested
+133            20230505          yes             not requested
+134            20230517          yes             not requested
+135            20230529          yes             not requested
+136            20230610          yes             not requested
+137            20230622          yes             not requested
+138            20230704          yes             not requested
+139            20230716          yes             not requested
+140            20230728          yes             not requested
+141            20230809          yes             not requested
+142            20230821          yes             not requested
+143            20230902          yes             not requested
+144            20230914          yes             not requested
+145            20230926          yes             not requested
+146            20231008          yes             not requested
+147            20231020          yes             not requested
+148            20231101          yes             not requested
+149            20231113          yes             not requested
+150            20231207          yes             not requested
+151            20231219          yes             not requested
+152            20231231          yes             not requested
+153            20240112          yes             not requested
+154            20240124          yes             not requested
+155            20240205          yes             not requested
+156            20240217          yes             not requested
+157            20240229          yes             not requested
+158            20240312          yes             not requested
+159            20240324          yes             not requested
+160            20240405          yes             not requested
+161            20240417          yes             not requested
+162            20240429          yes             not requested
+163            20240511          yes             not requested
+164            20240523          yes             not requested
+165            20240604          yes             not requested
+166            20240616          yes             pending 
+LiCSAlert status: 
+    1) Run ICASAR: True
+    2) Run LiCSAlert: True
+Updating the figure to 94 epochs... Done.
+
+Running ICASAR.
+From the data passed to ICASAR, I understand it to be spatial data (e.g. time series of images)
+As 'lons' and 'lats' have been provided, the ICs will be geocoded.  
+Spatial patterns will be statitically independent and The cumulative (single master) interferograms will be used.  
+Creating all possible variations of the time series (incremental/daisy chain, cumulative, and all possible).  
+When creating all interferograms, 93 were passed to the function, and these were found to make 1 connected networks.  From these, 1000 interferograms were created.  
+This interferogram timeseries has 93 times and 6493 pixels.  
+This interferogram timeseries has 1000 times and 6493 pixels.  
+This interferogram timeseries has 93 times and 6493 pixels.  
+Performing PCA to whiten the data....Starting to create the 02_PCA_7_components_correlations figure:
+Updating the masks for the two sources.  Of the 6493 in data1 and 6528 in data2, 6493 are in both and can be used.  
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 6 
+
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 6 
+
+Done.  
+Loading the results of multiple FastICA runs.  
+Failed to open the results from the previous runs of FastICA. Switching 'load_fastICA_results' to False and trying to continue anyway.  
+No results were found for the multiple ICA runs, so these will now be performed.  
+
+
+Starting the multiple ICA runs with 6 principal components
+FastICA progress with bootstrapping: FastICA algorithm converged in 7 iterations.  
+0% FastICA algorithm converged in 5 iterations.  
+1% FastICA algorithm converged in 6 iterations.  
+1% FastICA algorithm converged in 6 iterations.  
+2% FastICA algorithm converged in 10 iterations.  
+2% FastICA algorithm converged in 4 iterations.  
+3% FastICA algorithm converged in 8 iterations.  
+3% FastICA algorithm converged in 28 iterations.  
+4% FastICA algorithm converged in 6 iterations.  
+4% FastICA algorithm converged in 5 iterations.  
+5% FastICA algorithm converged in 9 iterations.  
+5% FastICA algorithm converged in 6 iterations.  
+6% FastICA algorithm converged in 144 iterations.  
+6% FastICA algorithm converged in 21 iterations.  
+7% FastICA algorithm converged in 11 iterations.  
+7% FastICA algorithm converged in 7 iterations.  
+8% FastICA algorithm converged in 5 iterations.  
+8% FastICA algorithm converged in 9 iterations.  
+9% FastICA algorithm converged in 4 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+10% FastICA algorithm converged in 6 iterations.  
+10% FastICA algorithm converged in 7 iterations.  
+11% FastICA algorithm converged in 14 iterations.  
+11% FastICA algorithm converged in 5 iterations.  
+12% FastICA algorithm converged in 5 iterations.  
+12% FastICA algorithm converged in 4 iterations.  
+13% FastICA algorithm converged in 6 iterations.  
+13% FastICA algorithm converged in 5 iterations.  
+14% FastICA algorithm converged in 12 iterations.  
+14% FastICA algorithm converged in 5 iterations.  
+15% FastICA algorithm converged in 9 iterations.  
+15% FastICA algorithm converged in 4 iterations.  
+16% FastICA algorithm converged in 4 iterations.  
+16% FastICA algorithm converged in 6 iterations.  
+17% FastICA algorithm converged in 6 iterations.  
+17% FastICA algorithm converged in 28 iterations.  
+18% FastICA algorithm converged in 4 iterations.  
+18% FastICA algorithm converged in 5 iterations.  
+19% FastICA algorithm converged in 10 iterations.  
+19% FastICA algorithm converged in 39 iterations.  
+20% FastICA algorithm converged in 4 iterations.  
+20% FastICA algorithm converged in 10 iterations.  
+21% FastICA algorithm converged in 8 iterations.  
+21% FastICA algorithm converged in 32 iterations.  
+22% FastICA algorithm converged in 4 iterations.  
+22% FastICA algorithm converged in 5 iterations.  
+23% FastICA algorithm converged in 4 iterations.  
+23% FastICA algorithm converged in 21 iterations.  
+24% FastICA algorithm converged in 7 iterations.  
+24% FastICA algorithm converged in 8 iterations.  
+25% FastICA algorithm converged in 110 iterations.  
+25% FastICA algorithm converged in 6 iterations.  
+26% FastICA algorithm converged in 8 iterations.  
+26% FastICA algorithm converged in 20 iterations.  
+27% FastICA algorithm converged in 4 iterations.  
+27% FastICA algorithm converged in 3 iterations.  
+28% FastICA algorithm converged in 5 iterations.  
+28% FastICA algorithm converged in 78 iterations.  
+28% FastICA algorithm converged in 4 iterations.  
+29% FastICA algorithm converged in 8 iterations.  
+30% FastICA algorithm converged in 4 iterations.  
+30% FastICA algorithm didn't converge in 149 iterations.  
+30% FastICA algorithm converged in 9 iterations.  
+31% FastICA algorithm converged in 17 iterations.  
+31% FastICA algorithm converged in 8 iterations.  
+32% FastICA algorithm converged in 4 iterations.  
+32% FastICA algorithm converged in 4 iterations.  
+33% FastICA algorithm converged in 7 iterations.  
+33% FastICA algorithm converged in 6 iterations.  
+34% FastICA algorithm converged in 8 iterations.  
+34% FastICA algorithm converged in 39 iterations.  
+35% FastICA algorithm converged in 8 iterations.  
+35% FastICA algorithm converged in 5 iterations.  
+36% FastICA algorithm converged in 5 iterations.  
+36% FastICA algorithm converged in 4 iterations.  
+37% FastICA algorithm converged in 5 iterations.  
+37% FastICA algorithm converged in 8 iterations.  
+38% FastICA algorithm converged in 6 iterations.  
+38% FastICA algorithm converged in 6 iterations.  
+39% FastICA algorithm converged in 54 iterations.  
+39% FastICA algorithm converged in 5 iterations.  
+40% FastICA algorithm converged in 10 iterations.  
+40% FastICA algorithm converged in 44 iterations.  
+41% FastICA algorithm converged in 5 iterations.  
+41% FastICA algorithm converged in 7 iterations.  
+42% FastICA algorithm converged in 5 iterations.  
+42% FastICA algorithm converged in 112 iterations.  
+43% FastICA algorithm converged in 13 iterations.  
+43% FastICA algorithm converged in 6 iterations.  
+44% FastICA algorithm converged in 5 iterations.  
+44% FastICA algorithm converged in 7 iterations.  
+45% FastICA algorithm converged in 11 iterations.  
+45% FastICA algorithm converged in 6 iterations.  
+46% FastICA algorithm converged in 4 iterations.  
+46% FastICA algorithm converged in 8 iterations.  
+47% FastICA algorithm converged in 10 iterations.  
+47% FastICA algorithm converged in 9 iterations.  
+48% FastICA algorithm converged in 5 iterations.  
+48% FastICA algorithm converged in 6 iterations.  
+49% FastICA algorithm converged in 4 iterations.  
+49% FastICA algorithm converged in 60 iterations.  
+50% FastICA algorithm converged in 4 iterations.  
+50% FastICA algorithm converged in 10 iterations.  
+51% FastICA algorithm converged in 4 iterations.  
+51% FastICA algorithm converged in 6 iterations.  
+52% FastICA algorithm converged in 8 iterations.  
+52% FastICA algorithm converged in 6 iterations.  
+53% FastICA algorithm converged in 6 iterations.  
+53% FastICA algorithm converged in 4 iterations.  
+54% FastICA algorithm converged in 5 iterations.  
+54% FastICA algorithm converged in 7 iterations.  
+55% FastICA algorithm converged in 6 iterations.  
+55% FastICA algorithm converged in 6 iterations.  
+56% FastICA algorithm converged in 8 iterations.  
+56% FastICA algorithm converged in 5 iterations.  
+56% FastICA algorithm converged in 7 iterations.  
+57% FastICA algorithm converged in 7 iterations.  
+57% FastICA algorithm converged in 51 iterations.  
+58% FastICA algorithm converged in 28 iterations.  
+59% FastICA algorithm converged in 24 iterations.  
+59% FastICA algorithm converged in 4 iterations.  
+60% FastICA algorithm converged in 10 iterations.  
+60% FastICA algorithm converged in 6 iterations.  
+61% FastICA algorithm converged in 6 iterations.  
+61% FastICA algorithm converged in 6 iterations.  
+62% FastICA algorithm converged in 9 iterations.  
+62% FastICA algorithm converged in 7 iterations.  
+63% FastICA algorithm converged in 7 iterations.  
+63% FastICA algorithm converged in 18 iterations.  
+64% FastICA algorithm converged in 11 iterations.  
+64% FastICA algorithm converged in 6 iterations.  
+65% FastICA algorithm converged in 7 iterations.  
+65% FastICA algorithm converged in 5 iterations.  
+66% FastICA algorithm converged in 10 iterations.  
+66% FastICA algorithm converged in 14 iterations.  
+67% FastICA algorithm converged in 13 iterations.  
+67% FastICA algorithm converged in 6 iterations.  
+68% FastICA algorithm converged in 9 iterations.  
+68% FastICA algorithm converged in 7 iterations.  
+69% FastICA algorithm converged in 4 iterations.  
+69% FastICA algorithm converged in 9 iterations.  
+70% FastICA algorithm converged in 8 iterations.  
+70% FastICA algorithm converged in 6 iterations.  
+71% FastICA algorithm converged in 4 iterations.  
+71% FastICA algorithm converged in 6 iterations.  
+72% FastICA algorithm converged in 13 iterations.  
+72% FastICA algorithm converged in 5 iterations.  
+73% FastICA algorithm converged in 5 iterations.  
+73% FastICA algorithm converged in 5 iterations.  
+74% FastICA algorithm converged in 4 iterations.  
+74% FastICA algorithm converged in 4 iterations.  
+75% FastICA algorithm converged in 7 iterations.  
+75% FastICA algorithm converged in 6 iterations.  
+76% FastICA algorithm converged in 10 iterations.  
+76% FastICA algorithm converged in 5 iterations.  
+77% FastICA algorithm converged in 5 iterations.  
+77% FastICA algorithm converged in 22 iterations.  
+78% FastICA algorithm converged in 4 iterations.  
+78% FastICA algorithm didn't converge in 149 iterations.  
+78% FastICA algorithm converged in 17 iterations.  
+79% FastICA algorithm converged in 6 iterations.  
+79% FastICA algorithm converged in 8 iterations.  
+80% FastICA algorithm converged in 4 iterations.  
+80% FastICA algorithm converged in 24 iterations.  
+81% FastICA algorithm converged in 4 iterations.  
+81% FastICA algorithm converged in 6 iterations.  
+82% FastICA algorithm converged in 11 iterations.  
+82% FastICA algorithm converged in 6 iterations.  
+83% FastICA algorithm converged in 9 iterations.  
+83% FastICA algorithm converged in 3 iterations.  
+84% FastICA algorithm converged in 6 iterations.  
+84% FastICA algorithm converged in 7 iterations.  
+85% FastICA algorithm converged in 6 iterations.  
+85% FastICA algorithm converged in 10 iterations.  
+86% FastICA algorithm converged in 5 iterations.  
+86% FastICA algorithm converged in 13 iterations.  
+87% FastICA algorithm converged in 6 iterations.  
+87% FastICA algorithm converged in 4 iterations.  
+88% FastICA algorithm converged in 5 iterations.  
+88% FastICA algorithm converged in 6 iterations.  
+89% FastICA algorithm converged in 6 iterations.  
+89% FastICA algorithm converged in 8 iterations.  
+90% FastICA algorithm converged in 5 iterations.  
+90% FastICA algorithm converged in 10 iterations.  
+91% FastICA algorithm converged in 10 iterations.  
+91% FastICA algorithm converged in 8 iterations.  
+92% FastICA algorithm converged in 5 iterations.  
+92% FastICA algorithm converged in 12 iterations.  
+93% FastICA algorithm converged in 8 iterations.  
+93% FastICA algorithm converged in 11 iterations.  
+94% FastICA algorithm converged in 6 iterations.  
+94% FastICA algorithm converged in 4 iterations.  
+95% FastICA algorithm converged in 4 iterations.  
+95% FastICA algorithm converged in 4 iterations.  
+96% FastICA algorithm converged in 5 iterations.  
+96% FastICA algorithm converged in 10 iterations.  
+97% FastICA algorithm converged in 6 iterations.  
+97% FastICA algorithm converged in 5 iterations.  
+98% FastICA algorithm converged in 7 iterations.  
+98% FastICA algorithm converged in 20 iterations.  
+99% FastICA algorithm converged in 6 iterations.  
+99% FastICA algorithm converged in 12 iterations.  
+100% 
+
+Starting the multiple ICA runs with 7 principal components
+FastICA progress with bootstrapping: FastICA algorithm converged in 6 iterations.  
+0% FastICA algorithm converged in 17 iterations.  
+1% FastICA algorithm converged in 32 iterations.  
+1% FastICA algorithm converged in 7 iterations.  
+2% FastICA algorithm converged in 8 iterations.  
+2% FastICA algorithm converged in 7 iterations.  
+3% FastICA algorithm converged in 7 iterations.  
+3% FastICA algorithm converged in 8 iterations.  
+4% FastICA algorithm converged in 15 iterations.  
+4% FastICA algorithm converged in 19 iterations.  
+5% FastICA algorithm converged in 10 iterations.  
+5% FastICA algorithm converged in 52 iterations.  
+6% FastICA algorithm converged in 9 iterations.  
+6% FastICA algorithm converged in 6 iterations.  
+7% FastICA algorithm converged in 9 iterations.  
+7% FastICA algorithm converged in 5 iterations.  
+8% FastICA algorithm converged in 10 iterations.  
+8% FastICA algorithm converged in 23 iterations.  
+9% FastICA algorithm converged in 7 iterations.  
+9% FastICA algorithm converged in 11 iterations.  
+10% FastICA algorithm converged in 26 iterations.  
+10% FastICA algorithm converged in 116 iterations.  
+11% FastICA algorithm converged in 111 iterations.  
+11% FastICA algorithm converged in 9 iterations.  
+12% FastICA algorithm converged in 7 iterations.  
+12% FastICA algorithm converged in 10 iterations.  
+13% FastICA algorithm converged in 16 iterations.  
+13% FastICA algorithm converged in 26 iterations.  
+14% FastICA algorithm converged in 6 iterations.  
+14% FastICA algorithm converged in 16 iterations.  
+15% FastICA algorithm converged in 37 iterations.  
+15% FastICA algorithm converged in 57 iterations.  
+16% FastICA algorithm converged in 8 iterations.  
+16% FastICA algorithm converged in 21 iterations.  
+17% FastICA algorithm converged in 6 iterations.  
+17% FastICA algorithm didn't converge in 149 iterations.  
+17% FastICA algorithm converged in 21 iterations.  
+18% FastICA algorithm converged in 5 iterations.  
+18% FastICA algorithm converged in 6 iterations.  
+19% FastICA algorithm converged in 8 iterations.  
+19% FastICA algorithm converged in 7 iterations.  
+20% FastICA algorithm converged in 41 iterations.  
+20% FastICA algorithm converged in 4 iterations.  
+21% FastICA algorithm converged in 22 iterations.  
+21% FastICA algorithm converged in 20 iterations.  
+22% FastICA algorithm converged in 5 iterations.  
+22% FastICA algorithm converged in 43 iterations.  
+23% FastICA algorithm converged in 14 iterations.  
+23% FastICA algorithm converged in 6 iterations.  
+24% FastICA algorithm converged in 9 iterations.  
+24% FastICA algorithm converged in 5 iterations.  
+25% FastICA algorithm converged in 22 iterations.  
+25% FastICA algorithm converged in 7 iterations.  
+26% FastICA algorithm converged in 20 iterations.  
+26% FastICA algorithm converged in 5 iterations.  
+27% FastICA algorithm converged in 7 iterations.  
+27% FastICA algorithm converged in 68 iterations.  
+28% FastICA algorithm converged in 8 iterations.  
+28% FastICA algorithm converged in 6 iterations.  
+28% FastICA algorithm converged in 78 iterations.  
+29% FastICA algorithm converged in 9 iterations.  
+30% FastICA algorithm converged in 8 iterations.  
+30% FastICA algorithm converged in 9 iterations.  
+31% FastICA algorithm converged in 29 iterations.  
+31% FastICA algorithm converged in 6 iterations.  
+32% FastICA algorithm converged in 8 iterations.  
+32% FastICA algorithm converged in 18 iterations.  
+33% FastICA algorithm converged in 13 iterations.  
+33% FastICA algorithm converged in 5 iterations.  
+34% FastICA algorithm converged in 6 iterations.  
+34% FastICA algorithm converged in 9 iterations.  
+35% FastICA algorithm converged in 8 iterations.  
+35% FastICA algorithm converged in 9 iterations.  
+36% FastICA algorithm converged in 7 iterations.  
+36% FastICA algorithm converged in 16 iterations.  
+37% FastICA algorithm converged in 7 iterations.  
+37% FastICA algorithm converged in 10 iterations.  
+38% FastICA algorithm converged in 27 iterations.  
+38% FastICA algorithm converged in 13 iterations.  
+39% FastICA algorithm converged in 8 iterations.  
+39% FastICA algorithm converged in 5 iterations.  
+40% FastICA algorithm converged in 9 iterations.  
+40% FastICA algorithm converged in 8 iterations.  
+41% FastICA algorithm converged in 19 iterations.  
+41% FastICA algorithm converged in 147 iterations.  
+42% FastICA algorithm converged in 7 iterations.  
+42% FastICA algorithm converged in 69 iterations.  
+43% FastICA algorithm converged in 17 iterations.  
+43% FastICA algorithm converged in 27 iterations.  
+44% FastICA algorithm converged in 9 iterations.  
+44% FastICA algorithm converged in 11 iterations.  
+45% FastICA algorithm converged in 19 iterations.  
+45% FastICA algorithm converged in 71 iterations.  
+46% FastICA algorithm converged in 8 iterations.  
+46% FastICA algorithm converged in 8 iterations.  
+47% FastICA algorithm converged in 21 iterations.  
+47% FastICA algorithm converged in 10 iterations.  
+48% FastICA algorithm converged in 30 iterations.  
+48% FastICA algorithm didn't converge in 149 iterations.  
+48% FastICA algorithm converged in 26 iterations.  
+49% FastICA algorithm converged in 10 iterations.  
+49% FastICA algorithm converged in 133 iterations.  
+50% FastICA algorithm converged in 59 iterations.  
+50% FastICA algorithm converged in 60 iterations.  
+51% FastICA algorithm converged in 26 iterations.  
+51% FastICA algorithm converged in 8 iterations.  
+52% FastICA algorithm didn't converge in 149 iterations.  
+52% FastICA algorithm converged in 5 iterations.  
+52% FastICA algorithm didn't converge in 149 iterations.  
+52% FastICA algorithm converged in 13 iterations.  
+53% FastICA algorithm converged in 7 iterations.  
+53% FastICA algorithm converged in 20 iterations.  
+54% FastICA algorithm converged in 9 iterations.  
+54% FastICA algorithm converged in 7 iterations.  
+55% FastICA algorithm converged in 5 iterations.  
+55% FastICA algorithm converged in 20 iterations.  
+56% FastICA algorithm converged in 7 iterations.  
+56% FastICA algorithm converged in 7 iterations.  
+56% FastICA algorithm converged in 12 iterations.  
+57% FastICA algorithm converged in 100 iterations.  
+57% FastICA algorithm converged in 14 iterations.  
+58% FastICA algorithm converged in 8 iterations.  
+59% FastICA algorithm converged in 27 iterations.  
+59% FastICA algorithm converged in 135 iterations.  
+60% FastICA algorithm didn't converge in 149 iterations.  
+60% FastICA algorithm converged in 10 iterations.  
+60% FastICA algorithm converged in 13 iterations.  
+61% FastICA algorithm converged in 7 iterations.  
+61% FastICA algorithm converged in 31 iterations.  
+62% FastICA algorithm converged in 6 iterations.  
+62% FastICA algorithm converged in 7 iterations.  
+63% FastICA algorithm converged in 7 iterations.  
+63% FastICA algorithm converged in 24 iterations.  
+64% FastICA algorithm converged in 8 iterations.  
+64% FastICA algorithm converged in 35 iterations.  
+65% FastICA algorithm converged in 15 iterations.  
+65% FastICA algorithm converged in 31 iterations.  
+66% FastICA algorithm converged in 4 iterations.  
+66% FastICA algorithm didn't converge in 149 iterations.  
+66% FastICA algorithm converged in 4 iterations.  
+67% FastICA algorithm converged in 9 iterations.  
+67% FastICA algorithm converged in 5 iterations.  
+68% FastICA algorithm converged in 6 iterations.  
+68% FastICA algorithm converged in 8 iterations.  
+69% FastICA algorithm converged in 7 iterations.  
+69% FastICA algorithm converged in 5 iterations.  
+70% FastICA algorithm converged in 6 iterations.  
+70% FastICA algorithm converged in 6 iterations.  
+71% FastICA algorithm converged in 7 iterations.  
+71% FastICA algorithm converged in 5 iterations.  
+72% FastICA algorithm converged in 29 iterations.  
+72% FastICA algorithm didn't converge in 149 iterations.  
+72% FastICA algorithm converged in 12 iterations.  
+73% FastICA algorithm converged in 5 iterations.  
+73% FastICA algorithm converged in 7 iterations.  
+74% FastICA algorithm converged in 8 iterations.  
+74% FastICA algorithm converged in 83 iterations.  
+75% FastICA algorithm converged in 6 iterations.  
+75% FastICA algorithm converged in 29 iterations.  
+76% FastICA algorithm converged in 5 iterations.  
+76% FastICA algorithm didn't converge in 149 iterations.  
+76% FastICA algorithm converged in 10 iterations.  
+77% FastICA algorithm converged in 13 iterations.  
+77% FastICA algorithm converged in 7 iterations.  
+78% FastICA algorithm converged in 8 iterations.  
+78% FastICA algorithm converged in 12 iterations.  
+79% FastICA algorithm converged in 11 iterations.  
+79% FastICA algorithm converged in 4 iterations.  
+80% FastICA algorithm converged in 32 iterations.  
+80% FastICA algorithm converged in 7 iterations.  
+81% FastICA algorithm converged in 16 iterations.  
+81% FastICA algorithm converged in 105 iterations.  
+82% FastICA algorithm converged in 4 iterations.  
+82% FastICA algorithm converged in 18 iterations.  
+83% FastICA algorithm converged in 15 iterations.  
+83% FastICA algorithm didn't converge in 149 iterations.  
+83% FastICA algorithm converged in 73 iterations.  
+84% FastICA algorithm converged in 8 iterations.  
+84% FastICA algorithm converged in 18 iterations.  
+85% FastICA algorithm converged in 11 iterations.  
+85% FastICA algorithm converged in 5 iterations.  
+86% FastICA algorithm converged in 6 iterations.  
+86% FastICA algorithm converged in 58 iterations.  
+87% FastICA algorithm converged in 13 iterations.  
+87% FastICA algorithm converged in 12 iterations.  
+88% FastICA algorithm converged in 10 iterations.  
+88% FastICA algorithm converged in 12 iterations.  
+89% FastICA algorithm converged in 71 iterations.  
+89% FastICA algorithm converged in 8 iterations.  
+90% FastICA algorithm converged in 6 iterations.  
+90% FastICA algorithm didn't converge in 149 iterations.  
+90% FastICA algorithm converged in 6 iterations.  
+91% FastICA algorithm converged in 5 iterations.  
+91% FastICA algorithm converged in 7 iterations.  
+92% FastICA algorithm converged in 5 iterations.  
+92% FastICA algorithm converged in 4 iterations.  
+93% FastICA algorithm converged in 13 iterations.  
+93% FastICA algorithm converged in 10 iterations.  
+94% FastICA algorithm converged in 20 iterations.  
+94% FastICA algorithm converged in 7 iterations.  
+95% FastICA algorithm converged in 61 iterations.  
+95% FastICA algorithm converged in 20 iterations.  
+96% FastICA algorithm converged in 6 iterations.  
+96% FastICA algorithm converged in 15 iterations.  
+97% FastICA algorithm converged in 6 iterations.  
+97% FastICA algorithm didn't converge in 149 iterations.  
+97% FastICA algorithm converged in 6 iterations.  
+98% FastICA algorithm converged in 5 iterations.  
+98% FastICA algorithm converged in 6 iterations.  
+99% FastICA algorithm converged in 9 iterations.  
+99% FastICA algorithm converged in 7 iterations.  
+100% 
+Starting to compute the pairwise distance matrices....Done!
+Starting to cluster the sources using HDBSCAN....Done!
+Starting to calculate the 2D manifold representation....Done!
+Calculating the centrotypes and associated time courses...Done!
+4 ICA sources have been chosen automatically.Continuing
+Starting to create the 03_ICA_sources_correlations figure:
+Updating the masks for the two sources.  Of the 6493 in data1 and 6528 in data2, 6493 are in both and can be used.  
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 
+
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 
+
+Done.  
+Creating a Google Earth .kmz of the geocoded independent components... Done!
+
+
+Source 0: deformation
+Source 1: turbulent_APS
+Source 2: turbulent_APS
+Source 3: topo_cor_APS
+
+
+Saving the key results as a .pkl file... Done!
+Running LiCSAlert for 20240616  (acquisition # 166 of 166) : monitoring date

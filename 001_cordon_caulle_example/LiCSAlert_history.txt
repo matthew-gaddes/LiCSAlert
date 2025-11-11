@@ -1,0 +1,966 @@
+
+
+
+
+
+LiCSAlert is being run for 001_cordon_caulle_example at 19/09/2025 21:25:05
+All the required arguments were found in the dictionary.  
+All the required arguments were found in the dictionary.  
+LiCSAlert is using data that was passed to the function as an argument  
+'licsbas_settings' can only be provided if a licsbas_dir is provided as the input data.  As data is being passed to LiCSAlert in a different way, licsbas_settings will be removed.  
+
+As the baseline_end date did not lie on an acquisition date, it has been updated so that it does.  Previously, it was 20210101, but it is now 20201231
+Epoch #    LiCSBAS date    Past baseline    LiCSAlert      
+0            20150108          no              not requested
+1            20150225          no              not requested
+2            20150321          no              not requested
+3            20150414          no              not requested
+4            20150426          no              not requested
+5            20150508          no              not requested
+6            20150520          no              not requested
+7            20150601          no              not requested
+8            20150625          no              not requested
+9            20151116          no              not requested
+10            20160103          no              not requested
+11            20160127          no              not requested
+12            20160220          no              not requested
+13            20160315          no              not requested
+14            20160408          no              not requested
+15            20160502          no              not requested
+16            20160526          no              not requested
+17            20160713          no              not requested
+18            20160806          no              not requested
+19            20160830          no              not requested
+20            20161017          no              not requested
+21            20161110          no              not requested
+22            20161204          no              not requested
+23            20161228          no              not requested
+24            20170121          no              not requested
+25            20170214          no              not requested
+26            20170708          no              not requested
+27            20170720          no              not requested
+28            20180209          no              not requested
+29            20180221          no              not requested
+30            20180305          no              not requested
+31            20181031          no              not requested
+32            20181112          no              not requested
+33            20181118          no              not requested
+34            20181124          no              not requested
+35            20181130          no              not requested
+36            20181206          no              not requested
+37            20181212          no              not requested
+38            20181218          no              not requested
+39            20181224          no              not requested
+40            20181230          no              not requested
+41            20190105          no              not requested
+42            20190111          no              not requested
+43            20190117          no              not requested
+44            20190123          no              not requested
+45            20190129          no              not requested
+46            20190204          no              not requested
+47            20190210          no              not requested
+48            20190216          no              not requested
+49            20190222          no              not requested
+50            20190228          no              not requested
+51            20190306          no              not requested
+52            20190312          no              not requested
+53            20190318          no              not requested
+54            20190324          no              not requested
+55            20190330          no              not requested
+56            20190405          no              not requested
+57            20190411          no              not requested
+58            20190429          no              not requested
+59            20190505          no              not requested
+60            20190511          no              not requested
+61            20190517          no              not requested
+62            20190523          no              not requested
+63            20190529          no              not requested
+64            20190604          no              not requested
+65            20190616          no              not requested
+66            20190628          no              not requested
+67            20190710          no              not requested
+68            20190722          no              not requested
+69            20190803          no              not requested
+70            20190815          no              not requested
+71            20190827          no              not requested
+72            20190908          no              not requested
+73            20190920          no              not requested
+74            20191002          no              not requested
+75            20191014          no              not requested
+76            20191026          no              not requested
+77            20191107          no              not requested
+78            20191119          no              not requested
+79            20191201          no              not requested
+80            20191213          no              not requested
+81            20191225          no              not requested
+82            20200106          no              not requested
+83            20200118          no              not requested
+84            20200130          no              not requested
+85            20200211          no              not requested
+86            20200223          no              not requested
+87            20200306          no              not requested
+88            20200318          no              not requested
+89            20200330          no              not requested
+90            20200411          no              not requested
+91            20200423          no              not requested
+92            20200505          no              not requested
+93            20200517          no              not requested
+94            20200529          no              not requested
+95            20200610          no              not requested
+96            20200616          no              not requested
+97            20200622          no              not requested
+98            20200628          no              not requested
+99            20200704          no              not requested
+100            20200710          no              not requested
+101            20200716          no              not requested
+102            20200722          no              not requested
+103            20200803          no              not requested
+104            20200809          no              not requested
+105            20200815          no              not requested
+106            20200821          no              not requested
+107            20200827          no              not requested
+108            20200902          no              not requested
+109            20200908          no              not requested
+110            20200914          no              not requested
+111            20200920          no              not requested
+112            20200926          no              not requested
+113            20201002          no              not requested
+114            20201008          no              not requested
+115            20201014          no              not requested
+116            20201020          no              not requested
+117            20201026          no              not requested
+118            20201101          no              not requested
+119            20201107          no              not requested
+120            20201113          no              not requested
+121            20201119          no              not requested
+122            20201125          no              not requested
+123            20201201          no              not requested
+124            20201207          no              not requested
+125            20201213          no              not requested
+126            20201219          no              not requested
+127            20201225          no              not requested
+128            20201231          no              not requested
+129            20210106          yes             not requested
+130            20210112          yes             not requested
+131            20210118          yes             not requested
+132            20210124          yes             not requested
+133            20210205          yes             not requested
+134            20210211          yes             not requested
+135            20210217          yes             not requested
+136            20210223          yes             not requested
+137            20210301          yes             not requested
+138            20210307          yes             not requested
+139            20210313          yes             not requested
+140            20210319          yes             not requested
+141            20210325          yes             not requested
+142            20210331          yes             not requested
+143            20210406          yes             not requested
+144            20210412          yes             not requested
+145            20210418          yes             not requested
+146            20210424          yes             not requested
+147            20210430          yes             not requested
+148            20210506          yes             not requested
+149            20210512          yes             not requested
+150            20210518          yes             not requested
+151            20210530          yes             not requested
+152            20210605          yes             not requested
+153            20210617          yes             not requested
+154            20210629          yes             not requested
+155            20210711          yes             not requested
+156            20210723          yes             not requested
+157            20210804          yes             not requested
+158            20210810          yes             not requested
+159            20210816          yes             not requested
+160            20210822          yes             not requested
+161            20210828          yes             not requested
+162            20210903          yes             not requested
+163            20210909          yes             not requested
+164            20210915          yes             not requested
+165            20210921          yes             not requested
+166            20210927          yes             not requested
+167            20211003          yes             not requested
+168            20211009          yes             not requested
+169            20211015          yes             not requested
+170            20211021          yes             not requested
+171            20211027          yes             not requested
+172            20211108          yes             not requested
+173            20211114          yes             not requested
+174            20211120          yes             not requested
+175            20211126          yes             not requested
+176            20211202          yes             not requested
+177            20211214          yes             not requested
+178            20211220          yes             not requested
+179            20211226          yes             not requested
+180            20220107          yes             not requested
+181            20220119          yes             not requested
+182            20220131          yes             not requested
+183            20220212          yes             not requested
+184            20220224          yes             not requested
+185            20220308          yes             not requested
+186            20220320          yes             not requested
+187            20220425          yes             not requested
+188            20220507          yes             not requested
+189            20220519          yes             not requested
+190            20220531          yes             not requested
+191            20220612          yes             not requested
+192            20220624          yes             not requested
+193            20220706          yes             not requested
+194            20220730          yes             not requested
+195            20220811          yes             not requested
+196            20220904          yes             not requested
+197            20220916          yes             not requested
+198            20220928          yes             not requested
+199            20221010          yes             not requested
+200            20221022          yes             not requested
+201            20221103          yes             not requested
+202            20221115          yes             not requested
+203            20221127          yes             not requested
+204            20221209          yes             not requested
+205            20221221          yes             not requested
+206            20230102          yes             not requested
+207            20230114          yes             not requested
+208            20230126          yes             not requested
+209            20230207          yes             not requested
+210            20230303          yes             not requested
+211            20230315          yes             not requested
+212            20230327          yes             not requested
+213            20230408          yes             not requested
+214            20230420          yes             not requested
+215            20230502          yes             not requested
+216            20230526          yes             not requested
+217            20230607          yes             not requested
+218            20230619          yes             not requested
+219            20230701          yes             not requested
+220            20230713          yes             not requested
+221            20230725          yes             not requested
+222            20230806          yes             not requested
+223            20230818          yes             not requested
+224            20230830          yes             not requested
+225            20230911          yes             not requested
+226            20230923          yes             not requested
+227            20231005          yes             not requested
+228            20231017          yes             not requested
+229            20231029          yes             not requested
+230            20231110          yes             not requested
+231            20231204          yes             not requested
+232            20231216          yes             not requested
+233            20231228          yes             not requested
+234            20240109          yes             not requested
+235            20240121          yes             not requested
+236            20240202          yes             not requested
+237            20240214          yes             not requested
+238            20240226          yes             not requested
+239            20240309          yes             not requested
+240            20240321          yes             not requested
+241            20240402          yes             not requested
+242            20240414          yes             not requested
+243            20240426          yes             not requested
+244            20240508          yes             not requested
+245            20240601          yes             not requested
+246            20240613          yes             not requested
+247            20240625          yes             not requested
+248            20240707          yes             not requested
+249            20240719          yes             not requested
+250            20240731          yes             not requested
+251            20240812          yes             not requested
+252            20240824          yes             not requested
+253            20240905          yes             not requested
+254            20241011          yes             not requested
+255            20241023          yes             not requested
+256            20241104          yes             not requested
+257            20241116          yes             not requested
+258            20241128          yes             not requested
+259            20241210          yes             not requested
+260            20241222          yes             not requested
+261            20250103          yes             not requested
+262            20250115          yes             not requested
+263            20250127          yes             not requested
+264            20250208          yes             not requested
+265            20250220          yes             not requested
+266            20250304          yes             not requested
+267            20250316          yes             not requested
+268            20250328          yes             not requested
+269            20250409          yes             not requested
+270            20250415          yes             not requested
+271            20250421          yes             not requested
+272            20250503          yes             not requested
+273            20250515          yes             not requested
+274            20250521          yes             not requested
+275            20250527          yes             not requested
+276            20250602          yes             not requested
+277            20250608          yes             not requested
+278            20250614          yes             not requested
+279            20250620          yes             not requested
+280            20250626          yes             not requested
+281            20250702          yes             not requested
+282            20250708          yes             not requested
+283            20250714          yes             not requested
+284            20250720          yes             not requested
+285            20250726          yes             pending 
+LiCSAlert status: 
+    1) Run ICASAR: True
+    2) Run LiCSAlert: True
+Updating the figure to 38 epochs... Done.
+
+Running ICASAR.
+From the data passed to ICASAR, I understand it to be spatial data (e.g. time series of images)
+As 'lons' and 'lats' have been provided, the ICs will be geocoded.  
+Spatial patterns will be statitically independent and The cumulative (single master) interferograms will be used.  
+Creating all possible variations of the time series (incremental/daisy chain, cumulative, and all possible).  
+When creating all interferograms, 37 were passed to the function, and these were found to make 1 connected networks.  From these, 703 interferograms were created.  
+This interferogram timeseries has 37 times and 21947 pixels.  
+This interferogram timeseries has 703 times and 21947 pixels.  
+This interferogram timeseries has 37 times and 21947 pixels.  
+Performing PCA to whiten the data....Starting to create the 02_PCA_8_components_correlations figure:
+Updating the masks for the two sources.  Of the 21947 in data1 and 38822 in data2, 21947 are in both and can be used.  
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 6 7 
+
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 5 6 7 
+
+Done.  
+Loading the results of multiple FastICA runs.  
+Failed to open the results from the previous runs of FastICA. Switching 'load_fastICA_results' to False and trying to continue anyway.  
+No results were found for the multiple ICA runs, so these will now be performed.  
+
+
+Starting the multiple ICA runs with 6 principal components
+FastICA progress with bootstrapping: FastICA algorithm converged in 5 iterations.  
+0% FastICA algorithm converged in 8 iterations.  
+1% FastICA algorithm converged in 12 iterations.  
+1% FastICA algorithm converged in 5 iterations.  
+2% FastICA algorithm converged in 7 iterations.  
+2% FastICA algorithm converged in 12 iterations.  
+3% FastICA algorithm converged in 19 iterations.  
+3% FastICA algorithm converged in 5 iterations.  
+4% FastICA algorithm converged in 5 iterations.  
+4% FastICA algorithm converged in 7 iterations.  
+5% FastICA algorithm converged in 7 iterations.  
+5% FastICA algorithm converged in 4 iterations.  
+6% FastICA algorithm converged in 7 iterations.  
+6% FastICA algorithm converged in 7 iterations.  
+7% FastICA algorithm converged in 25 iterations.  
+7% FastICA algorithm converged in 5 iterations.  
+8% FastICA algorithm converged in 20 iterations.  
+8% FastICA algorithm converged in 5 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+9% FastICA algorithm converged in 139 iterations.  
+10% FastICA algorithm converged in 30 iterations.  
+10% FastICA algorithm converged in 7 iterations.  
+11% FastICA algorithm converged in 17 iterations.  
+11% FastICA algorithm converged in 5 iterations.  
+12% FastICA algorithm converged in 7 iterations.  
+12% FastICA algorithm converged in 5 iterations.  
+13% FastICA algorithm converged in 4 iterations.  
+13% FastICA algorithm converged in 6 iterations.  
+14% FastICA algorithm converged in 6 iterations.  
+14% FastICA algorithm converged in 9 iterations.  
+15% FastICA algorithm converged in 8 iterations.  
+15% FastICA algorithm converged in 6 iterations.  
+16% FastICA algorithm converged in 7 iterations.  
+16% FastICA algorithm converged in 7 iterations.  
+17% FastICA algorithm converged in 4 iterations.  
+17% FastICA algorithm converged in 4 iterations.  
+18% FastICA algorithm converged in 4 iterations.  
+18% FastICA algorithm converged in 6 iterations.  
+19% FastICA algorithm converged in 16 iterations.  
+19% FastICA algorithm converged in 4 iterations.  
+20% FastICA algorithm converged in 29 iterations.  
+20% FastICA algorithm didn't converge in 149 iterations.  
+20% FastICA algorithm converged in 7 iterations.  
+21% FastICA algorithm converged in 5 iterations.  
+21% FastICA algorithm converged in 24 iterations.  
+22% FastICA algorithm converged in 5 iterations.  
+22% FastICA algorithm converged in 7 iterations.  
+23% FastICA algorithm converged in 78 iterations.  
+23% FastICA algorithm converged in 9 iterations.  
+24% FastICA algorithm converged in 7 iterations.  
+24% FastICA algorithm converged in 5 iterations.  
+25% FastICA algorithm converged in 6 iterations.  
+25% FastICA algorithm didn't converge in 149 iterations.  
+25% FastICA algorithm converged in 28 iterations.  
+26% FastICA algorithm converged in 9 iterations.  
+26% FastICA algorithm converged in 7 iterations.  
+27% FastICA algorithm converged in 6 iterations.  
+27% FastICA algorithm converged in 4 iterations.  
+28% FastICA algorithm converged in 19 iterations.  
+28% FastICA algorithm converged in 4 iterations.  
+28% FastICA algorithm converged in 9 iterations.  
+29% FastICA algorithm converged in 5 iterations.  
+30% FastICA algorithm converged in 4 iterations.  
+30% FastICA algorithm converged in 5 iterations.  
+31% FastICA algorithm converged in 32 iterations.  
+31% FastICA algorithm converged in 4 iterations.  
+32% FastICA algorithm converged in 17 iterations.  
+32% FastICA algorithm didn't converge in 149 iterations.  
+32% FastICA algorithm converged in 7 iterations.  
+33% FastICA algorithm converged in 5 iterations.  
+33% FastICA algorithm converged in 8 iterations.  
+34% FastICA algorithm converged in 6 iterations.  
+34% FastICA algorithm converged in 12 iterations.  
+35% FastICA algorithm converged in 6 iterations.  
+35% FastICA algorithm converged in 134 iterations.  
+36% FastICA algorithm converged in 45 iterations.  
+36% FastICA algorithm converged in 5 iterations.  
+37% FastICA algorithm converged in 11 iterations.  
+37% FastICA algorithm converged in 6 iterations.  
+38% FastICA algorithm converged in 5 iterations.  
+38% FastICA algorithm converged in 5 iterations.  
+39% FastICA algorithm converged in 6 iterations.  
+39% FastICA algorithm converged in 4 iterations.  
+40% FastICA algorithm converged in 4 iterations.  
+40% FastICA algorithm converged in 9 iterations.  
+41% FastICA algorithm converged in 5 iterations.  
+41% FastICA algorithm converged in 5 iterations.  
+42% FastICA algorithm converged in 85 iterations.  
+42% FastICA algorithm converged in 130 iterations.  
+43% FastICA algorithm converged in 16 iterations.  
+43% FastICA algorithm converged in 5 iterations.  
+44% FastICA algorithm converged in 16 iterations.  
+44% FastICA algorithm converged in 11 iterations.  
+45% FastICA algorithm converged in 5 iterations.  
+45% FastICA algorithm converged in 11 iterations.  
+46% FastICA algorithm converged in 7 iterations.  
+46% FastICA algorithm converged in 7 iterations.  
+47% FastICA algorithm converged in 10 iterations.  
+47% FastICA algorithm converged in 5 iterations.  
+48% FastICA algorithm converged in 5 iterations.  
+48% FastICA algorithm converged in 11 iterations.  
+49% FastICA algorithm converged in 5 iterations.  
+49% FastICA algorithm converged in 5 iterations.  
+50% FastICA algorithm converged in 8 iterations.  
+50% FastICA algorithm converged in 6 iterations.  
+51% FastICA algorithm converged in 7 iterations.  
+51% FastICA algorithm converged in 4 iterations.  
+52% FastICA algorithm converged in 7 iterations.  
+52% FastICA algorithm converged in 53 iterations.  
+53% FastICA algorithm converged in 10 iterations.  
+53% FastICA algorithm converged in 19 iterations.  
+54% FastICA algorithm converged in 30 iterations.  
+54% FastICA algorithm converged in 73 iterations.  
+55% FastICA algorithm converged in 12 iterations.  
+55% FastICA algorithm converged in 6 iterations.  
+56% FastICA algorithm converged in 25 iterations.  
+56% FastICA algorithm converged in 6 iterations.  
+56% FastICA algorithm converged in 11 iterations.  
+57% FastICA algorithm converged in 11 iterations.  
+57% FastICA algorithm converged in 17 iterations.  
+58% FastICA algorithm converged in 4 iterations.  
+59% FastICA algorithm converged in 23 iterations.  
+59% FastICA algorithm converged in 5 iterations.  
+60% FastICA algorithm converged in 6 iterations.  
+60% FastICA algorithm converged in 4 iterations.  
+61% FastICA algorithm converged in 12 iterations.  
+61% FastICA algorithm converged in 3 iterations.  
+62% FastICA algorithm converged in 7 iterations.  
+62% FastICA algorithm converged in 4 iterations.  
+63% FastICA algorithm converged in 16 iterations.  
+63% FastICA algorithm converged in 7 iterations.  
+64% FastICA algorithm converged in 4 iterations.  
+64% FastICA algorithm converged in 4 iterations.  
+65% FastICA algorithm converged in 5 iterations.  
+65% FastICA algorithm converged in 5 iterations.  
+66% FastICA algorithm converged in 12 iterations.  
+66% FastICA algorithm converged in 11 iterations.  
+67% FastICA algorithm converged in 19 iterations.  
+67% FastICA algorithm converged in 4 iterations.  
+68% FastICA algorithm converged in 9 iterations.  
+68% FastICA algorithm converged in 8 iterations.  
+69% FastICA algorithm converged in 4 iterations.  
+69% FastICA algorithm converged in 4 iterations.  
+70% FastICA algorithm converged in 50 iterations.  
+70% FastICA algorithm converged in 6 iterations.  
+71% FastICA algorithm converged in 6 iterations.  
+71% FastICA algorithm converged in 13 iterations.  
+72% FastICA algorithm converged in 6 iterations.  
+72% FastICA algorithm converged in 12 iterations.  
+73% FastICA algorithm converged in 11 iterations.  
+73% FastICA algorithm converged in 6 iterations.  
+74% FastICA algorithm converged in 9 iterations.  
+74% FastICA algorithm converged in 8 iterations.  
+75% FastICA algorithm converged in 5 iterations.  
+75% FastICA algorithm converged in 10 iterations.  
+76% FastICA algorithm converged in 6 iterations.  
+76% FastICA algorithm converged in 7 iterations.  
+77% FastICA algorithm converged in 6 iterations.  
+77% FastICA algorithm converged in 5 iterations.  
+78% FastICA algorithm converged in 6 iterations.  
+78% FastICA algorithm converged in 5 iterations.  
+79% FastICA algorithm converged in 65 iterations.  
+79% FastICA algorithm converged in 3 iterations.  
+80% FastICA algorithm converged in 8 iterations.  
+80% FastICA algorithm converged in 8 iterations.  
+81% FastICA algorithm converged in 5 iterations.  
+81% FastICA algorithm converged in 5 iterations.  
+82% FastICA algorithm converged in 8 iterations.  
+82% FastICA algorithm converged in 45 iterations.  
+83% FastICA algorithm converged in 7 iterations.  
+83% FastICA algorithm converged in 8 iterations.  
+84% FastICA algorithm converged in 6 iterations.  
+84% FastICA algorithm converged in 17 iterations.  
+85% FastICA algorithm converged in 16 iterations.  
+85% FastICA algorithm converged in 10 iterations.  
+86% FastICA algorithm converged in 6 iterations.  
+86% FastICA algorithm converged in 20 iterations.  
+87% FastICA algorithm converged in 9 iterations.  
+87% FastICA algorithm converged in 4 iterations.  
+88% FastICA algorithm converged in 6 iterations.  
+88% FastICA algorithm converged in 7 iterations.  
+89% FastICA algorithm converged in 7 iterations.  
+89% FastICA algorithm converged in 4 iterations.  
+90% FastICA algorithm converged in 5 iterations.  
+90% FastICA algorithm converged in 5 iterations.  
+91% FastICA algorithm converged in 7 iterations.  
+91% FastICA algorithm converged in 6 iterations.  
+92% FastICA algorithm converged in 9 iterations.  
+92% FastICA algorithm converged in 56 iterations.  
+93% FastICA algorithm converged in 14 iterations.  
+93% FastICA algorithm converged in 15 iterations.  
+94% FastICA algorithm converged in 9 iterations.  
+94% FastICA algorithm converged in 10 iterations.  
+95% FastICA algorithm converged in 6 iterations.  
+95% FastICA algorithm converged in 7 iterations.  
+96% FastICA algorithm converged in 12 iterations.  
+96% FastICA algorithm converged in 7 iterations.  
+97% FastICA algorithm converged in 6 iterations.  
+97% FastICA algorithm converged in 8 iterations.  
+98% FastICA algorithm converged in 41 iterations.  
+98% FastICA algorithm converged in 7 iterations.  
+99% FastICA algorithm converged in 16 iterations.  
+99% FastICA algorithm converged in 5 iterations.  
+100% 
+
+Starting the multiple ICA runs with 7 principal components
+FastICA progress with bootstrapping: FastICA algorithm didn't converge in 149 iterations.  
+0% FastICA algorithm converged in 8 iterations.  
+0% FastICA algorithm converged in 18 iterations.  
+1% FastICA algorithm converged in 6 iterations.  
+1% FastICA algorithm converged in 6 iterations.  
+2% FastICA algorithm converged in 5 iterations.  
+2% FastICA algorithm converged in 9 iterations.  
+3% FastICA algorithm converged in 13 iterations.  
+3% FastICA algorithm converged in 6 iterations.  
+4% FastICA algorithm converged in 13 iterations.  
+4% FastICA algorithm converged in 4 iterations.  
+5% FastICA algorithm converged in 13 iterations.  
+5% FastICA algorithm converged in 13 iterations.  
+6% FastICA algorithm converged in 5 iterations.  
+6% FastICA algorithm converged in 34 iterations.  
+7% FastICA algorithm converged in 7 iterations.  
+7% FastICA algorithm converged in 7 iterations.  
+8% FastICA algorithm converged in 5 iterations.  
+8% FastICA algorithm converged in 5 iterations.  
+9% FastICA algorithm converged in 12 iterations.  
+9% FastICA algorithm converged in 6 iterations.  
+10% FastICA algorithm converged in 5 iterations.  
+10% FastICA algorithm converged in 5 iterations.  
+11% FastICA algorithm converged in 8 iterations.  
+11% FastICA algorithm converged in 11 iterations.  
+12% FastICA algorithm converged in 8 iterations.  
+12% FastICA algorithm converged in 6 iterations.  
+13% FastICA algorithm converged in 5 iterations.  
+13% FastICA algorithm converged in 12 iterations.  
+14% FastICA algorithm converged in 16 iterations.  
+14% FastICA algorithm converged in 4 iterations.  
+15% FastICA algorithm converged in 9 iterations.  
+15% FastICA algorithm converged in 8 iterations.  
+16% FastICA algorithm converged in 4 iterations.  
+16% FastICA algorithm converged in 5 iterations.  
+17% FastICA algorithm converged in 14 iterations.  
+17% FastICA algorithm converged in 27 iterations.  
+18% FastICA algorithm converged in 5 iterations.  
+18% FastICA algorithm converged in 4 iterations.  
+19% FastICA algorithm converged in 12 iterations.  
+19% FastICA algorithm converged in 30 iterations.  
+20% FastICA algorithm converged in 4 iterations.  
+20% FastICA algorithm converged in 4 iterations.  
+21% FastICA algorithm converged in 56 iterations.  
+21% FastICA algorithm converged in 136 iterations.  
+22% FastICA algorithm converged in 5 iterations.  
+22% FastICA algorithm converged in 6 iterations.  
+23% FastICA algorithm converged in 13 iterations.  
+23% FastICA algorithm converged in 4 iterations.  
+24% FastICA algorithm converged in 10 iterations.  
+24% FastICA algorithm converged in 5 iterations.  
+25% FastICA algorithm converged in 7 iterations.  
+25% FastICA algorithm converged in 7 iterations.  
+26% FastICA algorithm converged in 24 iterations.  
+26% FastICA algorithm converged in 7 iterations.  
+27% FastICA algorithm converged in 18 iterations.  
+27% FastICA algorithm converged in 9 iterations.  
+28% FastICA algorithm converged in 5 iterations.  
+28% FastICA algorithm converged in 8 iterations.  
+28% FastICA algorithm converged in 6 iterations.  
+29% FastICA algorithm converged in 7 iterations.  
+30% FastICA algorithm converged in 13 iterations.  
+30% FastICA algorithm converged in 5 iterations.  
+31% FastICA algorithm converged in 10 iterations.  
+31% FastICA algorithm converged in 5 iterations.  
+32% FastICA algorithm didn't converge in 149 iterations.  
+32% FastICA algorithm converged in 8 iterations.  
+32% FastICA algorithm converged in 5 iterations.  
+33% FastICA algorithm converged in 5 iterations.  
+33% FastICA algorithm converged in 5 iterations.  
+34% FastICA algorithm converged in 5 iterations.  
+34% FastICA algorithm converged in 13 iterations.  
+35% FastICA algorithm converged in 16 iterations.  
+35% FastICA algorithm converged in 7 iterations.  
+36% FastICA algorithm converged in 10 iterations.  
+36% FastICA algorithm converged in 6 iterations.  
+37% FastICA algorithm converged in 5 iterations.  
+37% FastICA algorithm converged in 6 iterations.  
+38% FastICA algorithm converged in 11 iterations.  
+38% FastICA algorithm converged in 6 iterations.  
+39% FastICA algorithm converged in 4 iterations.  
+39% FastICA algorithm converged in 5 iterations.  
+40% FastICA algorithm converged in 38 iterations.  
+40% FastICA algorithm converged in 6 iterations.  
+41% FastICA algorithm converged in 4 iterations.  
+41% FastICA algorithm converged in 17 iterations.  
+42% FastICA algorithm converged in 7 iterations.  
+42% FastICA algorithm converged in 6 iterations.  
+43% FastICA algorithm converged in 7 iterations.  
+43% FastICA algorithm converged in 6 iterations.  
+44% FastICA algorithm converged in 12 iterations.  
+44% FastICA algorithm converged in 8 iterations.  
+45% FastICA algorithm converged in 4 iterations.  
+45% FastICA algorithm converged in 15 iterations.  
+46% FastICA algorithm converged in 7 iterations.  
+46% FastICA algorithm converged in 10 iterations.  
+47% FastICA algorithm converged in 8 iterations.  
+47% FastICA algorithm converged in 11 iterations.  
+48% FastICA algorithm converged in 6 iterations.  
+48% FastICA algorithm converged in 6 iterations.  
+49% FastICA algorithm converged in 15 iterations.  
+49% FastICA algorithm converged in 12 iterations.  
+50% FastICA algorithm converged in 8 iterations.  
+50% FastICA algorithm converged in 11 iterations.  
+51% FastICA algorithm converged in 40 iterations.  
+51% FastICA algorithm converged in 4 iterations.  
+52% FastICA algorithm converged in 7 iterations.  
+52% FastICA algorithm converged in 5 iterations.  
+53% FastICA algorithm converged in 7 iterations.  
+53% FastICA algorithm converged in 6 iterations.  
+54% FastICA algorithm converged in 7 iterations.  
+54% FastICA algorithm converged in 5 iterations.  
+55% FastICA algorithm converged in 4 iterations.  
+55% FastICA algorithm converged in 5 iterations.  
+56% FastICA algorithm converged in 4 iterations.  
+56% FastICA algorithm converged in 7 iterations.  
+56% FastICA algorithm converged in 15 iterations.  
+57% FastICA algorithm converged in 6 iterations.  
+57% FastICA algorithm converged in 9 iterations.  
+58% FastICA algorithm converged in 9 iterations.  
+59% FastICA algorithm converged in 39 iterations.  
+59% FastICA algorithm converged in 5 iterations.  
+60% FastICA algorithm converged in 7 iterations.  
+60% FastICA algorithm converged in 7 iterations.  
+61% FastICA algorithm converged in 7 iterations.  
+61% FastICA algorithm converged in 18 iterations.  
+62% FastICA algorithm converged in 20 iterations.  
+62% FastICA algorithm converged in 16 iterations.  
+63% FastICA algorithm converged in 9 iterations.  
+63% FastICA algorithm converged in 6 iterations.  
+64% FastICA algorithm converged in 22 iterations.  
+64% FastICA algorithm converged in 6 iterations.  
+65% FastICA algorithm converged in 5 iterations.  
+65% FastICA algorithm converged in 6 iterations.  
+66% FastICA algorithm converged in 18 iterations.  
+66% FastICA algorithm converged in 6 iterations.  
+67% FastICA algorithm converged in 3 iterations.  
+67% FastICA algorithm converged in 8 iterations.  
+68% FastICA algorithm converged in 5 iterations.  
+68% FastICA algorithm converged in 11 iterations.  
+69% FastICA algorithm converged in 6 iterations.  
+69% FastICA algorithm converged in 18 iterations.  
+70% FastICA algorithm converged in 3 iterations.  
+70% FastICA algorithm converged in 6 iterations.  
+71% FastICA algorithm converged in 8 iterations.  
+71% FastICA algorithm converged in 9 iterations.  
+72% FastICA algorithm converged in 13 iterations.  
+72% FastICA algorithm converged in 6 iterations.  
+73% FastICA algorithm converged in 8 iterations.  
+73% FastICA algorithm converged in 5 iterations.  
+74% FastICA algorithm converged in 14 iterations.  
+74% FastICA algorithm converged in 6 iterations.  
+75% FastICA algorithm converged in 7 iterations.  
+75% FastICA algorithm converged in 6 iterations.  
+76% FastICA algorithm converged in 8 iterations.  
+76% FastICA algorithm converged in 11 iterations.  
+77% FastICA algorithm converged in 9 iterations.  
+77% FastICA algorithm converged in 7 iterations.  
+78% FastICA algorithm converged in 7 iterations.  
+78% FastICA algorithm converged in 6 iterations.  
+79% FastICA algorithm converged in 4 iterations.  
+79% FastICA algorithm converged in 7 iterations.  
+80% FastICA algorithm converged in 6 iterations.  
+80% FastICA algorithm converged in 8 iterations.  
+81% FastICA algorithm converged in 7 iterations.  
+81% FastICA algorithm converged in 7 iterations.  
+82% FastICA algorithm converged in 7 iterations.  
+82% FastICA algorithm converged in 11 iterations.  
+83% FastICA algorithm converged in 11 iterations.  
+83% FastICA algorithm converged in 6 iterations.  
+84% FastICA algorithm converged in 4 iterations.  
+84% FastICA algorithm converged in 6 iterations.  
+85% FastICA algorithm converged in 21 iterations.  
+85% FastICA algorithm converged in 20 iterations.  
+86% FastICA algorithm converged in 6 iterations.  
+86% FastICA algorithm converged in 9 iterations.  
+87% FastICA algorithm converged in 7 iterations.  
+87% FastICA algorithm converged in 6 iterations.  
+88% FastICA algorithm converged in 5 iterations.  
+88% FastICA algorithm converged in 5 iterations.  
+89% FastICA algorithm converged in 6 iterations.  
+89% FastICA algorithm converged in 8 iterations.  
+90% FastICA algorithm converged in 10 iterations.  
+90% FastICA algorithm converged in 7 iterations.  
+91% FastICA algorithm converged in 5 iterations.  
+91% FastICA algorithm converged in 5 iterations.  
+92% FastICA algorithm converged in 5 iterations.  
+92% FastICA algorithm converged in 5 iterations.  
+93% FastICA algorithm converged in 5 iterations.  
+93% FastICA algorithm converged in 14 iterations.  
+94% FastICA algorithm converged in 5 iterations.  
+94% FastICA algorithm converged in 7 iterations.  
+95% FastICA algorithm converged in 8 iterations.  
+95% FastICA algorithm converged in 6 iterations.  
+96% FastICA algorithm converged in 5 iterations.  
+96% FastICA algorithm converged in 5 iterations.  
+97% FastICA algorithm converged in 6 iterations.  
+97% FastICA algorithm converged in 7 iterations.  
+98% FastICA algorithm converged in 8 iterations.  
+98% FastICA algorithm converged in 6 iterations.  
+99% FastICA algorithm converged in 10 iterations.  
+99% FastICA algorithm converged in 4 iterations.  
+100% 
+
+Starting the multiple ICA runs with 8 principal components
+FastICA progress with bootstrapping: FastICA algorithm converged in 67 iterations.  
+0% FastICA algorithm converged in 34 iterations.  
+1% FastICA algorithm converged in 15 iterations.  
+1% FastICA algorithm converged in 9 iterations.  
+2% FastICA algorithm converged in 9 iterations.  
+2% FastICA algorithm converged in 20 iterations.  
+3% FastICA algorithm converged in 8 iterations.  
+3% FastICA algorithm converged in 8 iterations.  
+4% FastICA algorithm converged in 7 iterations.  
+4% FastICA algorithm converged in 7 iterations.  
+5% FastICA algorithm converged in 6 iterations.  
+5% FastICA algorithm converged in 6 iterations.  
+6% FastICA algorithm converged in 6 iterations.  
+6% FastICA algorithm converged in 13 iterations.  
+7% FastICA algorithm converged in 44 iterations.  
+7% FastICA algorithm converged in 8 iterations.  
+8% FastICA algorithm converged in 8 iterations.  
+8% FastICA algorithm converged in 7 iterations.  
+9% FastICA algorithm converged in 17 iterations.  
+9% FastICA algorithm converged in 5 iterations.  
+10% FastICA algorithm didn't converge in 149 iterations.  
+10% FastICA algorithm converged in 19 iterations.  
+10% FastICA algorithm converged in 5 iterations.  
+11% FastICA algorithm converged in 7 iterations.  
+11% FastICA algorithm converged in 10 iterations.  
+12% FastICA algorithm converged in 10 iterations.  
+12% FastICA algorithm converged in 7 iterations.  
+13% FastICA algorithm converged in 7 iterations.  
+13% FastICA algorithm converged in 9 iterations.  
+14% FastICA algorithm converged in 21 iterations.  
+14% FastICA algorithm converged in 4 iterations.  
+15% FastICA algorithm converged in 47 iterations.  
+15% FastICA algorithm converged in 6 iterations.  
+16% FastICA algorithm converged in 5 iterations.  
+16% FastICA algorithm didn't converge in 149 iterations.  
+16% FastICA algorithm converged in 5 iterations.  
+17% FastICA algorithm converged in 14 iterations.  
+17% FastICA algorithm converged in 8 iterations.  
+18% FastICA algorithm converged in 12 iterations.  
+18% FastICA algorithm converged in 11 iterations.  
+19% FastICA algorithm converged in 10 iterations.  
+19% FastICA algorithm converged in 10 iterations.  
+20% FastICA algorithm converged in 125 iterations.  
+20% FastICA algorithm converged in 8 iterations.  
+21% FastICA algorithm converged in 8 iterations.  
+21% FastICA algorithm converged in 17 iterations.  
+22% FastICA algorithm converged in 15 iterations.  
+22% FastICA algorithm converged in 10 iterations.  
+23% FastICA algorithm converged in 10 iterations.  
+23% FastICA algorithm converged in 11 iterations.  
+24% FastICA algorithm converged in 5 iterations.  
+24% FastICA algorithm converged in 7 iterations.  
+25% FastICA algorithm converged in 5 iterations.  
+25% FastICA algorithm converged in 11 iterations.  
+26% FastICA algorithm converged in 47 iterations.  
+26% FastICA algorithm converged in 17 iterations.  
+27% FastICA algorithm converged in 8 iterations.  
+27% FastICA algorithm converged in 9 iterations.  
+28% FastICA algorithm converged in 17 iterations.  
+28% FastICA algorithm converged in 5 iterations.  
+28% FastICA algorithm converged in 6 iterations.  
+29% FastICA algorithm converged in 9 iterations.  
+30% FastICA algorithm converged in 6 iterations.  
+30% FastICA algorithm converged in 6 iterations.  
+31% FastICA algorithm converged in 5 iterations.  
+31% FastICA algorithm converged in 7 iterations.  
+32% FastICA algorithm converged in 6 iterations.  
+32% FastICA algorithm converged in 8 iterations.  
+33% FastICA algorithm converged in 8 iterations.  
+33% FastICA algorithm converged in 12 iterations.  
+34% FastICA algorithm converged in 7 iterations.  
+34% FastICA algorithm converged in 5 iterations.  
+35% FastICA algorithm converged in 11 iterations.  
+35% FastICA algorithm converged in 8 iterations.  
+36% FastICA algorithm converged in 9 iterations.  
+36% FastICA algorithm didn't converge in 149 iterations.  
+36% FastICA algorithm converged in 8 iterations.  
+37% FastICA algorithm converged in 7 iterations.  
+37% FastICA algorithm converged in 7 iterations.  
+38% FastICA algorithm converged in 5 iterations.  
+38% FastICA algorithm converged in 7 iterations.  
+39% FastICA algorithm converged in 7 iterations.  
+39% FastICA algorithm converged in 8 iterations.  
+40% FastICA algorithm converged in 8 iterations.  
+40% FastICA algorithm converged in 6 iterations.  
+41% FastICA algorithm converged in 17 iterations.  
+41% FastICA algorithm converged in 5 iterations.  
+42% FastICA algorithm converged in 35 iterations.  
+42% FastICA algorithm converged in 5 iterations.  
+43% FastICA algorithm converged in 7 iterations.  
+43% FastICA algorithm converged in 10 iterations.  
+44% FastICA algorithm converged in 30 iterations.  
+44% FastICA algorithm converged in 6 iterations.  
+45% FastICA algorithm converged in 14 iterations.  
+45% FastICA algorithm converged in 8 iterations.  
+46% FastICA algorithm converged in 9 iterations.  
+46% FastICA algorithm converged in 6 iterations.  
+47% FastICA algorithm converged in 19 iterations.  
+47% FastICA algorithm converged in 12 iterations.  
+48% FastICA algorithm converged in 5 iterations.  
+48% FastICA algorithm converged in 16 iterations.  
+49% FastICA algorithm converged in 8 iterations.  
+49% FastICA algorithm converged in 5 iterations.  
+50% FastICA algorithm converged in 12 iterations.  
+50% FastICA algorithm converged in 11 iterations.  
+51% FastICA algorithm converged in 5 iterations.  
+51% FastICA algorithm converged in 6 iterations.  
+52% FastICA algorithm converged in 5 iterations.  
+52% FastICA algorithm converged in 4 iterations.  
+53% FastICA algorithm converged in 7 iterations.  
+53% FastICA algorithm converged in 10 iterations.  
+54% FastICA algorithm converged in 41 iterations.  
+54% FastICA algorithm converged in 26 iterations.  
+55% FastICA algorithm converged in 25 iterations.  
+55% FastICA algorithm converged in 5 iterations.  
+56% FastICA algorithm converged in 6 iterations.  
+56% FastICA algorithm converged in 9 iterations.  
+56% FastICA algorithm converged in 24 iterations.  
+57% FastICA algorithm converged in 8 iterations.  
+57% FastICA algorithm converged in 11 iterations.  
+58% FastICA algorithm converged in 10 iterations.  
+59% FastICA algorithm converged in 9 iterations.  
+59% FastICA algorithm converged in 7 iterations.  
+60% FastICA algorithm converged in 9 iterations.  
+60% FastICA algorithm converged in 12 iterations.  
+61% FastICA algorithm converged in 8 iterations.  
+61% FastICA algorithm converged in 6 iterations.  
+62% FastICA algorithm converged in 6 iterations.  
+62% FastICA algorithm converged in 8 iterations.  
+63% FastICA algorithm converged in 8 iterations.  
+63% FastICA algorithm converged in 5 iterations.  
+64% FastICA algorithm converged in 8 iterations.  
+64% FastICA algorithm converged in 8 iterations.  
+65% FastICA algorithm converged in 8 iterations.  
+65% FastICA algorithm converged in 43 iterations.  
+66% FastICA algorithm converged in 6 iterations.  
+66% FastICA algorithm converged in 7 iterations.  
+67% FastICA algorithm converged in 11 iterations.  
+67% FastICA algorithm converged in 41 iterations.  
+68% FastICA algorithm converged in 10 iterations.  
+68% FastICA algorithm converged in 11 iterations.  
+69% FastICA algorithm converged in 30 iterations.  
+69% FastICA algorithm converged in 6 iterations.  
+70% FastICA algorithm converged in 5 iterations.  
+70% FastICA algorithm converged in 33 iterations.  
+71% FastICA algorithm converged in 7 iterations.  
+71% FastICA algorithm converged in 5 iterations.  
+72% FastICA algorithm converged in 6 iterations.  
+72% FastICA algorithm converged in 6 iterations.  
+73% FastICA algorithm converged in 11 iterations.  
+73% FastICA algorithm converged in 6 iterations.  
+74% FastICA algorithm converged in 10 iterations.  
+74% FastICA algorithm converged in 6 iterations.  
+75% FastICA algorithm converged in 5 iterations.  
+75% FastICA algorithm converged in 12 iterations.  
+76% FastICA algorithm converged in 9 iterations.  
+76% FastICA algorithm converged in 11 iterations.  
+77% FastICA algorithm converged in 10 iterations.  
+77% FastICA algorithm converged in 8 iterations.  
+78% FastICA algorithm converged in 18 iterations.  
+78% FastICA algorithm converged in 5 iterations.  
+79% FastICA algorithm converged in 4 iterations.  
+79% FastICA algorithm converged in 7 iterations.  
+80% FastICA algorithm converged in 4 iterations.  
+80% FastICA algorithm converged in 10 iterations.  
+81% FastICA algorithm converged in 6 iterations.  
+81% FastICA algorithm converged in 6 iterations.  
+82% FastICA algorithm converged in 5 iterations.  
+82% FastICA algorithm converged in 8 iterations.  
+83% FastICA algorithm converged in 10 iterations.  
+83% FastICA algorithm converged in 71 iterations.  
+84% FastICA algorithm converged in 56 iterations.  
+84% FastICA algorithm converged in 8 iterations.  
+85% FastICA algorithm converged in 103 iterations.  
+85% FastICA algorithm converged in 8 iterations.  
+86% FastICA algorithm converged in 5 iterations.  
+86% FastICA algorithm converged in 10 iterations.  
+87% FastICA algorithm converged in 6 iterations.  
+87% FastICA algorithm converged in 7 iterations.  
+88% FastICA algorithm converged in 9 iterations.  
+88% FastICA algorithm converged in 9 iterations.  
+89% FastICA algorithm converged in 7 iterations.  
+89% FastICA algorithm converged in 6 iterations.  
+90% FastICA algorithm converged in 6 iterations.  
+90% FastICA algorithm converged in 31 iterations.  
+91% FastICA algorithm converged in 7 iterations.  
+91% FastICA algorithm converged in 11 iterations.  
+92% FastICA algorithm converged in 6 iterations.  
+92% FastICA algorithm converged in 7 iterations.  
+93% FastICA algorithm converged in 29 iterations.  
+93% FastICA algorithm converged in 8 iterations.  
+94% FastICA algorithm converged in 5 iterations.  
+94% FastICA algorithm converged in 9 iterations.  
+95% FastICA algorithm converged in 7 iterations.  
+95% FastICA algorithm converged in 90 iterations.  
+96% FastICA algorithm converged in 5 iterations.  
+96% FastICA algorithm converged in 8 iterations.  
+97% FastICA algorithm converged in 18 iterations.  
+97% FastICA algorithm converged in 19 iterations.  
+98% FastICA algorithm converged in 11 iterations.  
+98% FastICA algorithm converged in 31 iterations.  
+99% FastICA algorithm converged in 5 iterations.  
+99% FastICA algorithm didn't converge in 149 iterations.  
+99% FastICA algorithm converged in 5 iterations.  
+100% 
+Starting to compute the pairwise distance matrices....Done!
+Starting to cluster the sources using HDBSCAN....Done!
+Starting to calculate the 2D manifold representation....Done!
+Calculating the centrotypes and associated time courses...Done!
+5 ICA sources have been chosen automatically.Continuing
+Starting to create the 03_ICA_sources_correlations figure:
+Updating the masks for the two sources.  Of the 21947 in data1 and 38822 in data2, 21947 are in both and can be used.  
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
+
+    Starting to calculate the 2D kernel density estimates for the signals.  Completed 0 1 2 3 4 
+
+Done.  
+Creating a Google Earth .kmz of the geocoded independent components... Done!
+
+
+Source 0: deformation
+Source 1: turbulent_APS
+Source 2: turbulent_APS
+Source 3: topo_cor_APS
+Source 4: turbulent_APS
+
+
+Saving the key results as a .pkl file... Done!
+Running LiCSAlert for 20250726  (acquisition # 285 of 285) : monitoring date
